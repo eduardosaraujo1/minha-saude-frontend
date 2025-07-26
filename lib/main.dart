@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/config/dependency_injection.dart';
-import 'ui/core/themes/theme.dart';
-import 'routing/router.dart';
+import 'package:minha_saude_frontend/ui/core/themes/theme.dart';
+import 'package:minha_saude_frontend/routing/router.dart';
 
 void main() {
   setupDI();

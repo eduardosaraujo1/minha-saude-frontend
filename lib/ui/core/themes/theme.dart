@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ColorTheme {
   static final ColorScheme light = ColorScheme(
     brightness: Brightness.light,
-    primary: Color(0xFF006879),
+    primary: Color(0xff006879),
     surfaceTint: Color(0xFF006879),
     onPrimary: Color(0xFFFFFFFF),
     primaryContainer: Color(0xFFA9EDFF),
@@ -68,7 +68,7 @@ class ColorTheme {
     error: Color(0xFFFFB4AB),
     onError: Color(0xFF690005),
     errorContainer: Color(0xFF93000A),
-    onErrorContainer: Color(0xFFDAD6),
+    onErrorContainer: Color(0x00ffdad6),
     surface: Color(0xFF0F1416),
     onSurface: Color(0xFFDEE3E5),
     onSurfaceVariant: Color(0xFFBFC8CB),

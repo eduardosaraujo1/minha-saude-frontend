@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import '../ui/auth/widgets/login_screen.dart';
-import '../ui/auth/view_model/login_view_model.dart';
+import 'package:minha_saude_frontend/ui/auth/widgets/login_screen.dart';
+import 'package:minha_saude_frontend/ui/auth/view_model/login_view_model.dart';
 
 final getIt = GetIt.instance;
 

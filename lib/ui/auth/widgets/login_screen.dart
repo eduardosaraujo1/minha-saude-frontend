@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:minha_saude_frontend/utils/result.dart';
+import 'package:flutter/services.dart';
 import '../view_model/login_view_model.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -7,12 +9,52 @@ class LoginScreen extends StatelessWidget {
 
   final LoginViewModel _viewModel;
 
-  // TODO: Add sign in with google button, putting logic in the _viewModel and using the Command pattern along side the Result class
+  void showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void copyToClipboard(String text) {
+    Clipboard.setData(ClipboardData(text: text));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
-      body: const Center(child: Text('Login Form')),
+      body: Center(
+        child: Column(
+          children: [
+            Text('Login Form'),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                await _viewModel.signInWithGoogle();
+              },
+              child: const Text('Sign in with Google'),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                final result = await _viewModel.getAuthCode();
+                if (!context.mounted) return;
+
+                late String message;
+                if (result is Error) {
+                  message = 'Error signing in: ${(result as Error).error}';
+                } else {
+                  message = (result as Ok<String?>).value ?? 'No auth code';
+                }
+
+                showSnackBar(context, message);
+                copyToClipboard(message);
+              },
+              child: const Text('Show token'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

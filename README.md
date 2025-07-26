@@ -1,16 +1,18 @@
-# minha_saude_frontend
+# Minha Saúde Frontend
 
-A new Flutter project.
+## Necessidades para build/debug
 
-## Getting Started
+-   [Android Keystore](https://docs.flutter.dev/deployment/android#sign-the-app)
+-   [Google Cloud - OAuth Client e Server](https://developer.android.com/identity/sign-in/credential-manager-siwg#set-google)
+    -   ClientID e ServerId devem ser definidos em `.env`
+    -   [Como gerar a chave SHA-1](https://stackoverflow.com/questions/51845559/generate-sha-1-for-flutter-react-native-android-native-app)
+-   Para iniciar o ambiente, utilize `flutter run --dart-define-from-file=.env`
 
-This project is a starting point for a Flutter application.
+## Para fazer
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+-   Escrever testes para google_auth_service (Test-Driven Development)
+-   Refatorar google_auth_client para google_auth_service, simplificando-o para o mínimo necessário
+-   Escrever testes para SessionService, AuthRepository, LoginViewModel e LoginView
+    -   Lembrar que ViewModels normalmente são ChangeNotifier
+-   Implementar SessionService, AuthRepository, LoginViewModel e LoginScreen
+-   Utilizar command_it e watch_it, com o auxílio do listen_it

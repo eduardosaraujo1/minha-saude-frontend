@@ -3,8 +3,9 @@ import 'package:minha_saude_frontend/config/dependency_injection.dart';
 import 'package:minha_saude_frontend/ui/core/themes/theme.dart';
 import 'package:minha_saude_frontend/routing/router.dart';
 
-void main() {
-  setupDI();
+void main() async {
+  await setupDI();
+
   runApp(const MyApp());
 }
 

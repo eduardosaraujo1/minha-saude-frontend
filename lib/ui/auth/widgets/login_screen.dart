@@ -30,13 +30,6 @@ class LoginScreen extends StatelessWidget {
             SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
-                await _viewModel.signInWithGoogle();
-              },
-              child: const Text('Sign in with Google'),
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () async {
                 final result = await _viewModel.getAuthCode();
                 if (!context.mounted) return;
 

@@ -3,10 +3,11 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:minha_saude_frontend/data/services/google_auth_service.dart';
 import 'package:minha_saude_frontend/utils/result.dart';
-import '../../../testing/fakes/MockGoogleSignIn.dart';
+import '../../../testing/fakes/mock_google_sign_in.dart';
 
 void main() {
-  const serverAuthTemplate = "4/AsjkASd*Fhfds&6dsaDSan8kDAJs";
+  const serverAuthTemplate =
+      "4/AdlKS89Hs9sjaD2398EBhsjai0_SJAHDJHLSAJDN021nlkkSKmsk98dK";
   const scopes = ['https://www.googleapis.com/auth/userinfo.email', 'openid'];
 
   late GoogleAuthService googleAuthService;
@@ -22,7 +23,10 @@ void main() {
 
   setUp(() {
     mockGoogleSignIn = MockGoogleSignIn();
-    googleAuthService = GoogleAuthService(mockGoogleSignIn);
+    googleAuthService = GoogleAuthService(
+      mockGoogleSignIn,
+      MockGoogleAuthConfig(),
+    );
 
     mockGoogleSignInAccount = MockGoogleSignInAccount();
     mockGoogleSignInAuthorizationClient = MockGoogleSignInAuthorizationClient();
@@ -35,7 +39,7 @@ void main() {
   group('generateServerAuthCode', () {
     test('returns server auth code when authenticated', () async {
       // Arrange
-      when(() => mockGoogleSignIn.initialize()).thenReturn(Future.value(null));
+      when(() => mockGoogleSignIn.initialize()).thenAnswer((_) async {});
       when(
         () => mockGoogleSignIn.attemptLightweightAuthentication(),
       ).thenAnswer((_) async => mockGoogleSignInAccount);

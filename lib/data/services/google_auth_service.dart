@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:minha_saude_frontend/config/google_sign_config.dart';
+import 'package:minha_saude_frontend/config/google_auth_config.dart';
 import 'package:minha_saude_frontend/utils/result.dart';
 
 const List<String> scopes = <String>[
@@ -10,13 +10,14 @@ const List<String> scopes = <String>[
 
 class GoogleAuthService {
   final GoogleSignIn _signIn;
+  final GoogleAuthConfig _config;
 
-  GoogleAuthService(this._signIn);
+  GoogleAuthService(this._signIn, this._config);
 
   Future<void> init() async {
     await _signIn.initialize(
-      clientId: GoogleSignConfig.clientId,
-      serverClientId: GoogleSignConfig.serverClientId,
+      clientId: _config.clientId,
+      serverClientId: _config.serverClientId,
     );
   }
 

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/config/service_locator.dart';
 import 'package:minha_saude_frontend/ui/core/themes/theme.dart';
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Minha Saúde 2025',
-      theme: ThemeData(colorScheme: ColorTheme.light),
+      theme: AppTheme.light,
       routerConfig: router,
     );
   }

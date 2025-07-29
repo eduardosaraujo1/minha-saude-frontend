@@ -12,13 +12,13 @@ class GoogleAuthConfig {
 
     if (clientId.isEmpty) {
       throw GoogleAuthException(
-        "Missing required environment variable 'clientId'",
+        "Missing required environment variable 'clientId'. Use 'flutter run --dart-define-from-file .env'",
       );
     }
 
     if (serverClientId.isEmpty) {
       throw GoogleAuthException(
-        "Missing required environment variable 'serverClientId'",
+        "Missing required environment variable 'serverClientId'. Use 'flutter run --dart-define-from-file .env'",
       );
     }
 

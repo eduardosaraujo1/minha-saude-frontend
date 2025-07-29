@@ -1,52 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/utils/result.dart';
 import 'package:flutter/services.dart';
-import '../view_model/login_view_model.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:minha_saude_frontend/ui/auth/widgets/login_decorator_widget.dart';
+import 'package:minha_saude_frontend/ui/auth/widgets/sign_in_button.dart';
+import 'package:minha_saude_frontend/utils/result.dart';
+import 'package:minha_saude_frontend/ui/auth/view_model/login_view_model.dart';
 
 class LoginScreen extends StatelessWidget {
+  final LoginViewModel _viewModel;
+
   const LoginScreen({required LoginViewModel viewModel, super.key})
     : _viewModel = viewModel;
 
-  final LoginViewModel _viewModel;
-
-  void showSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  void copyToClipboard(String text) {
-    Clipboard.setData(ClipboardData(text: text));
-  }
-
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Center(
-        child: Column(
-          children: [
-            Text('Login Form'),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () async {
-                final result = await _viewModel.getAuthCode();
-                if (!context.mounted) return;
-
-                late String message;
-                if (result is Error) {
-                  message = 'Error signing in: ${(result as Error).error}';
-                } else {
-                  message = (result as Ok<String?>).value ?? 'No auth code';
-                }
-
-                showSnackBar(context, message);
-                copyToClipboard(message);
-              },
-              child: const Text('Show token'),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const LoginDecoratorWidget(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Iniciar Sessão", style: theme.textTheme.headlineSmall),
+                const SizedBox(height: 16),
+                SignInButton(
+                  icon: SvgPicture.asset('assets/brand/google/logo.svg'),
+                  label: Text(
+                    "Entrar com Google",
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

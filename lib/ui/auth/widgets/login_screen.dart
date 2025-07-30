@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:minha_saude_frontend/ui/auth/widgets/login_decorator_widget.dart';
+import 'package:minha_saude_frontend/ui/auth/widgets/login_decorator.dart';
 import 'package:minha_saude_frontend/ui/auth/widgets/sign_in_button.dart';
-import 'package:minha_saude_frontend/utils/result.dart';
 import 'package:minha_saude_frontend/ui/auth/view_model/login_view_model.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -22,18 +20,31 @@ class LoginScreen extends StatelessWidget {
         children: [
           const LoginDecoratorWidget(),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text("Iniciar Sessão", style: theme.textTheme.headlineSmall),
                 const SizedBox(height: 16),
                 SignInButton(
-                  icon: SvgPicture.asset('assets/brand/google/logo.svg'),
+                  icon: SvgPicture.asset(
+                    'assets/brand/google/logo.svg',
+                    width: 24,
+                  ),
                   label: Text(
                     "Entrar com Google",
                     style: theme.textTheme.bodyLarge,
                   ),
+                  onPressed: () {},
+                ),
+                const SizedBox(height: 8),
+                SignInButton(
+                  icon: Icon(Icons.mail_outline, size: 24),
+                  label: Text(
+                    "Entrar com E-mail",
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                  onPressed: () {},
                 ),
               ],
             ),

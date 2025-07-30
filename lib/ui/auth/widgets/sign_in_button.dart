@@ -1,38 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class SignInButton extends StatelessWidget {
-  final Text _label;
-  final Widget _icon;
+  const SignInButton({
+    required this.label,
+    required this.icon,
+    this.onPressed,
+    super.key,
+  });
 
-  const SignInButton({required Text label, required Widget icon, super.key})
-    : _label = label,
-      _icon = icon;
+  final Text label;
+  final Widget icon;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
 
-    return ElevatedButton.icon(
-      label: _label,
-      icon: SizedBox(width: 24, height: 24, child: _icon),
-      onPressed: () {},
-      style: ElevatedButton.styleFrom(
-        backgroundColor: theme.colorScheme.surfaceContainerLowest,
-        foregroundColor: theme.colorScheme.onSurface,
-        shape: const StadiumBorder(),
-        elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        label: label,
+        icon: SizedBox(width: 24, height: 24, child: icon),
+        onPressed: onPressed ?? () {},
+        style: ElevatedButton.styleFrom(
+          alignment: Alignment.centerLeft,
+          backgroundColor: theme.colorScheme.surfaceContainerLowest,
+          foregroundColor: theme.colorScheme.onSurface,
+          shape: const StadiumBorder(),
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        ),
       ),
     );
   }
 }
-
-      // style: ButtonStyle(
-      //   backgroundColor: WidgetStateProperty.all(
-      //     theme.colorScheme.surfaceContainerLowest,
-      //   ),
-      //   textStyle: WidgetStateProperty.all(theme.textTheme.bodyLarge),
-      //   shape: WidgetStateProperty.all(const StadiumBorder()),
-      //   padding: WidgetStateProperty.all(const EdgeInsets.all(16)),
-      // ),

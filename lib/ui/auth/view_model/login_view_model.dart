@@ -5,7 +5,8 @@ class LoginViewModel {
   LoginViewModel(GoogleAuthService authService) : _authService = authService;
   final GoogleAuthService _authService;
 
-  Future<Result<String?>> getAuthCode() async {
+  Future<Result<String?>> signInWithGoogle() async {
+    // TODO: return if should sign directly (redirect to home) or sign up (redirect to register)
     return _authService.generateServerAuthCode();
   }
 }

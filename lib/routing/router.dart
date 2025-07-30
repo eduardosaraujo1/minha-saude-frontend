@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/ui/auth/widgets/login_screen.dart';
+import 'package:minha_saude_frontend/ui/auth/view_model/email_input_view_model.dart';
+import 'package:minha_saude_frontend/ui/auth/widgets/screens/email_input_screen.dart';
+import 'package:minha_saude_frontend/ui/auth/widgets/screens/login_screen.dart';
 import 'package:minha_saude_frontend/ui/auth/view_model/login_view_model.dart';
 
 final getIt = GetIt.instance;
@@ -19,6 +21,14 @@ final router = GoRouter(
       builder: (BuildContext context, GoRouterState state) {
         return LoginScreen(viewModel: getIt<LoginViewModel>());
       },
+      routes: [
+        GoRoute(
+          path: 'email-input',
+          builder: (BuildContext context, GoRouterState state) {
+            return EmailInputScreen(viewModel: getIt<EmailInputViewModel>());
+          },
+        ),
+      ],
     ),
   ],
 );

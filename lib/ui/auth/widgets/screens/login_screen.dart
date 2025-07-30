@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:minha_saude_frontend/ui/auth/widgets/login_decorator.dart';
-import 'package:minha_saude_frontend/ui/auth/widgets/sign_in_button.dart';
+import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/ui/auth/widgets/components/login_decorator.dart';
+import 'package:minha_saude_frontend/ui/auth/widgets/components/button_sign_in.dart';
 import 'package:minha_saude_frontend/ui/auth/view_model/login_view_model.dart';
 
 class LoginScreen extends StatelessWidget {
-  final LoginViewModel _viewModel;
+  final LoginViewModel viewModel;
 
-  const LoginScreen({required LoginViewModel viewModel, super.key})
-    : _viewModel = viewModel;
+  const LoginScreen({required this.viewModel, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class LoginScreen extends StatelessWidget {
               children: [
                 Text("Iniciar Sessão", style: theme.textTheme.headlineSmall),
                 const SizedBox(height: 16),
-                SignInButton(
+                ButtonSignIn(
                   icon: SvgPicture.asset(
                     'assets/brand/google/logo.svg',
                     width: 24,
@@ -38,13 +38,15 @@ class LoginScreen extends StatelessWidget {
                   onPressed: () {},
                 ),
                 const SizedBox(height: 8),
-                SignInButton(
+                ButtonSignIn(
                   icon: Icon(Icons.mail_outline, size: 24),
                   label: Text(
                     "Entrar com E-mail",
                     style: theme.textTheme.bodyLarge,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    context.go('/login/email-input');
+                  },
                 ),
               ],
             ),

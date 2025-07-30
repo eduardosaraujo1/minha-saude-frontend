@@ -3,6 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:minha_saude_frontend/config/google_auth_config.dart';
 import 'package:minha_saude_frontend/data/services/google_auth_service.dart';
 import 'package:minha_saude_frontend/data/services/session_service.dart';
+import 'package:minha_saude_frontend/ui/auth/view_model/email_input_view_model.dart';
 import 'package:minha_saude_frontend/ui/auth/view_model/login_view_model.dart';
 
 final getIt = GetIt.instance;
@@ -47,4 +48,5 @@ Future<void> setupServiceLocator() async {
   getIt.registerFactory<LoginViewModel>(
     () => LoginViewModel(getIt<GoogleAuthService>()),
   );
+  getIt.registerFactory<EmailInputViewModel>(() => EmailInputViewModel());
 }

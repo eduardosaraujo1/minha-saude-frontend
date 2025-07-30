@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class SignInButton extends StatelessWidget {
-  const SignInButton({
+class ButtonSignIn extends StatelessWidget {
+  const ButtonSignIn({
     required this.label,
     required this.icon,
     this.onPressed,

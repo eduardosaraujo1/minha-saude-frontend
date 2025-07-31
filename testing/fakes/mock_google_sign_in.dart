@@ -2,7 +2,17 @@ import 'package:minha_saude_frontend/config/google_auth_config.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class MockGoogleSignIn extends Mock implements GoogleSignIn {}
+class MockGoogleSignIn extends Mock implements GoogleSignIn {
+  @override
+  Future<void> initialize({
+    String? clientId,
+    String? serverClientId,
+    String? nonce,
+    String? hostedDomain,
+  }) async {
+    return;
+  }
+}
 
 class MockGoogleSignInAccount extends Mock implements GoogleSignInAccount {}
 

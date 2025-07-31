@@ -39,7 +39,6 @@ void main() {
   group('generateServerAuthCode', () {
     test('returns server auth code when authenticated', () async {
       // Arrange
-      when(() => mockGoogleSignIn.initialize()).thenAnswer((_) async {});
       when(
         () => mockGoogleSignIn.attemptLightweightAuthentication(),
       ).thenAnswer((_) async => mockGoogleSignInAccount);

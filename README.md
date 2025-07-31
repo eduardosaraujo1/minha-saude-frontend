@@ -6,6 +6,7 @@
 -   [Google Cloud - OAuth Client e Server](https://developer.android.com/identity/sign-in/credential-manager-siwg#set-google)
     -   ClientID e ServerId devem ser definidos em `.env`
     -   [Como gerar a chave SHA-1](https://stackoverflow.com/questions/51845559/generate-sha-1-for-flutter-react-native-android-native-app)
+-   Antes de iniciar, execute o comando `dart run build_runner build` ou `dart run build_runner watch`
 -   Para iniciar o ambiente, utilize `flutter run --dart-define-from-file=.env`
 
 ## Para fazer

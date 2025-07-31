@@ -34,11 +34,10 @@ Future<void> setupServiceLocator() async {
   final googleAuthConfig = GoogleAuthConfig();
   getIt.registerSingleton<GoogleAuthConfig>(googleAuthConfig);
 
-  final googleAuthService = GoogleAuthService(
+  final googleAuthService = await GoogleAuthService.create(
     GoogleSignIn.instance,
     googleAuthConfig,
   );
-  await googleAuthService.init();
   getIt.registerSingleton<GoogleAuthService>(googleAuthService);
 
   final sessionService = SessionService();

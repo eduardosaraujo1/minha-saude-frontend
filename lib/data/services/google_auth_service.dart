@@ -10,15 +10,19 @@ const List<String> scopes = <String>[
 
 class GoogleAuthService {
   final GoogleSignIn _signIn;
-  final GoogleAuthConfig _config;
 
-  GoogleAuthService(this._signIn, this._config);
+  GoogleAuthService._(this._signIn);
 
-  Future<void> init() async {
-    await _signIn.initialize(
-      clientId: _config.clientId,
-      serverClientId: _config.serverClientId,
+  static Future<GoogleAuthService> create(
+    GoogleSignIn signIn,
+    GoogleAuthConfig config,
+  ) async {
+    await signIn.initialize(
+      clientId: config.clientId,
+      serverClientId: config.serverClientId,
     );
+
+    return GoogleAuthService._(signIn);
   }
 
   Future<Result<String?>> generateServerAuthCode() async {

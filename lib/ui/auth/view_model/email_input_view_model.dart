@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:injectable/injectable.dart';
 
+@injectable
 class EmailInputViewModel {
   final formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();

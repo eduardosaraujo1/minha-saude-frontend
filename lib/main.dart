@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/di/service_locator.dart';
+import 'package:minha_saude_frontend/di/injection.dart';
 import 'package:minha_saude_frontend/ui/core/themes/theme.dart';
 import 'package:minha_saude_frontend/routing/router.dart';
 
@@ -9,8 +9,11 @@ import 'package:minha_saude_frontend/routing/router.dart';
 /// If any required environment variables are missing during setup,
 /// it will display an error screen instead of crashing.
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   try {
-    await setupServiceLocator();
+    // await setupServiceLocator();
+    await configureDependencies();
     runApp(const MyApp());
   } catch (e) {
     debugPrint('Failed to initialize app: $e');

@@ -1,15 +1,13 @@
+import 'package:injectable/injectable.dart';
+
+@singleton
 class GoogleAuthConfig {
-  late String clientId;
-  late String serverClientId;
+  final String clientId;
+  final String serverClientId;
 
-  GoogleAuthConfig() {
-    readEnv();
-  }
-
-  void readEnv() {
-    const String clientId = String.fromEnvironment('CLIENT_ID');
-    const String serverClientId = String.fromEnvironment('SERVER_CLIENT_ID');
-
+  GoogleAuthConfig()
+    : clientId = const String.fromEnvironment('CLIENT_ID'),
+      serverClientId = const String.fromEnvironment('SERVER_CLIENT_ID') {
     if (clientId.isEmpty) {
       throw GoogleAuthException(
         "Missing required environment variable 'clientId'. Use 'flutter run --dart-define-from-file .env'",
@@ -21,9 +19,6 @@ class GoogleAuthConfig {
         "Missing required environment variable 'serverClientId'. Use 'flutter run --dart-define-from-file .env'",
       );
     }
-
-    this.clientId = clientId;
-    this.serverClientId = serverClientId;
   }
 }
 

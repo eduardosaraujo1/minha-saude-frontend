@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:injectable/injectable.dart';
 import 'package:minha_saude_frontend/config/google_auth_config.dart';
 import 'package:minha_saude_frontend/utils/result.dart';
 
@@ -8,11 +9,14 @@ const List<String> scopes = <String>[
   'openid',
 ];
 
+@singleton
 class GoogleAuthService {
   final GoogleSignIn _signIn;
 
-  GoogleAuthService._(this._signIn);
+  const GoogleAuthService._(this._signIn);
 
+  @preResolve
+  @factoryMethod
   static Future<GoogleAuthService> create(
     GoogleSignIn signIn,
     GoogleAuthConfig config,

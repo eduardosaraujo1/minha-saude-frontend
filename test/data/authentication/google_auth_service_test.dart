@@ -21,9 +21,9 @@ void main() {
     registerFallbackValue(<String>[]);
   });
 
-  setUp(() {
+  setUp(() async {
     mockGoogleSignIn = MockGoogleSignIn();
-    googleAuthService = GoogleAuthService(
+    googleAuthService = await GoogleAuthService.create(
       mockGoogleSignIn,
       MockGoogleAuthConfig(),
     );

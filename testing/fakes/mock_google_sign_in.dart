@@ -9,10 +9,11 @@ class MockGoogleSignInAccount extends Mock implements GoogleSignInAccount {}
 class MockGoogleSignInAuthorizationClient extends Mock
     implements GoogleSignInAuthorizationClient {}
 
-class MockGoogleAuthConfig extends GoogleAuthConfig {
+@override
+class MockGoogleAuthConfig implements GoogleAuthConfig {
   @override
-  void readEnv() {
-    clientId = '';
-    serverClientId = '';
-  }
+  final String clientId = '';
+
+  @override
+  final String serverClientId = '';
 }

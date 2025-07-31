@@ -15,4 +15,3 @@
 -   Escrever testes para SessionService, AuthRepository, LoginViewModel e LoginView
     -   Lembrar que ViewModels normalmente são ChangeNotifier
 -   Implementar SessionService, AuthRepository, LoginViewModel e LoginScreen
--   Utilizar command_it e watch_it, com o auxílio do listen_it

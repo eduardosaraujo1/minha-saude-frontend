@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/ui/auth/widgets/components/login_decorator.dart';
 import 'package:minha_saude_frontend/ui/auth/widgets/components/button_sign_in.dart';
 import 'package:minha_saude_frontend/ui/auth/view_model/login_view_model.dart';
@@ -24,7 +23,10 @@ class LoginScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Iniciar Sessão", style: theme.textTheme.headlineSmall),
+                Text(
+                  "Iniciar Sessão com Google",
+                  style: theme.textTheme.headlineSmall,
+                ),
                 const SizedBox(height: 16),
                 ButtonSignIn(
                   icon: SvgPicture.asset(
@@ -37,17 +39,7 @@ class LoginScreen extends StatelessWidget {
                   ),
                   onPressed: () {},
                 ),
-                const SizedBox(height: 8),
-                ButtonSignIn(
-                  icon: Icon(Icons.mail_outline, size: 24),
-                  label: Text(
-                    "Entrar com E-mail",
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                  onPressed: () {
-                    context.go('/login/email-input');
-                  },
-                ),
+                // TODO: no futuro, login por E-mail, login por Senha, login por Microsoft...
               ],
             ),
           ),

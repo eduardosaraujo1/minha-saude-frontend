@@ -14,7 +14,7 @@ class LoginFormLayout extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const LoginTopBar(),
+            const _LoginTopBar(),
             Expanded(child: child),
           ],
         ),
@@ -23,13 +23,11 @@ class LoginFormLayout extends StatelessWidget {
   }
 }
 
-class LoginTopBar extends StatelessWidget {
-  const LoginTopBar({super.key});
+class _LoginTopBar extends StatelessWidget {
+  const _LoginTopBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     // Extracted sizes for future responsiveness
     const double layoutHeight = 196;
     const double circleSize = 64;

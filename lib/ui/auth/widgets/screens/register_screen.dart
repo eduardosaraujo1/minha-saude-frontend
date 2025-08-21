@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:minha_saude_frontend/ui/auth/view_model/register_screen_view_model.dart';
 import 'package:minha_saude_frontend/ui/auth/widgets/layouts/login_form_layout.dart';
 
@@ -13,59 +14,122 @@ class RegisterScreen extends StatelessWidget {
     return LoginFormLayout(
       child: Padding(
         padding: EdgeInsetsGeometry.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 8,
-          children: [
-            Text(
-              'Vamos concluir seu cadastro',
-              style: theme.textTheme.titleLarge,
-            ),
-            Text(
-              'Por favor, preencha os campos abaixo',
-              style: theme.textTheme.bodyLarge,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(
-                labelText: 'Nome',
-                border: OutlineInputBorder(),
+        child: Form(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          key: viewModel.formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 8,
+            children: [
+              Text(
+                'Vamos concluir seu cadastro',
+                style: theme.textTheme.titleLarge,
               ),
-            ),
-            TextFormField(
-              decoration: const InputDecoration(
-                labelText: 'CPF',
-                border: OutlineInputBorder(),
+              Text(
+                'Por favor, preencha os campos abaixo',
+                style: theme.textTheme.bodyLarge,
               ),
-              keyboardType: TextInputType.number,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(
-                labelText: 'Data de Nascimento',
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.calendar_today),
+              TextFormField(
+                controller: viewModel.nomeController,
+                validator: viewModel.validateNome,
+                decoration: const InputDecoration(
+                  labelText: 'Nome',
+                  border: OutlineInputBorder(),
+                ),
               ),
-              keyboardType: TextInputType.datetime,
-            ),
-            TextFormField(
-              decoration: const InputDecoration(
-                labelText: 'Telefone',
-                border: OutlineInputBorder(),
+              TextFormField(
+                controller: viewModel.cpfController,
+                validator: viewModel.validateCpf,
+                decoration: InputDecoration(
+                  hint: Text(
+                    "123.456.789-10",
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurface.withAlpha(0xAA),
+                    ),
+                  ),
+                  labelText: 'CPF',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  MaskTextInputFormatter(
+                    mask: '###.###.###-##',
+                    filter: {"#": RegExp(r'[0-9]')},
+                    type: MaskAutoCompletionType.lazy,
+                  ),
+                ],
               ),
-              keyboardType: TextInputType.phone,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Add your button logic here
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.primaryColor,
-                foregroundColor: theme.colorScheme.onPrimary,
+              TextFormField(
+                controller: viewModel.dataNascimentoController,
+                validator: viewModel.validateDtNascimento,
+                decoration: const InputDecoration(
+                  labelText: 'Data de Nascimento',
+                  border: OutlineInputBorder(),
+                  suffixIcon: Icon(Icons.calendar_today),
+                ),
+                keyboardType: TextInputType.datetime,
+                readOnly: true,
+                onTap: () => triggerBirthDatePicker(context),
               ),
-              child: const Text('Confirmar cadastro'),
-            ),
-          ],
+              TextFormField(
+                controller: viewModel.telefoneController,
+                validator: viewModel.validateTelefone,
+                decoration: InputDecoration(
+                  hint: Text(
+                    "+55 11 98765-4321",
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurface.withAlpha(0xAA),
+                    ),
+                  ),
+                  labelText: 'Telefone',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.phone,
+                inputFormatters: [
+                  MaskTextInputFormatter(
+                    mask: '+## (##) #####-####',
+                    filter: {"#": RegExp(r'[0-9]')},
+                    type: MaskAutoCompletionType.lazy,
+                  ),
+                ],
+              ),
+              ValueListenableBuilder(
+                valueListenable: viewModel.isFormValid,
+                builder: (context, isFormValid, child) {
+                  return FilledButton(
+                    onPressed: isFormValid
+                        ? () {
+                            // Add your button logic here
+                          }
+                        : null,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: isFormValid
+                          ? theme.primaryColor
+                          : theme.disabledColor,
+                      foregroundColor: theme.colorScheme.onPrimary,
+                    ),
+                    child: const Text('Confirmar cadastro'),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  void triggerBirthDatePicker(BuildContext context) async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (pickedDate != null) {
+      viewModel.dataNascimentoController.value = TextEditingValue(
+        text: "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}",
+      );
+    }
   }
 }

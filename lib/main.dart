@@ -12,7 +12,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    // await setupServiceLocator();
     await configureDependencies();
     runApp(const MyApp());
   } catch (e) {

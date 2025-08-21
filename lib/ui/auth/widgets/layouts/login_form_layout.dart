@@ -24,7 +24,7 @@ class LoginFormLayout extends StatelessWidget {
 }
 
 class _LoginTopBar extends StatelessWidget {
-  const _LoginTopBar({super.key});
+  const _LoginTopBar();
 
   @override
   Widget build(BuildContext context) {

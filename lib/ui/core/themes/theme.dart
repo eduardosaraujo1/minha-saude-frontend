@@ -8,7 +8,10 @@ class AppTheme {
   /// Gets the complete light theme configuration
   static ThemeData get light => ThemeData(
     colorScheme: AppColorSchemes.light,
-    textTheme: TextTheme(headlineSmall: TextStyle(fontWeight: FontWeight.w500)),
+    textTheme: TextTheme(
+      headlineSmall: TextStyle(fontWeight: FontWeight.w500),
+      titleLarge: TextStyle(fontWeight: FontWeight.w500),
+    ),
     scaffoldBackgroundColor: AppColorSchemes.light.surfaceBright,
     useMaterial3: true,
     // Add more theme configurations here:

@@ -18,11 +18,11 @@ class ButtonSignIn extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton.icon(
+      child: FilledButton.icon(
         label: label,
         icon: SizedBox(width: 24, height: 24, child: icon),
         onPressed: onPressed ?? () {},
-        style: ElevatedButton.styleFrom(
+        style: FilledButton.styleFrom(
           alignment: Alignment.centerLeft,
           backgroundColor: theme.colorScheme.surfaceContainerLowest,
           foregroundColor: theme.colorScheme.onSurface,

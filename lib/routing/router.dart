@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/ui/auth/view_model/email_input_view_model.dart';
+import 'package:minha_saude_frontend/ui/auth/view_model/register_screen_view_model.dart';
+import 'package:minha_saude_frontend/ui/auth/view_model/terms_conditions_view_model.dart';
 import 'package:minha_saude_frontend/ui/auth/widgets/screens/login_screen.dart';
 import 'package:minha_saude_frontend/ui/auth/view_model/login_view_model.dart';
+import 'package:minha_saude_frontend/ui/auth/widgets/screens/register_screen.dart';
+import 'package:minha_saude_frontend/ui/auth/widgets/screens/terms_conditions.dart';
 
 final getIt = GetIt.instance;
 
@@ -19,6 +22,18 @@ final router = GoRouter(
       path: '/login',
       builder: (BuildContext context, GoRouterState state) {
         return LoginScreen(viewModel: getIt<LoginViewModel>());
+      },
+    ),
+    GoRoute(
+      path: '/tos',
+      builder: (BuildContext context, GoRouterState state) {
+        return TermsConditions(viewModel: getIt<TermsConditionsViewModel>());
+      },
+    ),
+    GoRoute(
+      path: '/register',
+      builder: (BuildContext context, GoRouterState state) {
+        return RegisterScreen(viewModel: getIt<RegisterScreenViewModel>());
       },
     ),
   ],

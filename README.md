@@ -11,8 +11,14 @@
 
 ## Para fazer
 
--   Escrever testes para google_auth_service (Test-Driven Development)
--   Refatorar google_auth_client para google_auth_service, simplificando-o para o mínimo necessário
--   Escrever testes para SessionService, AuthRepository, LoginViewModel e LoginView
-    -   Lembrar que ViewModels normalmente são ChangeNotifier
--   Implementar SessionService, AuthRepository, LoginViewModel e LoginScreen
+-   Criar inicial de lista de documentos
+-   Fazer lógica de login com Google (criar um mock do componente que se comunica com o backend)
+-   Fazer rota ´/´ direcionar para documentos ou login dependendo do estado de login do usuário
+-   Fazer navbar e appbar
+-   Fazer tela (display only) de compartilhar, lixeira e configurações de usuário
+-   Fazer lógica de organização de documentos (frontend support)
+-   Fazer lógica de organização de documentos (backend mock)
+-   Fazer lógica de lixeira de documentos (frontend support)
+-   Fazer lógica de lixeira de documentos (backend mock)
+-   Fazer lógica de compartilhar documentos (frontend support)
+-   Fazer lógica de compartilhar documentos (backend mock)

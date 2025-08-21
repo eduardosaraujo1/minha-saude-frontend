@@ -36,7 +36,7 @@ class LoginScreen extends StatelessWidget {
                     style: theme.textTheme.bodyLarge,
                   ),
                   onPressed: () {
-                    context.push('/tos');
+                    context.go('/tos');
                   },
                 ),
               ],

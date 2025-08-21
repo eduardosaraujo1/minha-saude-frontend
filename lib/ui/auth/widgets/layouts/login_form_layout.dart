@@ -36,14 +36,15 @@ class _LoginTopBar extends StatelessWidget {
       height: layoutHeight,
       child: Stack(
         children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.pop(),
+          if (context.canPop())
+            Positioned(
+              top: 0,
+              left: 0,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => context.pop(),
+              ),
             ),
-          ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: LoginDecoratorVariant(circleSize: circleSize),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/ui/auth/view_model/terms_conditions_view_model.dart';
 import 'package:minha_saude_frontend/ui/auth/widgets/layouts/login_form_layout.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 class TermsConditions extends StatelessWidget {
   final TermsConditionsViewModel viewModel;
@@ -52,9 +53,18 @@ class TextScroller extends StatelessWidget {
           color: theme.colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: SingleChildScrollView(
-          child: Text(text, style: theme.textTheme.bodyMedium),
+        child: Markdown(
+          data: text,
+          selectable: true,
+          padding: EdgeInsets.zero,
+          styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+            p: theme.textTheme.bodyMedium,
+            h3: theme.textTheme.titleMedium,
+          ),
         ),
+        // child: SingleChildScrollView(
+        //   child: Text(text, style: theme.textTheme.bodyMedium),
+        // ),
       ),
     );
   }

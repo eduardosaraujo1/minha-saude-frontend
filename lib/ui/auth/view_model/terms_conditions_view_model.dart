@@ -10,11 +10,11 @@ Ao utilizar nossos serviços, você entende que coletaremos e usaremos suas info
 
 Dessa forma, a Avalon, doravante denominada simplesmente como “Avalon”, inscrita no CNPJ/MF sob o nº 00.000.000/0000-00, no papel de Controladora de Dados, obriga-se ao disposto na presente Política de Privacidade.
 
-1. QUAIS DADOS COLETAMOS SOBRE VOCÊ E PARA QUAL FINALIDADE?
+### 1. QUAIS DADOS COLETAMOS SOBRE VOCÊ E PARA QUAL FINALIDADE?
 
 Nosso aplicativo coleta e utiliza alguns dados pessoais seus, de forma a viabilizar a prestação de serviços e aprimorar a experiência de uso.
 
-1.1. DADOS PESSOAIS FORNECIDOS PELO TITULAR
+### 1.1. DADOS PESSOAIS FORNECIDOS PELO TITULAR
 
 -   Nome completo – identificar o usuário.
 -   CPF – identificação legal e prevenção de fraudes.
@@ -22,14 +22,14 @@ Nosso aplicativo coleta e utiliza alguns dados pessoais seus, de forma a viabili
 -   Telefone – recuperação de conta e verificação via SMS.
 -   Data de nascimento – validação de idade e personalização do perfil.
 
-1.2. DADOS PESSOAIS COLETADOS AUTOMATICAMENTE
+### 1.2. DADOS PESSOAIS COLETADOS AUTOMATICAMENTE
 
 -   Dados de login (tokens do Google) – autenticação e associação de conta.
 -   Endereço IP – segurança e prevenção de acessos indevidos.
 -   Dados de dispositivo (modelo, sistema operacional) – compatibilidade e melhoria do serviço.
 -   Código de sessão – manutenção da sessão ativa e preferências do usuário.
 
-2. COMO COLETAMOS OS SEUS DADOS?
+### 2. COMO COLETAMOS OS SEUS DADOS?
 
 A coleta dos seus dados pessoais ocorre da seguinte forma:
 
@@ -38,11 +38,11 @@ A coleta dos seus dados pessoais ocorre da seguinte forma:
 -   Quando você edita seus dados pessoais no aplicativo.
 -   Automaticamente, por meio de cookies e registros de navegação.
 
-2.1. CONSENTIMENTO
+### 2.1. CONSENTIMENTO
 
 O tratamento dos dados pessoais ocorre mediante consentimento expresso do usuário, solicitado de forma clara e inequívoca no momento da coleta.
 
-3. QUAIS SÃO OS SEUS DIREITOS?
+### 3. QUAIS SÃO OS SEUS DIREITOS?
 
 A Avalon assegura a seus usuários todos os direitos previstos no artigo 18 da LGPD, incluindo:
 
@@ -51,7 +51,7 @@ A Avalon assegura a seus usuários todos os direitos previstos no artigo 18 da L
 -   Solicitar portabilidade dos dados.
 -   Revogar consentimento a qualquer momento.
 
-4. COMO VOCÊ PODE EXERCER SEUS DIREITOS DE TITULAR?
+### 4. COMO VOCÊ PODE EXERCER SEUS DIREITOS DE TITULAR?
 
 Você pode exercer seus direitos entrando em contato pelos seguintes meios:
 
@@ -59,7 +59,7 @@ Você pode exercer seus direitos entrando em contato pelos seguintes meios:
 -   Telefone: (telefone de contato a definir)
 -   Será necessário confirmar sua identidade para proteção contra uso indevido.
 
-5. COMO E POR QUANTO TEMPO SEUS DADOS SERÃO ARMAZENADOS?
+### 5. COMO E POR QUANTO TEMPO SEUS DADOS SERÃO ARMAZENADOS?
 
 Os dados serão mantidos enquanto a relação contratual perdurar ou conforme exigências legais. Após este período, os dados serão excluídos ou anonimizados, exceto quando:
 
@@ -68,14 +68,14 @@ Os dados serão mantidos enquanto a relação contratual perdurar ou conforme ex
 -   Houver transferência legítima a terceiros.
 -   Houver uso exclusivo do controlador com anonimização.
 
-6. O QUE FAZEMOS PARA MANTER SEUS DADOS SEGUROS?
+### 6. O QUE FAZEMOS PARA MANTER SEUS DADOS SEGUROS?
 
 -   Apenas pessoas autorizadas têm acesso.
 -   Dados são armazenados em ambiente seguro e criptografados.
 -   Medidas técnicas são aplicadas para evitar acessos não autorizados.
 -   Em caso de incidente de segurança, os usuários e a ANPD serão notificados.
 
-7. COM QUEM SEUS DADOS PODEM SER COMPARTILHADOS?
+### 7. COM QUEM SEUS DADOS PODEM SER COMPARTILHADOS?
 
 Os dados podem ser compartilhados com:
 
@@ -87,11 +87,11 @@ Além disso, poderá haver compartilhamento por:
 -   Processos judiciais.
 -   Movimentações societárias (fusão, aquisição, etc.).
 
-7.1. TRANSFERÊNCIA INTERNACIONAL DE DADOS
+### 7.1. TRANSFERÊNCIA INTERNACIONAL DE DADOS
 
 Dados podem ser transferidos para servidores do Google localizados fora do Brasil, respeitando a LGPD.
 
-8. COOKIES OU DADOS DE NAVEGAÇÃO
+### 8. COOKIES OU DADOS DE NAVEGAÇÃO
 
 O aplicativo utiliza cookies para:
 
@@ -100,11 +100,11 @@ O aplicativo utiliza cookies para:
 -   Melhorar a usabilidade.
 -   O usuário pode desativar cookies no navegador, mas isso pode limitar algumas funcionalidades.
 
-9. ALTERAÇÃO DESTA POLÍTICA DE PRIVACIDADE
+### 9. ALTERAÇÃO DESTA POLÍTICA DE PRIVACIDADE
 
 A versão atual foi atualizada pela última vez em: 22/08/2025.
 
-10. RESPONSABILIDADE
+### 10. RESPONSABILIDADE
 
 A Avalon se responsabiliza pelo tratamento adequado dos dados e pelo cumprimento da legislação vigente, mas não se responsabiliza por:
 
@@ -112,10 +112,10 @@ A Avalon se responsabiliza pelo tratamento adequado dos dados e pelo cumprimento
 -   Ataques de terceiros fora de nosso controle.
 -   Informações falsas fornecidas pelo próprio usuário.
 
-11. ENCARREGADO DE PROTEÇÃO DE DADOS
+### 11. ENCARREGADO DE PROTEÇÃO DE DADOS
 
-Encarregado (DPO): Eduardo Soares e Araújo
-E-mail: eduardosaraujo1@proton.me
+- Encarregado (DPO): Eduardo Soares e Araújo
+- E-mail: eduardosaraujo1@proton.me
 """;
   const TermsConditionsViewModel();
 }

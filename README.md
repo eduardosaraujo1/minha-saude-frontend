@@ -11,6 +11,7 @@
 
 ## Para fazer
 
+-   Corrigir estrutura de temas
 -   Criar inicial de lista de documentos
 -   Fazer lógica de login com Google (criar um mock do componente que se comunica com o backend)
 -   Fazer rota ´/´ direcionar para documentos ou login dependendo do estado de login do usuário

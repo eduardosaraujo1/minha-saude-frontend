@@ -11,9 +11,9 @@ C:.
 │   ├───features
 │   │   └───[example]
 │   │       ├───data
-│   │       │   ├───model
-│   │       │   ├───repository
-│   │       │   └───source
+│   │       │   ├───models
+│   │       │   ├───repositories
+│   │       │   └───sources
 │   │       ├───domain
 │   │       │   ├───models
 │   │       │   └───repository_interface

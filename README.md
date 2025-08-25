@@ -11,6 +11,7 @@
 
 ## Para fazer
 
+-   Transformar estrutura de projetos em [feature-centric](docs/project_structure.md)
 -   Corrigir estrutura de temas
 -   Criar inicial de lista de documentos
 -   Fazer lógica de login com Google (criar um mock do componente que se comunica com o backend)

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/di/injection.dart';
+import 'package:minha_saude_frontend/state/injection.dart';
 import 'package:minha_saude_frontend/ui/core/themes/theme.dart';
 import 'package:minha_saude_frontend/routing/router.dart';
 

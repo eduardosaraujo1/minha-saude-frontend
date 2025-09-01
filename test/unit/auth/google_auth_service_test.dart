@@ -4,7 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:minha_saude_frontend/features/auth/domain/services/google_auth_service.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-import '../mocks/mock_google_sign_in.dart';
+import 'mocks/mock_google_sign_in.dart';
 
 void main() {
   const serverAuthTemplate =

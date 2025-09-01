@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:minha_saude_frontend/ui/auth/view_model/register_screen_view_model.dart';
-import 'package:minha_saude_frontend/ui/auth/widgets/layouts/login_form_layout.dart';
+import 'package:minha_saude_frontend/features/auth/ui/view_models/register_screen_view_model.dart';
+import 'package:minha_saude_frontend/features/auth/ui/views/layouts/login_form_layout.dart';
 
 class RegisterScreen extends StatelessWidget {
   final RegisterScreenViewModel viewModel;

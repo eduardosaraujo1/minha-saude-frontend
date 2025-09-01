@@ -1,14 +1,12 @@
-import 'package:injectable/injectable.dart';
-import 'package:minha_saude_frontend/data/services/google_auth_service.dart';
-import 'package:minha_saude_frontend/utils/result.dart';
+import 'package:minha_saude_frontend/features/auth/domain/services/google_auth_service.dart';
+import 'package:multiple_result/multiple_result.dart';
 
-@injectable
 class LoginViewModel {
   const LoginViewModel(GoogleAuthService authService)
     : _authService = authService;
   final GoogleAuthService _authService;
 
-  Future<Result<String?>> signInWithGoogle() async {
+  Future<Result<String?, Exception>> signInWithGoogle() async {
     // TODO: return if should sign directly (redirect to home) or sign up (redirect to register)
     return _authService.generateServerAuthCode();
   }

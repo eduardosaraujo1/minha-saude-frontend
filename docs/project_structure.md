@@ -16,8 +16,10 @@ C:.
 │   │       │   └───sources
 │   │       ├───domain
 │   │       │   ├───models
+│   │       │   ├───interactions
 │   │       │   └───repository_interface
 │   │       └───ui
+│   │           ├───riverpod
 │   │           ├───views
 │   │           ├───view_models
 │   │           └───widgets

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:minha_saude_frontend/ui/auth/widgets/components/login_decorator.dart';
-import 'package:minha_saude_frontend/ui/auth/widgets/components/button_sign_in.dart';
-import 'package:minha_saude_frontend/ui/auth/view_model/login_view_model.dart';
+import 'package:minha_saude_frontend/features/auth/ui/widgets/button_sign_in.dart';
+import 'package:minha_saude_frontend/features/auth/ui/widgets/login_decorator.dart';
+import 'package:minha_saude_frontend/features/auth/ui/view_models/login_view_model.dart';
 
 class LoginScreen extends StatelessWidget {
   final LoginViewModel viewModel;

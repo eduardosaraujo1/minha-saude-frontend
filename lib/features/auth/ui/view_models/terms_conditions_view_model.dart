@@ -1,6 +1,3 @@
-import 'package:injectable/injectable.dart';
-
-@injectable
 class TermsConditionsViewModel {
   // TODO: Carregar termos a partir do GitHub
   final String termos = """

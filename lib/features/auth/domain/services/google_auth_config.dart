@@ -1,8 +1,22 @@
-import 'package:minha_saude_frontend/shared/utils/environment_reader.dart';
-
 class GoogleAuthConfig {
-  const GoogleAuthConfig();
+  static const String _clientId = String.fromEnvironment(
+    'CLIENT_ID',
+    defaultValue: '',
+  );
+  static const String _serverClientId = String.fromEnvironment(
+    'SERVER_CLIENT_ID',
+    defaultValue: '',
+  );
 
-  String get clientId => String.fromEnvironment('CLIENT_ID');
-  String get serverClientId => String.fromEnvironment('SERVER_CLIENT_ID');
+  GoogleAuthConfig() {
+    if (_clientId.isEmpty) {
+      throw ArgumentError('CLIENT_ID environment variable is not set.');
+    }
+    if (_serverClientId.isEmpty) {
+      throw ArgumentError('SERVER_CLIENT_ID environment variable is not set.');
+    }
+  }
+
+  String get clientId => _clientId;
+  String get serverClientId => _serverClientId;
 }

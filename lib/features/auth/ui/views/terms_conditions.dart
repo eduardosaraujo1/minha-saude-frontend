@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/ui/auth/view_model/terms_conditions_view_model.dart';
-import 'package:minha_saude_frontend/ui/auth/widgets/layouts/login_form_layout.dart';
+import 'package:minha_saude_frontend/features/auth/ui/view_models/terms_conditions_view_model.dart';
+import 'package:minha_saude_frontend/features/auth/ui/views/layouts/login_form_layout.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 class TermsConditions extends StatelessWidget {

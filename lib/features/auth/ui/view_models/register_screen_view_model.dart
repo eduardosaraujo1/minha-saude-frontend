@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 
-@injectable
 class RegisterScreenViewModel extends RegisterFormState {
   final ValueNotifier<bool> isFormValid = ValueNotifier(false);
 

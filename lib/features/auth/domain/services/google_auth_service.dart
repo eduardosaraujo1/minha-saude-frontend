@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:minha_saude_frontend/config/google_auth_config.dart';
-import 'package:minha_saude_frontend/utils/result.dart';
+import 'package:minha_saude_frontend/features/auth/domain/services/google_auth_config.dart';
+import 'package:multiple_result/multiple_result.dart';
 
 class GoogleAuthService {
   static const List<String> scopes = <String>[
@@ -25,7 +25,7 @@ class GoogleAuthService {
     return GoogleAuthService._(signIn);
   }
 
-  Future<Result<String?>> generateServerAuthCode() async {
+  Future<Result<String?, Exception>> generateServerAuthCode() async {
     try {
       // Try silent auth
       var account = await _signIn.attemptLightweightAuthentication();
@@ -42,7 +42,7 @@ class GoogleAuthService {
         return Result.error(Exception('Failed to retrieve server auth code'));
       }
 
-      return Result.ok(serverAuth.serverAuthCode);
+      return Result.success(serverAuth.serverAuthCode);
     } on GoogleSignInException catch (e) {
       return Result.error(e);
     } catch (e) {

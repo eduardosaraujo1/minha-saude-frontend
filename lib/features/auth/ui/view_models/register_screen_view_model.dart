@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 
 class RegisterScreenViewModel extends RegisterFormState {
-  final ValueNotifier<bool> isFormValid = ValueNotifier(false);
-
   RegisterScreenViewModel() {
-    onFormChanged(checkFormValidity);
+    // onFormChanged(checkFormValidity);
   }
 
-  void checkFormValidity() {
-    isFormValid.value = formKey.currentState?.validate() ?? false;
-  }
-
-  @override
-  void dispose() {
-    isFormValid.dispose();
-    super.dispose();
+  bool registerUser() {
+    if (formKey.currentState?.validate() ?? false) {
+      // Perform registration logic
+      return true;
+    }
+    return false;
   }
 }
 

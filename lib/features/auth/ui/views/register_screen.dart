@@ -15,7 +15,6 @@ class RegisterScreen extends StatelessWidget {
       child: Padding(
         padding: EdgeInsetsGeometry.all(16),
         child: Form(
-          autovalidateMode: AutovalidateMode.onUserInteraction,
           key: viewModel.formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -93,24 +92,15 @@ class RegisterScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              ValueListenableBuilder(
-                valueListenable: viewModel.isFormValid,
-                builder: (context, isFormValid, child) {
-                  return FilledButton(
-                    onPressed: isFormValid
-                        ? () {
-                            // Add your button logic here
-                          }
-                        : null,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: isFormValid
-                          ? theme.primaryColor
-                          : theme.disabledColor,
-                      foregroundColor: theme.colorScheme.onPrimary,
-                    ),
-                    child: const Text('Confirmar cadastro'),
-                  );
+              FilledButton(
+                onPressed: () {
+                  viewModel.registerUser();
                 },
+                style: FilledButton.styleFrom(
+                  backgroundColor: theme.primaryColor,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                ),
+                child: const Text('Confirmar cadastro'),
               ),
             ],
           ),

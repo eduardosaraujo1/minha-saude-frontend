@@ -17,7 +17,8 @@ GoRouter makeRouter() {
       // Temporary until SessionRepostiory is available
       final isLoggedIn = false;
       final authRoutes = ['/login', '/register', '/tos'];
-      if (!isLoggedIn && !authRoutes.contains(state.path)) {
+      final allowedRoutes = authRoutes.contains(state.fullPath);
+      if (!isLoggedIn && !allowedRoutes) {
         return '/login';
       }
       return null;

@@ -8,7 +8,7 @@
             "name": "minha_saude_frontend",
             "request": "launch",
             "type": "dart",
-            "args": ["--dart-define-from-file", ".env"]
+            "args": ["--dart-define-from-file", "env.json"]
         },
         {
             "name": "minha_saude_frontend (profile mode)",

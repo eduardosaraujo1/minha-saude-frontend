@@ -12,6 +12,7 @@
 ## Para fazer
 
 -   Transformar estrutura de projetos em [feature-centric](docs/project_structure.md)
+-   Inspirando-se na arquitetura de Providers do Riverpod, crie funções que registram no getIt, e leia esses arquivos do `state/get_it.dart`. A única diferença do Riverpod é que dai não tá acoplado no widget tree
 -   Corrigir estrutura de temas
 -   Criar inicial de lista de documentos
 -   Fazer lógica de login com Google (criar um mock do componente que se comunica com o backend)

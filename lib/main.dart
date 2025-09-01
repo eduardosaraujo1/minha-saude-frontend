@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/state/injection.dart';
-import 'package:minha_saude_frontend/ui/core/themes/theme.dart';
-import 'package:minha_saude_frontend/routing/router.dart';
+import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/config/themes/app_theme.dart';
+import 'package:minha_saude_frontend/state/get_it.dart';
 
 /// The main entry point of the application.
 ///
@@ -12,7 +13,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    await configureDependencies();
+    configureDependencies();
     runApp(const MyApp());
   } catch (e) {
     debugPrint('Failed to initialize app: $e');
@@ -27,8 +28,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Minha Saúde 2025',
-      theme: AppTheme.light,
-      routerConfig: router,
+      theme: AppTheme.light(),
+      routerConfig: GetIt.I<GoRouter>(),
     );
   }
 }

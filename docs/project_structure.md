@@ -11,13 +11,15 @@ C:.
 │   ├───features
 │   │   └───[example]
 │   │       ├───data
-│   │       │   ├───model
-│   │       │   ├───repository
-│   │       │   └───source
+│   │       │   ├───models
+│   │       │   ├───repositories
+│   │       │   └───sources
 │   │       ├───domain
 │   │       │   ├───models
+│   │       │   ├───interactions
 │   │       │   └───repository_interface
 │   │       └───ui
+│   │           ├───riverpod
 │   │           ├───views
 │   │           ├───view_models
 │   │           └───widgets

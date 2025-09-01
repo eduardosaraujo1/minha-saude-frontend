@@ -1,9 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:minha_saude_frontend/data/services/google_auth_service.dart';
-import 'package:minha_saude_frontend/utils/result.dart';
-import '../../../testing/fakes/mock_google_sign_in.dart';
+import 'package:minha_saude_frontend/features/auth/domain/services/google_auth_service.dart';
+import 'package:multiple_result/multiple_result.dart';
+
+import '../mocks/mock_google_sign_in.dart';
 
 void main() {
   const serverAuthTemplate =
@@ -59,8 +60,8 @@ void main() {
       final result = await googleAuthService.generateServerAuthCode();
 
       // Assert
-      expect(result, isA<Ok<String?>>());
-      expect((result as Ok<String?>).value, equals(serverAuthTemplate));
+      final value = result.getOrThrow();
+      expect(value, equals(serverAuthTemplate));
     });
 
     test('returns Error when login fails', () async {
@@ -77,7 +78,7 @@ void main() {
       final result = await googleAuthService.generateServerAuthCode();
 
       // Assert
-      expect(result, isA<Error<String?>>());
+      expect(result, isA<Error>());
     });
   });
 }

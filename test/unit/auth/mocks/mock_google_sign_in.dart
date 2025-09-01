@@ -1,4 +1,4 @@
-import 'package:minha_saude_frontend/config/google_auth_config.dart';
+import 'package:minha_saude_frontend/features/auth/domain/services/google_auth_config.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 

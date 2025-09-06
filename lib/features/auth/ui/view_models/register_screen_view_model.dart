@@ -1,18 +1,42 @@
 import 'package:flutter/material.dart';
 
-class RegisterScreenViewModel extends RegisterFormState {
+class RegisterScreenViewModel extends RegisterFormState with ChangeNotifier {
   RegisterScreenViewModel() {
     // onFormChanged(checkFormValidity);
   }
 
-  bool registerUser() {
-    if (formKey.currentState?.validate() ?? false) {
-      // Perform registration logic
-      return true;
-    }
-    return false;
+  String? _errorMessage;
+
+  String? get errorMessage => _errorMessage;
+
+  /// Register user with current form data
+  Future<bool> registerUser() async {
+    return formKey.currentState?.validate() ?? false;
+  }
+
+  /// Parse date from DD/MM/YYYY format
+  // DateTime? _parseDate(String dateText) {
+  //   try {
+  //     final parts = dateText.split('/');
+  //     if (parts.length == 3) {
+  //       final day = int.parse(parts[0]);
+  //       final month = int.parse(parts[1]);
+  //       final year = int.parse(parts[2]);
+  //       return DateTime(year, month, day);
+  //     }
+  //   } catch (e) {
+  //     // Invalid date format
+  //   }
+  //   return null;
+  // }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }
+
+enum RegisterState { initial, loading, success, error }
 
 class RegisterFormState {
   final formKey = GlobalKey<FormState>();

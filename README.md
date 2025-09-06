@@ -11,9 +11,11 @@
 
 ## Para fazer
 
--   Transformar estrutura de projetos em [feature-centric](docs/project_structure.md)
--   Inspirando-se na arquitetura de Providers do Riverpod, crie funções que registram no getIt, e leia esses arquivos do `state/get_it.dart`. A única diferença do Riverpod é que dai não tá acoplado no widget tree
--   Corrigir estrutura de temas
+-   Fazer API de gestão de autenticação dentro do app
+    -   Método para iniciar sessão com token Sanctum
+    -   Método para apagar sessão atual
+    -   Método para obter dados do usuário (isso é cacheado através do FlutterSecureStorage)
+    -   Método para renovar cache dos dados do usuário
 -   Criar inicial de lista de documentos
 -   Fazer lógica de login com Google (criar um mock do componente que se comunica com o backend)
 -   Fazer rota ´/´ direcionar para documentos ou login dependendo do estado de login do usuário
@@ -25,3 +27,4 @@
 -   Fazer lógica de lixeira de documentos (backend mock)
 -   Fazer lógica de compartilhar documentos (frontend support)
 -   Fazer lógica de compartilhar documentos (backend mock)
+-   Escrever casos de teste

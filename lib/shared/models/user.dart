@@ -4,6 +4,7 @@ class User {
   final String email;
   final String telefone;
   final String cpf;
+  final String birthDate;
 
   const User({
     required this.id,
@@ -11,6 +12,7 @@ class User {
     required this.email,
     required this.telefone,
     required this.cpf,
+    required this.birthDate,
   });
 
   // fromJson
@@ -21,6 +23,7 @@ class User {
       email: json['email'] ?? '',
       telefone: json['telefone'] ?? '',
       cpf: json['cpf'] ?? '',
+      birthDate: json['birth_date'] ?? '',
     );
   }
 
@@ -32,6 +35,7 @@ class User {
       'email': email,
       'telefone': telefone,
       'cpf': cpf,
+      'birth_date': birthDate,
     };
   }
 }

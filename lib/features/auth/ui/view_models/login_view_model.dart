@@ -10,7 +10,7 @@ class LoginViewModel extends ChangeNotifier {
   LoginViewModel(this._authRepository) {
     loginCommand = Command.createAsyncNoParam(() async {
       // Perform login logic here
-      Result<AuthResponse, Exception> result = await _authRepository
+      Result<LoginResponse, Exception> result = await _authRepository
           .loginWithGoogle();
 
       if (result.isError()) {

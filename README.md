@@ -13,9 +13,8 @@
 
 -   Fazer API de gestão de autenticação dentro do app
     -   Método para iniciar sessão com token Sanctum
-    -   Método para apagar sessão atual
-    -   Método para obter dados do usuário (isso é cacheado através do FlutterSecureStorage)
-    -   Método para renovar cache dos dados do usuário
+    -   Método para apagar token atual
+    -   Dados de usuário não serão cacheados no SecureStorage, no initialize o endpoint /auth/session será chamado
 -   Criar inicial de lista de documentos
 -   Fazer lógica de login com Google (criar um mock do componente que se comunica com o backend)
 -   Fazer rota ´/´ direcionar para documentos ou login dependendo do estado de login do usuário

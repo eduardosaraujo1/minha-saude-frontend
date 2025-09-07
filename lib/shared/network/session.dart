@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:minha_saude_frontend/shared/auth/user.dart';
+import 'package:minha_saude_frontend/shared/models/user.dart';
 
-class Session {
-  Session(this._storage);
+class AuthSession {
+  AuthSession(this._storage);
   final FlutterSecureStorage _storage;
 
   // Cache values to avoid frequent storage reads

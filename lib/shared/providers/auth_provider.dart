@@ -2,8 +2,11 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:minha_saude_frontend/shared/models/user.dart';
 
-class AuthSession {
-  AuthSession(this._storage);
+// MODIFICATIONS
+// 1. User should NOT be cached here, only token
+// 2. Add method to get fresh token from storage (bypass cache)
+class AuthProvider {
+  AuthProvider(this._storage);
   final FlutterSecureStorage _storage;
 
   // Cache values to avoid frequent storage reads

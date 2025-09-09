@@ -7,7 +7,8 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 class TosPage extends StatelessWidget {
   final TermsConditionsViewModel viewModel;
 
-  const TosPage({required this.viewModel, super.key});
+  TosPage({viewModel, super.key})
+    : viewModel = viewModel ?? TermsConditionsViewModel();
 
   @override
   Widget build(BuildContext context) {

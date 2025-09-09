@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:minha_saude_frontend/app/data/auth/DTO/login_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/DTO/register_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/DTO/user_dto.dart';
@@ -103,7 +105,7 @@ class AuthRepository {
       // The user is considered logged out locally regardless
       if (serverLogoutResult.isError()) {
         // Log the error but don't return it
-        print("Warning: Server logout failed, but user is logged out locally");
+        log("Warning: Server logout failed, but user is logged out locally");
       }
     }
 

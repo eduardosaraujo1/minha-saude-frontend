@@ -1,16 +1,18 @@
 import 'package:minha_saude_frontend/app/data/auth/DTO/login_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/DTO/register_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/DTO/user_dto.dart';
+import 'package:minha_saude_frontend/app/data/shared/sources/api_client.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 class AuthRemoteDataSource {
-  AuthRemoteDataSource();
+  final ApiClient _apiClient; // will be used once data is no longer mocked
+  AuthRemoteDataSource(this._apiClient);
 
   /// Exchange Google token with Laravel Sanctum token (login)
   Future<Result<LoginResponse, Exception>> loginWithGoogle(
     String googleToken,
   ) async {
-    // Mock the submition to the backend, return a fake Laravel Sanctum token
+    // Mock the submission to the backend, return a fake Laravel Sanctum token
     return Future.delayed(
       Duration(seconds: 2),
       // () => Result.success(AuthResponse("session_token_example", false)),
@@ -20,7 +22,7 @@ class AuthRemoteDataSource {
   }
 
   Future<Result<RegisterResponse, Exception>> register(UserDto userData) async {
-    // Mock the submition to the backend, return a fake register error or success
+    // Mock the submission to the backend, return a fake register error or success
     return Future.delayed(
       Duration(seconds: 2),
       () => Result.success(RegisterResponse(RegisterStatus.success)),

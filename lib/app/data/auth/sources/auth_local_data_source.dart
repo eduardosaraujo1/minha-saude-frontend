@@ -1,9 +1,10 @@
-import 'package:get_it/get_it.dart';
 import 'package:minha_saude_frontend/app/data/shared/sources/secure_storage.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 class AuthLocalDataSource {
-  final _storage = GetIt.I<SecureStorage>();
+  final SecureStorage _storage;
+
+  AuthLocalDataSource(this._storage);
 
   static const String _tokenKey = 'session_token';
 

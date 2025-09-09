@@ -1,13 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/presentation/shared/themes/dark_theme.dart';
-import 'package:minha_saude_frontend/app/presentation/shared/themes/light_theme.dart';
+import 'package:minha_saude_frontend/app/presentation/shared/themes/variants/dark_theme.dart';
+import 'package:minha_saude_frontend/app/presentation/shared/themes/variants/light_theme.dart';
 
-class AppTheme {
-  static ThemeData light() {
+class AppTheme extends ChangeNotifier {
+  late ThemeData _selectedTheme;
+
+  ThemeData get selectedTheme => _selectedTheme;
+
+  AppTheme() {
+    _selectedTheme = _light();
+  }
+
+  void selectLightTheme() {
+    _selectedTheme = _light();
+    notifyListeners();
+  }
+
+  void selectDarkTheme() {
+    _selectedTheme = _dark();
+    notifyListeners();
+  }
+
+  void selectCustomTheme(ThemeData theme) {
+    _selectedTheme = theme;
+    notifyListeners();
+  }
+
+  ThemeData _light() {
     return LightTheme().getTheme();
   }
 
-  static ThemeData dark() {
+  ThemeData _dark() {
     return DarkTheme().getTheme();
   }
 }

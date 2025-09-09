@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/presentation/shared/themes/app_theme.dart';
 import 'package:minha_saude_frontend/container/init.dart' as container;
+import 'package:watch_it/watch_it.dart';
 
 /// The main entry point of the application.
 ///
@@ -29,14 +29,16 @@ void main() async {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends WatchingWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final appTheme = watchIt<AppTheme>();
+
     return MaterialApp.router(
       title: 'Minha Saúde 2025',
-      theme: AppTheme.light(),
+      theme: appTheme.selectedTheme,
       routerConfig: GetIt.I<GoRouter>(),
     );
   }

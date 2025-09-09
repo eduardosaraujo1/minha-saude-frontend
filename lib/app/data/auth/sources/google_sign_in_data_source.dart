@@ -1,19 +1,3 @@
-/*
-# shared
-Gateway -> usado pra falar com o backend, funções como "sendRequest" etc
-Session -> Armazena se o usuário está logado ou não em FlutterSecureStorage e localmente, permite efetuar "login(LoginStrategy)", "logout", e pegar o usuário atualmente logado
-(abstract) AuthStrategy
-# features/auth
-## data
-sources/AuthLocalDataSource -> Responsável por gerenciar a autenticação local, como armazenamento de token, login e logout.
-sources/AuthRemoteDataSource -> Responsável por gerenciar a autenticação remota, como troca de tokens.
-repositories/AuthRepositoryImpl -> Decide qual API usar para gerar auth token
-
-## domain
-repositories/AuthRepository
-abstract LoginStrategy -> Criar implementações como GoogleLogin e EmailLogin, com os dados necessários no objeto em si (substituir GoogleAuthService por isso aqui)
-model AuthUser -> Dados do usuário autenticado
- */
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:minha_saude_frontend/config/google_auth_config.dart';
 import 'package:multiple_result/multiple_result.dart';

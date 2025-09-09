@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:minha_saude_frontend/app/data/auth/sources/auth_local_data_source.dart';
@@ -39,7 +41,7 @@ class ApiClient {
 
           if (error.response?.statusCode == 401) {
             // Future feature: Auto-logout on 401
-            print(
+            log(
               "Warning: Received 401 Unauthorized. Consider implementing auto-logout.",
             );
           }

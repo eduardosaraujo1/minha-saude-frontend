@@ -9,7 +9,7 @@ import 'package:watch_it/watch_it.dart';
 class LoginPage extends WatchingWidget {
   final LoginViewModel viewModel;
 
-  const LoginPage({required this.viewModel, super.key});
+  LoginPage({viewModel, super.key}) : viewModel = viewModel ?? LoginViewModel();
 
   @override
   Widget build(BuildContext context) {

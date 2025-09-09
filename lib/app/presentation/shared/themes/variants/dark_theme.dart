@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/presentation/shared/themes/theme_variant.dart';
+import 'package:minha_saude_frontend/app/presentation/shared/themes/variants/theme_variant.dart';
 
 class DarkTheme implements ThemeVariant {
   static const seedColor = Color(0xFF003039);

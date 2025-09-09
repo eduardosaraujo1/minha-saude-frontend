@@ -6,7 +6,8 @@ import 'package:minha_saude_frontend/app/presentation/auth/views/layouts/login_f
 class RegisterPage extends StatelessWidget {
   final RegisterScreenViewModel viewModel;
 
-  const RegisterPage({required this.viewModel, super.key});
+  RegisterPage({viewModel, super.key})
+    : viewModel = viewModel ?? RegisterScreenViewModel();
 
   @override
   Widget build(BuildContext context) {

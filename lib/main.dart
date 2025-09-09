@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/config/themes/app_theme.dart';
-import 'package:minha_saude_frontend/state/get_it.dart';
+import 'package:minha_saude_frontend/presentation/shared/themes/app_theme.dart';
+import 'package:minha_saude_frontend/old/state/get_it.dart';
 
 /// The main entry point of the application.
 ///

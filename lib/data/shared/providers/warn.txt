@@ -1,1 +1,0 @@
-THIS FOLDER (providers inside shared) SHOULD NOT EXIST A

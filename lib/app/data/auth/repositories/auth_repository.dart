@@ -6,6 +6,7 @@ import 'package:minha_saude_frontend/app/data/auth/DTO/user_dto.dart';
 import 'package:minha_saude_frontend/app/data/auth/sources/auth_local_data_source.dart';
 import 'package:minha_saude_frontend/app/data/auth/sources/auth_remote_data_source.dart';
 import 'package:minha_saude_frontend/app/data/auth/sources/google_sign_in_data_source.dart';
+import 'package:minha_saude_frontend/app/domain/exceptions/exceptions.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 class AuthRepository {
@@ -27,7 +28,9 @@ class AuthRepository {
 
     if (googleSignInResult.isError()) {
       return Result.error(
-        Exception("Ocorreu um erro ao autenticar com o Google"),
+        UserException(
+          "Não foi possível autenticar com o Google. Por favor, tente novamente.",
+        ),
       );
     }
 
@@ -38,7 +41,9 @@ class AuthRepository {
 
     if (loginResponse.isError()) {
       return Result.error(
-        Exception("Ocorreu um erro ao autenticar com o backend"),
+        UserException(
+          "Não foi possível conectar ao servidor. Por favor, tente novamente mais tarde.",
+        ),
       );
     }
 
@@ -61,7 +66,7 @@ class AuthRepository {
 
     if (registerResult.isError()) {
       return Result.error(
-        Exception("Ocorreu um erro ao registrar com o backend"),
+        UserException("Ocorreu um erro ao registrar com o backend"),
       );
     }
 
@@ -92,7 +97,7 @@ class AuthRepository {
     // Clear local session first (even if server logout fails)
     final clearResult = await _authLocalDataSource.removeSessionToken();
     if (clearResult.isError()) {
-      return Result.error(Exception("Erro ao limpar dados locais"));
+      return Result.error(Exception("Could not clear local session"));
     }
 
     // If we had a token, try to logout from server

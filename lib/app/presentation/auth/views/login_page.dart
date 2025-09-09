@@ -14,28 +14,25 @@ class LoginPage extends WatchingWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final result = watch(viewModel.loginCommand.results).value;
+    final loginResult = watch(viewModel.loginWithGoogleCommand.results).value;
 
-    // Handle UI updates after build is complete
+    // Check results outside postFrameCallback
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (result.hasData) {
-        if (result.data! == LoginStatus.authenticated) {
+      if (loginResult.hasData) {
+        if (loginResult.data!.status == LoginStatus.authenticated) {
           context.go('/home');
-        } else if (result.data! == LoginStatus.needsRegistration) {
+        } else if (loginResult.data!.status == LoginStatus.needsRegistration) {
           context.go('/tos');
-        } else if (result.data! == LoginStatus.error) {
-          final snackBar = SnackBar(
-            content: Text(
-              viewModel.errorMessage ?? 'Ocorreu um erro desconhecido',
-            ),
-          );
+        } else if (loginResult.data!.isError) {
+          final errorMessage =
+              loginResult.data!.errorMessage ?? 'Ocorreu um erro desconhecido';
+          final snackBar = SnackBar(content: Text(errorMessage));
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
         }
-      } else if (result.hasError) {
+      } else if (loginResult.hasError) {
         final snackBar = SnackBar(
-          content: Text(
-            result.error?.toString() ?? 'Ocorreu um erro desconhecido',
-          ),
+          content: Text('Ocorreu um erro desconhecido'),
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
@@ -60,11 +57,11 @@ class LoginPage extends WatchingWidget {
                   ),
                   label: "Entrar com Google",
                   onPressed: () {
-                    viewModel.loginCommand.execute();
+                    viewModel.loginWithGoogleCommand.execute();
                   },
-                  disabled: result.isExecuting,
+                  disabled: loginResult.isExecuting,
                 ),
-                if (result.isExecuting)
+                if (loginResult.isExecuting)
                   SizedBox(
                     width: double.infinity,
                     child: Center(child: CircularProgressIndicator()),

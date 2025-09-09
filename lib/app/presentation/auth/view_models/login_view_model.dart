@@ -1,11 +1,10 @@
 import 'package:command_it/command_it.dart';
-import 'package:flutter/foundation.dart';
 import 'package:minha_saude_frontend/app/data/auth/DTO/login_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/container/get_it.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-class LoginViewModel extends ChangeNotifier {
+class LoginViewModel {
   final AuthRepository _authRepository = getIt<AuthRepository>();
 
   late Command<void, LoginCommandResponse> loginWithGoogleCommand;

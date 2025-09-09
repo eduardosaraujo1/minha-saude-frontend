@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class RegisterScreenViewModel extends RegisterFormState with ChangeNotifier {
+class RegisterScreenViewModel extends RegisterFormState {
   RegisterScreenViewModel() {
     // onFormChanged(checkFormValidity);
   }
@@ -12,6 +12,8 @@ class RegisterScreenViewModel extends RegisterFormState with ChangeNotifier {
   /// Register user with current form data
   Future<bool> registerUser() async {
     return formKey.currentState?.validate() ?? false;
+    // TODO: integrate with AuthRepository to register user
+    // TODO: use command_it for better state management
   }
 
   /// Parse date from DD/MM/YYYY format

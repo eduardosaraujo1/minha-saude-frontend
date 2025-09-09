@@ -12,6 +12,7 @@ class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+
     return LoginFormLayout(
       child: Padding(
         padding: EdgeInsetsGeometry.all(16),

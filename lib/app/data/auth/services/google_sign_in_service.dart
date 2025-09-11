@@ -2,7 +2,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:minha_saude_frontend/config/google_auth_config.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-class GoogleSignInDataSource {
+class GoogleSignInService {
   static const List<String> scopes = <String>[
     'https://www.googleapis.com/auth/userinfo.email',
     'openid',
@@ -10,9 +10,9 @@ class GoogleSignInDataSource {
 
   final GoogleSignIn _signIn;
 
-  const GoogleSignInDataSource._(this._signIn);
+  const GoogleSignInService._(this._signIn);
 
-  static Future<GoogleSignInDataSource> create(
+  static Future<GoogleSignInService> create(
     GoogleSignIn signIn,
     GoogleAuthConfig config,
   ) async {
@@ -21,7 +21,7 @@ class GoogleSignInDataSource {
       serverClientId: config.serverClientId,
     );
 
-    return GoogleSignInDataSource._(signIn);
+    return GoogleSignInService._(signIn);
   }
 
   Future<Result<String?, Exception>> generateServerAuthCode() async {

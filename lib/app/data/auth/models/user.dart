@@ -1,11 +1,11 @@
-class UserDto {
+class User {
   // cpf,nome_completo,data_nascimento,telefone
   String cpf;
   String nomeCompleto;
   DateTime dataNascimento;
   String telefone;
 
-  UserDto({
+  User({
     required this.cpf,
     required this.nomeCompleto,
     required this.dataNascimento,
@@ -25,8 +25,8 @@ class UserDto {
   }
 
   // fromJson
-  factory UserDto.fromJson(Map<String, dynamic> json) {
-    return UserDto(
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
       cpf: json['cpf'],
       nomeCompleto: json['nome_completo'],
       dataNascimento: DateTime.parse(

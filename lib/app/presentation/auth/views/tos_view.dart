@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/presentation/auth/view_models/terms_conditions_view_model.dart';
+import 'package:minha_saude_frontend/app/presentation/auth/view_models/tos_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/views/layouts/login_form_layout.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
-class TosPage extends StatelessWidget {
-  final TermsConditionsViewModel viewModel;
+class TosView extends StatelessWidget {
+  final TosViewModel viewModel;
 
-  TosPage({viewModel, super.key})
-    : viewModel = viewModel ?? TermsConditionsViewModel();
+  const TosView(this.viewModel, {super.key});
 
   @override
   Widget build(BuildContext context) {

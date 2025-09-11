@@ -1,51 +1,71 @@
 import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_screen_view_model.dart';
+import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/views/layouts/login_form_layout.dart';
 
-class RegisterPage extends StatelessWidget {
-  final RegisterScreenViewModel viewModel;
+class RegisterView extends StatefulWidget {
+  final RegisterViewModel viewModel;
+  const RegisterView(this.viewModel, {super.key});
 
-  RegisterPage({viewModel, super.key})
-    : viewModel = viewModel ?? RegisterScreenViewModel();
+  @override
+  State<RegisterView> createState() => _RegisterViewState();
+}
+
+class _RegisterViewState extends State<RegisterView> {
+  @override
+  void initState() {
+    super.initState();
+    widget.viewModel.addListener(_onViewModelChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.viewModel.removeListener(_onViewModelChanged);
+    super.dispose();
+  }
+
+  void _onViewModelChanged() {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
+    final vm = widget.viewModel;
     return LoginFormLayout(
       child: Padding(
         padding: EdgeInsetsGeometry.all(16),
         child: Form(
-          key: viewModel.formKey,
+          key: vm.formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             spacing: 8,
             children: [
               Text(
                 'Vamos concluir seu cadastro',
-                style: theme.textTheme.titleLarge,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               Text(
                 'Por favor, preencha os campos abaixo',
-                style: theme.textTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
               TextFormField(
-                controller: viewModel.nomeController,
-                validator: viewModel.validateNome,
+                controller: vm.nomeController,
+                validator: vm.validateNome,
                 decoration: const InputDecoration(
                   labelText: 'Nome',
                   border: OutlineInputBorder(),
                 ),
               ),
               TextFormField(
-                controller: viewModel.cpfController,
-                validator: viewModel.validateCpf,
+                controller: vm.cpfController,
+                validator: vm.validateCpf,
                 decoration: InputDecoration(
                   hint: Text(
                     "123.456.789-10",
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurface.withAlpha(0xAA),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withAlpha(0xAA),
                     ),
                   ),
                   labelText: 'CPF',
@@ -61,8 +81,8 @@ class RegisterPage extends StatelessWidget {
                 ],
               ),
               TextFormField(
-                controller: viewModel.dataNascimentoController,
-                validator: viewModel.validateDtNascimento,
+                controller: vm.dataNascimentoController,
+                validator: vm.validateDtNascimento,
                 decoration: const InputDecoration(
                   labelText: 'Data de Nascimento',
                   border: OutlineInputBorder(),
@@ -70,16 +90,18 @@ class RegisterPage extends StatelessWidget {
                 ),
                 keyboardType: TextInputType.datetime,
                 readOnly: true,
-                onTap: () => triggerBirthDatePicker(context),
+                onTap: () => _triggerBirthDatePicker(context),
               ),
               TextFormField(
-                controller: viewModel.telefoneController,
-                validator: viewModel.validateTelefone,
+                controller: vm.telefoneController,
+                validator: vm.validateTelefone,
                 decoration: InputDecoration(
                   hint: Text(
                     "+55 11 98765-4321",
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurface.withAlpha(0xAA),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withAlpha(0xAA),
                     ),
                   ),
                   labelText: 'Telefone',
@@ -96,11 +118,11 @@ class RegisterPage extends StatelessWidget {
               ),
               FilledButton(
                 onPressed: () {
-                  viewModel.registerUser();
+                  vm.registerUser();
                 },
                 style: FilledButton.styleFrom(
-                  backgroundColor: theme.primaryColor,
-                  foregroundColor: theme.colorScheme.onPrimary,
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 ),
                 child: const Text('Confirmar cadastro'),
               ),
@@ -111,7 +133,7 @@ class RegisterPage extends StatelessWidget {
     );
   }
 
-  void triggerBirthDatePicker(BuildContext context) async {
+  void _triggerBirthDatePicker(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -119,7 +141,7 @@ class RegisterPage extends StatelessWidget {
       lastDate: DateTime.now(),
     );
     if (pickedDate != null) {
-      viewModel.dataNascimentoController.value = TextEditingValue(
+      widget.viewModel.dataNascimentoController.value = TextEditingValue(
         text: "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}",
       );
     }

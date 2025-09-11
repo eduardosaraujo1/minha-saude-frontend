@@ -1,25 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/di/get_it.dart';
 import 'package:minha_saude_frontend/app/presentation/shared/themes/app_theme.dart';
-import 'package:minha_saude_frontend/container/providers/providers.dart'
-    as container;
 import 'package:watch_it/watch_it.dart';
 
-/// The main entry point of the application.
-///
-/// This function initializes the service locator and runs the app.
-/// If any required environment variables are missing during setup,
-/// it will display an error screen instead of crashing.
 void main() async {
   try {
     // Ensure Flutter bindings are initialized
     WidgetsFlutterBinding.ensureInitialized();
 
     // Initialize all providers and dependencies
-    container.initProviders();
-
-    // Wait until getIt sets up all the async services
-    await container.allReady();
+    await setupLocator();
 
     // Run the app
     runApp(const MyApp());
@@ -40,7 +31,7 @@ class MyApp extends WatchingWidget {
     return MaterialApp.router(
       title: 'Minha Saúde 2025',
       theme: appTheme.selectedTheme,
-      routerConfig: GetIt.I<GoRouter>(),
+      routerConfig: di<GoRouter>(),
     );
   }
 }

@@ -8,6 +8,7 @@ import 'package:minha_saude_frontend/app/presentation/auth/view_models/tos_view_
 import 'package:minha_saude_frontend/app/presentation/auth/views/login_view.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/views/register_view.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/views/tos_view.dart';
+import 'package:minha_saude_frontend/app/presentation/shared/views/not_found.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -22,6 +23,7 @@ final router = GoRouter(
     }
     return null;
   },
+  errorBuilder: (context, state) => const NotFoundView(),
   routes: [
     GoRoute(
       path: '/login',

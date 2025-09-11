@@ -67,13 +67,14 @@ class _LoginViewState extends State<LoginView> {
                     width: 24,
                   ),
                   label: "Entrar com Google",
+                  disabled: vm.isLoading,
                   onPressed: vm.isLoading
                       ? null
                       : () {
                           vm.loginWithGoogle();
                         },
-                  disabled: vm.isLoading,
                 ),
+                SizedBox(height: 8),
                 if (vm.isLoading)
                   SizedBox(
                     width: double.infinity,

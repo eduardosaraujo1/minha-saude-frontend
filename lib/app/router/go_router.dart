@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/app/di/get_it.dart';
+import 'package:minha_saude_frontend/app/domain/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/login_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/tos_view_model.dart';
@@ -12,7 +12,7 @@ import 'package:minha_saude_frontend/app/presentation/auth/views/tos_view.dart';
 final router = GoRouter(
   initialLocation: '/',
   redirect: (context, state) {
-    final authRepository = getIt<AuthRepositoryImpl>();
+    final authRepository = getIt<AuthRepository>();
     final isLoggedIn = authRepository.isLoggedIn();
 
     final authRoutes = ['/login', '/register', '/tos'];
@@ -26,7 +26,7 @@ final router = GoRouter(
     GoRoute(
       path: '/login',
       builder: (BuildContext context, GoRouterState state) {
-        return LoginView(LoginViewModel(getIt<AuthRepositoryImpl>()));
+        return LoginView(LoginViewModel(getIt<AuthRepository>()));
       },
     ),
     GoRoute(
@@ -38,7 +38,7 @@ final router = GoRouter(
     GoRoute(
       path: '/register',
       builder: (BuildContext context, GoRouterState state) {
-        return RegisterView(RegisterViewModel());
+        return RegisterView(RegisterViewModel(getIt<AuthRepository>()));
       },
     ),
   ],

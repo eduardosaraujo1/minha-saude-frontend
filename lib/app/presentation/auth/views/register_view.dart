@@ -25,17 +25,27 @@ class _RegisterViewState extends State<RegisterView> {
   }
 
   void _onViewModelChanged() {
+    if (widget.viewModel.errorMessage != null) {
+      final snackBar = SnackBar(
+        content: Text(
+          widget.viewModel.errorMessage ?? 'Ocorreu um erro desconhecido',
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     final vm = widget.viewModel;
+    final form = vm.form;
+
     return LoginFormLayout(
       child: Padding(
         padding: EdgeInsetsGeometry.all(16),
         child: Form(
-          key: vm.formKey,
+          key: form.formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             spacing: 8,
@@ -49,16 +59,16 @@ class _RegisterViewState extends State<RegisterView> {
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               TextFormField(
-                controller: vm.nomeController,
-                validator: vm.validateNome,
+                controller: form.nomeController,
+                validator: form.validateNome,
                 decoration: const InputDecoration(
                   labelText: 'Nome',
                   border: OutlineInputBorder(),
                 ),
               ),
               TextFormField(
-                controller: vm.cpfController,
-                validator: vm.validateCpf,
+                controller: form.cpfController,
+                validator: form.validateCpf,
                 decoration: InputDecoration(
                   hint: Text(
                     "123.456.789-10",
@@ -81,8 +91,8 @@ class _RegisterViewState extends State<RegisterView> {
                 ],
               ),
               TextFormField(
-                controller: vm.dataNascimentoController,
-                validator: vm.validateDtNascimento,
+                controller: form.dataNascimentoController,
+                validator: form.validateDtNascimento,
                 decoration: const InputDecoration(
                   labelText: 'Data de Nascimento',
                   border: OutlineInputBorder(),
@@ -90,11 +100,11 @@ class _RegisterViewState extends State<RegisterView> {
                 ),
                 keyboardType: TextInputType.datetime,
                 readOnly: true,
-                onTap: () => _triggerBirthDatePicker(context),
+                onTap: () => _triggerBirthDatePicker(),
               ),
               TextFormField(
-                controller: vm.telefoneController,
-                validator: vm.validateTelefone,
+                controller: form.telefoneController,
+                validator: form.validateTelefone,
                 decoration: InputDecoration(
                   hint: Text(
                     "+55 11 98765-4321",
@@ -133,7 +143,7 @@ class _RegisterViewState extends State<RegisterView> {
     );
   }
 
-  void _triggerBirthDatePicker(BuildContext context) async {
+  void _triggerBirthDatePicker() async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -141,7 +151,7 @@ class _RegisterViewState extends State<RegisterView> {
       lastDate: DateTime.now(),
     );
     if (pickedDate != null) {
-      widget.viewModel.dataNascimentoController.value = TextEditingValue(
+      widget.viewModel.form.dataNascimentoController.value = TextEditingValue(
         text: "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}",
       );
     }

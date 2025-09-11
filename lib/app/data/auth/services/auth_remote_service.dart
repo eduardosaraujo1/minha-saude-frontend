@@ -12,22 +12,17 @@ class AuthRemoteService {
   Future<Result<LoginResponse, Exception>> loginWithGoogle(
     String googleToken,
   ) async {
+    final result = LoginResponse("session_token_example", true);
+
     // Mock the submission to the backend, return a fake Laravel Sanctum token
-    return Future.delayed(
-      Duration(seconds: 2),
-      // () => Result.success(AuthResponse("session_token_example", false)),
-      () => Result.success(LoginResponse("session_token_example", true)),
-      // () => Result.error(Exception("Erro ao autenticar com o Google")),
-    );
+    return Future.delayed(Duration(seconds: 2), () => Result.success(result));
   }
 
   Future<Result<RegisterResponse, Exception>> register(User userData) async {
     // Mock the submission to the backend, return a fake register error or success
-    return Future.delayed(
-      Duration(seconds: 2),
-      () => Result.success(RegisterResponse(RegisterStatus.success)),
-      // () => Result.error(Exception("Erro ao autenticar com o Google")),
-    );
+    final RegisterResponse result = RegisterResponse(RegisterStatus.success);
+
+    return Future.delayed(Duration(seconds: 2), () => Result.success(result));
   }
 
   /// Logout user from server (invalidate session token)

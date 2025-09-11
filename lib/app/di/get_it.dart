@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -17,6 +18,7 @@ final getIt = GetIt.I;
 /// Awaits until all async singletons are ready
 Future<void> setupLocator() async {
   // Providers
+  getIt.registerSingleton<Dio>(Dio());
   getIt.registerSingleton<SecureStorage>(SecureStorage());
   getIt.registerSingleton<GoogleAuthConfig>(GoogleAuthConfig());
   getIt.registerSingleton<AppTheme>(AppTheme());
@@ -40,7 +42,7 @@ Future<void> setupLocator() async {
       getIt<AuthRemoteService>(),
       getIt<GoogleSignInService>(),
     ),
-    dependsOn: [AuthLocalService, AuthRemoteService, GoogleSignInService],
+    dependsOn: [GoogleSignInService],
   );
 
   // Await on async operations

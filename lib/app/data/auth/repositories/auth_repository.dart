@@ -14,16 +14,19 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthLocalService _authLocalService;
   final GoogleSignInService _googleSignInService;
 
-  static AuthRepositoryImpl create(
+  static Future<AuthRepositoryImpl> create(
     AuthLocalService authLocalService,
     AuthRemoteService authRemoteService,
     GoogleSignInService googleSignInService,
-  ) {
-    return AuthRepositoryImpl._(
+  ) async {
+    final repository = AuthRepositoryImpl._(
       authRemoteService,
       authLocalService,
       googleSignInService,
-    ).._initializeTokenCache();
+    );
+    await repository._initializeTokenCache();
+
+    return repository;
   }
 
   // Cached token for synchronous access
@@ -119,7 +122,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
       if (registerResult.isError()) {
         return Result.error(
-          Exception("Ocorreu um erro ao registrar com o backend"),
+          Exception(
+            "Ocorreu um erro ao registrar. Verifique sua conexão com a internet",
+          ),
         );
       }
 
@@ -130,7 +135,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Result.success(response);
     } catch (e) {
-      return Result.error(Exception("Erro inesperado durante o registro: $e"));
+      log(e.toString());
+      return Result.error(Exception("Ocorreu um erro desconhecido."));
     }
   }
 

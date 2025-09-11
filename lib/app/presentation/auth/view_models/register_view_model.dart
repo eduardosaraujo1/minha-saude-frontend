@@ -1,48 +1,84 @@
-import 'package:flutter/material.dart';
+import 'dart:developer';
 
-class RegisterViewModel extends ChangeNotifier with RegisterFormState {
-  RegisterViewModel();
+import 'package:flutter/material.dart';
+import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
+import 'package:minha_saude_frontend/app/domain/repositories/auth_repository.dart';
+
+class RegisterViewModel extends ChangeNotifier {
+  final RegisterForm form = RegisterForm();
+  final AuthRepository authRepository;
+
+  RegisterViewModel(this.authRepository);
 
   String? _errorMessage;
 
+  bool _isLoading = false;
+
   String? get errorMessage => _errorMessage;
 
+  bool get isLoading => _isLoading;
+
   /// Register user with current form data
-  Future<bool> registerUser() async {
-    return formKey.currentState?.validate() ?? false;
-    // TODO: integrate with AuthRepository to register user
+  Future<void> registerUser() async {
+    try {
+      if (!form.validate()) {
+        return;
+      }
+      _isLoading = true;
+      notifyListeners();
+
+      final newUser = User(
+        nome: form.nomeController.text.trim(),
+        cpf: form.cpfController.text.replaceAll(RegExp(r'[^0-9]'), ''),
+        dataNascimento: _parseDate(form.dataNascimentoController.text.trim()),
+        telefone: form.telefoneController.text.trim(),
+      );
+
+      await authRepository.registerWithGoogle(newUser);
+    } catch (e) {
+      log(e.toString());
+      _errorMessage = "Ocorreu um erro desconhecido.";
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+      _errorMessage = null; // Evitar a reexibição da mensagem de erro
+    }
   }
 
   /// Parse date from DD/MM/YYYY format
-  // DateTime? _parseDate(String dateText) {
-  //   try {
-  //     final parts = dateText.split('/');
-  //     if (parts.length == 3) {
-  //       final day = int.parse(parts[0]);
-  //       final month = int.parse(parts[1]);
-  //       final year = int.parse(parts[2]);
-  //       return DateTime(year, month, day);
-  //     }
-  //   } catch (e) {
-  //     // Invalid date format
-  //   }
-  //   return null;
-  // }
+  DateTime _parseDate(String dateText) {
+    final parts = dateText.split('/');
+
+    if (parts.length == 3) {
+      final day = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      final year = int.parse(parts[2]);
+      return DateTime(year, month, day);
+    } else {
+      throw FormatException('Data de nascimento inválida');
+    }
+  }
 
   @override
   void dispose() {
+    form.dispose();
     super.dispose();
   }
 }
 
 enum RegisterState { initial, loading, success, error }
 
-mixin class RegisterFormState {
+class RegisterForm {
   final formKey = GlobalKey<FormState>();
   final nomeController = TextEditingController();
   final cpfController = TextEditingController();
   final dataNascimentoController = TextEditingController();
   final telefoneController = TextEditingController();
+
+  /// Validates the form and returns true if valid
+  bool validate() {
+    return formKey.currentState?.validate() ?? false;
+  }
 
   void onFormChanged(VoidCallback callback) {
     nomeController.addListener(callback);

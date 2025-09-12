@@ -16,9 +16,13 @@ class RegisterViewModel extends ChangeNotifier {
 
   bool _isLoading = false;
 
+  RegisterState _state = RegisterState.initial;
+
   String? get errorMessage => _errorMessage;
 
   bool get isLoading => _isLoading;
+
+  RegisterState get state => _state;
 
   /// Register user with current form data
   Future<void> registerUser() async {
@@ -27,6 +31,7 @@ class RegisterViewModel extends ChangeNotifier {
         return;
       }
       _isLoading = true;
+      _state = RegisterState.loading;
       notifyListeners();
 
       final newUser = User(
@@ -42,9 +47,13 @@ class RegisterViewModel extends ChangeNotifier {
       if (result.isError()) {
         _errorMessage =
             result.tryGetError()?.toString() ?? "Ocorreu um erro desconhecido.";
+      }
+
+      if (authRepository.isRegistered) {
+        _state = RegisterState.success;
       } else {
-        // Registration successful, auth repository should have updated isRegistered automatically
-        log("Registration successful");
+        _errorMessage =
+            "Não foi possível completar o registro. Tente novamente mais tarde.";
       }
     } catch (e) {
       log(e.toString());
@@ -52,8 +61,12 @@ class RegisterViewModel extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
-      // Note: Don't clear error message immediately - let the UI handle it
     }
+  }
+
+  void clearErrorMessages() {
+    _errorMessage = null;
+    notifyListeners();
   }
 
   /// Get current authentication token

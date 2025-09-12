@@ -29,7 +29,7 @@ class LoginViewModel extends ChangeNotifier {
       if (result.isError()) {
         _status = LoginStatus.error;
         _errorMessage =
-            result.tryGetError()?.toString() ?? "Ocorreu um erro desconhecido.";
+            "Não foi possível fazer login com o Google. Tente novamente mais tarde.";
       } else {
         final signInResult = result.getOrThrow();
 
@@ -66,11 +66,10 @@ class LoginViewModel extends ChangeNotifier {
     }
   }
 
-  /// Get current authentication token
-  String? get authToken => tokenRepository.token;
-
-  /// Check if user is logged in (has a valid token)
-  bool get isLoggedIn => tokenRepository.hasToken;
+  void clearErrorMessages() {
+    _errorMessage = null;
+    notifyListeners();
+  }
 
   /// Logout user by clearing token and registration status
   Future<void> logout() async {

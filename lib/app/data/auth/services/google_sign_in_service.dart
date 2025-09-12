@@ -25,6 +25,11 @@ class GoogleSignInService {
   }
 
   Future<Result<String?, Exception>> generateServerAuthCode() async {
+    // temporary mock
+    // return Future.delayed(
+    //   Duration(seconds: 2),
+    //   () => Result.success("mock_server_auth_code"),
+    // );
     try {
       // Try silent auth
       var account = await _signIn.attemptLightweightAuthentication();

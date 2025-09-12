@@ -3,60 +3,50 @@ import 'dart:developer';
 import 'package:minha_saude_frontend/app/data/auth/models/login_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/register_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
+import 'package:minha_saude_frontend/app/data/auth/repositories/auth_token_repository.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/auth_cache_service.dart';
-import 'package:minha_saude_frontend/app/data/auth/services/auth_storage_service.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/auth_remote_service.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/google_sign_in_service.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 class AuthRepository {
   final AuthRemoteService _authRemoteService;
-  final AuthStorageService _authStorageService;
   final GoogleSignInService _googleSignInService;
+  final AuthTokenRepository _tokenRepository;
   final AuthCacheService _cacheService;
 
   static Future<AuthRepository> create(
-    AuthStorageService authStorageService,
     AuthRemoteService authRemoteService,
     GoogleSignInService googleSignInService,
+    AuthTokenRepository tokenRepository,
     AuthCacheService cacheService,
   ) async {
     final repository = AuthRepository._(
       authRemoteService,
-      authStorageService,
       googleSignInService,
+      tokenRepository,
       cacheService,
     );
-    await repository._initializeCache();
+
+    // Check registration status with server if we have a token
+    await repository._syncRegistrationStatus();
 
     return repository;
   }
 
   AuthRepository._(
     this._authRemoteService,
-    this._authStorageService,
     this._googleSignInService,
+    this._tokenRepository,
     this._cacheService,
   );
 
-  bool _cacheInitialized = false;
-
-  /// Initialize the cache from local storage and remote status
-  Future<void> _initializeCache() async {
+  /// Check registration status with server if we have a token
+  Future<void> _syncRegistrationStatus() async {
     try {
-      // Load token from secure storage
-      final tokenResult = await _authStorageService.getSessionToken();
-      if (tokenResult.isSuccess()) {
-        final token = tokenResult.tryGetSuccess();
-        if (token != null) {
-          _cacheService.setToken(token);
-        }
-      }
-
-      // If we have a token, check registration status with server
-      if (_cacheService.hasToken) {
+      if (_tokenRepository.hasToken) {
         final statusResult = await _authRemoteService.getAuthStatus(
-          _cacheService.token!,
+          _tokenRepository.authToken!,
         );
         if (statusResult.isSuccess()) {
           final status = statusResult.tryGetSuccess();
@@ -65,11 +55,8 @@ class AuthRepository {
       } else {
         _cacheService.setRegistered(false);
       }
-
-      _cacheInitialized = true;
     } catch (e) {
-      log("Error initializing cache: $e");
-      _cacheInitialized = true; // Mark as initialized even on error
+      log("Error syncing registration status: $e");
     }
   }
 
@@ -111,13 +98,20 @@ class AuthRepository {
 
       final response = loginResponse.tryGetSuccess()!;
 
-      // CORRECTED: Update cache based on needsRegistration flag
-      // The server creates a stub user and sets needsRegistration appropriately
-      await _updateTokenAndCache(
-        response.sessionToken,
-        isRegistered: !response
-            .needsRegistration, // isRegistered is opposite of needsRegistration
-      );
+      // Update token and registration status
+      if (response.sessionToken != null) {
+        final tokenResult = await _tokenRepository.setToken(
+          response.sessionToken!,
+        );
+        if (tokenResult.isError()) {
+          return Result.error(
+            Exception("Falha ao salvar token de autenticação."),
+          );
+        }
+      }
+
+      // Set registration status based on needsRegistration flag
+      _cacheService.setRegistered(!response.needsRegistration);
 
       return Result.success(response);
     } catch (e) {
@@ -127,8 +121,8 @@ class AuthRepository {
 
   Future<Result<RegisterResponse, Exception>> register(User userData) async {
     try {
-      // CORRECTED: Use existing token from cache, no need for Google auth again
-      if (!_cacheService.hasToken) {
+      // Check if user has a valid token
+      if (!_tokenRepository.hasToken) {
         return Result.error(
           Exception(
             "Token de autenticação não encontrado. Faça login novamente.",
@@ -149,7 +143,7 @@ class AuthRepository {
 
       final response = registerResult.tryGetSuccess()!;
 
-      // Update registration status in cache - user is now fully registered
+      // Update registration status - user is now fully registered
       _cacheService.setRegistered(true);
 
       return Result.success(response);
@@ -164,21 +158,15 @@ class AuthRepository {
   // =============================================================================
 
   String? get authToken {
-    return _cacheService.token;
+    return _tokenRepository.authToken;
   }
 
   bool get isRegistered {
-    // If cache not initialized, return false (conservative approach)
-    if (!_cacheInitialized) return false;
-
     return _cacheService.isRegistered;
   }
 
   bool get isLoggedIn {
-    // If cache not initialized, return false (conservative approach)
-    if (!_cacheInitialized) return false;
-
-    return _cacheService.isLoggedIn;
+    return _tokenRepository.isLoggedIn;
   }
 
   // =============================================================================
@@ -187,10 +175,15 @@ class AuthRepository {
 
   Future<Result<void, Exception>> signOut() async {
     try {
-      final currentToken = _cacheService.token;
+      final currentToken = _tokenRepository.authToken;
 
       // Clear local session first (even if server logout fails)
-      await _clearCacheAndStorage();
+      final clearResult = await _tokenRepository.clearAll();
+      if (clearResult.isError()) {
+        log(
+          "Warning: Failed to clear local session: ${clearResult.tryGetError()}",
+        );
+      }
 
       // If we had a token, try to logout from server
       if (currentToken != null && currentToken.isNotEmpty) {
@@ -210,9 +203,9 @@ class AuthRepository {
     } catch (e) {
       // Even if there's an error, ensure local session is cleared
       try {
-        await _clearCacheAndStorage();
+        await _tokenRepository.clearAll();
       } catch (clearError) {
-        log("Error clearing cache during signOut: $clearError");
+        log("Error clearing token repository during signOut: $clearError");
       }
 
       return Result.error(Exception("Erro durante logout: $e"));
@@ -223,32 +216,12 @@ class AuthRepository {
   // UTILITY METHODS (for internal use and debugging)
   // =============================================================================
 
-  /// Check if cache has been initialized
-  bool get isCacheInitialized => _cacheInitialized;
+  /// Check if token repository cache has been initialized
+  bool get isCacheInitialized => _tokenRepository.isCacheInitialized;
 
-  /// Force reload cache from storage and server (useful for debugging)
+  /// Force reload cache from storage and sync with server
   Future<void> reloadCache() async {
-    await _initializeCache();
-  }
-
-  /// Update cache and storage with new token
-  Future<void> _updateTokenAndCache(String? token, {bool? isRegistered}) async {
-    if (token != null) {
-      _cacheService.setToken(token);
-      await _authStorageService.setSessionToken(token);
-    } else {
-      _cacheService.clearCache();
-      await _authStorageService.removeSessionToken();
-    }
-
-    if (isRegistered != null) {
-      _cacheService.setRegistered(isRegistered);
-    }
-  }
-
-  /// Clear cache and storage
-  Future<void> _clearCacheAndStorage() async {
-    _cacheService.clearCache();
-    await _authStorageService.removeSessionToken();
+    await _tokenRepository.reloadCache();
+    await _syncRegistrationStatus();
   }
 }

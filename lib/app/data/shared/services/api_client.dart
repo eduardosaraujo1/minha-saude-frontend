@@ -1,19 +1,18 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
-import 'package:minha_saude_frontend/app/di/get_it.dart';
+import 'package:minha_saude_frontend/app/data/auth/repositories/auth_token_repository.dart';
 
 class ApiClient {
-  final _httpClient = getIt<Dio>();
-  final _authRepository = getIt<AuthRepository>();
+  final Dio _httpClient;
+  final AuthTokenRepository _authTokenRepository;
 
   // Class that handles communication with backend server
   // Has endpoint url, and handles middleware like signing out on 401 Unauthorized error
   // Simple abstraction such as get, post, put, delete methods
   // Is NOT a singleton, can be instantiated normally but it made a singleton in get_it.dart
 
-  ApiClient() {
+  ApiClient(this._httpClient, this._authTokenRepository) {
     _setupInterceptors();
   }
 
@@ -23,7 +22,7 @@ class ApiClient {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           // Add authorization header if we have a token
-          final tokenResult = _authRepository.authToken;
+          final tokenResult = _authTokenRepository.authToken;
           options.headers['Authorization'] = 'Bearer $tokenResult';
           handler.next(options);
         },

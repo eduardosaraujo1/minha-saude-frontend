@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:minha_saude_frontend/app/domain/repositories/auth_repository.dart';
 
 class LoginViewModel extends ChangeNotifier {
-  final AuthRepository authRepository;
+  final IAuthRepository authRepository;
 
   LoginStatus _status = LoginStatus.initial;
   String? _errorMessage;
@@ -19,15 +19,22 @@ class LoginViewModel extends ChangeNotifier {
     _errorMessage = null;
     _status = LoginStatus.initial;
     notifyListeners();
+
     try {
-      final result = await authRepository.loginWithGoogle();
+      // Use the new googleLogin method
+      final result = await authRepository.googleLogin();
+
       if (result.isError()) {
         _status = LoginStatus.error;
         _errorMessage =
             result.tryGetError()?.toString() ?? "Ocorreu um erro desconhecido.";
       } else {
         final signInResult = result.getOrThrow();
-        if (signInResult.needsRegistration) {
+
+        // After successful login, check registration status
+        final isRegistered = authRepository.isRegistered;
+
+        if (!isRegistered) {
           _status = LoginStatus.needsRegistration;
         } else if (signInResult.sessionToken != null) {
           _status = LoginStatus.authenticated;

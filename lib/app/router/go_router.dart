@@ -13,14 +13,32 @@ import 'package:minha_saude_frontend/app/presentation/shared/views/not_found.dar
 final router = GoRouter(
   initialLocation: '/',
   redirect: (context, state) {
-    final authRepository = getIt<AuthRepository>();
-    final isLoggedIn = authRepository.isLoggedIn();
+    final authRepository = getIt<IAuthRepository>();
+
+    // Check if user has a valid token
+    final hasToken = authRepository.getToken() != null;
+
+    // Check if user is registered (for users with token)
+    final isRegistered = hasToken ? authRepository.isRegistered() : false;
 
     final authRoutes = ['/login', '/register', '/tos'];
-    final allowedRoutes = authRoutes.contains(state.fullPath);
-    if (!isLoggedIn && !allowedRoutes) {
+    final isOnAuthRoute = authRoutes.contains(state.fullPath);
+
+    // If no token and not on auth route, go to login
+    if (!hasToken && !isOnAuthRoute) {
       return '/login';
     }
+
+    // If has token but not registered and not on register route, go to register
+    if (hasToken && !isRegistered && state.fullPath != '/register') {
+      return '/register';
+    }
+
+    // If has token and is registered but on auth route, go to home
+    if (hasToken && isRegistered && isOnAuthRoute) {
+      return '/'; // or '/home' depending on your setup
+    }
+
     return null;
   },
   errorBuilder: (context, state) => const NotFoundView(),
@@ -28,7 +46,7 @@ final router = GoRouter(
     GoRoute(
       path: '/login',
       builder: (BuildContext context, GoRouterState state) {
-        return LoginView(LoginViewModel(getIt<AuthRepository>()));
+        return LoginView(LoginViewModel(getIt<IAuthRepository>()));
       },
     ),
     GoRoute(
@@ -40,7 +58,7 @@ final router = GoRouter(
     GoRoute(
       path: '/register',
       builder: (BuildContext context, GoRouterState state) {
-        return RegisterView(RegisterViewModel(getIt<AuthRepository>()));
+        return RegisterView(RegisterViewModel(getIt<IAuthRepository>()));
       },
     ),
   ],

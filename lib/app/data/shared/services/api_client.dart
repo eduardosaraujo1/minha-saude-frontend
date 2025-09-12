@@ -1,12 +1,12 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:minha_saude_frontend/app/data/auth/services/auth_local_service.dart';
+import 'package:minha_saude_frontend/app/data/auth/services/auth_storage_service.dart';
 import 'package:minha_saude_frontend/app/di/get_it.dart';
 
 class ApiClient {
   final _httpClient = getIt<Dio>();
-  final _authLocalDataSource = getIt<AuthLocalService>();
+  final _authLocalDataSource = getIt<AuthStorageService>();
 
   // Class that handles communication with backend server
   // Has endpoint url, and handles middleware like signing out on 401 Unauthorized error

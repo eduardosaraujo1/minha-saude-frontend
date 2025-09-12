@@ -6,7 +6,7 @@ import 'package:minha_saude_frontend/app/domain/repositories/auth_repository.dar
 
 class RegisterViewModel extends ChangeNotifier {
   final RegisterForm form = RegisterForm();
-  final AuthRepository authRepository;
+  final IAuthRepository authRepository;
 
   RegisterViewModel(this.authRepository);
 
@@ -34,14 +34,23 @@ class RegisterViewModel extends ChangeNotifier {
         telefone: form.telefoneController.text.trim(),
       );
 
-      await authRepository.registerWithGoogle(newUser);
+      // Use the new googleRegister method
+      final result = await authRepository.register(newUser);
+
+      if (result.isError()) {
+        _errorMessage =
+            result.tryGetError()?.toString() ?? "Ocorreu um erro desconhecido.";
+      } else {
+        // Registration successful, cache should be updated automatically
+        log("Registration successful");
+      }
     } catch (e) {
       log(e.toString());
       _errorMessage = "Ocorreu um erro desconhecido.";
     } finally {
       _isLoading = false;
       notifyListeners();
-      _errorMessage = null; // Evitar a reexibição da mensagem de erro
+      // Note: Don't clear error message immediately - let the UI handle it
     }
   }
 

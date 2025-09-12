@@ -3,11 +3,9 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
-import 'package:minha_saude_frontend/app/data/auth/repositories/auth_token_repository.dart';
-import 'package:minha_saude_frontend/app/data/auth/services/auth_cache_service.dart';
-import 'package:minha_saude_frontend/app/data/auth/services/auth_storage_service.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/auth_remote_service.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/google_sign_in_service.dart';
+import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/services/api_client.dart';
 import 'package:minha_saude_frontend/app/data/shared/services/secure_storage.dart';
 import 'package:minha_saude_frontend/app/presentation/shared/themes/app_theme.dart';
@@ -24,25 +22,14 @@ Future<void> setupLocator() async {
   getIt.registerSingleton<GoogleAuthConfig>(GoogleAuthConfig());
   getIt.registerSingleton<AppTheme>(AppTheme());
   getIt.registerSingleton<GoRouter>(router);
+  getIt.registerSingletonAsync<TokenRepository>(() {
+    return TokenRepository.create(getIt<SecureStorage>());
+  });
 
-  // Auth token management (no external dependencies)
-  getIt.registerSingleton<AuthCacheService>(AuthCacheService());
-  getIt.registerSingleton<AuthStorageService>(
-    AuthStorageService(getIt<SecureStorage>()),
-  );
-
-  // AuthTokenRepository (depends on cache and storage services)
-  getIt.registerSingletonAsync<AuthTokenRepository>(
-    () async => AuthTokenRepository.create(
-      getIt<AuthCacheService>(),
-      getIt<AuthStorageService>(),
-    ),
-  );
-
-  // ApiClient (depends on Dio and AuthTokenRepository - no circular dependency!)
+  // ApiClient (depends on Dio and TokenRepository)
   getIt.registerSingletonAsync<ApiClient>(
-    () async => ApiClient(getIt<Dio>(), getIt<AuthTokenRepository>()),
-    dependsOn: [AuthTokenRepository],
+    () async => ApiClient(getIt<Dio>(), getIt<TokenRepository>()),
+    dependsOn: [TokenRepository],
   );
 
   // AuthRemoteService (depends on ApiClient)
@@ -59,15 +46,14 @@ Future<void> setupLocator() async {
     );
   });
 
-  // AuthRepository (depends on remote service, Google service, token repository, and cache service)
+  // AuthRepository (depends on remote service, Google service, and token repository)
   getIt.registerSingletonAsync<AuthRepository>(
     () async => AuthRepository.create(
       getIt<AuthRemoteService>(),
       getIt<GoogleSignInService>(),
-      getIt<AuthTokenRepository>(),
-      getIt<AuthCacheService>(),
+      getIt<TokenRepository>(),
     ),
-    dependsOn: [AuthRemoteService, GoogleSignInService, AuthTokenRepository],
+    dependsOn: [AuthRemoteService, GoogleSignInService, TokenRepository],
   );
 
   // Await on async operations

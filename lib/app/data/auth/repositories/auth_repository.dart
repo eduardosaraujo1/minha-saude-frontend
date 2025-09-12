@@ -3,33 +3,32 @@ import 'dart:developer';
 import 'package:minha_saude_frontend/app/data/auth/models/login_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/register_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
-import 'package:minha_saude_frontend/app/data/auth/repositories/auth_token_repository.dart';
-import 'package:minha_saude_frontend/app/data/auth/services/auth_cache_service.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/auth_remote_service.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/google_sign_in_service.dart';
+import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 class AuthRepository {
   final AuthRemoteService _authRemoteService;
   final GoogleSignInService _googleSignInService;
-  final AuthTokenRepository _tokenRepository;
-  final AuthCacheService _cacheService;
+  final TokenRepository _tokenRepository;
+
+  // Internal registration status storage
+  bool _isRegistered = false;
 
   static Future<AuthRepository> create(
     AuthRemoteService authRemoteService,
     GoogleSignInService googleSignInService,
-    AuthTokenRepository tokenRepository,
-    AuthCacheService cacheService,
+    TokenRepository tokenRepository,
   ) async {
     final repository = AuthRepository._(
       authRemoteService,
       googleSignInService,
       tokenRepository,
-      cacheService,
     );
 
     // Check registration status with server if we have a token
-    await repository._syncRegistrationStatus();
+    await repository._loadRegistrationStatus();
 
     return repository;
   }
@@ -38,22 +37,21 @@ class AuthRepository {
     this._authRemoteService,
     this._googleSignInService,
     this._tokenRepository,
-    this._cacheService,
   );
 
   /// Check registration status with server if we have a token
-  Future<void> _syncRegistrationStatus() async {
+  Future<void> _loadRegistrationStatus() async {
     try {
       if (_tokenRepository.hasToken) {
         final statusResult = await _authRemoteService.getAuthStatus(
-          _tokenRepository.authToken!,
+          _tokenRepository.token!,
         );
         if (statusResult.isSuccess()) {
           final status = statusResult.tryGetSuccess();
-          _cacheService.setRegistered(status?.isRegistered ?? false);
+          _isRegistered = status?.isRegistered ?? false;
         }
       } else {
-        _cacheService.setRegistered(false);
+        _isRegistered = false;
       }
     } catch (e) {
       log("Error syncing registration status: $e");
@@ -98,20 +96,9 @@ class AuthRepository {
 
       final response = loginResponse.tryGetSuccess()!;
 
-      // Update token and registration status
-      if (response.sessionToken != null) {
-        final tokenResult = await _tokenRepository.setToken(
-          response.sessionToken!,
-        );
-        if (tokenResult.isError()) {
-          return Result.error(
-            Exception("Falha ao salvar token de autenticação."),
-          );
-        }
-      }
-
       // Set registration status based on needsRegistration flag
-      _cacheService.setRegistered(!response.needsRegistration);
+      // Note: Token management is now handled by ViewModels
+      _isRegistered = !response.isRegistered;
 
       return Result.success(response);
     } catch (e) {
@@ -144,7 +131,7 @@ class AuthRepository {
       final response = registerResult.tryGetSuccess()!;
 
       // Update registration status - user is now fully registered
-      _cacheService.setRegistered(true);
+      _isRegistered = true;
 
       return Result.success(response);
     } catch (e) {
@@ -154,19 +141,11 @@ class AuthRepository {
   }
 
   // =============================================================================
-  // READ OPERATIONS (Token retrieval and status checks)
+  // READ OPERATIONS (Registration status checks only)
   // =============================================================================
 
-  String? get authToken {
-    return _tokenRepository.authToken;
-  }
-
   bool get isRegistered {
-    return _cacheService.isRegistered;
-  }
-
-  bool get isLoggedIn {
-    return _tokenRepository.isLoggedIn;
+    return _isRegistered;
   }
 
   // =============================================================================
@@ -175,15 +154,10 @@ class AuthRepository {
 
   Future<Result<void, Exception>> signOut() async {
     try {
-      final currentToken = _tokenRepository.authToken;
+      final currentToken = _tokenRepository.token;
 
-      // Clear local session first (even if server logout fails)
-      final clearResult = await _tokenRepository.clearAll();
-      if (clearResult.isError()) {
-        log(
-          "Warning: Failed to clear local session: ${clearResult.tryGetError()}",
-        );
-      }
+      // Clear local registration state
+      _isRegistered = false;
 
       // If we had a token, try to logout from server
       if (currentToken != null && currentToken.isNotEmpty) {
@@ -202,11 +176,7 @@ class AuthRepository {
       return Result.success(null);
     } catch (e) {
       // Even if there's an error, ensure local session is cleared
-      try {
-        await _tokenRepository.clearAll();
-      } catch (clearError) {
-        log("Error clearing token repository during signOut: $clearError");
-      }
+      _isRegistered = false;
 
       return Result.error(Exception("Erro durante logout: $e"));
     }
@@ -216,12 +186,12 @@ class AuthRepository {
   // UTILITY METHODS (for internal use and debugging)
   // =============================================================================
 
-  /// Check if token repository cache has been initialized
-  bool get isCacheInitialized => _tokenRepository.isCacheInitialized;
+  /// Check if token repository has been initialized
+  bool get isTokenRepositoryInitialized => _tokenRepository.isInitialized;
 
   /// Force reload cache from storage and sync with server
   Future<void> reloadCache() async {
-    await _tokenRepository.reloadCache();
-    await _syncRegistrationStatus();
+    await _tokenRepository.reload();
+    await _loadRegistrationStatus();
   }
 }

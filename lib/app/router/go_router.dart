@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
+import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 import 'package:minha_saude_frontend/app/di/get_it.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/login_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_view_model.dart';
@@ -14,9 +15,10 @@ final router = GoRouter(
   initialLocation: '/',
   redirect: (context, state) {
     final authRepository = getIt<AuthRepository>();
+    final tokenRepository = getIt<TokenRepository>();
 
     // Check if user has a valid token
-    final hasToken = authRepository.authToken != null;
+    final hasToken = tokenRepository.hasToken;
 
     // Check if user is registered (for users with token)
     final isRegistered = hasToken ? authRepository.isRegistered : false;
@@ -50,7 +52,9 @@ final router = GoRouter(
     GoRoute(
       path: '/login',
       builder: (BuildContext context, GoRouterState state) {
-        return LoginView(LoginViewModel(getIt<AuthRepository>()));
+        return LoginView(
+          LoginViewModel(getIt<AuthRepository>(), getIt<TokenRepository>()),
+        );
       },
     ),
     GoRoute(
@@ -62,7 +66,9 @@ final router = GoRouter(
     GoRoute(
       path: '/register',
       builder: (BuildContext context, GoRouterState state) {
-        return RegisterView(RegisterViewModel(getIt<AuthRepository>()));
+        return RegisterView(
+          RegisterViewModel(getIt<AuthRepository>(), getIt<TokenRepository>()),
+        );
       },
     ),
   ],

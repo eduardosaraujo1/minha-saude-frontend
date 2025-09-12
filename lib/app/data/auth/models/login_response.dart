@@ -3,7 +3,7 @@ class LoginResponse {
   final String? sessionToken;
 
   /// Indicates if additional registration steps are needed
-  final bool needsRegistration;
+  final bool isRegistered;
 
-  const LoginResponse(this.sessionToken, this.needsRegistration);
+  const LoginResponse({required this.sessionToken, required this.isRegistered});
 }

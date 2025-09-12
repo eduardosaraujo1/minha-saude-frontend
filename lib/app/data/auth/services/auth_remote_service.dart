@@ -1,17 +1,11 @@
 import 'dart:developer';
 
+import 'package:minha_saude_frontend/app/data/auth/models/auth_status_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/login_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/register_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
 import 'package:minha_saude_frontend/app/data/shared/services/api_client.dart';
 import 'package:multiple_result/multiple_result.dart';
-
-/// Model for auth status response
-class AuthStatusResponse {
-  final bool isRegistered;
-
-  AuthStatusResponse({required this.isRegistered});
-}
 
 class AuthRemoteService {
   // ignore: unused_field
@@ -24,7 +18,7 @@ class AuthRemoteService {
   ) async {
     // Mock the auth status check
     log("Endpoint /auth/status called with token: $sessionToken");
-    final result = AuthStatusResponse(isRegistered: true);
+    final result = AuthStatusResponse(isRegistered: false);
 
     return Future.delayed(Duration(seconds: 1), () => Result.success(result));
   }
@@ -39,8 +33,8 @@ class AuthRemoteService {
     // Mock response - in real implementation, server creates stub user if needed
     // and returns needsRegistration based on user completion status
     final result = LoginResponse(
-      "session_token_example",
-      true,
+      sessionToken: "session_token_example",
+      isRegistered: false,
     ); // needsRegistration = true for demo
 
     return Future.delayed(Duration(seconds: 2), () => Result.success(result));

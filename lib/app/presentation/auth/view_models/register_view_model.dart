@@ -3,12 +3,14 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
 import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
+import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 
 class RegisterViewModel extends ChangeNotifier {
   final RegisterForm form = RegisterForm();
   final AuthRepository authRepository;
+  final TokenRepository tokenRepository;
 
-  RegisterViewModel(this.authRepository);
+  RegisterViewModel(this.authRepository, this.tokenRepository);
 
   String? _errorMessage;
 
@@ -34,14 +36,14 @@ class RegisterViewModel extends ChangeNotifier {
         telefone: form.telefoneController.text.trim(),
       );
 
-      // Use the new googleRegister method
+      // Use the existing register method
       final result = await authRepository.register(newUser);
 
       if (result.isError()) {
         _errorMessage =
             result.tryGetError()?.toString() ?? "Ocorreu um erro desconhecido.";
       } else {
-        // Registration successful, cache should be updated automatically
+        // Registration successful, auth repository should have updated isRegistered automatically
         log("Registration successful");
       }
     } catch (e) {
@@ -53,6 +55,15 @@ class RegisterViewModel extends ChangeNotifier {
       // Note: Don't clear error message immediately - let the UI handle it
     }
   }
+
+  /// Get current authentication token
+  String? get authToken => tokenRepository.token;
+
+  /// Check if user is logged in (has a valid token)
+  bool get isLoggedIn => tokenRepository.hasToken;
+
+  /// Check if user is registered (completed profile)
+  bool get isRegistered => authRepository.isRegistered;
 
   /// Parse date from DD/MM/YYYY format
   DateTime _parseDate(String dateText) {

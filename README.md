@@ -11,20 +11,16 @@
 
 ## Para fazer
 
--   Fazer API de gestão de autenticação dentro do app
-    -   Método para iniciar sessão com token Sanctum
-    -   Método para apagar sessão atual
-    -   Método para obter dados do usuário (isso é cacheado através do FlutterSecureStorage)
-    -   Método para renovar cache dos dados do usuário
--   Criar inicial de lista de documentos
--   Fazer lógica de login com Google (criar um mock do componente que se comunica com o backend)
--   Fazer rota ´/´ direcionar para documentos ou login dependendo do estado de login do usuário
--   Fazer navbar e appbar
--   Fazer tela (display only) de compartilhar, lixeira e configurações de usuário
--   Fazer lógica de organização de documentos (frontend support)
--   Fazer lógica de organização de documentos (backend mock)
--   Fazer lógica de lixeira de documentos (frontend support)
--   Fazer lógica de lixeira de documentos (backend mock)
--   Fazer lógica de compartilhar documentos (frontend support)
--   Fazer lógica de compartilhar documentos (backend mock)
--   Escrever casos de teste
+-   [ ] Unir telas feitas pelo Davi aqui
+-   [ ] Criar inicial de lista de documentos
+-   [ ] Fazer lógica de login com Google (criar um mock do componente que se comunica com o backend)
+-   [ ] Fazer rota ´/´ direcionar para documentos ou login dependendo do estado de login do usuário
+-   [ ] Fazer navbar e appbar
+-   [ ] Fazer tela (display only) de compartilhar, lixeira e configurações de usuário
+-   [ ] Fazer lógica de organização de documentos (frontend support)
+-   [ ] Fazer lógica de organização de documentos (backend mock)
+-   [ ] Fazer lógica de lixeira de documentos (frontend support)
+-   [ ] Fazer lógica de lixeira de documentos (backend mock)
+-   [ ] Fazer lógica de compartilhar documentos (frontend support)
+-   [ ] Fazer lógica de compartilhar documentos (backend mock)
+-   [ ] Escrever casos de teste

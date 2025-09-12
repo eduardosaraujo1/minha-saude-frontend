@@ -17,10 +17,16 @@ class AuthRemoteService {
     String sessionToken,
   ) async {
     // Mock the auth status check
+    // Careful: if cannot reach server, app should display no connection error
+    // and allow retry - do not log out user automatically
     log("Endpoint /auth/status called with token: $sessionToken");
     final result = AuthStatusResponse(isRegistered: false);
 
-    return Future.delayed(Duration(seconds: 1), () => Result.success(result));
+    // return Future.delayed(Duration(seconds: 1), () => Result.success(result));
+    return Future.delayed(
+      Duration(seconds: 2),
+      () => Result.error(Exception("Erro ao fazer login com Google")),
+    );
   }
 
   /// Exchange Google token with Laravel Sanctum token (login)
@@ -38,6 +44,10 @@ class AuthRemoteService {
     ); // needsRegistration = true for demo
 
     return Future.delayed(Duration(seconds: 2), () => Result.success(result));
+    // return Future.delayed(
+    //   Duration(seconds: 2),
+    //   () => Result.error(Exception("Erro ao fazer login com Google")),
+    // );
   }
 
   /// Complete user registration using existing auth token
@@ -50,6 +60,10 @@ class AuthRemoteService {
     final RegisterResponse result = RegisterResponse(RegisterStatus.success);
 
     return Future.delayed(Duration(seconds: 2), () => Result.success(result));
+    // return Future.delayed(
+    //   Duration(seconds: 2),
+    //   () => Result.error(Exception("Erro ao registrar-se")),
+    // );
   }
 
   /// Logout user from server (invalidate session token)

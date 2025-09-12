@@ -96,9 +96,9 @@ class AuthRepository {
 
       final response = loginResponse.tryGetSuccess()!;
 
-      // Set registration status based on needsRegistration flag
+      // Set registration status
       // Note: Token management is now handled by ViewModels
-      _isRegistered = !response.isRegistered;
+      _isRegistered = response.isRegistered;
 
       return Result.success(response);
     } catch (e) {

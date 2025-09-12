@@ -33,11 +33,13 @@ class _LoginViewState extends State<LoginView> {
       context.go('/home');
     } else if (status == LoginStatus.needsRegistration) {
       context.go('/tos');
-    } else if (status == LoginStatus.error) {
+    } else if (widget.viewModel.errorMessage != null) {
       final errorMessage =
           widget.viewModel.errorMessage ?? 'Ocorreu um erro desconhecido';
       final snackBar = SnackBar(content: Text(errorMessage));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+      widget.viewModel.clearErrorMessages();
     }
 
     setState(() {});

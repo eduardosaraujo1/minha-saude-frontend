@@ -23,6 +23,7 @@ class AuthRemoteService {
     final result = AuthStatusResponse(isRegistered: false);
 
     // return Future.delayed(Duration(seconds: 1), () => Result.success(result));
+    // TODO: remove forced error after testing, create error ui
     return Future.delayed(
       Duration(seconds: 2),
       () => Result.error(Exception("Erro ao fazer login com Google")),

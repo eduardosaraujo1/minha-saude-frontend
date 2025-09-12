@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/app/di/get_it.dart';
-import 'package:minha_saude_frontend/app/domain/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/login_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/tos_view_model.dart';
@@ -13,15 +13,15 @@ import 'package:minha_saude_frontend/app/presentation/shared/views/not_found.dar
 final router = GoRouter(
   initialLocation: '/',
   redirect: (context, state) {
-    final authRepository = getIt<IAuthRepository>();
+    final authRepository = getIt<AuthRepository>();
 
     // Check if user has a valid token
-    final hasToken = authRepository.getToken() != null;
+    final hasToken = authRepository.authToken != null;
 
     // Check if user is registered (for users with token)
-    final isRegistered = hasToken ? authRepository.isRegistered() : false;
+    final isRegistered = hasToken ? authRepository.isRegistered : false;
 
-    final authRoutes = ['/login', '/register', '/tos'];
+    final authRoutes = ['/login', '/tos', '/register'];
     final isOnAuthRoute = authRoutes.contains(state.fullPath);
 
     // If no token and not on auth route, go to login
@@ -29,9 +29,13 @@ final router = GoRouter(
       return '/login';
     }
 
-    // If has token but not registered and not on register route, go to register
-    if (hasToken && !isRegistered && state.fullPath != '/register') {
-      return '/register';
+    // CORRECTED FLOW:
+    // If has token but not registered, user needs to complete registration
+    if (hasToken && !isRegistered) {
+      // First go to TOS, then to register
+      if (state.fullPath != '/tos' && state.fullPath != '/register') {
+        return '/tos';
+      }
     }
 
     // If has token and is registered but on auth route, go to home
@@ -46,7 +50,7 @@ final router = GoRouter(
     GoRoute(
       path: '/login',
       builder: (BuildContext context, GoRouterState state) {
-        return LoginView(LoginViewModel(getIt<IAuthRepository>()));
+        return LoginView(LoginViewModel(getIt<AuthRepository>()));
       },
     ),
     GoRoute(
@@ -58,7 +62,7 @@ final router = GoRouter(
     GoRoute(
       path: '/register',
       builder: (BuildContext context, GoRouterState state) {
-        return RegisterView(RegisterViewModel(getIt<IAuthRepository>()));
+        return RegisterView(RegisterViewModel(getIt<AuthRepository>()));
       },
     ),
   ],

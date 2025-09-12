@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
-import 'package:minha_saude_frontend/app/domain/repositories/auth_repository.dart';
+import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
 
 class LoginViewModel extends ChangeNotifier {
-  final IAuthRepository authRepository;
+  final AuthRepository authRepository;
 
   LoginStatus _status = LoginStatus.initial;
   String? _errorMessage;

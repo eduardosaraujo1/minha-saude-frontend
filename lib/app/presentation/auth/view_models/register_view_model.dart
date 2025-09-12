@@ -2,11 +2,11 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
-import 'package:minha_saude_frontend/app/domain/repositories/auth_repository.dart';
+import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
 
 class RegisterViewModel extends ChangeNotifier {
   final RegisterForm form = RegisterForm();
-  final IAuthRepository authRepository;
+  final AuthRepository authRepository;
 
   RegisterViewModel(this.authRepository);
 

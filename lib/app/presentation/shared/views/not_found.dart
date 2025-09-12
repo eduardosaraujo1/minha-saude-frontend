@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/app/di/get_it.dart';
-import 'package:minha_saude_frontend/app/domain/repositories/auth_repository.dart';
 
 class NotFoundView extends StatelessWidget {
   const NotFoundView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final authRepository = getIt<IAuthRepository>();
-    final isLoggedIn = authRepository.isLoggedIn();
+    final authRepository = getIt<AuthRepository>();
+    final isLoggedIn = authRepository.isLoggedIn;
 
     return Scaffold(
       body: Center(
@@ -62,7 +62,7 @@ class NotFoundView extends StatelessWidget {
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
                   onPressed: () async {
-                    await authRepository.logout();
+                    await authRepository.signOut();
                     if (context.mounted) {
                       context.go('/login');
                     }

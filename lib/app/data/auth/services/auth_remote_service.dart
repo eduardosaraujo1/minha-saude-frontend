@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:minha_saude_frontend/app/data/auth/models/login_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/register_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
@@ -12,6 +14,7 @@ class AuthStatusResponse {
 }
 
 class AuthRemoteService {
+  // ignore: unused_field
   final ApiClient _apiClient; // will be used once data is no longer mocked
   AuthRemoteService(this._apiClient);
 
@@ -20,35 +23,36 @@ class AuthRemoteService {
     String sessionToken,
   ) async {
     // Mock the auth status check
+    log("Endpoint /auth/status called with token: $sessionToken");
     final result = AuthStatusResponse(isRegistered: true);
 
     return Future.delayed(Duration(seconds: 1), () => Result.success(result));
   }
 
   /// Exchange Google token with Laravel Sanctum token (login)
+  /// Creates a stub user if doesn't exist, returns needsRegistration flag
   Future<Result<LoginResponse, Exception>> loginWithGoogle(
     String googleToken,
   ) async {
-    final result = LoginResponse("session_token_example", true);
+    log("Endpoint /auth/google/login called with token: $googleToken");
 
-    // Mock the submission to the backend, return a fake Laravel Sanctum token
-    return Future.delayed(Duration(seconds: 2), () => Result.success(result));
-  }
-
-  /// Register with Google OAuth (POST /auth/google/register)
-  Future<Result<RegisterResponse, Exception>> registerWithGoogle(
-    User userData,
-    String googleAuthCode,
-  ) async {
-    // Mock the submission to the backend, return a fake register response
-    final RegisterResponse result = RegisterResponse(RegisterStatus.success);
+    // Mock response - in real implementation, server creates stub user if needed
+    // and returns needsRegistration based on user completion status
+    final result = LoginResponse(
+      "session_token_example",
+      true,
+    ); // needsRegistration = true for demo
 
     return Future.delayed(Duration(seconds: 2), () => Result.success(result));
   }
 
-  /// Legacy register method for backward compatibility
+  /// Complete user registration using existing auth token
+  /// Uses the token from login (no need for Google auth again)
   Future<Result<RegisterResponse, Exception>> register(User userData) async {
-    // Mock the submission to the backend, return a fake register error or success
+    log("Endpoint /auth/register called with user data: ${userData.nome}");
+
+    // Mock the submission - in real implementation, uses Authorization header
+    // from ApiClient to complete the user registration
     final RegisterResponse result = RegisterResponse(RegisterStatus.success);
 
     return Future.delayed(Duration(seconds: 2), () => Result.success(result));

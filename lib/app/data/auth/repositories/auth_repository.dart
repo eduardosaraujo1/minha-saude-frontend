@@ -3,42 +3,43 @@ import 'dart:developer';
 import 'package:minha_saude_frontend/app/data/auth/models/login_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/register_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
+import 'package:minha_saude_frontend/app/data/auth/services/auth_cache_service.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/auth_storage_service.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/auth_remote_service.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/google_sign_in_service.dart';
-import 'package:minha_saude_frontend/app/domain/repositories/auth_repository.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-class AuthRepository implements IAuthRepository {
+class AuthRepository {
   final AuthRemoteService _authRemoteService;
   final AuthStorageService _authStorageService;
   final GoogleSignInService _googleSignInService;
+  final AuthCacheService _cacheService;
 
   static Future<AuthRepository> create(
     AuthStorageService authStorageService,
     AuthRemoteService authRemoteService,
     GoogleSignInService googleSignInService,
+    AuthCacheService cacheService,
   ) async {
     final repository = AuthRepository._(
       authRemoteService,
       authStorageService,
       googleSignInService,
+      cacheService,
     );
     await repository._initializeCache();
 
     return repository;
   }
 
-  // Cache for synchronous access
-  String? _cachedToken;
-  bool? _cachedIsRegistered;
-  bool _cacheInitialized = false;
-
   AuthRepository._(
     this._authRemoteService,
     this._authStorageService,
     this._googleSignInService,
+    this._cacheService,
   );
+
+  bool _cacheInitialized = false;
 
   /// Initialize the cache from local storage and remote status
   Future<void> _initializeCache() async {
@@ -46,20 +47,23 @@ class AuthRepository implements IAuthRepository {
       // Load token from secure storage
       final tokenResult = await _authStorageService.getSessionToken();
       if (tokenResult.isSuccess()) {
-        _cachedToken = tokenResult.tryGetSuccess();
+        final token = tokenResult.tryGetSuccess();
+        if (token != null) {
+          _cacheService.setToken(token);
+        }
       }
 
       // If we have a token, check registration status with server
-      if (_cachedToken != null && _cachedToken!.isNotEmpty) {
+      if (_cacheService.hasToken) {
         final statusResult = await _authRemoteService.getAuthStatus(
-          _cachedToken!,
+          _cacheService.token!,
         );
         if (statusResult.isSuccess()) {
           final status = statusResult.tryGetSuccess();
-          _cachedIsRegistered = status?.isRegistered;
+          _cacheService.setRegistered(status?.isRegistered ?? false);
         }
       } else {
-        _cachedIsRegistered = false;
+        _cacheService.setRegistered(false);
       }
 
       _cacheInitialized = true;
@@ -69,30 +73,10 @@ class AuthRepository implements IAuthRepository {
     }
   }
 
-  /// Update cache and storage with new token
-  Future<void> _updateTokenAndCache(String? token, {bool? isRegistered}) async {
-    _cachedToken = token;
-    _cachedIsRegistered = isRegistered;
-
-    if (token != null) {
-      await _authStorageService.setSessionToken(token);
-    } else {
-      await _authStorageService.removeSessionToken();
-    }
-  }
-
-  /// Clear cache and storage
-  Future<void> _clearCacheAndStorage() async {
-    _cachedToken = null;
-    _cachedIsRegistered = null;
-    await _authStorageService.removeSessionToken();
-  }
-
   // =============================================================================
   // CREATE OPERATIONS (Login/Authentication)
   // =============================================================================
 
-  @override
   Future<Result<LoginResponse, Exception>> googleLogin() async {
     try {
       // Get Google auth code
@@ -127,10 +111,12 @@ class AuthRepository implements IAuthRepository {
 
       final response = loginResponse.tryGetSuccess()!;
 
-      // Update cache and storage with token and registration status
+      // CORRECTED: Update cache based on needsRegistration flag
+      // The server creates a stub user and sets needsRegistration appropriately
       await _updateTokenAndCache(
         response.sessionToken,
-        isRegistered: true, // User is registered if login was successful
+        isRegistered: !response
+            .needsRegistration, // isRegistered is opposite of needsRegistration
       );
 
       return Result.success(response);
@@ -139,29 +125,18 @@ class AuthRepository implements IAuthRepository {
     }
   }
 
-  @override
   Future<Result<RegisterResponse, Exception>> register(User userData) async {
     try {
-      // Get Google auth code first
-      final googleSignInResult = await _googleSignInService
-          .generateServerAuthCode();
-
-      if (googleSignInResult.isError()) {
+      // CORRECTED: Use existing token from cache, no need for Google auth again
+      if (!_cacheService.hasToken) {
         return Result.error(
           Exception(
-            "Não foi possível autenticar com o Google. Por favor, tente novamente.",
+            "Token de autenticação não encontrado. Faça login novamente.",
           ),
         );
       }
 
-      final authCode = googleSignInResult.tryGetSuccess();
-      if (authCode == null) {
-        return Result.error(
-          Exception("Código de autenticação do Google não foi obtido."),
-        );
-      }
-
-      // Attempt registration with backend
+      // Use the existing token to complete registration
       final registerResult = await _authRemoteService.register(userData);
 
       if (registerResult.isError()) {
@@ -174,8 +149,8 @@ class AuthRepository implements IAuthRepository {
 
       final response = registerResult.tryGetSuccess()!;
 
-      // Update registration status in cache (no token yet)
-      _cachedIsRegistered = true;
+      // Update registration status in cache - user is now fully registered
+      _cacheService.setRegistered(true);
 
       return Result.success(response);
     } catch (e) {
@@ -188,34 +163,31 @@ class AuthRepository implements IAuthRepository {
   // READ OPERATIONS (Token retrieval and status checks)
   // =============================================================================
 
-  @override
   String? get authToken {
-    return _cachedToken;
+    return _cacheService.token;
   }
 
-  @override
   bool get isRegistered {
     // If cache not initialized, return false (conservative approach)
     if (!_cacheInitialized) return false;
 
-    return _cachedIsRegistered ?? false;
+    return _cacheService.isRegistered;
   }
 
   bool get isLoggedIn {
     // If cache not initialized, return false (conservative approach)
     if (!_cacheInitialized) return false;
 
-    return _cachedToken != null && _cachedToken!.isNotEmpty;
+    return _cacheService.isLoggedIn;
   }
 
   // =============================================================================
   // DELETE OPERATIONS (Logout/Session cleanup)
   // =============================================================================
 
-  @override
   Future<Result<void, Exception>> signOut() async {
     try {
-      final currentToken = _cachedToken;
+      final currentToken = _cacheService.token;
 
       // Clear local session first (even if server logout fails)
       await _clearCacheAndStorage();
@@ -257,5 +229,26 @@ class AuthRepository implements IAuthRepository {
   /// Force reload cache from storage and server (useful for debugging)
   Future<void> reloadCache() async {
     await _initializeCache();
+  }
+
+  /// Update cache and storage with new token
+  Future<void> _updateTokenAndCache(String? token, {bool? isRegistered}) async {
+    if (token != null) {
+      _cacheService.setToken(token);
+      await _authStorageService.setSessionToken(token);
+    } else {
+      _cacheService.clearCache();
+      await _authStorageService.removeSessionToken();
+    }
+
+    if (isRegistered != null) {
+      _cacheService.setRegistered(isRegistered);
+    }
+  }
+
+  /// Clear cache and storage
+  Future<void> _clearCacheAndStorage() async {
+    _cacheService.clearCache();
+    await _authStorageService.removeSessionToken();
   }
 }

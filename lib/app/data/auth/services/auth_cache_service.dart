@@ -7,7 +7,7 @@ class AuthCacheService {
   // Stored registration status
   bool? _isRegistered;
 
-  bool get isLoggedIn => _token == null;
+  bool get isLoggedIn => _token != null && _token!.isNotEmpty;
   bool get hasToken => _token != null;
 
   bool get isRegistered => _isRegistered ?? false;

@@ -3,12 +3,12 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
+import 'package:minha_saude_frontend/app/data/auth/services/auth_cache_service.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/auth_storage_service.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/auth_remote_service.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/google_sign_in_service.dart';
 import 'package:minha_saude_frontend/app/data/shared/services/api_client.dart';
 import 'package:minha_saude_frontend/app/data/shared/services/secure_storage.dart';
-import 'package:minha_saude_frontend/app/domain/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/app/presentation/shared/themes/app_theme.dart';
 import 'package:minha_saude_frontend/app/router/go_router.dart';
 import 'package:minha_saude_frontend/config/google_auth_config.dart';
@@ -23,6 +23,7 @@ Future<void> setupLocator() async {
   getIt.registerSingleton<GoogleAuthConfig>(GoogleAuthConfig());
   getIt.registerSingleton<AppTheme>(AppTheme());
   getIt.registerSingleton<GoRouter>(router);
+  getIt.registerSingleton<AuthCacheService>(AuthCacheService());
   getIt.registerSingleton<AuthStorageService>(
     AuthStorageService(getIt<SecureStorage>()),
   );
@@ -36,11 +37,12 @@ Future<void> setupLocator() async {
       GoogleAuthConfig(),
     );
   });
-  getIt.registerSingletonAsync<IAuthRepository>(
+  getIt.registerSingletonAsync<AuthRepository>(
     () async => AuthRepository.create(
       getIt<AuthStorageService>(),
       getIt<AuthRemoteService>(),
       getIt<GoogleSignInService>(),
+      getIt<AuthCacheService>(),
     ),
     dependsOn: [GoogleSignInService],
   );

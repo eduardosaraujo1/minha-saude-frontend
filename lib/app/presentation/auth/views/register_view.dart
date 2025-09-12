@@ -127,14 +127,37 @@ class _RegisterViewState extends State<RegisterView> {
                 ],
               ),
               FilledButton(
-                onPressed: () {
-                  vm.registerUser();
-                },
+                onPressed: vm.isLoading
+                    ? null
+                    : () {
+                        vm.registerUser();
+                      },
                 style: FilledButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  backgroundColor: vm.isLoading
+                      ? Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.12)
+                      : Theme.of(context).primaryColor,
+                  foregroundColor: vm.isLoading
+                      ? Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.38)
+                      : Theme.of(context).colorScheme.onPrimary,
                 ),
-                child: const Text('Confirmar cadastro'),
+                child: vm.isLoading
+                    ? SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.38),
+                          ),
+                        ),
+                      )
+                    : const Text('Confirmar cadastro'),
               ),
             ],
           ),

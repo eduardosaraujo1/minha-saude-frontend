@@ -1,12 +1,12 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:minha_saude_frontend/app/data/auth/services/auth_storage_service.dart';
+import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/app/di/get_it.dart';
 
 class ApiClient {
   final _httpClient = getIt<Dio>();
-  final _authLocalDataSource = getIt<AuthStorageService>();
+  final _authRepository = getIt<AuthRepository>();
 
   // Class that handles communication with backend server
   // Has endpoint url, and handles middleware like signing out on 401 Unauthorized error
@@ -23,11 +23,8 @@ class ApiClient {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           // Add authorization header if we have a token
-          final tokenResult = await _authLocalDataSource.getSessionToken();
-          if (tokenResult.isSuccess() && tokenResult.tryGetSuccess() != null) {
-            options.headers['Authorization'] =
-                'Bearer ${tokenResult.tryGetSuccess()}';
-          }
+          final tokenResult = _authRepository.authToken;
+          options.headers['Authorization'] = 'Bearer $tokenResult';
           handler.next(options);
         },
         onResponse: (response, handler) {

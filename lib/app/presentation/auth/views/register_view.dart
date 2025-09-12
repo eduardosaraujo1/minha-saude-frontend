@@ -83,7 +83,7 @@ class _RegisterViewState extends State<RegisterView> {
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Theme.of(
                         context,
-                      ).colorScheme.onSurface.withAlpha(0xAA),
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                   labelText: 'CPF',

@@ -6,6 +6,8 @@ import 'package:watch_it/watch_it.dart';
 
 void main() async {
   try {
+    // Seria interessante um método como app.init() que carregasse o get_it e depois
+    // verificasse se há erros de conexão, mas por ora fica assim
     // Ensure Flutter bindings are initialized
     WidgetsFlutterBinding.ensureInitialized();
 

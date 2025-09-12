@@ -5,6 +5,7 @@ import 'package:minha_saude_frontend/app/data/auth/models/login_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/register_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
 import 'package:minha_saude_frontend/app/data/shared/services/api_client.dart';
+import 'package:minha_saude_frontend/app/data/shared/exceptions/connection_exception.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 class AuthRemoteService {
@@ -20,12 +21,18 @@ class AuthRemoteService {
     // Careful: if cannot reach server, app should display no connection error
     // and allow retry - do not log out user automatically
     log("Endpoint /auth/status called with token: $sessionToken");
-    final result = AuthStatusResponse(isRegistered: false);
 
+    // For testing purposes, you can switch between success and error:
+    // SUCCESS: Uncomment the next line and comment the error lines
+    // final result = AuthStatusResponse(isRegistered: false);
     // return Future.delayed(Duration(seconds: 1), () => Result.success(result));
+
+    // ERROR (Connection failure): Uncomment to test connection error screen
     return Future.delayed(
       Duration(seconds: 2),
-      () => Result.error(Exception("Erro ao fazer login com Google")),
+      () => Result.error(
+        ConnectionException("Não foi possível conectar ao servidor"),
+      ),
     );
   }
 

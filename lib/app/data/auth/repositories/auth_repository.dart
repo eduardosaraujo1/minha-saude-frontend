@@ -6,6 +6,7 @@ import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/auth_remote_service.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/google_sign_in_service.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
+import 'package:minha_saude_frontend/app/data/shared/exceptions/connection_exception.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 class AuthRepository {
@@ -28,7 +29,28 @@ class AuthRepository {
     );
 
     // Check registration status with server if we have a token
+    // This can throw ConnectionException if server is unreachable during startup
     await repository._loadRegistrationStatus();
+
+    return repository;
+  }
+
+  /// Create an offline-only AuthRepository without attempting server communication
+  /// Used when connection errors occur during startup
+  static AuthRepository createOffline(
+    AuthRemoteService authRemoteService,
+    GoogleSignInService googleSignInService,
+    TokenRepository tokenRepository,
+  ) {
+    final repository = AuthRepository._(
+      authRemoteService,
+      googleSignInService,
+      tokenRepository,
+    );
+
+    // Don't attempt to load registration status from server in offline mode
+    // User will be considered not registered until connection is restored
+    repository._isRegistered = false;
 
     return repository;
   }
@@ -40,6 +62,7 @@ class AuthRepository {
   );
 
   /// Check registration status with server if we have a token
+  /// Throws ConnectionException if cannot reach server during startup
   Future<void> _loadRegistrationStatus() async {
     try {
       if (_tokenRepository.hasToken) {
@@ -49,11 +72,24 @@ class AuthRepository {
         if (statusResult.isSuccess()) {
           final status = statusResult.tryGetSuccess();
           _isRegistered = status?.isRegistered ?? false;
+        } else {
+          // Check if it's a connection error during startup
+          final error = statusResult.tryGetError();
+          if (error is ConnectionException) {
+            // Re-throw connection exceptions during startup to be handled by app initialization
+            throw error;
+          }
+          // For other errors, just log and continue (user stays logged in locally)
+          log("Error syncing registration status: $error");
         }
       } else {
         _isRegistered = false;
       }
     } catch (e) {
+      if (e is ConnectionException) {
+        // Re-throw connection exceptions during startup
+        rethrow;
+      }
       log("Error syncing registration status: $e");
     }
   }

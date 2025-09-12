@@ -11,12 +11,7 @@
 
 ## Para fazer
 
--   Fazer API de gestão de autenticação dentro do app
-    -   Método para iniciar sessão com token Sanctum
-    -   Método para apagar token atual
-    -   Dados de usuário não serão cacheados no SecureStorage, no initialize o endpoint /auth/session será chamado
 -   Criar inicial de lista de documentos
--   Fazer lógica de login com Google (criar um mock do componente que se comunica com o backend)
 -   Fazer rota ´/´ direcionar para documentos ou login dependendo do estado de login do usuário
 -   Fazer navbar e appbar
 -   Fazer tela (display only) de compartilhar, lixeira e configurações de usuário
@@ -27,3 +22,4 @@
 -   Fazer lógica de compartilhar documentos (frontend support)
 -   Fazer lógica de compartilhar documentos (backend mock)
 -   Escrever casos de teste
+-   "Se a request de auth status não for bem sucedida, exibir mensagem de não foi possível se comunicar com servidor para o usuário"

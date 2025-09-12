@@ -8,6 +8,8 @@ import 'package:minha_saude_frontend/app/data/auth/services/google_sign_in_servi
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/services/api_client.dart';
 import 'package:minha_saude_frontend/app/data/shared/services/secure_storage.dart';
+import 'package:minha_saude_frontend/app/data/shared/exceptions/connection_exception.dart';
+import 'package:minha_saude_frontend/app/data/shared/managers/app_state_manager.dart';
 import 'package:minha_saude_frontend/app/presentation/shared/themes/app_theme.dart';
 import 'package:minha_saude_frontend/app/router/go_router.dart';
 import 'package:minha_saude_frontend/config/google_auth_config.dart';
@@ -21,6 +23,7 @@ Future<void> setupLocator() async {
   getIt.registerSingleton<SecureStorage>(SecureStorage());
   getIt.registerSingleton<GoogleAuthConfig>(GoogleAuthConfig());
   getIt.registerSingleton<AppTheme>(AppTheme());
+  getIt.registerSingleton<AppStateManager>(AppStateManager());
   getIt.registerSingleton<GoRouter>(router);
   getIt.registerSingletonAsync<TokenRepository>(() {
     return TokenRepository.create(getIt<SecureStorage>());
@@ -47,14 +50,29 @@ Future<void> setupLocator() async {
   });
 
   // AuthRepository (depends on remote service, Google service, and token repository)
-  getIt.registerSingletonAsync<AuthRepository>(
-    () async => AuthRepository.create(
-      getIt<AuthRemoteService>(),
-      getIt<GoogleSignInService>(),
-      getIt<TokenRepository>(),
-    ),
-    dependsOn: [AuthRemoteService, GoogleSignInService, TokenRepository],
-  );
+  getIt.registerSingletonAsync<AuthRepository>(() async {
+    try {
+      return await AuthRepository.create(
+        getIt<AuthRemoteService>(),
+        getIt<GoogleSignInService>(),
+        getIt<TokenRepository>(),
+      );
+    } catch (e) {
+      if (e is ConnectionException) {
+        // Register the connection error in app state manager
+        getIt<AppStateManager>().setStartupConnectionError(e);
+
+        // Create a "dummy" AuthRepository that won't be used but keeps DI happy
+        // The router will check app state and redirect to connection error screen
+        return AuthRepository.createOffline(
+          getIt<AuthRemoteService>(),
+          getIt<GoogleSignInService>(),
+          getIt<TokenRepository>(),
+        );
+      }
+      rethrow;
+    }
+  }, dependsOn: [AuthRemoteService, GoogleSignInService, TokenRepository]);
 
   // Await on async operations
   await getIt.allReady();

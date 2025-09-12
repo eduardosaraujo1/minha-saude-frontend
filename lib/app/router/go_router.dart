@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
+import 'package:minha_saude_frontend/app/data/shared/managers/app_state_manager.dart';
 import 'package:minha_saude_frontend/app/di/get_it.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/login_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_view_model.dart';
@@ -10,10 +11,21 @@ import 'package:minha_saude_frontend/app/presentation/auth/views/login_view.dart
 import 'package:minha_saude_frontend/app/presentation/auth/views/register_view.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/views/tos_view.dart';
 import 'package:minha_saude_frontend/app/presentation/shared/views/not_found.dart';
+import 'package:minha_saude_frontend/app/presentation/shared/views/connection_error_view.dart';
 
 final router = GoRouter(
   initialLocation: '/',
   redirect: (context, state) {
+    // Check for startup connection errors first
+    final appStateManager = getIt<AppStateManager>();
+    if (appStateManager.hasStartupConnectionError) {
+      // Only redirect to connection error if not already there
+      if (state.fullPath != '/connection-error') {
+        return '/connection-error';
+      }
+      return null;
+    }
+
     final authRepository = getIt<AuthRepository>();
     final tokenRepository = getIt<TokenRepository>();
 
@@ -49,6 +61,12 @@ final router = GoRouter(
   },
   errorBuilder: (context, state) => const NotFoundView(),
   routes: [
+    GoRoute(
+      path: '/connection-error',
+      builder: (BuildContext context, GoRouterState state) {
+        return const ConnectionErrorView();
+      },
+    ),
     GoRoute(
       path: '/login',
       builder: (BuildContext context, GoRouterState state) {

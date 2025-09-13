@@ -30,17 +30,20 @@ class _DocumentListViewState extends State<DocumentListView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Documents')),
+      appBar: AppBar(
+        title: const Text('Documentos'),
+        scrolledUnderElevation: 0,
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.description, size: 64, color: Colors.blue),
             const SizedBox(height: 16),
-            const Text('Document List View', style: TextStyle(fontSize: 24)),
+            const Text('Lista de Documentos', style: TextStyle(fontSize: 24)),
             const SizedBox(height: 8),
             Text(
-              'Page ${widget.viewModel.hashCode}',
+              'Página ${widget.viewModel.hashCode}',
               style: const TextStyle(color: Colors.grey),
             ),
           ],

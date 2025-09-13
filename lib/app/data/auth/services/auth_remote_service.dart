@@ -20,14 +20,14 @@ class AuthRemoteService {
     // Careful: if cannot reach server, app should display no connection error
     // and allow retry - do not log out user automatically
     log("Endpoint /auth/status called with token: $sessionToken");
-    final result = AuthStatusResponse(isRegistered: false);
+    final result = AuthStatusResponse(isRegistered: true);
 
-    // return Future.delayed(Duration(seconds: 1), () => Result.success(result));
+    return Future.delayed(Duration(seconds: 1), () => Result.success(result));
     // TODO: remove forced error after testing, create error ui
-    return Future.delayed(
-      Duration(seconds: 2),
-      () => Result.error(Exception("Erro ao fazer login com Google")),
-    );
+    // return Future.delayed(
+    //   Duration(seconds: 2),
+    //   () => Result.error(Exception("Erro ao fazer login com Google")),
+    // );
   }
 
   /// Exchange Google token with Laravel Sanctum token (login)

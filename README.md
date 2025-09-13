@@ -24,3 +24,4 @@
 -   [ ] Fazer lógica de compartilhar documentos (frontend support)
 -   [ ] Fazer lógica de compartilhar documentos (backend mock)
 -   [ ] Escrever casos de teste
+-   [ ] Tratativa de erro caso o backend se torne não-responsivo

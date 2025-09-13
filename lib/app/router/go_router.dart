@@ -31,7 +31,6 @@ final router = GoRouter(
       return '/login';
     }
 
-    // CORRECTED FLOW:
     // If has token but not registered, user needs to complete registration
     if (hasToken && !isRegistered) {
       // First go to TOS, then to register
@@ -42,13 +41,16 @@ final router = GoRouter(
 
     // If has token and is registered but on auth route, go to home
     if (hasToken && isRegistered && isOnAuthRoute) {
-      return '/'; // or '/home' depending on your setup
+      return '/';
     }
 
     return null;
   },
   errorBuilder: (context, state) => const NotFoundView(),
   routes: [
+    // Navbar routes
+
+    // Auth Routes
     GoRoute(
       path: '/login',
       builder: (BuildContext context, GoRouterState state) {

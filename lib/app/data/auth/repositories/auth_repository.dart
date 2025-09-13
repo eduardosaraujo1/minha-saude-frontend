@@ -51,6 +51,8 @@ class AuthRepository {
           _isRegistered = status?.isRegistered ?? false;
         }
       } else {
+        // TODO: fix this problematic behavior
+        // if the app can't determine if the user is registered or not... I don't know all approaches I think about are bad
         _isRegistered = false;
       }
     } catch (e) {

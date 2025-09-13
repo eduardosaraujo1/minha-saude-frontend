@@ -12,8 +12,7 @@ class User {
     required this.telefone,
   });
 
-  // toJson
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'cpf': cpf,
       'nome_completo': nome,
@@ -24,15 +23,14 @@ class User {
     };
   }
 
-  // fromJson
-  factory User.fromJson(Map<String, dynamic> json) {
+  static User fromMap(Map<String, dynamic> map) {
     return User(
-      cpf: json['cpf'],
-      nome: json['nome_completo'],
+      cpf: map['cpf'],
+      nome: map['nome_completo'],
       dataNascimento: DateTime.parse(
-        json['data_nascimento'],
+        map['data_nascimento'],
       ), // handles yyyy-mm-dd
-      telefone: json['telefone'],
+      telefone: map['telefone'],
     );
   }
 }

@@ -29,8 +29,10 @@ final router = GoRouter(
     // Check if user has a valid token
     final hasToken = tokenRepository.hasToken;
 
-    // Check if user is registered (for users with token)
-    final isRegistered = hasToken ? authRepository.isRegistered : false;
+    // Check if user is registered (from cache only for router)
+    final isRegisteredCached = hasToken
+        ? authRepository.isRegisteredCached
+        : false;
 
     final authRoutes = ['/login', '/tos', '/register'];
     final isOnAuthRoute = authRoutes.contains(state.fullPath);
@@ -40,8 +42,19 @@ final router = GoRouter(
       return '/login';
     }
 
+    // If has token but registration status is not cached yet, let the app continue
+    // The ViewModels will handle the async loading of registration status
+    if (hasToken && isRegisteredCached == null) {
+      // If on auth route, stay there until we know the registration status
+      if (isOnAuthRoute) {
+        return null;
+      }
+      // If not on auth route, let the destination handle the loading
+      return null;
+    }
+
     // If has token but not registered, user needs to complete registration
-    if (hasToken && !isRegistered) {
+    if (hasToken && isRegisteredCached == false) {
       // First go to TOS, then to register
       if (state.fullPath != '/tos' && state.fullPath != '/register') {
         return '/tos';
@@ -49,7 +62,7 @@ final router = GoRouter(
     }
 
     // If has token and is registered but on auth route, go to home
-    if (hasToken && isRegistered && isOnAuthRoute) {
+    if (hasToken && isRegisteredCached == true && isOnAuthRoute) {
       return '/';
     }
 
@@ -75,7 +88,12 @@ final router = GoRouter(
             GoRoute(
               path: '/',
               builder: (BuildContext context, GoRouterState state) =>
-                  DocumentListView(DocumentListViewModel()),
+                  DocumentListView(
+                    DocumentListViewModel(
+                      getIt<AuthRepository>(),
+                      getIt<TokenRepository>(),
+                    ),
+                  ),
             ),
           ],
         ),

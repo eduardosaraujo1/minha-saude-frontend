@@ -14,7 +14,7 @@ class AuthRepository {
   final TokenRepository _tokenRepository;
 
   // Internal registration status storage
-  bool _isRegistered = false;
+  bool? _isRegisteredCache;
 
   static Future<AuthRepository> create(
     AuthRemoteService authRemoteService,
@@ -27,9 +27,6 @@ class AuthRepository {
       tokenRepository,
     );
 
-    // Check registration status with server if we have a token
-    await repository._loadRegistrationStatus();
-
     return repository;
   }
 
@@ -40,7 +37,7 @@ class AuthRepository {
   );
 
   /// Check registration status with server if we have a token
-  Future<void> _loadRegistrationStatus() async {
+  Future<bool> _loadRegistrationStatus() async {
     try {
       if (_tokenRepository.hasToken) {
         final statusResult = await _authRemoteService.getAuthStatus(
@@ -48,16 +45,21 @@ class AuthRepository {
         );
         if (statusResult.isSuccess()) {
           final status = statusResult.tryGetSuccess();
-          _isRegistered = status?.isRegistered ?? false;
+          _isRegisteredCache = status?.isRegistered ?? false;
+          return _isRegisteredCache!;
         }
       } else {
-        // TODO: fix this problematic behavior
-        // if the app can't determine if the user is registered or not... I don't know all approaches I think about are bad
-        _isRegistered = false;
+        // No token means user is not registered
+        _isRegisteredCache = false;
+        return false;
       }
     } catch (e) {
       log("Error syncing registration status: $e");
     }
+
+    // Default to false if there was an error
+    _isRegisteredCache = false;
+    return false;
   }
 
   // =============================================================================
@@ -98,9 +100,8 @@ class AuthRepository {
 
       final response = loginResponse.tryGetSuccess()!;
 
-      // Set registration status
-      // Note: Token management is now handled by ViewModels
-      _isRegistered = response.isRegistered;
+      // Get the updated registration status from the server
+      await _loadRegistrationStatus();
 
       return Result.success(response);
     } catch (e) {
@@ -133,7 +134,7 @@ class AuthRepository {
       final response = registerResult.tryGetSuccess()!;
 
       // Update registration status - user is now fully registered
-      _isRegistered = true;
+      _isRegisteredCache = true;
 
       return Result.success(response);
     } catch (e) {
@@ -146,8 +147,21 @@ class AuthRepository {
   // READ OPERATIONS (Registration status checks only)
   // =============================================================================
 
-  bool get isRegistered {
-    return _isRegistered;
+  /// Check if user is registered (async - fetches from server if not cached)
+  Future<bool> isRegistered() async {
+    // Return cached value if available
+    if (_isRegisteredCache != null) {
+      return _isRegisteredCache!;
+    }
+
+    // Load from server and cache the result
+    return await _loadRegistrationStatus();
+  }
+
+  /// Check if user is registered from cache only (synchronous)
+  /// Returns null if not cached yet - use for router redirect logic
+  bool? get isRegisteredCached {
+    return _isRegisteredCache;
   }
 
   // =============================================================================
@@ -159,7 +173,7 @@ class AuthRepository {
       final currentToken = _tokenRepository.token;
 
       // Clear local registration state
-      _isRegistered = false;
+      _isRegisteredCache = null;
 
       // If we had a token, try to logout from server
       if (currentToken != null && currentToken.isNotEmpty) {
@@ -178,7 +192,7 @@ class AuthRepository {
       return Result.success(null);
     } catch (e) {
       // Even if there's an error, ensure local session is cleared
-      _isRegistered = false;
+      _isRegisteredCache = null;
 
       return Result.error(Exception("Erro durante logout: $e"));
     }
@@ -194,6 +208,7 @@ class AuthRepository {
   /// Force reload cache from storage and sync with server
   Future<void> reloadCache() async {
     await _tokenRepository.reload();
+    _isRegisteredCache = null; // Clear cache to force reload
     await _loadRegistrationStatus();
   }
 }

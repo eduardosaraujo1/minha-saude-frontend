@@ -49,7 +49,7 @@ class RegisterViewModel extends ChangeNotifier {
             result.tryGetError()?.toString() ?? "Ocorreu um erro desconhecido.";
       }
 
-      if (authRepository.isRegistered) {
+      if (await authRepository.isRegistered()) {
         _state = RegisterState.success;
       } else {
         _errorMessage =
@@ -75,8 +75,8 @@ class RegisterViewModel extends ChangeNotifier {
   /// Check if user is logged in (has a valid token)
   bool get isLoggedIn => tokenRepository.hasToken;
 
-  /// Check if user is registered (completed profile)
-  bool get isRegistered => authRepository.isRegistered;
+  /// Check if user is registered (completed profile) - cached value only
+  bool? get isRegisteredCached => authRepository.isRegisteredCached;
 
   /// Parse date from DD/MM/YYYY format
   DateTime _parseDate(String dateText) {

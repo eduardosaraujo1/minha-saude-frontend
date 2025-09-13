@@ -46,7 +46,7 @@ class LoginViewModel extends ChangeNotifier {
         }
 
         // After successful login, check registration status
-        final isRegistered = authRepository.isRegistered;
+        final isRegistered = await authRepository.isRegistered();
 
         if (!isRegistered) {
           _status = LoginStatus.needsRegistration;

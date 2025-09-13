@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
-import 'package:minha_saude_frontend/app/di/get_it.dart';
+import 'package:minha_saude_frontend/di/get_it.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/login_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/tos_view_model.dart';

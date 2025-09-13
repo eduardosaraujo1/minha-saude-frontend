@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
 import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
-import 'package:minha_saude_frontend/app/di/get_it.dart';
+import 'package:minha_saude_frontend/di/get_it.dart';
 
 class RegisterViewModel extends ChangeNotifier {
   final RegisterForm form = RegisterForm();

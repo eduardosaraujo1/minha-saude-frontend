@@ -1,5 +1,7 @@
+import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:minha_saude_frontend/config/google_auth_config.dart';
+import 'package:minha_saude_frontend/config/mock_endpoint_config.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 class GoogleSignInService {
@@ -7,14 +9,11 @@ class GoogleSignInService {
     'https://www.googleapis.com/auth/userinfo.email',
     'openid',
   ];
-
-  // Mock control variables
-  static const int _googleSignInImpl =
-      0; // 0 -> real implementation, 1 -> mock success, 2 -> mock failure
+  final mock = GetIt.I<MockEndpointConfig>();
 
   final GoogleSignIn _signIn;
 
-  const GoogleSignInService._(this._signIn);
+  GoogleSignInService._(this._signIn);
 
   static Future<GoogleSignInService> create(
     GoogleSignIn signIn,
@@ -30,12 +29,14 @@ class GoogleSignInService {
 
   Future<Result<String?, Exception>> generateServerAuthCode() async {
     // Mock response based on configuration
-    if (_googleSignInImpl == 1) {
+    if (mock.googleSignInMode == GoogleSignInMode.mockSuccess) {
       return Future.delayed(
         Duration(seconds: 2),
         () => Result.success("mock_server_auth_code"),
       );
-    } else if (_googleSignInImpl == 2) {
+    }
+
+    if (mock.googleSignInMode == GoogleSignInMode.mockError) {
       return Future.delayed(
         Duration(seconds: 2),
         () => Result.error(Exception('Failed to retrieve server auth code')),

@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
-import 'package:minha_saude_frontend/app/di/get_it.dart';
+import 'package:minha_saude_frontend/di/get_it.dart';
 
 class LoginViewModel extends ChangeNotifier {
   final AuthRepository authRepository;

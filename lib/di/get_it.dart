@@ -11,12 +11,19 @@ import 'package:minha_saude_frontend/app/data/shared/services/secure_storage.dar
 import 'package:minha_saude_frontend/app/presentation/shared/themes/app_theme.dart';
 import 'package:minha_saude_frontend/app/router/go_router.dart';
 import 'package:minha_saude_frontend/config/google_auth_config.dart';
+import 'package:minha_saude_frontend/config/mock_endpoint_config.dart';
 
 final getIt = GetIt.I;
 
 /// Awaits until all async singletons are ready
 Future<void> setupLocator() async {
   // Core dependencies
+  getIt.registerSingleton(
+    MockEndpointConfig(
+      googleSignInMode: GoogleSignInMode.mockSuccess,
+      serverAuthMode: ServerAuthMode.mockExistingUser,
+    ),
+  );
   getIt.registerSingleton<Dio>(Dio());
   getIt.registerSingleton<SecureStorage>(SecureStorage());
   getIt.registerSingleton<GoogleAuthConfig>(GoogleAuthConfig());

@@ -1,22 +1,17 @@
 import 'dart:developer';
 
+import 'package:get_it/get_it.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/login_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/register_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
 import 'package:minha_saude_frontend/app/data/shared/services/api_client.dart';
+import 'package:minha_saude_frontend/config/mock_endpoint_config.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 class AuthRemoteService {
   // ignore: unused_field
   final ApiClient _apiClient; // will be used once data is no longer mocked
-
-  // Mock control variables
-  static const bool _mockLoginSuccess = true; // false = login error
-  static const bool _mockUserIsRegistered =
-      false; // true = user is already registered, false = needs registration
-  static const int _mockRegisterResponse =
-      0; // 0 = success, 1 = token expired error, 2 = generic error
-  static const bool _mockLogoutSuccess = true; // false = logout error
+  final mock = GetIt.I<MockEndpointConfig>();
 
   AuthRemoteService(this._apiClient);
 
@@ -28,7 +23,7 @@ class AuthRemoteService {
     log("Endpoint /auth/google/login called with token: $googleToken");
 
     // Check if login should fail
-    if (!_mockLoginSuccess) {
+    if (mock.serverAuthMode == ServerAuthMode.mockLoginError) {
       return Future.delayed(
         Duration(seconds: 2),
         () => Result.error(Exception("Erro ao fazer login com Google")),
@@ -37,7 +32,7 @@ class AuthRemoteService {
 
     // Mock response based on user registration status
     final LoginResponse result;
-    if (_mockUserIsRegistered) {
+    if (mock.serverAuthMode == ServerAuthMode.mockExistingUser) {
       // User is already registered - return session token
       result = LoginResponse(
         isRegistered: true,
@@ -70,27 +65,21 @@ class AuthRemoteService {
     );
 
     // Mock response based on configuration
-    switch (_mockRegisterResponse) {
-      case 0: // Success
+    switch (mock.serverAuthMode) {
+      case ServerAuthMode.mockNewUser: // Success
         final RegisterResponse result = RegisterResponse(
           RegisterStatus.success,
           sessionToken: "session_token_from_registration",
           expiresAt: DateTime.now().add(Duration(days: 30)),
         );
         return Future.delayed(
-          Duration(seconds: 2),
+          Duration(seconds: 1),
           () => Result.success(result),
         );
 
-      case 1: // Token expired error
+      case ServerAuthMode.mockRegisterError: // Token expired error
         return Future.delayed(
-          Duration(seconds: 2),
-          () => Result.error(Exception("Token de registro expirado")),
-        );
-
-      case 2: // Generic error
-        return Future.delayed(
-          Duration(seconds: 2),
+          Duration(seconds: 1),
           () => Result.error(Exception("Erro ao registrar usuário")),
         );
 
@@ -101,7 +90,7 @@ class AuthRemoteService {
           expiresAt: DateTime.now().add(Duration(days: 30)),
         );
         return Future.delayed(
-          Duration(seconds: 2),
+          Duration(seconds: 1),
           () => Result.success(result),
         );
     }
@@ -112,14 +101,6 @@ class AuthRemoteService {
   Future<Result<void, Exception>> logout(String sessionToken) async {
     log("Endpoint /auth/logout called with token: $sessionToken");
 
-    // Mock response based on configuration
-    if (_mockLogoutSuccess) {
-      return Future.delayed(Duration(seconds: 1), () => Result.success(null));
-    } else {
-      return Future.delayed(
-        Duration(seconds: 1),
-        () => Result.error(Exception("Erro ao fazer logout no servidor")),
-      );
-    }
+    return Future.delayed(Duration(seconds: 1), () => Result.success(null));
   }
 }

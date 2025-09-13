@@ -29,38 +29,36 @@ Future<void> setupLocator() async {
   getIt.registerSingleton<GoogleAuthConfig>(GoogleAuthConfig());
   getIt.registerSingleton<AppTheme>(AppTheme());
   getIt.registerSingleton<GoRouter>(router);
-  getIt.registerSingletonAsync<TokenRepository>(() {
-    return TokenRepository.create(getIt<SecureStorage>());
-  });
+  getIt.registerSingleton<TokenRepository>(
+    TokenRepository(getIt<SecureStorage>()),
+  );
 
   // ApiClient (depends on Dio and TokenRepository)
-  getIt.registerSingletonAsync<ApiClient>(
-    () async => ApiClient(getIt<Dio>(), getIt<TokenRepository>()),
-    dependsOn: [TokenRepository],
+  getIt.registerSingleton<ApiClient>(
+    ApiClient(getIt<Dio>(), getIt<TokenRepository>()),
   );
 
   // AuthRemoteService (depends on ApiClient)
-  getIt.registerSingletonAsync<AuthRemoteService>(
-    () async => AuthRemoteService(getIt<ApiClient>()),
-    dependsOn: [ApiClient],
+  getIt.registerSingleton<AuthRemoteService>(
+    AuthRemoteService(getIt<ApiClient>()),
   );
 
   // GoogleSignInService (async, no dependencies on auth)
   getIt.registerSingletonAsync<GoogleSignInService>(() async {
-    return GoogleSignInService.create(
+    return await GoogleSignInService.create(
       GoogleSignIn.instance,
       GoogleAuthConfig(),
     );
   });
 
   // AuthRepository (depends on remote service, Google service, and token repository)
-  getIt.registerSingletonWithDependencies<AuthRepository>(
-    () => AuthRepository(
+  getIt.registerSingletonAsync<AuthRepository>(
+    () async => AuthRepository(
       getIt<AuthRemoteService>(),
       getIt<GoogleSignInService>(),
       getIt<TokenRepository>(),
     ),
-    dependsOn: [AuthRemoteService],
+    dependsOn: [AuthRemoteService, GoogleSignInService],
   );
 
   // Await on async operations

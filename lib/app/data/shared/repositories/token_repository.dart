@@ -6,46 +6,51 @@ import 'package:multiple_result/multiple_result.dart';
 /// Shared repository responsible for managing authentication tokens only
 /// This provides a clean separation between token storage and auth-specific logic
 class TokenRepository {
-  final SecureStorage _storage;
-
-  TokenRepository._(this._storage);
-
   static const String _tokenKey = 'session_token';
 
+  final SecureStorage _storage;
+
+  TokenRepository(this._storage);
+
   String? _cachedToken;
-  bool _isInitialized = false;
+  bool _cacheLoaded = false;
 
-  static Future<TokenRepository> create(SecureStorage storage) async {
-    final repository = TokenRepository._(storage);
-    await repository._loadToken();
-    return repository;
-  }
-
-  /// Initialize the repository by loading token from storage
-  Future<void> _loadToken() async {
-    try {
-      final token = await _storage.read(_tokenKey);
-      _cachedToken = token;
-      _isInitialized = true;
-    } catch (e) {
-      log("Error initializing token repository: $e");
-      _isInitialized = true; // Mark as initialized even on error
+  /// Get the current authentication token (lazy-loaded)
+  Future<String?> getToken() async {
+    if (!_cacheLoaded) {
+      await _refreshTokenCache();
     }
-  }
 
-  // =============================================================================
-  // TOKEN MANAGEMENT
-  // =============================================================================
-
-  /// Get the current authentication token
-  String? get token {
     return _cachedToken;
   }
 
-  /// Check if user has a valid token
-  bool get hasToken {
-    if (!_isInitialized) return false;
+  /// Get the cached token without loading from storage (may be null if not loaded yet)
+  String? get tokenCached => _cachedToken;
+
+  /// Check if user has a valid token (lazy-loaded)
+  Future<bool> get hasToken async {
+    await _refreshTokenCache();
     return _cachedToken != null && _cachedToken!.isNotEmpty;
+  }
+
+  /// Check if user has a valid cached token (synchronous, no storage access)
+  bool get hasTokenCached {
+    return _cachedToken != null && _cachedToken!.isNotEmpty;
+  }
+
+  /// Lazy load token from storage if not already cached
+  Future<void> _refreshTokenCache() async {
+    _cacheLoaded = false;
+
+    try {
+      final token = await _storage.read(_tokenKey);
+      _cachedToken = token;
+      _cacheLoaded = true;
+    } catch (e) {
+      log("Error loading token from storage: $e");
+      _cachedToken = null;
+      _cacheLoaded = true; // Mark as loaded even on error to avoid retry loops
+    }
   }
 
   /// Set a new authentication token
@@ -53,6 +58,7 @@ class TokenRepository {
     try {
       await _storage.write(_tokenKey, token);
       _cachedToken = token;
+      _cacheLoaded = true; // Mark cache as loaded with new value
       return Result.success(null);
     } catch (e) {
       return Result.error(Exception("Error setting token: $e"));
@@ -64,6 +70,7 @@ class TokenRepository {
     try {
       await _storage.delete(_tokenKey);
       _cachedToken = null;
+      _cacheLoaded = true; // Mark cache as loaded with null value
       return Result.success(null);
     } catch (e) {
       return Result.error(Exception("Error removing token: $e"));
@@ -74,11 +81,8 @@ class TokenRepository {
   // UTILITY METHODS
   // =============================================================================
 
-  /// Check if repository has been initialized
-  bool get isInitialized => _isInitialized;
-
   /// Force reload token from storage
   Future<void> reload() async {
-    await _loadToken();
+    await _refreshTokenCache(); // Reload from storage
   }
 }

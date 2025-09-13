@@ -11,7 +11,7 @@ class NotFoundView extends StatelessWidget {
   Widget build(BuildContext context) {
     final authRepository = getIt<AuthRepository>();
     final tokenRepository = getIt<TokenRepository>();
-    final isLoggedIn = tokenRepository.hasToken;
+    final isLoggedIn = tokenRepository.hasTokenCached;
 
     return Scaffold(
       body: Center(

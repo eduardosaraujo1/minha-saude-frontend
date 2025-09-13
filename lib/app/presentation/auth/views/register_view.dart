@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/views/layouts/login_form_layout.dart';
+import 'package:watch_it/watch_it.dart';
 
+// Wrapper for RegisterView to handle ViewModel disposal
 class RegisterView extends StatefulWidget {
   final RegisterViewModel viewModel;
   const RegisterView(this.viewModel, {super.key});
@@ -13,35 +15,44 @@ class RegisterView extends StatefulWidget {
 
 class _RegisterViewState extends State<RegisterView> {
   @override
-  void initState() {
-    super.initState();
-    widget.viewModel.addListener(_onViewModelChanged);
-  }
-
-  @override
   void dispose() {
-    widget.viewModel.removeListener(_onViewModelChanged);
+    widget.viewModel.dispose();
     super.dispose();
-  }
-
-  void _onViewModelChanged() {
-    var vm = widget.viewModel;
-
-    if (vm.errorMessage != null) {
-      final snackBar = SnackBar(
-        content: Text(vm.errorMessage ?? 'Ocorreu um erro desconhecido'),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-      vm.clearErrorMessages();
-    }
-    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = widget.viewModel;
+    return _RegisterView(widget.viewModel);
+  }
+}
+
+class _RegisterView extends WatchingWidget {
+  final RegisterViewModel viewModel;
+  const _RegisterView(this.viewModel);
+
+  void _onErrorChanged(BuildContext context, String? errorMessage) {
+    final errorMessage = viewModel.errorMessage.value;
+
+    if (errorMessage != null) {
+      final snackBar = SnackBar(content: Text(errorMessage));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+      viewModel.clearErrorMessages();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = viewModel;
     final form = vm.form;
+    final isLoading = watch(vm.isLoading);
+
+    registerChangeNotifierHandler(
+      target: vm.errorMessage,
+      handler: (context, newValue, cancel) {
+        _onErrorChanged(context, newValue.value);
+      },
+    );
 
     return LoginFormLayout(
       child: Padding(
@@ -102,7 +113,7 @@ class _RegisterViewState extends State<RegisterView> {
                 ),
                 keyboardType: TextInputType.datetime,
                 readOnly: true,
-                onTap: () => _triggerBirthDatePicker(),
+                onTap: () => _triggerBirthDatePicker(context),
               ),
               TextFormField(
                 controller: form.telefoneController,
@@ -113,7 +124,7 @@ class _RegisterViewState extends State<RegisterView> {
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Theme.of(
                         context,
-                      ).colorScheme.onSurface.withAlpha(0xAA),
+                      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                     ),
                   ),
                   labelText: 'Telefone',
@@ -129,24 +140,24 @@ class _RegisterViewState extends State<RegisterView> {
                 ],
               ),
               FilledButton(
-                onPressed: vm.isLoading
+                onPressed: isLoading.value
                     ? null
                     : () {
                         vm.registerUser();
                       },
                 style: FilledButton.styleFrom(
-                  backgroundColor: vm.isLoading
+                  backgroundColor: isLoading.value
                       ? Theme.of(
                           context,
                         ).colorScheme.onSurface.withValues(alpha: 0.12)
                       : Theme.of(context).primaryColor,
-                  foregroundColor: vm.isLoading
+                  foregroundColor: isLoading.value
                       ? Theme.of(
                           context,
                         ).colorScheme.onSurface.withValues(alpha: 0.38)
                       : Theme.of(context).colorScheme.onPrimary,
                 ),
-                child: vm.isLoading
+                child: isLoading.value
                     ? SizedBox(
                         height: 20,
                         width: 20,
@@ -168,7 +179,7 @@ class _RegisterViewState extends State<RegisterView> {
     );
   }
 
-  void _triggerBirthDatePicker() async {
+  void _triggerBirthDatePicker(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -176,7 +187,7 @@ class _RegisterViewState extends State<RegisterView> {
       lastDate: DateTime.now(),
     );
     if (pickedDate != null) {
-      widget.viewModel.form.dataNascimentoController.value = TextEditingValue(
+      viewModel.form.dataNascimentoController.value = TextEditingValue(
         text: "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}",
       );
     }

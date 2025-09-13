@@ -201,9 +201,10 @@ class AuthRepository {
   // =============================================================================
 
   /// Check if user is registered based on current tokens
+  /// Note: isRegistered evaluates if the server has the user registered, but it only provides that data after a login attempt
   Future<bool> isRegistered() async {
     // If we have a session token, user is registered
-    if (_tokenRepository.hasToken) {
+    if (await _tokenRepository.hasToken) {
       return true;
     }
 
@@ -227,7 +228,7 @@ class AuthRepository {
 
   Future<Result<void, Exception>> signOut() async {
     try {
-      final currentToken = _tokenRepository.token;
+      final currentToken = await _tokenRepository.getToken();
 
       // Clear all local state
       _clearRegisterToken();
@@ -261,9 +262,6 @@ class AuthRepository {
   // =============================================================================
   // UTILITY METHODS
   // =============================================================================
-
-  /// Check if token repository has been initialized
-  bool get isTokenRepositoryInitialized => _tokenRepository.isInitialized;
 
   /// Clear register token and expiry
   void _clearRegisterToken() {

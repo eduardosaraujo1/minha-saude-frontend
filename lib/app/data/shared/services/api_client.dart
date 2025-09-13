@@ -22,7 +22,7 @@ class ApiClient {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           // Add authorization header if we have a token
-          final token = _tokenRepository.token;
+          final token = await _tokenRepository.getToken();
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }

@@ -4,28 +4,24 @@ import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 import 'package:minha_saude_frontend/di/get_it.dart';
 
-class LoginViewModel extends ChangeNotifier {
+class LoginViewModel {
   final AuthRepository authRepository;
   final TokenRepository tokenRepository;
 
-  String? _errorMessage;
-  bool _isLoading = false;
+  final ValueNotifier<String?> errorMessage = ValueNotifier(null);
+  final ValueNotifier<bool> isLoading = ValueNotifier(false);
 
   LoginViewModel(this.authRepository, this.tokenRepository);
 
-  String? get errorMessage => _errorMessage;
-  bool get isLoading => _isLoading;
-
   Future<void> loginWithGoogle() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    isLoading.value = true;
+    errorMessage.value = null;
 
     try {
       final result = await authRepository.googleLogin();
 
       if (result.isError()) {
-        _errorMessage = result.tryGetError()!.toString();
+        errorMessage.value = result.tryGetError()!.toString();
       } else {
         final response = result.getOrThrow();
 
@@ -39,16 +35,14 @@ class LoginViewModel extends ChangeNotifier {
         }
       }
     } catch (e) {
-      _errorMessage = "Ocorreu um erro desconhecido: $e";
+      errorMessage.value = "Ocorreu um erro desconhecido: $e";
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      isLoading.value = false;
     }
   }
 
   void clearErrorMessages() {
-    _errorMessage = null;
-    notifyListeners();
+    errorMessage.value = null;
   }
 
   /// Logout user by clearing all tokens and state
@@ -56,12 +50,8 @@ class LoginViewModel extends ChangeNotifier {
     try {
       // Clear all tokens and state through auth repository
       await authRepository.signOut();
-
-      // Update UI state
-      notifyListeners();
     } catch (e) {
-      _errorMessage = "Erro durante logout: $e";
-      notifyListeners();
+      errorMessage.value = "Erro durante logout: $e";
     }
   }
 }

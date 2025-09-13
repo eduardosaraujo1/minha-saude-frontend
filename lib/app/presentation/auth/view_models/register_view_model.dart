@@ -7,20 +7,16 @@ import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 import 'package:minha_saude_frontend/di/get_it.dart';
 
-class RegisterViewModel extends ChangeNotifier {
+class RegisterViewModel {
   final RegisterForm form = RegisterForm();
   final AuthRepository authRepository;
   final TokenRepository tokenRepository;
 
   RegisterViewModel(this.authRepository, this.tokenRepository);
 
-  String? _errorMessage;
+  final ValueNotifier<String?> errorMessage = ValueNotifier(null);
 
-  bool _isLoading = false;
-
-  String? get errorMessage => _errorMessage;
-
-  bool get isLoading => _isLoading;
+  final ValueNotifier<bool> isLoading = ValueNotifier(false);
 
   /// Register user with current form data
   Future<void> registerUser() async {
@@ -31,13 +27,12 @@ class RegisterViewModel extends ChangeNotifier {
 
       // Check if we have a valid register token
       if (!authRepository.hasValidRegisterToken) {
-        _errorMessage = "Token de registro expirado. Faça login novamente.";
-        notifyListeners();
+        errorMessage.value =
+            "Token de registro expirado. Faça login novamente.";
         return;
       }
 
-      _isLoading = true;
-      notifyListeners();
+      isLoading.value = true;
 
       final newUser = User(
         nome: form.nomeController.text.trim(),
@@ -54,35 +49,57 @@ class RegisterViewModel extends ChangeNotifier {
 
         // Check if error is due to expired token
         if (!authRepository.hasValidRegisterToken) {
-          _errorMessage =
+          this.errorMessage.value =
               "Seu tempo para completar o registro expirou. Faça login novamente.";
 
+          disposeForm();
           getIt<GoRouter>().go("/login");
         } else {
-          _errorMessage = errorMessage;
+          this.errorMessage.value = errorMessage;
         }
       } else {
+        disposeForm();
         getIt<GoRouter>().go("/");
       }
     } catch (e) {
       log(e.toString());
-      _errorMessage = "Ocorreu um erro desconhecido.";
+      errorMessage.value = "Ocorreu um erro desconhecido.";
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      isLoading.value = false;
     }
   }
 
   void clearErrorMessages() {
-    _errorMessage = null;
-    notifyListeners();
+    errorMessage.value = null;
   }
 
   /// Check if user has a valid register token
   bool get hasValidRegisterToken => authRepository.hasValidRegisterToken;
 
   /// Check if user has a session token (fully authenticated)
-  bool get isAuthenticated => tokenRepository.hasToken;
+  Future<bool> isAuthenticated() async {
+    return await tokenRepository.hasToken;
+  }
+
+  /// Dispose form controllers
+  void disposeForm() {
+    form.dispose();
+  }
+
+  void dispose() {
+    form.dispose();
+  }
+
+  /// Wrap goRouter redirects into a method to ensure form disposal
+  void navigateTo(String path, {bool replace = false}) {
+    disposeForm();
+
+    if (replace) {
+      getIt<GoRouter>().go(path);
+    } else {
+      getIt<GoRouter>().push(path);
+    }
+  }
 
   /// Parse date from DD/MM/YYYY format
   DateTime _parseDate(String dateText) {
@@ -96,12 +113,6 @@ class RegisterViewModel extends ChangeNotifier {
     } else {
       throw FormatException('Data de nascimento inválida');
     }
-  }
-
-  @override
-  void dispose() {
-    form.dispose();
-    super.dispose();
   }
 }
 

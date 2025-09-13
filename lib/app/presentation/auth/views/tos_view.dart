@@ -11,7 +11,6 @@ class TosView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     return LoginFormLayout(
       child: Padding(
         padding: EdgeInsetsGeometry.all(16),
@@ -19,15 +18,18 @@ class TosView extends StatelessWidget {
           spacing: 4,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Termos e Condições', style: theme.textTheme.titleLarge),
+            Text(
+              'Termos e Condições',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             TextScroller(text: viewModel.termos),
             FilledButton(
               onPressed: () {
                 context.push("/register");
               },
               style: FilledButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: theme.colorScheme.onPrimary,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
               ),
               child: Text('Li e concordo com os termos'),
             ),

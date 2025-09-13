@@ -23,43 +23,26 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Use the new googleLogin method
       final result = await authRepository.googleLogin();
 
       if (result.isError()) {
         _status = LoginStatus.error;
-        _errorMessage =
-            "Não foi possível fazer login com o Google. Tente novamente mais tarde.";
+        _errorMessage = result.tryGetError()!.toString();
       } else {
-        final signInResult = result.getOrThrow();
+        final response = result.getOrThrow();
 
-        // Store token in local storage if received
-        if (signInResult.sessionToken != null) {
-          final tokenResult = await tokenRepository.setToken(
-            signInResult.sessionToken!,
-          );
-          if (tokenResult.isError()) {
-            _status = LoginStatus.error;
-            _errorMessage = "Falha ao salvar token de autenticação.";
-            return;
-          }
-        }
-
-        // After successful login, check registration status
-        final isRegistered = await authRepository.isRegistered();
-
-        if (!isRegistered) {
-          _status = LoginStatus.needsRegistration;
-        } else if (signInResult.sessionToken != null) {
+        // Handle response based on registration status
+        if (response.isRegistered) {
+          // User is fully registered - session token is handled by repository
           _status = LoginStatus.authenticated;
         } else {
-          _status = LoginStatus.error;
-          _errorMessage = "Ocorreu um erro desconhecido.";
+          // User needs to complete registration - register token is handled by repository
+          _status = LoginStatus.needsRegistration;
         }
       }
     } catch (e) {
       _status = LoginStatus.error;
-      _errorMessage = "Ocorreu um erro desconhecido.";
+      _errorMessage = "Ocorreu um erro desconhecido: $e";
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -71,13 +54,10 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Logout user by clearing token and registration status
+  /// Logout user by clearing all tokens and state
   Future<void> logout() async {
     try {
-      // Clear token from storage
-      await tokenRepository.removeToken();
-
-      // Clear registration status through auth repository
+      // Clear all tokens and state through auth repository
       await authRepository.signOut();
 
       // Update UI state

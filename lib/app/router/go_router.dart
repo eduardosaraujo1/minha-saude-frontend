@@ -26,44 +26,34 @@ final router = GoRouter(
     final authRepository = getIt<AuthRepository>();
     final tokenRepository = getIt<TokenRepository>();
 
-    // Check if user has a valid token
-    final hasToken = tokenRepository.hasToken;
-
-    // Check if user is registered (from cache only for router)
-    final isRegisteredCached = hasToken
-        ? authRepository.isRegisteredCached
-        : false;
+    // Check authentication state
+    final hasSessionToken = tokenRepository.hasToken;
+    final hasRegisterToken = authRepository.hasValidRegisterToken;
 
     final authRoutes = ['/login', '/tos', '/register'];
     final isOnAuthRoute = authRoutes.contains(state.fullPath);
 
-    // If no token and not on auth route, go to login
-    if (!hasToken && !isOnAuthRoute) {
+    // If user has session token (fully authenticated), redirect away from auth routes
+    if (hasSessionToken && isOnAuthRoute) {
+      return '/';
+    }
+
+    // If user has register token but not session token (needs to complete registration)
+    if (hasRegisterToken && !hasSessionToken) {
+      if (state.fullPath != '/tos' && state.fullPath != '/register') {
+        return '/tos'; // Start registration flow
+      }
+      return null; // Allow TOS and register routes
+    }
+
+    // If user has no valid tokens and not on auth route, go to login
+    if (!hasSessionToken && !hasRegisterToken && !isOnAuthRoute) {
       return '/login';
     }
 
-    // If has token but registration status is not cached yet, let the app continue
-    // The ViewModels will handle the async loading of registration status
-    if (hasToken && isRegisteredCached == null) {
-      // If on auth route, stay there until we know the registration status
-      if (isOnAuthRoute) {
-        return null;
-      }
-      // If not on auth route, let the destination handle the loading
+    // If user has session token, allow access to main app
+    if (hasSessionToken && !isOnAuthRoute) {
       return null;
-    }
-
-    // If has token but not registered, user needs to complete registration
-    if (hasToken && isRegisteredCached == false) {
-      // First go to TOS, then to register
-      if (state.fullPath != '/tos' && state.fullPath != '/register') {
-        return '/tos';
-      }
-    }
-
-    // If has token and is registered but on auth route, go to home
-    if (hasToken && isRegisteredCached == true && isOnAuthRoute) {
-      return '/';
     }
 
     return null;

@@ -13,21 +13,20 @@ class AuthRepository {
   final GoogleSignInService _googleSignInService;
   final TokenRepository _tokenRepository;
 
-  // Internal registration status storage
-  bool? _isRegisteredCache;
+  // Temporary register token storage (short-lived, stored in Redis on backend)
+  String? _registerToken;
+  DateTime? _registerTokenExpiry;
 
   static Future<AuthRepository> create(
     AuthRemoteService authRemoteService,
     GoogleSignInService googleSignInService,
     TokenRepository tokenRepository,
   ) async {
-    final repository = AuthRepository._(
+    return AuthRepository._(
       authRemoteService,
       googleSignInService,
       tokenRepository,
     );
-
-    return repository;
   }
 
   AuthRepository._(
@@ -36,39 +35,51 @@ class AuthRepository {
     this._tokenRepository,
   );
 
-  /// Check registration status with server if we have a token
-  Future<bool> _loadRegistrationStatus() async {
-    try {
-      if (_tokenRepository.hasToken) {
-        final statusResult = await _authRemoteService.getAuthStatus(
-          _tokenRepository.token!,
-        );
-        if (statusResult.isSuccess()) {
-          final status = statusResult.tryGetSuccess();
-          _isRegisteredCache = status?.isRegistered ?? false;
-          return _isRegisteredCache!;
-        }
-      } else {
-        // No token means user is not registered
-        _isRegisteredCache = false;
-        return false;
-      }
-    } catch (e) {
-      log("Error syncing registration status: $e");
-    }
-
-    // Default to false if there was an error
-    _isRegisteredCache = false;
-    return false;
-  }
-
   // =============================================================================
   // CREATE OPERATIONS (Login/Authentication)
   // =============================================================================
 
   Future<Result<LoginResponse, Exception>> googleLogin() async {
     try {
-      // Get Google auth code
+      final authCode = await _getGoogleToken();
+      if (authCode.isError()) {
+        return Result.error(authCode.tryGetError()!);
+      }
+      final authToken = authCode.tryGetSuccess()!;
+
+      // Exchange with backend for session token or register token
+      final loginResponse = await _sendLoginRequest(authToken);
+      if (loginResponse.isError()) {
+        return Result.error(loginResponse.tryGetError()!);
+      }
+      final response = loginResponse.tryGetSuccess()!;
+
+      // Handle the response based on registration status
+      if (response.isRegistered) {
+        // User is fully registered - store session token
+        if (response.sessionToken != null) {
+          await _tokenRepository.setToken(response.sessionToken!);
+        }
+        // Clear any existing register token
+        _clearRegisterToken();
+      } else {
+        // User needs to complete registration - store register token
+        if (response.registerToken != null) {
+          _registerToken = response.registerToken;
+          _registerTokenExpiry = response.expiresAt;
+        }
+        // Clear any existing session token
+        await _tokenRepository.removeToken();
+      }
+
+      return Result.success(response);
+    } catch (e) {
+      return Result.error(Exception("Erro inesperado durante o login: $e"));
+    }
+  }
+
+  Future<Result<String, Exception>> _getGoogleToken() async {
+    try {
       final googleSignInResult = await _googleSignInService
           .generateServerAuthCode();
 
@@ -79,51 +90,68 @@ class AuthRepository {
           ),
         );
       }
-
       final authCode = googleSignInResult.tryGetSuccess();
+
       if (authCode == null) {
         return Result.error(
           Exception("Código de autenticação do Google não foi obtido."),
         );
       }
 
-      // Exchange with backend for session token
-      final loginResponse = await _authRemoteService.loginWithGoogle(authCode);
+      return Result.success(authCode);
+    } catch (e) {
+      return Result.error(
+        Exception("Erro inesperado ao obter token do Google: $e"),
+      );
+    }
+  }
 
-      if (loginResponse.isError()) {
+  Future<Result<LoginResponse, Exception>> _sendLoginRequest(
+    String googleToken,
+  ) async {
+    try {
+      final response = await _authRemoteService.loginWithGoogle(googleToken);
+      if (response.isError()) {
         return Result.error(
           Exception(
             "Não foi possível conectar ao servidor. Por favor, tente novamente mais tarde.",
           ),
         );
       }
-
-      final response = loginResponse.tryGetSuccess()!;
-
-      // Get the updated registration status from the server
-      await _loadRegistrationStatus();
-
-      return Result.success(response);
+      return Result.success(response.tryGetSuccess()!);
     } catch (e) {
-      return Result.error(Exception("Erro inesperado durante o login: $e"));
+      return Result.error(
+        Exception("Erro inesperado ao trocar token do Google: $e"),
+      );
     }
   }
 
+  /// Complete user registration with provided user data
   Future<Result<RegisterResponse, Exception>> register(User userData) async {
     try {
-      // Check if user has a valid token
-      if (!_tokenRepository.hasToken) {
+      // Check if we have a valid register token
+      if (_registerToken == null || _isRegisterTokenExpired()) {
         return Result.error(
-          Exception(
-            "Token de autenticação não encontrado. Faça login novamente.",
-          ),
+          Exception("Token de registro expirado. Faça login novamente."),
         );
       }
 
-      // Use the existing token to complete registration
-      final registerResult = await _authRemoteService.register(userData);
+      // Use the register token to complete registration
+      final registerResult = await _authRemoteService.register(
+        userData,
+        _registerToken!,
+      );
 
       if (registerResult.isError()) {
+        // Check if error is due to expired token
+        final error = registerResult.tryGetError();
+        if (error.toString().contains("token") ||
+            error.toString().contains("expired")) {
+          _clearRegisterToken();
+          return Result.error(
+            Exception("Token de registro expirou. Faça login novamente."),
+          );
+        }
         return Result.error(
           Exception(
             "Ocorreu um erro ao registrar. Verifique sua conexão com a internet",
@@ -133,8 +161,8 @@ class AuthRepository {
 
       final response = registerResult.tryGetSuccess()!;
 
-      // Update registration status - user is now fully registered
-      _isRegisteredCache = true;
+      // Registration successful - clear register token
+      _clearRegisterToken();
 
       return Result.success(response);
     } catch (e) {
@@ -144,24 +172,28 @@ class AuthRepository {
   }
 
   // =============================================================================
-  // READ OPERATIONS (Registration status checks only)
+  // READ OPERATIONS (Registration status checks)
   // =============================================================================
 
-  /// Check if user is registered (async - fetches from server if not cached)
+  /// Check if user is registered based on current tokens
   Future<bool> isRegistered() async {
-    // Return cached value if available
-    if (_isRegisteredCache != null) {
-      return _isRegisteredCache!;
+    // If we have a session token, user is registered
+    if (_tokenRepository.hasToken) {
+      return true;
     }
 
-    // Load from server and cache the result
-    return await _loadRegistrationStatus();
+    // If we have a register token that's not expired, user is not registered
+    if (_registerToken != null && !_isRegisterTokenExpired()) {
+      return false;
+    }
+
+    // No valid tokens - user needs to login
+    return false;
   }
 
-  /// Check if user is registered from cache only (synchronous)
-  /// Returns null if not cached yet - use for router redirect logic
-  bool? get isRegisteredCached {
-    return _isRegisteredCache;
+  /// Check if user has a valid register token for completing registration
+  bool get hasValidRegisterToken {
+    return _registerToken != null && !_isRegisterTokenExpired();
   }
 
   // =============================================================================
@@ -172,10 +204,10 @@ class AuthRepository {
     try {
       final currentToken = _tokenRepository.token;
 
-      // Clear local registration state
-      _isRegisteredCache = null;
+      // Clear all local state
+      _clearRegisterToken();
 
-      // If we had a token, try to logout from server
+      // If we had a session token, try to logout from server
       if (currentToken != null && currentToken.isNotEmpty) {
         final serverLogoutResult = await _authRemoteService.logout(
           currentToken,
@@ -184,31 +216,45 @@ class AuthRepository {
         // Note: We don't fail the whole logout if server logout fails
         // The user is considered logged out locally regardless
         if (serverLogoutResult.isError()) {
-          // Log the error but don't return it
           log("Warning: Server logout failed, but user is logged out locally");
         }
       }
 
+      // Clear session token
+      await _tokenRepository.removeToken();
+
       return Result.success(null);
     } catch (e) {
       // Even if there's an error, ensure local session is cleared
-      _isRegisteredCache = null;
+      _clearRegisterToken();
+      await _tokenRepository.removeToken();
 
       return Result.error(Exception("Erro durante logout: $e"));
     }
   }
 
   // =============================================================================
-  // UTILITY METHODS (for internal use and debugging)
+  // UTILITY METHODS
   // =============================================================================
 
   /// Check if token repository has been initialized
   bool get isTokenRepositoryInitialized => _tokenRepository.isInitialized;
 
-  /// Force reload cache from storage and sync with server
-  Future<void> reloadCache() async {
-    await _tokenRepository.reload();
-    _isRegisteredCache = null; // Clear cache to force reload
-    await _loadRegistrationStatus();
+  /// Clear register token and expiry
+  void _clearRegisterToken() {
+    _registerToken = null;
+    _registerTokenExpiry = null;
+  }
+
+  /// Check if register token is expired
+  bool _isRegisterTokenExpired() {
+    if (_registerTokenExpiry == null) return true;
+    return DateTime.now().isAfter(_registerTokenExpiry!);
+  }
+
+  /// Force clear all tokens and state - used for debugging/testing
+  Future<void> clearAllState() async {
+    _clearRegisterToken();
+    await _tokenRepository.removeToken();
   }
 }

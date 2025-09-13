@@ -1,9 +1,20 @@
 class LoginResponse {
-  /// Session token provided by the backend (Laravel Sanctum token)
-  final String? sessionToken;
-
-  /// Indicates if additional registration steps are needed
+  /// Indicates if user has completed registration
   final bool isRegistered;
 
-  const LoginResponse({required this.sessionToken, required this.isRegistered});
+  /// Session token for authenticated users (only when isRegistered = true)
+  final String? sessionToken;
+
+  /// Register token for users who need to complete registration (only when isRegistered = false)
+  final String? registerToken;
+
+  /// Token expiration time
+  final DateTime? expiresAt;
+
+  const LoginResponse({
+    required this.isRegistered,
+    this.sessionToken,
+    this.registerToken,
+    this.expiresAt,
+  });
 }

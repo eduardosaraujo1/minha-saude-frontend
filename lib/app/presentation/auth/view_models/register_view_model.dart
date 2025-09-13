@@ -30,6 +30,15 @@ class RegisterViewModel extends ChangeNotifier {
       if (!form.validate()) {
         return;
       }
+
+      // Check if we have a valid register token
+      if (!authRepository.hasValidRegisterToken) {
+        _errorMessage = "Token de registro expirado. Faça login novamente.";
+        _state = RegisterState.error;
+        notifyListeners();
+        return;
+      }
+
       _isLoading = true;
       _state = RegisterState.loading;
       notifyListeners();
@@ -41,23 +50,29 @@ class RegisterViewModel extends ChangeNotifier {
         telefone: form.telefoneController.text.trim(),
       );
 
-      // Use the existing register method
       final result = await authRepository.register(newUser);
 
       if (result.isError()) {
-        _errorMessage =
+        final errorMessage =
             result.tryGetError()?.toString() ?? "Ocorreu um erro desconhecido.";
-      }
 
-      if (await authRepository.isRegistered()) {
-        _state = RegisterState.success;
+        // Check if error is due to expired token
+        if (errorMessage.contains("Token de registro expirado") ||
+            errorMessage.contains("expirou")) {
+          _errorMessage =
+              "Seu tempo para completar o registro expirou. Faça login novamente.";
+          _state = RegisterState.tokenExpired;
+        } else {
+          _errorMessage = errorMessage;
+          _state = RegisterState.error;
+        }
       } else {
-        _errorMessage =
-            "Não foi possível completar o registro. Tente novamente mais tarde.";
+        _state = RegisterState.success;
       }
     } catch (e) {
       log(e.toString());
       _errorMessage = "Ocorreu um erro desconhecido.";
+      _state = RegisterState.error;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -69,14 +84,11 @@ class RegisterViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Get current authentication token
-  String? get authToken => tokenRepository.token;
+  /// Check if user has a valid register token
+  bool get hasValidRegisterToken => authRepository.hasValidRegisterToken;
 
-  /// Check if user is logged in (has a valid token)
-  bool get isLoggedIn => tokenRepository.hasToken;
-
-  /// Check if user is registered (completed profile) - cached value only
-  bool? get isRegisteredCached => authRepository.isRegisteredCached;
+  /// Check if user has a session token (fully authenticated)
+  bool get isAuthenticated => tokenRepository.hasToken;
 
   /// Parse date from DD/MM/YYYY format
   DateTime _parseDate(String dateText) {
@@ -99,7 +111,7 @@ class RegisterViewModel extends ChangeNotifier {
   }
 }
 
-enum RegisterState { initial, loading, success, error }
+enum RegisterState { initial, loading, success, error, tokenExpired }
 
 class RegisterForm {
   final formKey = GlobalKey<FormState>();

@@ -129,7 +129,14 @@ class AuthRepository {
 
       final response = registrationResult.tryGetSuccess()!;
 
-      // Registration successful - clear register token
+      // Registration successful - handle session token
+      if (response.status == RegisterStatus.success &&
+          response.sessionToken != null) {
+        // Store the session token from successful registration
+        await _tokenRepository.setToken(response.sessionToken!);
+      }
+
+      // Clear register token since registration is complete
       _clearRegisterToken();
 
       return Result.success(response);

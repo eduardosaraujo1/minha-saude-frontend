@@ -1,9 +1,11 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
 import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
+import 'package:minha_saude_frontend/app/di/get_it.dart';
 
 class RegisterViewModel extends ChangeNotifier {
   final RegisterForm form = RegisterForm();
@@ -16,13 +18,9 @@ class RegisterViewModel extends ChangeNotifier {
 
   bool _isLoading = false;
 
-  RegisterState _state = RegisterState.initial;
-
   String? get errorMessage => _errorMessage;
 
   bool get isLoading => _isLoading;
-
-  RegisterState get state => _state;
 
   /// Register user with current form data
   Future<void> registerUser() async {
@@ -34,13 +32,11 @@ class RegisterViewModel extends ChangeNotifier {
       // Check if we have a valid register token
       if (!authRepository.hasValidRegisterToken) {
         _errorMessage = "Token de registro expirado. Faça login novamente.";
-        _state = RegisterState.error;
         notifyListeners();
         return;
       }
 
       _isLoading = true;
-      _state = RegisterState.loading;
       notifyListeners();
 
       final newUser = User(
@@ -57,22 +53,20 @@ class RegisterViewModel extends ChangeNotifier {
             result.tryGetError()?.toString() ?? "Ocorreu um erro desconhecido.";
 
         // Check if error is due to expired token
-        if (errorMessage.contains("Token de registro expirado") ||
-            errorMessage.contains("expirou")) {
+        if (!authRepository.hasValidRegisterToken) {
           _errorMessage =
               "Seu tempo para completar o registro expirou. Faça login novamente.";
-          _state = RegisterState.tokenExpired;
+
+          getIt<GoRouter>().go("/login");
         } else {
           _errorMessage = errorMessage;
-          _state = RegisterState.error;
         }
       } else {
-        _state = RegisterState.success;
+        getIt<GoRouter>().go("/");
       }
     } catch (e) {
       log(e.toString());
       _errorMessage = "Ocorreu um erro desconhecido.";
-      _state = RegisterState.error;
     } finally {
       _isLoading = false;
       notifyListeners();

@@ -8,6 +8,10 @@ class GoogleSignInService {
     'openid',
   ];
 
+  // Mock control variables
+  static const int _googleSignInImpl =
+      0; // 0 -> real implementation, 1 -> mock success, 2 -> mock failure
+
   final GoogleSignIn _signIn;
 
   const GoogleSignInService._(this._signIn);
@@ -25,11 +29,20 @@ class GoogleSignInService {
   }
 
   Future<Result<String?, Exception>> generateServerAuthCode() async {
-    // temporary mock
-    // return Future.delayed(
-    //   Duration(seconds: 2),
-    //   () => Result.success("mock_server_auth_code"),
-    // );
+    // Mock response based on configuration
+    if (_googleSignInImpl == 1) {
+      return Future.delayed(
+        Duration(seconds: 2),
+        () => Result.success("mock_server_auth_code"),
+      );
+    } else if (_googleSignInImpl == 2) {
+      return Future.delayed(
+        Duration(seconds: 2),
+        () => Result.error(Exception('Failed to retrieve server auth code')),
+      );
+    }
+
+    // Real implementation below (commented out)
     try {
       // Try silent auth
       var account = await _signIn.attemptLightweightAuthentication();

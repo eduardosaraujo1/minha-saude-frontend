@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/views/layouts/login_form_layout.dart';
@@ -26,20 +25,15 @@ class _RegisterViewState extends State<RegisterView> {
   }
 
   void _onViewModelChanged() {
-    if (widget.viewModel.state == RegisterState.success) {
-      // Registration successful, navigate to home or main app screen
-      context.go('/');
-    }
+    var vm = widget.viewModel;
 
-    if (widget.viewModel.errorMessage != null) {
+    if (vm.errorMessage != null) {
       final snackBar = SnackBar(
-        content: Text(
-          widget.viewModel.errorMessage ?? 'Ocorreu um erro desconhecido',
-        ),
+        content: Text(vm.errorMessage ?? 'Ocorreu um erro desconhecido'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
-      widget.viewModel.clearErrorMessages();
+      vm.clearErrorMessages();
     }
     setState(() {});
   }

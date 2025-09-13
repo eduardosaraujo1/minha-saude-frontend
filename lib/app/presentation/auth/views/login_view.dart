@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/widgets/button_sign_in.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/widgets/login_decorator.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/login_view_model.dart';
@@ -28,18 +27,13 @@ class _LoginViewState extends State<LoginView> {
   }
 
   void _onViewModelChanged() {
-    final status = widget.viewModel.status;
-    if (status == LoginStatus.authenticated) {
-      context.go('/home');
-    } else if (status == LoginStatus.needsRegistration) {
-      context.go('/tos');
-    } else if (widget.viewModel.errorMessage != null) {
-      final errorMessage =
-          widget.viewModel.errorMessage ?? 'Ocorreu um erro desconhecido';
+    final vm = widget.viewModel;
+    if (vm.errorMessage != null) {
+      final errorMessage = vm.errorMessage ?? 'Ocorreu um erro desconhecido';
       final snackBar = SnackBar(content: Text(errorMessage));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
-      widget.viewModel.clearErrorMessages();
+      vm.clearErrorMessages();
     }
 
     setState(() {});

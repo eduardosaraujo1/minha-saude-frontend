@@ -17,19 +17,7 @@ class AuthRepository {
   String? _registerToken;
   DateTime? _registerTokenExpiry;
 
-  static Future<AuthRepository> create(
-    AuthRemoteService authRemoteService,
-    GoogleSignInService googleSignInService,
-    TokenRepository tokenRepository,
-  ) async {
-    return AuthRepository._(
-      authRemoteService,
-      googleSignInService,
-      tokenRepository,
-    );
-  }
-
-  AuthRepository._(
+  AuthRepository(
     this._authRemoteService,
     this._googleSignInService,
     this._tokenRepository,
@@ -129,14 +117,48 @@ class AuthRepository {
   /// Complete user registration with provided user data
   Future<Result<RegisterResponse, Exception>> register(User userData) async {
     try {
+      final tokenCheck = await _checkRegisterToken();
+      if (tokenCheck.isError()) {
+        return Result.error(tokenCheck.tryGetError()!);
+      }
+
+      final registrationResult = await _sendRegistrationRequest(userData);
+      if (registrationResult.isError()) {
+        return Result.error(registrationResult.tryGetError()!);
+      }
+
+      final response = registrationResult.tryGetSuccess()!;
+
+      // Registration successful - clear register token
+      _clearRegisterToken();
+
+      return Result.success(response);
+    } catch (e) {
+      log(e.toString());
+      return Result.error(Exception("Ocorreu um erro desconhecido."));
+    }
+  }
+
+  Future<Result<void, Exception>> _checkRegisterToken() async {
+    try {
       // Check if we have a valid register token
       if (_registerToken == null || _isRegisterTokenExpired()) {
         return Result.error(
           Exception("Token de registro expirado. Faça login novamente."),
         );
       }
+      return Result.success(null);
+    } catch (e) {
+      return Result.error(
+        Exception("Erro inesperado ao verificar token de registro: $e"),
+      );
+    }
+  }
 
-      // Use the register token to complete registration
+  Future<Result<RegisterResponse, Exception>> _sendRegistrationRequest(
+    User userData,
+  ) async {
+    try {
       final registerResult = await _authRemoteService.register(
         userData,
         _registerToken!,
@@ -159,15 +181,11 @@ class AuthRepository {
         );
       }
 
-      final response = registerResult.tryGetSuccess()!;
-
-      // Registration successful - clear register token
-      _clearRegisterToken();
-
-      return Result.success(response);
+      return Result.success(registerResult.tryGetSuccess()!);
     } catch (e) {
-      log(e.toString());
-      return Result.error(Exception("Ocorreu um erro desconhecido."));
+      return Result.error(
+        Exception("Erro inesperado ao enviar dados de registro: $e"),
+      );
     }
   }
 

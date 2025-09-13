@@ -47,13 +47,13 @@ Future<void> setupLocator() async {
   });
 
   // AuthRepository (depends on remote service, Google service, and token repository)
-  getIt.registerSingletonAsync<AuthRepository>(
-    () async => AuthRepository.create(
+  getIt.registerSingletonWithDependencies<AuthRepository>(
+    () => AuthRepository(
       getIt<AuthRemoteService>(),
       getIt<GoogleSignInService>(),
       getIt<TokenRepository>(),
     ),
-    dependsOn: [AuthRemoteService, GoogleSignInService, TokenRepository],
+    dependsOn: [AuthRemoteService],
   );
 
   // Await on async operations

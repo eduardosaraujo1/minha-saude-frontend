@@ -11,6 +11,8 @@
 
 ## Para fazer
 
+-   [ ] TokenRepository should lazy read the SecureStorage, not eager on the create method (that simplifies getIt process)
+-   [ ] Return to watch_it + stateless widget (registerHandler solves BuildCOntext issue)
 -   [ ] Unir telas feitas pelo Davi aqui
 -   [ ] Criar inicial de lista de documentos
 -   [ ] Fazer lógica de login com Google (criar um mock do componente que se comunica com o backend)

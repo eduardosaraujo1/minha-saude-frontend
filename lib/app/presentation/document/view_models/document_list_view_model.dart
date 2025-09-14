@@ -95,6 +95,10 @@ class DocumentListViewModel {
     selectedAlgorithm.value = algorithm;
     groupedDocuments.value = groupDocuments(documents.value, algorithm);
   }
+
+  void clearErrorMessage() {
+    errorMessage.value = null;
+  }
 }
 
 enum GroupAlgorithm { paciente, tipo, medico, data }

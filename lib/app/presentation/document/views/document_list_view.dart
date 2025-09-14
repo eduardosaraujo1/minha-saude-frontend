@@ -17,6 +17,13 @@ class DocumentListView extends WatchingWidget {
       viewModel.groupedDocuments,
     ).value;
 
+    registerHandler<ValueNotifier, String?>(
+      target: viewModel.errorMessage,
+      handler: (context, newValue, cancel) {
+        _onErrorChanged(context, newValue);
+      },
+    );
+
     return Scaffold(
       appBar: BrandAppBar(
         title: const Text('Documentos'),
@@ -31,40 +38,42 @@ class DocumentListView extends WatchingWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: documents.entries.map((entry) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        entry.key,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                              childAspectRatio: 1,
-                            ),
-                        itemCount: entry.value.length,
-                        itemBuilder: (context, index) {
-                          final documentTitle = entry.value[index].titulo;
-                          return DocumentItem(
-                            title: documentTitle,
-                            onTap: () {
-                              // TODO: Handle document tap
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  );
-                }).toList(),
+                children: [
+                  ...documents.entries.map((entry) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          entry.key,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 8,
+                                mainAxisSpacing: 8,
+                                childAspectRatio: 1,
+                              ),
+                          itemCount: entry.value.length,
+                          itemBuilder: (context, index) {
+                            final documentTitle = entry.value[index].titulo;
+                            return DocumentItem(
+                              title: documentTitle,
+                              onTap: () {
+                                // TODO: Handle document tap
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  }),
+                  SizedBox(height: 60),
+                ],
               ),
             ),
       floatingActionButton: DocumentFab(
@@ -87,6 +96,15 @@ class DocumentListView extends WatchingWidget {
         ],
       ),
     );
+  }
+
+  void _onErrorChanged(BuildContext context, String? newValue) {
+    if (newValue != null && newValue.isNotEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(newValue)));
+      viewModel.clearErrorMessage();
+    }
   }
 }
 

@@ -1,5 +1,6 @@
 class Document {
   const Document({
+    required this.id,
     required this.paciente,
     required this.titulo,
     required this.tipo,
@@ -8,6 +9,7 @@ class Document {
     required this.dataAdicao,
   });
 
+  final String id;
   final String paciente;
   final String titulo;
   final String tipo;
@@ -17,6 +19,7 @@ class Document {
 
   factory Document.fromMap(Map<String, dynamic> map) {
     return Document(
+      id: map['id'],
       paciente: map['paciente'],
       titulo: map['titulo'],
       tipo: map['tipo'],
@@ -28,6 +31,7 @@ class Document {
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'paciente': paciente,
       'titulo': titulo,
       'tipo': tipo,

@@ -7,6 +7,7 @@ class DocumentCreateViewModel {
 
   final isLoading = ValueNotifier<bool>(true);
   final errorMessage = ValueNotifier<String?>(null);
+  final documentFile = ValueNotifier<DocumentFile?>(null);
 
   DocumentCreateViewModel(this._type, this.uploadRepository) {
     _getDocument();
@@ -25,6 +26,8 @@ class DocumentCreateViewModel {
 
       if (result.isError()) {
         errorMessage.value = result.tryGetError()?.toString();
+      } else {
+        documentFile.value = result.getOrThrow();
       }
       isLoading.value = false;
     } else if (_type == DocumentCreateType.upload) {

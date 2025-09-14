@@ -13,6 +13,7 @@ import 'package:minha_saude_frontend/app/data/shared/services/secure_storage.dar
 import 'package:minha_saude_frontend/app/presentation/shared/themes/app_theme.dart';
 import 'package:minha_saude_frontend/app/router/go_router.dart';
 import 'package:minha_saude_frontend/config/google_auth_config.dart';
+import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
 import 'package:minha_saude_frontend/config/mock_endpoint_config.dart';
 
 final getIt = GetIt.I;
@@ -64,7 +65,9 @@ Future<void> setupLocator() async {
   );
 
   getIt.registerSingleton<DocumentRepository>(DocumentRepository());
-  getIt.registerSingleton<DocumentUploadRepository>(DocumentUploadRepository());
+  getIt.registerSingleton<DocumentUploadRepository>(
+    DocumentUploadRepository(docScanner: FlutterDocScanner()),
+  );
 
   // Await on async operations
   await getIt.allReady();

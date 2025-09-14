@@ -8,14 +8,17 @@ class CompartilharView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: BrandAppBar(title: const Text('Compartilhar')),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Códigos de Compartilhamento',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-        ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Códigos de Compartilhamento',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ],
+        ),
       ),
     );
   }

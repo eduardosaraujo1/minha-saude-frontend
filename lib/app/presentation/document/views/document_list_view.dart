@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_list_view_model.dart';
+import 'package:minha_saude_frontend/app/presentation/document/widgets/document_fab.dart';
 import 'package:minha_saude_frontend/app/presentation/document/widgets/document_item.dart';
 import 'package:minha_saude_frontend/app/presentation/shared/widgets/brand_app_bar.dart';
 import 'package:watch_it/watch_it.dart';
@@ -10,41 +11,29 @@ class DocumentListView extends WatchingWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Mock data based on the picture
-    final mockData = [
-      {
-        'person': 'Ana Beatriz Rocha',
-        'documents': [
-          'Exame de Sangue da Beatriz',
-          'Receita pro Zoladex da Ana',
-          'Mamografia da Ana Beatriz',
-        ],
-      },
-      {
-        'person': 'Daniel Ferreira',
-        'documents': [
-          'Receita de Haldol do Daniel',
-          'Hemograma do Daniel 2020',
-          'Hemograma do Daniel 2021',
-        ],
-      },
-      {
-        'person': 'Jaqueline Souza',
-        'documents': [
-          'Tomografia da Jaqueline',
-          'Endoscopia da Jaqueline',
-          'Mamografia da Jaqueline',
-        ],
-      },
-      {
-        'person': 'Marcos Lima',
-        'documents': [
-          'Hemograma do Marcos',
-          'Colonoscopia do Marcos',
-          'Tomografia do Marcos',
-        ],
-      },
-    ];
+    // Mock data as map with category names as keys
+    final Map<String, List<String>> mockData = {
+      'Ana Beatriz Rocha': [
+        'Exame de Sangue da Beatriz',
+        'Receita pro Zoladex da Ana',
+        'Mamografia da Ana Beatriz',
+      ],
+      'Daniel Ferreira': [
+        'Receita de Haldol do Daniel',
+        'Hemograma do Daniel 2020',
+        'Hemograma do Daniel 2021',
+      ],
+      'Jaqueline Souza': [
+        'Tomografia da Jaqueline',
+        'Endoscopia da Jaqueline',
+        'Mamografia da Jaqueline',
+      ],
+      'Marcos Lima': [
+        'Hemograma do Marcos',
+        'Colonoscopia do Marcos',
+        'Tomografia do Marcos',
+      ],
+    };
 
     return Scaffold(
       appBar: BrandAppBar(
@@ -55,18 +44,13 @@ class DocumentListView extends WatchingWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: mockData.map((personData) {
+          mainAxisSize: MainAxisSize.min,
+          children: mockData.entries.map((entry) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  personData['person'] as String,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
+                Text(entry.key, style: Theme.of(context).textTheme.titleMedium),
                 GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -76,10 +60,9 @@ class DocumentListView extends WatchingWidget {
                     mainAxisSpacing: 8,
                     childAspectRatio: 0.8,
                   ),
-                  itemCount: (personData['documents'] as List<String>).length,
+                  itemCount: entry.value.length,
                   itemBuilder: (context, index) {
-                    final documentTitle =
-                        (personData['documents'] as List<String>)[index];
+                    final documentTitle = entry.value[index];
                     return DocumentItem(
                       title: documentTitle,
                       onTap: () {
@@ -88,19 +71,29 @@ class DocumentListView extends WatchingWidget {
                     );
                   },
                 ),
-                const SizedBox(height: 24),
               ],
             );
           }).toList(),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
-        icon: Icon(Icons.add, color: Theme.of(context).primaryColor),
-        label: Text(
-          'Documento',
-          style: TextStyle(color: Theme.of(context).primaryColor),
-        ),
+      floatingActionButton: DocumentFab(
+        fabLabel: 'Documento',
+        menuItems: [
+          DocumentFabMenuItem(
+            label: 'Escanear',
+            icon: Icons.camera_alt,
+            onPressed: () {
+              // TODO: Handle scan document
+            },
+          ),
+          DocumentFabMenuItem(
+            label: 'Upload',
+            icon: Icons.upload_file,
+            onPressed: () {
+              // TODO: Handle upload document
+            },
+          ),
+        ],
       ),
     );
   }

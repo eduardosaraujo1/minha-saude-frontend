@@ -30,34 +30,66 @@ class DocumentListViewModel {
     }
 
     documents.value = documentsQuery.getOrThrow();
+
+    groupedDocuments.value = groupDocuments(
+      documents.value,
+      selectedAlgorithm.value,
+    );
   }
 
-  // Map<String, List<Document>> groupDocuments(
-  //     List<Document> docs, GroupAlgorithm algorithm) {
-  //   final Map<String, List<Document>> grouped = {};
+  Map<String, List<Document>> groupDocuments(
+    List<Document> docs,
+    GroupAlgorithm algorithm,
+  ) {
+    final Map<String, List<Document>> grouped = {};
 
-  //   for (var doc in docs) {
-  //     String key;
-  //     switch (algorithm) {
-  //       case GroupAlgorithm.paciente:
-  //         key = doc.paciente;
-  //         break;
-  //       case GroupAlgorithm.tipo:
-  //         key = doc.tipo;
-  //         break;
-  //       case GroupAlgorithm.data:
-  //         key = doc.data.toIso8601String().split('T').first; // YYYY-MM-DD
-  //         break;
-  //     }
+    for (final doc in docs) {
+      String key;
 
-  //     if (!grouped.containsKey(key)) {
-  //       grouped[key] = [];
-  //     }
-  //     grouped[key]!.add(doc);
-  //   }
+      switch (algorithm) {
+        case GroupAlgorithm.paciente:
+          key = doc.paciente;
+          break;
+        case GroupAlgorithm.tipo:
+          key = doc.tipo;
+          break;
+        case GroupAlgorithm.medico:
+          key = doc.medico;
+          break;
+        case GroupAlgorithm.data:
+          key = _formatDateToMonthYear(doc.dataDocumento);
+          break;
+      }
 
-  //   return grouped;
-  // }
+      if (grouped.containsKey(key)) {
+        grouped[key]!.add(doc);
+      } else {
+        grouped[key] = [doc];
+      }
+    }
+
+    return grouped;
+  }
+
+  String _formatDateToMonthYear(DateTime date) {
+    final months = [
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
+    ];
+
+    final monthName = months[date.month - 1];
+    return '$monthName ${date.year}';
+  }
 }
 
 enum GroupAlgorithm { paciente, tipo, medico, data }

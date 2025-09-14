@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:minha_saude_frontend/app/data/document/models/document.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_list_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/document/widgets/document_fab.dart';
 import 'package:minha_saude_frontend/app/presentation/document/widgets/document_item.dart';
@@ -12,28 +13,9 @@ class DocumentListView extends WatchingWidget {
   @override
   Widget build(BuildContext context) {
     // Mock data as map with category names as keys
-    final Map<String, List<String>> mockData = {
-      'Ana Beatriz Rocha': [
-        'Exame de Sangue da Beatriz',
-        'Receita pro Zoladex da Ana',
-        'Mamografia da Ana Beatriz',
-      ],
-      'Daniel Ferreira': [
-        'Receita de Haldol do Daniel',
-        'Hemograma do Daniel 2020',
-        'Hemograma do Daniel 2021',
-      ],
-      'Jaqueline Souza': [
-        'Tomografia da Jaqueline',
-        'Endoscopia da Jaqueline',
-        'Mamografia da Jaqueline',
-      ],
-      'Marcos Lima': [
-        'Hemograma do Marcos',
-        'Colonoscopia do Marcos',
-        'Tomografia do Marcos',
-      ],
-    };
+    final Map<String, List<Document>> mockData = watch(
+      viewModel.groupedDocuments,
+    ).value;
 
     return Scaffold(
       appBar: BrandAppBar(
@@ -58,11 +40,11 @@ class DocumentListView extends WatchingWidget {
                     crossAxisCount: 3,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
-                    childAspectRatio: 0.8,
+                    childAspectRatio: 1,
                   ),
                   itemCount: entry.value.length,
                   itemBuilder: (context, index) {
-                    final documentTitle = entry.value[index];
+                    final documentTitle = entry.value[index].titulo;
                     return DocumentItem(
                       title: documentTitle,
                       onTap: () {

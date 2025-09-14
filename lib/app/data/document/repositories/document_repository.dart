@@ -6,7 +6,7 @@ class DocumentRepository {
 
   // READ
   // TODO: quando a escala do app justificar, implementar paginação via scroll infinito
-  Future<Result<List<Document>, Exception>> readDocuments() async {
+  Future<Result<List<Document>, Exception>> listDocuments() async {
     // Simulação de leitura de documentos
     await Future.delayed(const Duration(seconds: 1));
     final List<Document> documentos = [

@@ -1,22 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
-import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
-import 'package:command_it/command_it.dart';
+import 'package:minha_saude_frontend/app/data/document/models/document.dart';
+import 'package:minha_saude_frontend/app/data/document/repositories/document_repository.dart';
 
-class DocumentListViewModel extends ChangeNotifier {
-  DocumentListViewModel(this.authRepository, this.tokenRepository) {
-    cmdLogout = Command.createAsyncNoParam<bool>(_logout, initialValue: false);
+class DocumentListViewModel {
+  final DocumentRepository documentRepository;
+
+  DocumentListViewModel(this.documentRepository) {
+    refresh();
   }
 
-  final AuthRepository authRepository;
-  final TokenRepository tokenRepository;
+  // Cached list of documents
+  final documents = ValueNotifier<List<Document>>([]);
+  final groupedDocuments = ValueNotifier<Map<String, List<Document>>>({});
 
-  late final Command<void, bool> cmdLogout;
+  // State for sorting/grouping documents
+  final ValueNotifier<GroupAlgorithm> selectedAlgorithm = ValueNotifier(
+    GroupAlgorithm.paciente,
+  );
+  final openFAB = ValueNotifier(false);
+  final showSortMenu = ValueNotifier(false);
+  final errorMessage = ValueNotifier<String?>(null);
 
-  Future<bool> _logout() async {
-    await tokenRepository.removeToken();
-    await authRepository.signOut();
+  Future<void> refresh() async {
+    final documentsQuery = await documentRepository.listDocuments();
 
-    return true;
+    if (documentsQuery.isError()) {
+      errorMessage.value = documentsQuery.tryGetError()!.toString();
+      return;
+    }
+
+    documents.value = documentsQuery.getOrThrow();
   }
+
+  // Map<String, List<Document>> groupDocuments(
+  //     List<Document> docs, GroupAlgorithm algorithm) {
+  //   final Map<String, List<Document>> grouped = {};
+
+  //   for (var doc in docs) {
+  //     String key;
+  //     switch (algorithm) {
+  //       case GroupAlgorithm.paciente:
+  //         key = doc.paciente;
+  //         break;
+  //       case GroupAlgorithm.tipo:
+  //         key = doc.tipo;
+  //         break;
+  //       case GroupAlgorithm.data:
+  //         key = doc.data.toIso8601String().split('T').first; // YYYY-MM-DD
+  //         break;
+  //     }
+
+  //     if (!grouped.containsKey(key)) {
+  //       grouped[key] = [];
+  //     }
+  //     grouped[key]!.add(doc);
+  //   }
+
+  //   return grouped;
+  // }
 }
+
+enum GroupAlgorithm { paciente, tipo, medico, data }

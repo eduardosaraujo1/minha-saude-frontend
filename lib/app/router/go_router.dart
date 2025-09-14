@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
+import 'package:minha_saude_frontend/app/data/document/repositories/document_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_view_model.dart';
 import 'package:minha_saude_frontend/di/get_it.dart';
@@ -79,10 +80,7 @@ final router = GoRouter(
               path: '/',
               builder: (BuildContext context, GoRouterState state) =>
                   DocumentListView(
-                    DocumentListViewModel(
-                      getIt<AuthRepository>(),
-                      getIt<TokenRepository>(),
-                    ),
+                    DocumentListViewModel(getIt<DocumentRepository>()),
                   ),
             ),
           ],

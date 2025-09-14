@@ -7,9 +7,17 @@ import 'package:minha_saude_frontend/app/presentation/document/widgets/document_
 import 'package:minha_saude_frontend/app/presentation/shared/widgets/brand_app_bar.dart';
 import 'package:watch_it/watch_it.dart';
 
-class DocumentListView extends WatchingWidget {
-  const DocumentListView(this.viewModel, {super.key});
+class DocumentListView extends WatchingStatefulWidget {
   final DocumentListViewModel viewModel;
+
+  const DocumentListView(this.viewModel, {super.key});
+
+  @override
+  State<DocumentListView> createState() => _DocumentListViewState();
+}
+
+class _DocumentListViewState extends State<DocumentListView> {
+  DocumentListViewModel get viewModel => widget.viewModel;
 
   @override
   Widget build(BuildContext context) {
@@ -52,14 +60,14 @@ class DocumentListView extends WatchingWidget {
             label: 'Escanear',
             icon: Icons.camera_alt,
             onPressed: () {
-              // TODO: Handle scan document
+              context.go("/documentos/scan");
             },
           ),
           DocumentFabMenuItem(
             label: 'Upload',
             icon: Icons.upload_file,
             onPressed: () {
-              // TODO: Handle upload document
+              context.go("/documentos/upload");
             },
           ),
         ],
@@ -69,9 +77,12 @@ class DocumentListView extends WatchingWidget {
 
   void _onErrorChanged(BuildContext context, String? newValue) {
     if (newValue != null && newValue.isNotEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(newValue)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(newValue),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
       viewModel.clearErrorMessage();
     }
   }
@@ -102,7 +113,7 @@ class DocumentListView extends WatchingWidget {
                   return DocumentItem(
                     title: documentTitle,
                     onTap: () {
-                      context.push('/documentos/${entry.value[index].id}');
+                      context.go('/documentos/${entry.value[index].id}');
                     },
                   );
                 },

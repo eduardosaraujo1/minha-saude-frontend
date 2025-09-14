@@ -55,6 +55,7 @@ class _DocumentFabState extends State<DocumentFab> {
           ...widget.menuItems.map(
             (item) => FilledButton.icon(
               onPressed: () {
+                _toggleMenu();
                 item.onPressed();
               },
               icon: Icon(item.icon, size: 20),

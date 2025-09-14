@@ -12,7 +12,10 @@ class LoginView extends WatchingWidget {
 
   void _onError(BuildContext context, String? errorMessage) {
     if (errorMessage != null) {
-      final snackBar = SnackBar(content: Text(errorMessage));
+      final snackBar = SnackBar(
+        content: Text(errorMessage),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
       viewModel.clearErrorMessages();

@@ -52,6 +52,8 @@ dependencies:
     intl: ^0.20.2
     intl_utils: ^2.8.11
     pdfx: ^2.9.2
+    flutter_doc_scanner: ^0.0.16
+    file_picker: ^10.3.3
 
 dev_dependencies:
     flutter_test:

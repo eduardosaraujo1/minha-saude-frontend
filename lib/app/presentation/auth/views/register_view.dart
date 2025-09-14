@@ -25,7 +25,10 @@ class _RegisterViewState extends State<RegisterView> {
     final errorMessage = widget.viewModel.errorMessage.value;
 
     if (errorMessage != null) {
-      final snackBar = SnackBar(content: Text(errorMessage));
+      final snackBar = SnackBar(
+        content: Text(errorMessage),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
       widget.viewModel.clearErrorMessages();

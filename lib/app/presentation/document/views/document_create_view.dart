@@ -98,7 +98,7 @@ class _DocumentCreateViewState extends State<DocumentCreateView> {
                   Expanded(
                     child: FilledButton.tonal(
                       onPressed: () {
-                        context.pop();
+                        context.go('/');
                       },
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),

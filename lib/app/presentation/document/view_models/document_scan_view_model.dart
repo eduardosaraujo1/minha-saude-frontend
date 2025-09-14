@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/app/data/document/repositories/document_upload_repository.dart';
+import 'package:minha_saude_frontend/config/mock_endpoint_config.dart';
+import 'package:minha_saude_frontend/di/get_it.dart';
 import 'package:pdfx/pdfx.dart';
 
 class DocumentScanViewModel {
@@ -27,20 +29,25 @@ class DocumentScanViewModel {
     status.value = PageStatus.loading;
 
     if (_type == DocumentCreateType.scan) {
-      final result = await uploadRepository.scanDocument();
+      // mock decision
+      if (getIt<MockEndpointConfig>().documentCreateMode ==
+          DocumentCreateMode.scan) {
+        final result = await uploadRepository.scanDocument();
 
-      if (result.isError()) {
-        status.value = PageStatus.error;
-        errorMessage.value = result.tryGetError()?.toString();
+        if (result.isError()) {
+          status.value = PageStatus.error;
+          errorMessage.value = result.tryGetError()?.toString();
+        } else {
+          _pdfController = PdfController(
+            document: PdfDocument.openFile(result.getOrThrow().path),
+          );
+        }
       } else {
+        // Mock:
         _pdfController = PdfController(
-          document: PdfDocument.openFile(result.getOrThrow().path),
+          document: PdfDocument.openAsset('assets/fake/document.pdf'),
         );
       }
-      // // Mock:
-      // _pdfController = PdfController(
-      //   document: PdfDocument.openAsset('assets/fake/document.pdf'),
-      // );
       status.value = PageStatus.loaded;
     } else if (_type == DocumentCreateType.upload) {
       final result = await uploadRepository.uploadDocumentFromFile();

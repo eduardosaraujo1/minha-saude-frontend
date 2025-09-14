@@ -6,7 +6,7 @@ import 'package:minha_saude_frontend/app/data/document/repositories/document_upl
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_create_view_model.dart';
-import 'package:minha_saude_frontend/app/presentation/document/view_models/document_state_view_model.dart';
+import 'package:minha_saude_frontend/app/presentation/document/view_models/document_scan_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/document/views/document_create_view.dart';
 import 'package:minha_saude_frontend/app/presentation/document/views/document_scan_view.dart';

@@ -22,12 +22,12 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final router = GoRouter(
   initialLocation: '/',
-  redirect: (context, state) {
+  redirect: (context, state) async {
     final authRepository = getIt<AuthRepository>();
     final tokenRepository = getIt<TokenRepository>();
 
     // Check authentication state
-    final hasSessionToken = tokenRepository.hasTokenCached;
+    final hasSessionToken = await tokenRepository.hasToken();
     final hasRegisterToken = authRepository.hasValidRegisterToken;
 
     final authRoutes = ['/login', '/tos', '/register'];

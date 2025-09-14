@@ -75,7 +75,7 @@ class RegisterViewModel {
 
   /// Check if user has a session token (fully authenticated)
   Future<bool> isAuthenticated() async {
-    return await tokenRepository.hasToken;
+    return await tokenRepository.hasToken();
   }
 
   /// Dispose form controllers and value notifiers

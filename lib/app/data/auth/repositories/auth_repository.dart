@@ -204,7 +204,7 @@ class AuthRepository {
   /// Note: isRegistered evaluates if the server has the user registered, but it only provides that data after a login attempt
   Future<bool> isRegistered() async {
     // If we have a session token, user is registered
-    if (await _tokenRepository.hasToken) {
+    if (await _tokenRepository.hasToken()) {
       return true;
     }
 

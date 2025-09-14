@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:minha_saude_frontend/app/presentation/shared/widgets/brand_app_bar.dart';
 
 class ConfiguracoesView extends StatelessWidget {
   const ConfiguracoesView({super.key});
@@ -6,7 +7,7 @@ class ConfiguracoesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Configurações')),
+      appBar: BrandAppBar(title: const Text('Configurações')),
       body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

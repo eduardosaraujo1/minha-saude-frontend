@@ -11,7 +11,6 @@ class NotFoundView extends StatelessWidget {
   Widget build(BuildContext context) {
     final authRepository = getIt<AuthRepository>();
     final tokenRepository = getIt<TokenRepository>();
-    final isLoggedIn = tokenRepository.hasTokenCached;
 
     return Scaffold(
       body: Center(
@@ -52,42 +51,51 @@ class NotFoundView extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 48),
-              if (isLoggedIn) ...[
-                FilledButton.icon(
-                  onPressed: () => context.go('/'),
-                  icon: const Icon(Icons.home),
-                  label: const Text('Ir para início'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(200, 48),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                OutlinedButton.icon(
-                  onPressed: () async {
-                    // Clear token from storage
-                    await tokenRepository.removeToken();
-                    // Clear registration status
-                    await authRepository.signOut();
-                    if (context.mounted) {
-                      context.go('/login');
-                    }
-                  },
-                  icon: const Icon(Icons.logout),
-                  label: const Text('Sair'),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(200, 48),
-                  ),
-                ),
-              ] else ...[
-                FilledButton.icon(
-                  onPressed: () => context.go('/login'),
-                  icon: const Icon(Icons.login),
-                  label: const Text('Fazer login'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(200, 48),
-                  ),
-                ),
-              ],
+              FutureBuilder(
+                future: tokenRepository.hasToken(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data == true) {
+                    return Column(
+                      children: [
+                        FilledButton.icon(
+                          onPressed: () => context.go('/'),
+                          icon: const Icon(Icons.home),
+                          label: const Text('Ir para início'),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size(200, 48),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            // Clear token from storage
+                            await tokenRepository.removeToken();
+                            // Clear registration status
+                            await authRepository.signOut();
+                            if (context.mounted) {
+                              context.go('/login');
+                            }
+                          },
+                          icon: const Icon(Icons.logout),
+                          label: const Text('Sair'),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(200, 48),
+                          ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return FilledButton.icon(
+                      onPressed: () => context.go('/login'),
+                      icon: const Icon(Icons.login),
+                      label: const Text('Fazer login'),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(200, 48),
+                      ),
+                    );
+                  }
+                },
+              ),
             ],
           ),
         ),

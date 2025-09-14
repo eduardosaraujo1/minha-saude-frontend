@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
+import 'package:minha_saude_frontend/app/data/shared/services/secure_storage.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_list_view_model.dart';
+import 'package:minha_saude_frontend/app/presentation/shared/widgets/brand_app_bar.dart';
+import 'package:minha_saude_frontend/di/get_it.dart';
 
 class DocumentListView extends StatefulWidget {
   const DocumentListView(this.viewModel, {super.key});
@@ -40,11 +44,9 @@ class _DocumentListViewState extends State<DocumentListView> {
   @override
   Widget build(BuildContext context) {
     final vm = widget.viewModel;
+    final dbg = getIt<SecureStorage>();
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Documentos'),
-        scrolledUnderElevation: 0,
-      ),
+      appBar: BrandAppBar(title: const Text('Documentos')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -66,9 +68,14 @@ class _DocumentListViewState extends State<DocumentListView> {
             const SizedBox(height: 16),
             const Text('Lista de Documentos', style: TextStyle(fontSize: 24)),
             const SizedBox(height: 8),
-            Text(
-              'Página ${widget.viewModel.hashCode}',
-              style: const TextStyle(color: Colors.grey),
+            FutureBuilder(
+              future: dbg.read(TokenRepository.keyUserId),
+              builder: (context, asyncSnapshot) {
+                return Text(
+                  'Página ${asyncSnapshot.data ?? ''}',
+                  style: const TextStyle(color: Colors.grey),
+                );
+              },
             ),
             FilledButton(
               onPressed: () {

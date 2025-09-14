@@ -44,7 +44,6 @@ class LoginView extends WatchingWidget {
       target: vm.redirectTo,
       handler: (context, String? newValue, cancel) {
         _onRedirect(context, newValue);
-        // log(newValue.toString());
       },
     );
 

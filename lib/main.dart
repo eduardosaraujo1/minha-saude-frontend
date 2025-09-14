@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 import 'package:minha_saude_frontend/di/get_it.dart';
 import 'package:minha_saude_frontend/app/presentation/shared/themes/app_theme.dart';
 import 'package:watch_it/watch_it.dart';
@@ -11,6 +12,9 @@ void main() async {
 
     // Initialize all providers and dependencies
     await setupLocator();
+
+    // Preload authentication token
+    await getIt<TokenRepository>().reload();
 
     // Run the app
     runApp(const MyApp());

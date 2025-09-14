@@ -6,7 +6,7 @@ import 'package:multiple_result/multiple_result.dart';
 /// Shared repository responsible for managing authentication tokens only
 /// This provides a clean separation between token storage and auth-specific logic
 class TokenRepository {
-  static const String _tokenKey = 'session_token';
+  static const String keyUserId = 'session_token';
 
   final SecureStorage _storage;
 
@@ -28,13 +28,10 @@ class TokenRepository {
   String? get tokenCached => _cachedToken;
 
   /// Check if user has a valid token (lazy-loaded)
-  Future<bool> get hasToken async {
-    await _refreshTokenCache();
-    return _cachedToken != null && _cachedToken!.isNotEmpty;
-  }
-
-  /// Check if user has a valid cached token (synchronous, no storage access)
-  bool get hasTokenCached {
+  Future<bool> hasToken() async {
+    if (!_cacheLoaded) {
+      await _refreshTokenCache();
+    }
     return _cachedToken != null && _cachedToken!.isNotEmpty;
   }
 
@@ -43,7 +40,7 @@ class TokenRepository {
     _cacheLoaded = false;
 
     try {
-      final token = await _storage.read(_tokenKey);
+      final token = await _storage.read(keyUserId);
       _cachedToken = token;
       _cacheLoaded = true;
     } catch (e) {
@@ -56,7 +53,7 @@ class TokenRepository {
   /// Set a new authentication token
   Future<Result<void, Exception>> setToken(String token) async {
     try {
-      await _storage.write(_tokenKey, token);
+      await _storage.write(keyUserId, token);
       _cachedToken = token;
       _cacheLoaded = true; // Mark cache as loaded with new value
       return Result.success(null);
@@ -68,7 +65,7 @@ class TokenRepository {
   /// Remove the current authentication token
   Future<Result<void, Exception>> removeToken() async {
     try {
-      await _storage.delete(_tokenKey);
+      await _storage.delete(keyUserId);
       _cachedToken = null;
       _cacheLoaded = true; // Mark cache as loaded with null value
       return Result.success(null);

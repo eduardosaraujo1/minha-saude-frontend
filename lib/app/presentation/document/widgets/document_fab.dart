@@ -90,15 +90,21 @@ class _DocumentFabState extends State<DocumentFab> {
                 ? FloatingActionButton.extended(
                     onPressed: _toggleMenu,
                     backgroundColor:
-                        widget.fabBackgroundColor ?? colorScheme.primary,
+                        widget.fabBackgroundColor ??
+                        colorScheme.primaryContainer,
                     foregroundColor:
-                        widget.fabForegroundColor ?? colorScheme.onPrimary,
-                    icon: Icon(widget.fabIcon),
+                        widget.fabForegroundColor ??
+                        colorScheme.onPrimaryContainer,
+                    icon: Icon(
+                      widget.fabIcon,
+                      color: colorScheme.onPrimaryContainer,
+                    ),
                     label: Text(
                       widget.fabLabel!,
                       style: textTheme.labelLarge?.copyWith(
                         color:
-                            widget.fabForegroundColor ?? colorScheme.onPrimary,
+                            widget.fabForegroundColor ??
+                            colorScheme.onPrimaryContainer,
                       ),
                     ),
                   )

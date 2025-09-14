@@ -90,6 +90,11 @@ class DocumentListViewModel {
     final monthName = months[date.month - 1];
     return '$monthName ${date.year}';
   }
+
+  void setSelectedAlgorithm(GroupAlgorithm algorithm) {
+    selectedAlgorithm.value = algorithm;
+    groupedDocuments.value = groupDocuments(documents.value, algorithm);
+  }
 }
 
 enum GroupAlgorithm { paciente, tipo, medico, data }

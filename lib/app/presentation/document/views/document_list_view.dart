@@ -13,51 +13,60 @@ class DocumentListView extends WatchingWidget {
   @override
   Widget build(BuildContext context) {
     // Mock data as map with category names as keys
-    final Map<String, List<Document>> mockData = watch(
+    final Map<String, List<Document>> documents = watch(
       viewModel.groupedDocuments,
     ).value;
 
     return Scaffold(
       appBar: BrandAppBar(
         title: const Text('Documentos'),
-        action: IconButton(onPressed: () {}, icon: const Icon(Icons.sort)),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: mockData.entries.map((entry) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(entry.key, style: Theme.of(context).textTheme.titleMedium),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                    childAspectRatio: 1,
-                  ),
-                  itemCount: entry.value.length,
-                  itemBuilder: (context, index) {
-                    final documentTitle = entry.value[index].titulo;
-                    return DocumentItem(
-                      title: documentTitle,
-                      onTap: () {
-                        // TODO: Handle document tap
-                      },
-                    );
-                  },
-                ),
-              ],
-            );
-          }).toList(),
+        action: IconButton(
+          onPressed: () {},
+          icon: _SortMenu(onSelected: viewModel.setSelectedAlgorithm),
         ),
       ),
+      body: documents.isEmpty
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: documents.entries.map((entry) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        entry.key,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                              childAspectRatio: 1,
+                            ),
+                        itemCount: entry.value.length,
+                        itemBuilder: (context, index) {
+                          final documentTitle = entry.value[index].titulo;
+                          return DocumentItem(
+                            title: documentTitle,
+                            onTap: () {
+                              // TODO: Handle document tap
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
       floatingActionButton: DocumentFab(
         fabLabel: 'Documento',
         menuItems: [
@@ -77,6 +86,49 @@ class DocumentListView extends WatchingWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _SortMenu extends StatelessWidget {
+  const _SortMenu({required this.onSelected});
+
+  final void Function(GroupAlgorithm) onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      menuChildren: <Widget>[
+        MenuItemButton(
+          onPressed: () => onSelected(GroupAlgorithm.paciente),
+          child: const Text('Agrupar por Paciente'),
+        ),
+        MenuItemButton(
+          onPressed: () => onSelected(GroupAlgorithm.tipo),
+          child: const Text('Agrupar por Tipo'),
+        ),
+        MenuItemButton(
+          onPressed: () => onSelected(GroupAlgorithm.medico),
+          child: const Text('Agrupar por Médico'),
+        ),
+        MenuItemButton(
+          onPressed: () => onSelected(GroupAlgorithm.data),
+          child: const Text('Agrupar por Data'),
+        ),
+      ],
+      builder:
+          (BuildContext context, MenuController controller, Widget? child) {
+            return IconButton(
+              onPressed: () {
+                if (controller.isOpen) {
+                  controller.close();
+                } else {
+                  controller.open();
+                }
+              },
+              icon: const Icon(Icons.sort),
+            );
+          },
     );
   }
 }

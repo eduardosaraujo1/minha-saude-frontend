@@ -20,5 +20,6 @@
 -   [ ] Fazer lógica de lixeira de documentos (backend mock)
 -   [ ] Fazer lógica de compartilhar documentos (frontend support)
 -   [ ] Fazer lógica de compartilhar documentos (backend mock)
+-   [ ] Upload pdf via arquivo
 -   [ ] Escrever casos de teste para avaliar edge cases (especialmente no visualizar documento)
 -   [ ] Tratativa de erro caso o backend se torne não-responsivo

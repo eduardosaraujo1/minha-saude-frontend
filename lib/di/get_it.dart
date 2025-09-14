@@ -9,6 +9,7 @@ import 'package:minha_saude_frontend/app/data/document/repositories/document_rep
 import 'package:minha_saude_frontend/app/data/document/repositories/document_upload_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/services/api_client.dart';
+import 'package:minha_saude_frontend/app/data/shared/services/document_scanner.dart';
 import 'package:minha_saude_frontend/app/data/shared/services/secure_storage.dart';
 import 'package:minha_saude_frontend/app/presentation/shared/themes/app_theme.dart';
 import 'package:minha_saude_frontend/app/router/go_router.dart';
@@ -27,6 +28,7 @@ Future<void> setupLocator() async {
     ),
   );
   getIt.registerSingleton<Dio>(Dio());
+  getIt.registerSingleton<DocumentScanner>(DocumentScanner());
   getIt.registerSingleton<SecureStorage>(SecureStorage());
   getIt.registerSingleton<GoogleAuthConfig>(GoogleAuthConfig());
   getIt.registerSingleton<AppTheme>(AppTheme());
@@ -64,7 +66,9 @@ Future<void> setupLocator() async {
   );
 
   getIt.registerSingleton<DocumentRepository>(DocumentRepository());
-  getIt.registerSingleton<DocumentUploadRepository>(DocumentUploadRepository());
+  getIt.registerSingleton<DocumentUploadRepository>(
+    DocumentUploadRepository(getIt<DocumentScanner>()),
+  );
 
   // Await on async operations
   await getIt.allReady();

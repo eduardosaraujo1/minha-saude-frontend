@@ -91,7 +91,7 @@ final router = GoRouter(
                 GoRoute(
                   path: 'documentos/upload',
                   builder: (BuildContext context, GoRouterState state) {
-                    return DocumentCreateView(
+                    return DocumentCreatePreview(
                       DocumentCreateViewModel(
                         DocumentCreateType.upload,
                         getIt<DocumentUploadRepository>(),
@@ -102,7 +102,7 @@ final router = GoRouter(
                 GoRoute(
                   path: 'documentos/scan',
                   builder: (BuildContext context, GoRouterState state) {
-                    return DocumentCreateView(
+                    return DocumentCreatePreview(
                       DocumentCreateViewModel(
                         DocumentCreateType.scan,
                         getIt<DocumentUploadRepository>(),

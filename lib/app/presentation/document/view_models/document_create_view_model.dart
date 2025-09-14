@@ -1,44 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/app/data/document/repositories/document_upload_repository.dart';
+import 'package:pdfx/pdfx.dart';
 
 class DocumentCreateViewModel {
   final DocumentUploadRepository uploadRepository;
   final DocumentCreateType _type;
 
-  final isLoading = ValueNotifier<bool>(true);
+  final status = ValueNotifier<PageStatus>(PageStatus.initial);
   final errorMessage = ValueNotifier<String?>(null);
-  final documentFile = ValueNotifier<DocumentFile?>(null);
+
+  PdfController? _pdfController;
+
+  PdfController? get pdfController => _pdfController;
 
   DocumentCreateViewModel(this._type, this.uploadRepository) {
     _getDocument();
   }
 
   void dispose() {
-    isLoading.dispose();
+    status.dispose();
     errorMessage.dispose();
+    _pdfController?.dispose();
   }
 
   void _getDocument() async {
-    isLoading.value = true;
+    status.value = PageStatus.loading;
 
     if (_type == DocumentCreateType.scan) {
       final result = await uploadRepository.scanDocument();
 
       if (result.isError()) {
+        status.value = PageStatus.error;
         errorMessage.value = result.tryGetError()?.toString();
       } else {
-        documentFile.value = result.getOrThrow();
+        _pdfController = PdfController(
+          document: PdfDocument.openFile(result.getOrThrow().path),
+        );
       }
-      isLoading.value = false;
+      // // Mock:
+      // _pdfController = PdfController(
+      //   document: PdfDocument.openAsset('assets/fake/document.pdf'),
+      // );
+      status.value = PageStatus.loaded;
     } else if (_type == DocumentCreateType.upload) {
       final result = await uploadRepository.uploadDocumentFromFile();
 
       if (result.isError()) {
+        status.value = PageStatus.error;
         errorMessage.value = result.tryGetError()?.toString();
       }
-      isLoading.value = false;
+      status.value = PageStatus.loaded;
+    } else {
+      status.value = PageStatus.error;
+      errorMessage.value = 'Tipo de criação de documento inválido.';
     }
   }
 }
 
 enum DocumentCreateType { scan, upload }
+
+enum PageStatus { initial, loading, loaded, error }

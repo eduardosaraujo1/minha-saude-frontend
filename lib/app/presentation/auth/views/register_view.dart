@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/views/layouts/login_form_layout.dart';
 import 'package:watch_it/watch_it.dart';
 
 // Wrapper for RegisterView to handle ViewModel disposal
-class RegisterView extends StatefulWidget {
+class RegisterView extends WatchingStatefulWidget {
   final RegisterViewModel viewModel;
   const RegisterView(this.viewModel, {super.key});
 
@@ -20,37 +21,46 @@ class _RegisterViewState extends State<RegisterView> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return _RegisterView(widget.viewModel);
-  }
-}
-
-class _RegisterView extends WatchingWidget {
-  final RegisterViewModel viewModel;
-  const _RegisterView(this.viewModel);
-
-  void _onErrorChanged(BuildContext context, String? errorMessage) {
-    final errorMessage = viewModel.errorMessage.value;
+  void _onErrorChanged(BuildContext context) {
+    final errorMessage = widget.viewModel.errorMessage.value;
 
     if (errorMessage != null) {
       final snackBar = SnackBar(content: Text(errorMessage));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
-      viewModel.clearErrorMessages();
+      widget.viewModel.clearErrorMessages();
     }
+  }
+
+  void _onRedirect(BuildContext context) {
+    final redirectPath = widget.viewModel.redirectTo.value;
+    if (redirectPath != null) {
+      widget.viewModel.redirectTo.value = null; // Clear redirect
+      context.go(redirectPath);
+    }
+  }
+
+  Future<void> _handleRegister(BuildContext context) async {
+    await widget.viewModel.registerUser();
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = viewModel;
+    final vm = widget.viewModel;
     final form = vm.form;
     final isLoading = watch(vm.isLoading);
 
-    registerChangeNotifierHandler(
+    registerHandler<ValueNotifier, String?>(
       target: vm.errorMessage,
-      handler: (context, newValue, cancel) {
-        _onErrorChanged(context, newValue.value);
+      handler: (context, value, cancel) {
+        _onErrorChanged(context);
+      },
+    );
+
+    registerHandler<ValueNotifier, String?>(
+      target: vm.redirectTo,
+      handler: (context, value, cancel) {
+        _onRedirect(context);
       },
     );
 
@@ -142,9 +152,7 @@ class _RegisterView extends WatchingWidget {
               FilledButton(
                 onPressed: isLoading.value
                     ? null
-                    : () {
-                        vm.registerUser();
-                      },
+                    : () => _handleRegister(context),
                 style: FilledButton.styleFrom(
                   backgroundColor: isLoading.value
                       ? Theme.of(
@@ -180,6 +188,9 @@ class _RegisterView extends WatchingWidget {
   }
 
   void _triggerBirthDatePicker(BuildContext context) async {
+    final dtNascimentoController =
+        widget.viewModel.form.dataNascimentoController;
+
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -187,7 +198,7 @@ class _RegisterView extends WatchingWidget {
       lastDate: DateTime.now(),
     );
     if (pickedDate != null) {
-      viewModel.form.dataNascimentoController.value = TextEditingValue(
+      dtNascimentoController.value = TextEditingValue(
         text: "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}",
       );
     }

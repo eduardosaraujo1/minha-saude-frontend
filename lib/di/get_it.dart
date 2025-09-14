@@ -58,7 +58,7 @@ Future<void> setupLocator() async {
       getIt<GoogleSignInService>(),
       getIt<TokenRepository>(),
     ),
-    dependsOn: [AuthRemoteService, GoogleSignInService],
+    dependsOn: [GoogleSignInService],
   );
 
   // Await on async operations

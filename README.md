@@ -11,12 +11,11 @@
 
 ## Para fazer
 
--   [ ] TokenRepository should lazy read the SecureStorage, not eager on the create method (that simplifies getIt process)
--   [ ] Return to watch_it + stateless widget (registerHandler solves BuildCOntext issue)
 -   [ ] Unir telas feitas pelo Davi aqui
 -   [ ] Criar inicial de lista de documentos
 -   [ ] Fazer lógica de login com Google (criar um mock do componente que se comunica com o backend)
--   [ ] Fazer rota ´/´ direcionar para documentos ou login dependendo do estado de login do usuário
+-   Descobrir pq o register tava crashando
+-   [ ] Fazer tela de adicionar documento
 -   [ ] Fazer navbar e appbar
 -   [ ] Fazer tela (display only) de compartilhar, lixeira e configurações de usuário
 -   [ ] Fazer lógica de organização de documentos (frontend support)

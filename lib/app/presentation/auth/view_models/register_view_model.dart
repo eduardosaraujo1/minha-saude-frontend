@@ -1,11 +1,9 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
 import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
-import 'package:minha_saude_frontend/di/get_it.dart';
 
 class RegisterViewModel {
   final RegisterForm form = RegisterForm();
@@ -15,6 +13,8 @@ class RegisterViewModel {
   RegisterViewModel(this.authRepository, this.tokenRepository);
 
   final ValueNotifier<String?> errorMessage = ValueNotifier(null);
+
+  final ValueNotifier<String?> redirectTo = ValueNotifier(null);
 
   final ValueNotifier<bool> isLoading = ValueNotifier(false);
 
@@ -50,16 +50,13 @@ class RegisterViewModel {
         // Check if error is due to expired token
         if (!authRepository.hasValidRegisterToken) {
           this.errorMessage.value =
-              "Seu tempo para completar o registro expirou. Faça login novamente.";
-
-          disposeForm();
-          getIt<GoRouter>().go("/login");
+              "Token de registro expirado. Faça login novamente.";
+          redirectTo.value = "/login";
         } else {
           this.errorMessage.value = errorMessage;
         }
       } else {
-        disposeForm();
-        getIt<GoRouter>().go("/");
+        redirectTo.value = "/";
       }
     } catch (e) {
       log(e.toString());
@@ -81,24 +78,13 @@ class RegisterViewModel {
     return await tokenRepository.hasToken;
   }
 
-  /// Dispose form controllers
+  /// Dispose form controllers and value notifiers
   void disposeForm() {
     form.dispose();
   }
 
   void dispose() {
     form.dispose();
-  }
-
-  /// Wrap goRouter redirects into a method to ensure form disposal
-  void navigateTo(String path, {bool replace = false}) {
-    disposeForm();
-
-    if (replace) {
-      getIt<GoRouter>().go(path);
-    } else {
-      getIt<GoRouter>().push(path);
-    }
   }
 
   /// Parse date from DD/MM/YYYY format

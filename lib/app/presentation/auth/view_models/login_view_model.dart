@@ -1,8 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
-import 'package:minha_saude_frontend/di/get_it.dart';
 
 class LoginViewModel {
   final AuthRepository authRepository;
@@ -10,6 +8,7 @@ class LoginViewModel {
 
   final ValueNotifier<String?> errorMessage = ValueNotifier(null);
   final ValueNotifier<bool> isLoading = ValueNotifier(false);
+  final ValueNotifier<String?> redirectTo = ValueNotifier(null);
 
   LoginViewModel(this.authRepository, this.tokenRepository);
 
@@ -25,13 +24,11 @@ class LoginViewModel {
       } else {
         final response = result.getOrThrow();
 
-        // Handle response based on registration status
+        // Set redirect path based on registration status
         if (response.isRegistered) {
-          // User is fully registered - navigate to main app
-          getIt<GoRouter>().go("/");
+          redirectTo.value = "/";
         } else {
-          // User needs to complete registration - navigate to TOS
-          getIt<GoRouter>().go("/tos");
+          redirectTo.value = "/tos";
         }
       }
     } catch (e) {

@@ -45,6 +45,9 @@ dependencies:
     mask_text_input_formatter: ^2.9.0
     flutter_markdown_plus: ^1.0.3
     multiple_result: ^5.2.0
+    flutter_secure_storage: ^9.2.2
+    watch_it: ^1.7.0
+    dio: ^5.9.0
 
 dev_dependencies:
     flutter_test:
@@ -73,6 +76,7 @@ flutter:
         - assets/brand/google/logo.svg
         - assets/brand/minha_saude/logo.svg
         - assets/brand/minha_saude/logo_icon.svg
+        - assets/icons/document.svg
 
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/to/resolution-aware-images

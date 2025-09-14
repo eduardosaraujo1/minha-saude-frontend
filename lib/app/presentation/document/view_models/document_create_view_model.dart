@@ -1,62 +1,77 @@
-import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/data/document/repositories/document_upload_repository.dart';
-import 'package:pdfx/pdfx.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
+// TODO: implement with DocumentRepository real creation
 class DocumentCreateViewModel {
-  final DocumentUploadRepository uploadRepository;
-  final DocumentCreateType _type;
-
-  final status = ValueNotifier<PageStatus>(PageStatus.initial);
+  final state = ValueNotifier<PageStatus>(PageStatus.initial);
   final errorMessage = ValueNotifier<String?>(null);
-
-  PdfController? _pdfController;
-
-  PdfController? get pdfController => _pdfController;
-
-  DocumentCreateViewModel(this._type, this.uploadRepository) {
-    _getDocument();
-  }
+  final form = DocumentFormController();
 
   void dispose() {
-    status.dispose();
+    state.dispose();
     errorMessage.dispose();
-    _pdfController?.dispose();
-  }
-
-  void _getDocument() async {
-    status.value = PageStatus.loading;
-
-    if (_type == DocumentCreateType.scan) {
-      final result = await uploadRepository.scanDocument();
-
-      if (result.isError()) {
-        status.value = PageStatus.error;
-        errorMessage.value = result.tryGetError()?.toString();
-      } else {
-        _pdfController = PdfController(
-          document: PdfDocument.openFile(result.getOrThrow().path),
-        );
-      }
-      // // Mock:
-      // _pdfController = PdfController(
-      //   document: PdfDocument.openAsset('assets/fake/document.pdf'),
-      // );
-      status.value = PageStatus.loaded;
-    } else if (_type == DocumentCreateType.upload) {
-      final result = await uploadRepository.uploadDocumentFromFile();
-
-      if (result.isError()) {
-        status.value = PageStatus.error;
-        errorMessage.value = result.tryGetError()?.toString();
-      }
-      status.value = PageStatus.loaded;
-    } else {
-      status.value = PageStatus.error;
-      errorMessage.value = 'Tipo de criação de documento inválido.';
-    }
+    form.dispose();
   }
 }
 
-enum DocumentCreateType { scan, upload }
+class DocumentFormController {
+  final formKey = GlobalKey<FormState>();
+  final tituloController = TextEditingController();
+  final nomePacienteController = TextEditingController();
+  final nomeMedicoController = TextEditingController();
+  final tipoDocumentoController = TextEditingController();
+  final dataDocumentoController = TextEditingController();
+
+  /// Validates the form and returns true if valid
+  bool validate() {
+    return formKey.currentState?.validate() ?? false;
+  }
+
+  String? validateTitulo(String? value) {
+    if (value != null && value.length > 100) {
+      return 'O título não pode exceder 100 caracteres';
+    }
+    if (value == null || value.isEmpty) {
+      return 'Por favor, insira o título do documento';
+    }
+    return null;
+  }
+
+  String? validateNomePaciente(String? value) {
+    if (value != null && value.length > 100) {
+      return 'O nome do paciente não pode exceder 100 caracteres';
+    }
+    return null;
+  }
+
+  String? validateNomeMedico(String? value) {
+    if (value != null && value.length > 100) {
+      return 'O nome do médico não pode exceder 100 caracteres';
+    }
+    return null;
+  }
+
+  String? validateTipoDocumento(String? value) {
+    if (value != null && value.length > 100) {
+      return 'O tipo do documento não pode exceder 100 caracteres';
+    }
+    return null;
+  }
+
+  String? validateDataDocumento(String? value) {
+    if (value != null && value.length > 100) {
+      return 'A data do documento não pode exceder 100 caracteres';
+    }
+    return null;
+  }
+
+  void dispose() {
+    tituloController.dispose();
+    nomePacienteController.dispose();
+    nomeMedicoController.dispose();
+    tipoDocumentoController.dispose();
+    dataDocumentoController.dispose();
+  }
+}
 
 enum PageStatus { initial, loading, loaded, error }

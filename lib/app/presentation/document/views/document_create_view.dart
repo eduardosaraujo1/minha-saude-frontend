@@ -1,174 +1,150 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_create_view_model.dart';
-import 'package:pdfx/pdfx.dart';
 import 'package:watch_it/watch_it.dart';
 
-class DocumentCreatePreview extends WatchingStatefulWidget {
+class DocumentCreateView extends WatchingStatefulWidget {
   final DocumentCreateViewModel viewModel;
-  const DocumentCreatePreview(this.viewModel, {super.key});
+
+  const DocumentCreateView(this.viewModel, {super.key});
 
   @override
-  State<DocumentCreatePreview> createState() => _MyWidgetState();
+  State<DocumentCreateView> createState() => _DocumentCreateViewState();
 }
 
-class _MyWidgetState extends State<DocumentCreatePreview> {
+class _DocumentCreateViewState extends State<DocumentCreateView> {
   DocumentCreateViewModel get viewModel => widget.viewModel;
+
   @override
   void dispose() {
     viewModel.dispose();
     super.dispose();
   }
 
-  _onErrorChanged(BuildContext context, String? newValue) {
-    if (newValue != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(newValue),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final status = watch(viewModel.status).value;
-
-    registerHandler<ValueNotifier, String?>(
-      handler: (context, newValue, cancel) {
-        _onErrorChanged(context, newValue);
-      },
-      target: viewModel.errorMessage,
-    );
+    final form = viewModel.form;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Criar Documento'),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       ),
-      body: Builder(
-        builder: (context) {
-          if (status == PageStatus.error &&
-              viewModel.errorMessage.value != null) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: form.formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 8,
+            children: [
+              Text(
+                "Vamos organizar o seu documento",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              Text(
+                "Informe os dados abaixo para facilitar a localização do arquivo",
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: form.tituloController,
+                validator: form.validateTitulo,
+                decoration: const InputDecoration(
+                  labelText: 'Título',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              TextFormField(
+                controller: form.nomePacienteController,
+                validator: form.validateNomePaciente,
+                decoration: const InputDecoration(
+                  labelText: 'Nome do(a) paciente',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              TextFormField(
+                controller: form.nomeMedicoController,
+                validator: form.validateNomeMedico,
+                decoration: const InputDecoration(
+                  labelText: 'Nome do(a) médico(a)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              TextFormField(
+                controller: form.tipoDocumentoController,
+                validator: form.validateTipoDocumento,
+                decoration: const InputDecoration(
+                  labelText: 'Tipo do documento',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              TextFormField(
+                controller: form.dataDocumentoController,
+                validator: form.validateDataDocumento,
+                decoration: const InputDecoration(
+                  labelText: 'Data do documento',
+                  border: OutlineInputBorder(),
+                  suffixIcon: Icon(Icons.calendar_today),
+                ),
+                keyboardType: TextInputType.datetime,
+                readOnly: true,
+                onTap: () => _triggerDocumentDatePicker(context),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                spacing: 8,
                 children: [
-                  Text(
-                    textAlign: TextAlign.center,
-                    'Ocorreu um erro desconhecido. Por favor, tente novamente.',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.error,
+                  Expanded(
+                    child: FilledButton.tonal(
+                      onPressed: () {
+                        context.pop();
+                      },
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: const Text('Pular essa etapa'),
                     ),
                   ),
-                  FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.error,
-                      foregroundColor: Theme.of(context).colorScheme.onError,
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () {
+                        if (form.validate()) {
+                          context.go('/');
+                        }
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: const Text('Salvar e Continuar'),
                     ),
-                    onPressed: () {
-                      context.pop();
-                    },
-                    child: Text("Voltar"),
                   ),
                 ],
               ),
-            );
-          } else if (status == PageStatus.loaded &&
-              viewModel.pdfController != null) {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(children: [_buildPreview(), _buildBottomCard()]),
-            );
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
-    );
-  }
-
-  Widget _buildPreview() {
-    if (viewModel.pdfController == null) {
-      return const Center(child: Text('Nenhum documento carregado.'));
-    }
-    return Expanded(
-      child: PdfView(
-        controller: viewModel.pdfController!,
-        scrollDirection: Axis.horizontal,
-        pageSnapping: true,
-        physics: BouncingScrollPhysics(),
-        onDocumentError: (error) {
-          viewModel.errorMessage.value = 'Erro ao carregar documento: $error';
-        },
-      ),
-    );
-  }
-
-  Widget _buildBottomCard() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Este documento parece certo?',
-            style: Theme.of(context).textTheme.titleMedium,
-            textAlign: TextAlign.left,
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.tonalIcon(
-                  onPressed: () {
-                    context.pop();
-                  },
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    foregroundColor: Theme.of(
-                      context,
-                    ).colorScheme.onSecondaryContainer,
-                  ),
-                  label: const Text('Cancelar'),
-                  icon: Icon(
-                    Icons.cancel,
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: FilledButton.tonalIcon(
-                  onPressed: () {
-                    // TODO: Implement document confirmation logic
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Documento confirmado!')),
-                    );
-                  },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.primaryContainer,
-                    foregroundColor: Theme.of(
-                      context,
-                    ).colorScheme.onPrimaryContainer,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  icon: Icon(
-                    Icons.check,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
-                  label: const Text('Confirmar'),
-                ),
-              ),
             ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  void _triggerDocumentDatePicker(BuildContext context) async {
+    final dataDocumentoController = viewModel.form.dataDocumentoController;
+
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (pickedDate != null) {
+      dataDocumentoController.value = TextEditingValue(
+        text: "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}",
+      );
+    }
   }
 }

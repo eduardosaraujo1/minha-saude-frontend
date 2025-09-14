@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_view_model.dart';
 import 'package:watch_it/watch_it.dart';
+import 'package:intl/intl.dart';
 
 class DocumentView extends WatchingWidget {
   final DocumentViewModel viewModel;
@@ -31,6 +32,14 @@ class DocumentView extends WatchingWidget {
       appBar: AppBar(
         title: Text(document?.titulo ?? 'Visualizar Documento'),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+        actions: [
+          if (document != null)
+            IconButton(
+              icon: const Icon(Icons.info_outline),
+              onPressed: () => _showDocumentInfoModal(context, document),
+              tooltip: 'Informações',
+            ),
+        ],
       ),
       body: document == null
           ? const Center(
@@ -117,6 +126,138 @@ class DocumentView extends WatchingWidget {
                 debugPrint('PDF View Created');
               },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDocumentInfoModal(BuildContext context, dynamic document) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+              ),
+              child: Column(
+                children: [
+                  // Handle bar
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  // Header
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Informações',
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.close),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildInfoField(context, 'Título', document.titulo),
+                          const SizedBox(height: 16),
+                          _buildInfoField(
+                            context,
+                            'Adicionado em',
+                            DateFormat(
+                              'dd/MM/yyyy',
+                            ).format(document.dataAdicao),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildInfoField(
+                            context,
+                            'Nome do(a) Paciente',
+                            document.paciente,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildInfoField(
+                            context,
+                            'Nome do(a) Médico(a)',
+                            document.medico,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildInfoField(
+                            context,
+                            'Tipo de Documento',
+                            document.tipo,
+                          ),
+                          const SizedBox(height: 32),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildInfoField(BuildContext context, String label, String value) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
           ),
         ],
       ),

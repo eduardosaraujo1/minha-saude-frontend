@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:minha_saude_frontend/app/data/document/models/document.dart';
+import 'package:pdfx/pdfx.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_view_model.dart';
 import 'package:watch_it/watch_it.dart';
 import 'package:intl/intl.dart';
 
-class DocumentView extends WatchingWidget {
+class DocumentView extends WatchingStatefulWidget {
   final DocumentViewModel viewModel;
   const DocumentView(this.viewModel, {super.key});
+
+  @override
+  State<DocumentView> createState() => _DocumentViewState();
+}
+
+class _DocumentViewState extends State<DocumentView> {
+  DocumentViewModel get viewModel => widget.viewModel;
+
+  @override
+  void dispose() {
+    viewModel.dispose();
+    super.dispose();
+  }
 
   void _onErrorChanged(BuildContext context, String? newValue) {
     if (newValue != null) {
@@ -20,6 +34,7 @@ class DocumentView extends WatchingWidget {
   @override
   Widget build(BuildContext context) {
     final document = watch(viewModel.document).value;
+    final loadingStatus = watch(viewModel.documentLoadingStatus).value;
 
     registerHandler<ValueNotifier, String?>(
       target: viewModel.errorMessage,
@@ -34,204 +49,243 @@ class DocumentView extends WatchingWidget {
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         actions: [
           if (document != null)
-            IconButton(
-              icon: const Icon(Icons.info_outline),
-              onPressed: () => _showDocumentInfoModal(context, document),
-              tooltip: 'Informações',
-            ),
+            _DocumentActionsMenu((DocumentAction action) {
+              if (action == DocumentAction.view) {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) {
+                    return _DocumentInfoBottomSheet(document: document);
+                  },
+                );
+              }
+            }),
         ],
       ),
-      body: document == null
-          ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Carregando documento...'),
-                ],
-              ),
-            )
-          : FutureBuilder<String>(
-              future: viewModel.pdfPathFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 16),
-                        Text('Preparando documento...'),
-                      ],
-                    ),
-                  );
-                }
-
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: Colors.red,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Erro ao carregar documento',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          snapshot.error.toString(),
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                final pdfPath = snapshot.data!;
-                return _buildPdfView(context, document, pdfPath);
-              },
-            ),
+      body: Stack(
+        children: [_buildBodyStateWrapper(context, document, loadingStatus)],
+      ),
     );
   }
 
-  Widget _buildPdfView(BuildContext context, dynamic document, String pdfPath) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: PDFView(
-              filePath: pdfPath,
-              enableSwipe: true,
-              swipeHorizontal: false,
-              autoSpacing: true,
-              fitEachPage: true,
-              pageFling: true,
-              pageSnap: true,
-              fitPolicy: FitPolicy.BOTH,
-              preventLinkNavigation: false,
-              backgroundColor: Theme.of(context).colorScheme.surfaceBright,
-              onError: (error) {
-                viewModel.errorMessage.value = error.toString();
-              },
-              onViewCreated: (PDFViewController controller) {
-                debugPrint('PDF View Created');
-              },
-            ),
+  Widget _buildBodyStateWrapper(
+    BuildContext context,
+    dynamic document,
+    DocumentLoadStatus loadingStatus,
+  ) {
+    switch (loadingStatus) {
+      case DocumentLoadStatus.loading:
+        return const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Carregando documento...'),
+            ],
           ),
-        ],
-      ),
-    );
+        );
+      case DocumentLoadStatus.error:
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(
+                'Erro ao carregar documento',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                viewModel.errorMessage.value ?? 'Erro desconhecido',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Voltar'),
+              ),
+            ],
+          ),
+        );
+      case DocumentLoadStatus.loaded:
+        return _buildPdfView(context, document);
+    }
   }
 
-  void _showDocumentInfoModal(BuildContext context, dynamic document) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          minChildSize: 0.4,
-          maxChildSize: 0.9,
-          builder: (context, scrollController) {
-            return Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(20),
+  Widget _buildPdfView(BuildContext context, dynamic document) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: PdfViewPinch(
+            controller: viewModel.pdfController!,
+            scrollDirection: Axis.vertical,
+            onDocumentError: (error) {
+              viewModel.documentLoadingStatus.value = DocumentLoadStatus.error;
+              viewModel.errorMessage.value = error.toString();
+            },
+            onDocumentLoaded: (document) {
+              debugPrint('PDF loaded: ${document.pagesCount} pages');
+            },
+            onPageChanged: (page) {
+              debugPrint('Current page: $page');
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DocumentInfoBottomSheet extends StatelessWidget {
+  const _DocumentInfoBottomSheet({required this.document});
+
+  final Document document;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (context, scrollController) {
+          return Column(
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              child: Column(
-                children: [
-                  // Handle bar
-                  Container(
-                    margin: const EdgeInsets.only(top: 8),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurfaceVariant.withOpacity(0.4),
-                      borderRadius: BorderRadius.circular(2),
+              // Header
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Text(
+                      'Informações',
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
-                  ),
-                  // Header
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Informações',
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.close),
-                        ),
-                      ],
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
                     ),
-                  ),
-                  // Content
-                  Expanded(
-                    child: SingleChildScrollView(
-                      controller: scrollController,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildInfoField(context, 'Título', document.titulo),
-                          const SizedBox(height: 16),
-                          _buildInfoField(
-                            context,
-                            'Adicionado em',
-                            DateFormat(
-                              'dd/MM/yyyy',
-                            ).format(document.dataAdicao),
-                          ),
-                          const SizedBox(height: 16),
-                          _buildInfoField(
-                            context,
-                            'Nome do(a) Paciente',
-                            document.paciente,
-                          ),
-                          const SizedBox(height: 16),
-                          _buildInfoField(
-                            context,
-                            'Nome do(a) Médico(a)',
-                            document.medico,
-                          ),
-                          const SizedBox(height: 16),
-                          _buildInfoField(
-                            context,
-                            'Tipo de Documento',
-                            document.tipo,
-                          ),
-                          const SizedBox(height: 32),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            );
+              // Content
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    spacing: 8,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _DocumentInfoCard(
+                        label: 'Título',
+                        value: document.titulo,
+                      ),
+                      _DocumentInfoCard(
+                        label: 'Adicionado em',
+                        value: DateFormat(
+                          'dd/MM/yyyy',
+                        ).format(document.dataAdicao),
+                      ),
+                      _DocumentInfoCard(
+                        label: 'Nome do(a) Paciente',
+                        value: document.paciente,
+                      ),
+                      _DocumentInfoCard(
+                        label: 'Nome do(a) Médico(a)',
+                        value: document.medico,
+                      ),
+                      _DocumentInfoCard(
+                        label: 'Tipo de Documento',
+                        value: document.tipo,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _DocumentActionsMenu extends StatelessWidget {
+  final void Function(DocumentAction) onSelected;
+
+  const _DocumentActionsMenu(this.onSelected);
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      menuChildren: [
+        MenuItemButton(
+          onPressed: () => onSelected(DocumentAction.view),
+          child: Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Informações',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+      builder: (context, controller, child) {
+        return IconButton(
+          icon: const Icon(Icons.more_vert),
+          onPressed: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
           },
         );
       },
     );
   }
+}
 
-  Widget _buildInfoField(BuildContext context, String label, String value) {
+class _DocumentInfoCard extends StatelessWidget {
+  const _DocumentInfoCard({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -239,7 +293,7 @@ class DocumentView extends WatchingWidget {
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -247,7 +301,7 @@ class DocumentView extends WatchingWidget {
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
@@ -257,7 +311,7 @@ class DocumentView extends WatchingWidget {
             value,
             style: Theme.of(
               context,
-            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
           ),
         ],
       ),

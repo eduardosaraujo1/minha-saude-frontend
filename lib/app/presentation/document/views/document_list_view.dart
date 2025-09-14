@@ -13,7 +13,6 @@ class DocumentListView extends WatchingWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Mock data as map with category names as keys
     final Map<String, List<Document>> documents = watch(
       viewModel.groupedDocuments,
     ).value;
@@ -25,6 +24,7 @@ class DocumentListView extends WatchingWidget {
       },
     );
 
+    // UI
     return Scaffold(
       appBar: BrandAppBar(
         title: const Text('Documentos'),
@@ -40,41 +40,7 @@ class DocumentListView extends WatchingWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ...documents.entries.map((entry) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          entry.key,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                crossAxisSpacing: 8,
-                                mainAxisSpacing: 8,
-                                childAspectRatio: 1,
-                              ),
-                          itemCount: entry.value.length,
-                          itemBuilder: (context, index) {
-                            final documentTitle = entry.value[index].titulo;
-                            return DocumentItem(
-                              title: documentTitle,
-                              onTap: () {
-                                context.push(
-                                  '/documentos/${entry.value[index].id}',
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ],
-                    );
-                  }),
+                  ..._makeDocumentGroups(context, documents),
                   SizedBox(height: 60),
                 ],
               ),
@@ -108,6 +74,43 @@ class DocumentListView extends WatchingWidget {
       ).showSnackBar(SnackBar(content: Text(newValue)));
       viewModel.clearErrorMessage();
     }
+  }
+
+  List<Widget> _makeDocumentGroups(
+    BuildContext context,
+    Map<String, List<Document>> documents,
+  ) {
+    return documents.entries
+        .map(
+          (entry) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(entry.key, style: Theme.of(context).textTheme.titleMedium),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                  childAspectRatio: 1,
+                ),
+                itemCount: entry.value.length,
+                itemBuilder: (context, index) {
+                  final documentTitle = entry.value[index].titulo;
+                  return DocumentItem(
+                    title: documentTitle,
+                    onTap: () {
+                      context.push('/documentos/${entry.value[index].id}');
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+        )
+        .toList();
   }
 }
 

@@ -12,14 +12,10 @@
 ## Para fazer
 
 -   [ ] Unir telas feitas pelo Davi aqui
--   [ ] Criar inicial de lista de documentos
--   [ ] Fazer lógica de login com Google (criar um mock do componente que se comunica com o backend)
--   Descobrir pq o register tava crashando
+-   [ ] Tela criar documento
 -   [ ] Fazer tela de adicionar documento
 -   [ ] Fazer navbar e appbar
 -   [ ] Fazer tela (display only) de compartilhar, lixeira e configurações de usuário
--   [ ] Fazer lógica de organização de documentos (frontend support)
--   [ ] Fazer lógica de organização de documentos (backend mock)
 -   [ ] Fazer lógica de lixeira de documentos (frontend support)
 -   [ ] Fazer lógica de lixeira de documentos (backend mock)
 -   [ ] Fazer lógica de compartilhar documentos (frontend support)

@@ -5,7 +5,9 @@ import 'package:minha_saude_frontend/app/data/shared/repositories/token_reposito
 import 'package:minha_saude_frontend/di/get_it.dart';
 
 class NotFoundView extends StatelessWidget {
-  const NotFoundView({super.key});
+  final String fullPath;
+
+  const NotFoundView(this.fullPath, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +36,7 @@ class NotFoundView extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'Página não encontrada',
+                "Página '$fullPath' não encontrada",
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),

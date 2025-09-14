@@ -18,14 +18,16 @@ class DocumentRepository {
       );
       return Result.success(document);
     } catch (e) {
-      return Result.error(Exception('Documento não encontrado'));
+      return Result.error(
+        Exception('Documento não encontrado. Tente fechar a página.'),
+      );
     }
   }
 
   // TODO: quando a escala do app justificar, implementar paginação via scroll infinito
   Future<Result<List<Document>, Exception>> listDocuments() async {
     // Simulação de leitura de documentos
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(milliseconds: 100));
     final List<Document> documentos = [
       Document(
         id: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',

@@ -4,6 +4,8 @@ import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.
 import 'package:minha_saude_frontend/app/data/document/repositories/document_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_view_model.dart';
+import 'package:minha_saude_frontend/app/presentation/document/view_models/document_view_model.dart';
+import 'package:minha_saude_frontend/app/presentation/document/views/document_view.dart';
 import 'package:minha_saude_frontend/di/get_it.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/login_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/tos_view_model.dart';
@@ -59,7 +61,7 @@ final router = GoRouter(
 
     return null;
   },
-  errorBuilder: (context, state) => const NotFoundView(),
+  errorBuilder: (context, state) => NotFoundView(state.fullPath ?? ''),
   routes: [
     // Main app routes with bottom navigation
     StatefulShellRoute.indexedStack(
@@ -82,6 +84,19 @@ final router = GoRouter(
                   DocumentListView(
                     DocumentListViewModel(getIt<DocumentRepository>()),
                   ),
+              routes: [
+                GoRoute(
+                  path: 'documentos/:id',
+                  builder: (BuildContext context, GoRouterState state) {
+                    return DocumentView(
+                      DocumentViewModel(
+                        state.pathParameters['id'] ?? '',
+                        getIt<DocumentRepository>(),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           ],
         ),

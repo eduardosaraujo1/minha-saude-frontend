@@ -7,9 +7,25 @@ class DocumentView extends WatchingWidget {
   final DocumentViewModel viewModel;
   const DocumentView(this.viewModel, {super.key});
 
+  void _onErrorChanged(BuildContext context, String? newValue) {
+    if (newValue != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(newValue)));
+      viewModel.errorMessage.value = null; // Reset after showing
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final document = watch(viewModel.document).value;
+
+    registerHandler<ValueNotifier, String?>(
+      target: viewModel.errorMessage,
+      handler: (context, newValue, cancel) {
+        _onErrorChanged(context, newValue);
+      },
+    );
 
     return Scaffold(
       appBar: AppBar(

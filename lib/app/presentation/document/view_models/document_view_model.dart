@@ -13,7 +13,6 @@ class DocumentViewModel {
 
   final errorMessage = ValueNotifier<String?>(null);
   final document = ValueNotifier<Document?>(null);
-
   late final Future<String> pdfPathFuture;
 
   DocumentViewModel(this.documentId, this.documentRepository) {

@@ -1,7 +1,6 @@
 import 'dart:io';
-import 'package:flutter/services.dart';
-import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:minha_saude_frontend/app/data/shared/services/document_scanner.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 /// Model representing a scanned/picked document file
@@ -20,72 +19,24 @@ class DocumentFile {
 }
 
 class DocumentUploadRepository {
-  final FlutterDocScanner _docScanner;
+  final DocumentScanner _docScanner;
 
-  DocumentUploadRepository({FlutterDocScanner? docScanner})
-    : _docScanner = docScanner ?? FlutterDocScanner();
+  DocumentUploadRepository(this._docScanner);
 
   /// Scans a document using the device camera and document scanner
-  /// Returns a [DocumentFile] with the path to the scanned PDF file
-  Future<Result<DocumentFile, Exception>> scanDocument({
-    int maxPages = 40,
-  }) async {
+  /// Returns a [File] with the path to the scanned PDF file
+  Future<Result<File, Exception>> scanDocument() async {
     try {
       // Use the scanner to get a PDF document
-      final scannedDocument = await _docScanner.getScannedDocumentAsPdf(
-        page: maxPages,
-      );
+      final file = await _docScanner.scanPdf();
 
-      if (scannedDocument == null) {
+      if (file == null) {
         return Result.error(
           Exception('Nenhum documento foi escaneado. Tente novamente.'),
         );
       }
 
-      // The scannedDocument can be either a Map or a String depending on method used
-      String filePath;
-      if (scannedDocument is Map) {
-        filePath = scannedDocument['pdfUri'] ?? scannedDocument.toString();
-      } else {
-        filePath = scannedDocument.toString();
-      }
-
-      final File file = File(filePath);
-
-      // Note: Some scanner packages store files in temporary locations
-      // that may take time to become available. Let's add a brief check with retry.
-      bool fileExists = await file.exists();
-      if (!fileExists) {
-        // Wait a moment and retry once
-        await Future.delayed(const Duration(milliseconds: 500));
-        fileExists = await file.exists();
-      }
-
-      if (!fileExists) {
-        return Result.error(
-          Exception(
-            'Arquivo escaneado não foi encontrado no caminho: $filePath',
-          ),
-        );
-      }
-
-      final stat = await file.stat();
-
-      final documentFile = DocumentFile(
-        path: filePath,
-        name:
-            'documento_escaneado_${DateTime.now().millisecondsSinceEpoch}.pdf',
-        size: stat.size,
-        mimeType: 'application/pdf',
-      );
-
-      return Result.success(documentFile);
-    } on PlatformException catch (e) {
-      return Result.error(
-        Exception(
-          'Erro ao escanear documento: ${e.message ?? 'Erro desconhecido'}',
-        ),
-      );
+      return Result.success(file);
     } catch (e) {
       return Result.error(
         Exception('Erro inesperado ao escanear documento: $e'),

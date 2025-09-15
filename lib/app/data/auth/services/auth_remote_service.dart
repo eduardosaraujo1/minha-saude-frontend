@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:get_it/get_it.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/login_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/register_response.dart';
-import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
+import 'package:minha_saude_frontend/app/data/auth/models/user_register_data.dart';
 import 'package:minha_saude_frontend/app/data/shared/services/api_client.dart';
 import 'package:minha_saude_frontend/config/mock_endpoint_config.dart';
 import 'package:multiple_result/multiple_result.dart';
@@ -57,7 +57,7 @@ class AuthRemoteService {
   /// Payload: {register_token,cpf,nome_completo,data_nascimento,telefone,codigo_telefone}
   /// Returns: {status,session_token,expires_at}
   Future<Result<RegisterResponse, Exception>> register(
-    User userData,
+    UserRegisterData userData,
     String registerToken,
   ) async {
     log(

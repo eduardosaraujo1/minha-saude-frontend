@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:minha_saude_frontend/app/data/auth/models/login_response.dart';
 import 'package:minha_saude_frontend/app/data/auth/models/register_response.dart';
-import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
+import 'package:minha_saude_frontend/app/data/auth/models/user_register_data.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/auth_remote_service.dart';
 import 'package:minha_saude_frontend/app/data/auth/services/google_sign_in_service.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
@@ -115,7 +115,9 @@ class AuthRepository {
   }
 
   /// Complete user registration with provided user data
-  Future<Result<RegisterResponse, Exception>> register(User userData) async {
+  Future<Result<RegisterResponse, Exception>> register(
+    UserRegisterData userData,
+  ) async {
     try {
       final tokenCheck = await _checkRegisterToken();
       if (tokenCheck.isError()) {
@@ -163,7 +165,7 @@ class AuthRepository {
   }
 
   Future<Result<RegisterResponse, Exception>> _sendRegistrationRequest(
-    User userData,
+    UserRegisterData userData,
   ) async {
     try {
       final registerResult = await _authRemoteService.register(

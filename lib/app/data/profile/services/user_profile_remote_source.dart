@@ -4,11 +4,11 @@ import 'package:minha_saude_frontend/app/data/profile/models/user.dart';
 
 /// Remote data source for user profile
 /// Handles API communication for user profile operations
-class UserProfileRemoteSource {
+class ProfileRemoteService {
   final http.Client _client;
   final String _baseUrl;
 
-  UserProfileRemoteSource(this._client, this._baseUrl);
+  ProfileRemoteService(this._client, this._baseUrl);
 
   /// Fetch user profile from API
   Future<User?> fetchUserProfile() async {
@@ -20,7 +20,7 @@ class UserProfileRemoteSource {
 
       if (response.statusCode == 200) {
         final userData = jsonDecode(response.body);
-        return User.fromJson(userData);
+        return User.fromMap(userData);
       } else {
         // Handle error responses based on status code
         _handleErrorResponse(response);
@@ -46,7 +46,7 @@ class UserProfileRemoteSource {
 
       if (response.statusCode == 200) {
         final userData = jsonDecode(response.body);
-        return User.fromJson(userData);
+        return User.fromMap(userData);
       } else {
         _handleErrorResponse(response);
         return null;

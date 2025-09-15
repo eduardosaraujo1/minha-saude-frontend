@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/data/auth/models/user.dart';
+import 'package:minha_saude_frontend/app/data/auth/models/user_register_data.dart';
 import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 
@@ -34,7 +34,7 @@ class RegisterViewModel {
 
       isLoading.value = true;
 
-      final newUser = User(
+      final newUser = UserRegisterData(
         nome: form.nomeController.text.trim(),
         cpf: form.cpfController.text.replaceAll(RegExp(r'[^0-9]'), ''),
         dataNascimento: _parseDate(form.dataNascimentoController.text.trim()),

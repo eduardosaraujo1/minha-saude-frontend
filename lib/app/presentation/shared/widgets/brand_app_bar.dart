@@ -24,10 +24,9 @@ class BrandAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// Action widget to display on the right (constrained to 48x48)
   final Widget? action;
 
-  /// Callback for when the back button is pressed
-  final VoidCallback? onBackPressed;
+  final PreferredSizeWidget? bottom;
 
-  const BrandAppBar({super.key, this.title, this.action, this.onBackPressed});
+  const BrandAppBar({super.key, this.title, this.action, this.bottom});
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +37,7 @@ class BrandAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       scrolledUnderElevation: 0,
       leading: canPop ? null : _buildBrandIcon(),
+      bottom: bottom,
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [if (title != null) Flexible(child: title!)],

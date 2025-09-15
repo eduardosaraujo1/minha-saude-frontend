@@ -1,11 +1,11 @@
-class User {
+class UserRegisterData {
   // cpf,nome_completo,data_nascimento,telefone
   String cpf;
   String nome;
   DateTime dataNascimento;
   String telefone;
 
-  User({
+  UserRegisterData({
     required this.cpf,
     required this.nome,
     required this.dataNascimento,
@@ -23,8 +23,8 @@ class User {
     };
   }
 
-  static User fromMap(Map<String, dynamic> map) {
-    return User(
+  static UserRegisterData fromMap(Map<String, dynamic> map) {
+    return UserRegisterData(
       cpf: map['cpf'],
       nome: map['nome_completo'],
       dataNascimento: DateTime.parse(

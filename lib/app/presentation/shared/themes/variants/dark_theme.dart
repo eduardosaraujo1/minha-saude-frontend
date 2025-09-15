@@ -19,6 +19,7 @@ class DarkTheme implements ThemeVariant {
   ColorScheme colorScheme() {
     final seededScheme = ColorScheme.fromSeed(seedColor: seedColor);
     return seededScheme.copyWith(
+      brightness: Brightness.dark,
       // primary: Color(0xFF84D2E6),
       // onPrimary: Color(0xFF003640),
       // primaryContainer: Color(0xFF004E5C),

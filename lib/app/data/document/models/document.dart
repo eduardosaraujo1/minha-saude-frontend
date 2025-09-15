@@ -7,6 +7,7 @@ class Document {
     required this.medico,
     required this.dataDocumento,
     required this.dataAdicao,
+    this.deletedAt,
   });
 
   final String id;
@@ -16,6 +17,7 @@ class Document {
   final String medico;
   final DateTime dataDocumento;
   final DateTime dataAdicao;
+  final DateTime? deletedAt;
 
   factory Document.fromMap(Map<String, dynamic> map) {
     return Document(
@@ -26,6 +28,9 @@ class Document {
       medico: map['medico'],
       dataDocumento: DateTime.parse(map['dataDocumento']),
       dataAdicao: DateTime.parse(map['dataAdicao']),
+      deletedAt: map['deletedAt'] != null
+          ? DateTime.parse(map['deletedAt'])
+          : null,
     );
   }
 
@@ -38,6 +43,7 @@ class Document {
       'medico': medico,
       'dataDocumento': dataDocumento.toIso8601String(),
       'dataAdicao': dataAdicao.toIso8601String(),
+      'deletedAt': deletedAt?.toIso8601String(),
     };
   }
 }

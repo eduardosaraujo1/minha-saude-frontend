@@ -7,7 +7,11 @@ import 'package:minha_saude_frontend/app/data/profile/repositories/profile_repos
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/configuracoes/view_models/edit_nome_view_model.dart';
+import 'package:minha_saude_frontend/app/presentation/configuracoes/view_models/edit_birthday_view_model.dart';
+import 'package:minha_saude_frontend/app/presentation/configuracoes/view_models/edit_telefone_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/configuracoes/views/edit_nome_view.dart';
+import 'package:minha_saude_frontend/app/presentation/configuracoes/views/edit_birthday_view.dart';
+import 'package:minha_saude_frontend/app/presentation/configuracoes/views/edit_telefone_view.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_create_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_scan_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_view_model.dart';
@@ -175,13 +179,17 @@ final router = GoRouter(
                 GoRoute(
                   path: 'edit/telefone',
                   builder: (context, state) {
-                    return Placeholder();
+                    return EditTelefoneView(
+                      EditTelefoneViewModel(getIt<ProfileRepository>()),
+                    );
                   },
                 ),
                 GoRoute(
                   path: 'edit/birthdate',
                   builder: (context, state) {
-                    return Placeholder();
+                    return EditBirthdayView(
+                      EditBirthdayViewModel(getIt<ProfileRepository>()),
+                    );
                   },
                 ),
               ],

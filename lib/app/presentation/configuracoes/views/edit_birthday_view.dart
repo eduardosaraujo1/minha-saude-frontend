@@ -1,59 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/presentation/configuracoes/view_models/edit_birthday_view_model.dart';
+import 'package:watch_it/watch_it.dart';
 
-class EditarData extends StatefulWidget {
-  final String dataAtual;
+class EditBirthdayView extends WatchingStatefulWidget {
+  final EditBirthdayViewModel viewModel;
 
-  const EditarData({super.key, required this.dataAtual});
+  const EditBirthdayView(this.viewModel, {super.key});
 
   @override
-  State<EditarData> createState() => _EditarDataState();
+  State<EditBirthdayView> createState() => _EditBirthdayViewState();
 }
 
-class _EditarDataState extends State<EditarData> {
-  late DateTime _dataSelecionada;
+class _EditBirthdayViewState extends State<EditBirthdayView> {
+  EditBirthdayViewModel get viewModel => widget.viewModel;
 
   @override
   void initState() {
     super.initState();
-    // Converter a data atual para DateTime
-    final partes = widget.dataAtual.split('/');
-    _dataSelecionada = DateTime(
-      int.parse(partes[2]),
-      int.parse(partes[1]),
-      int.parse(partes[0]),
-    );
   }
 
-  Future<void> _selecionarData(BuildContext context) async {
-    final DateTime? dataEscolhida = await showDatePicker(
+  @override
+  void dispose() {
+    viewModel.dispose();
+    super.dispose();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? selectedDate = await showDatePicker(
       context: context,
-      initialDate: _dataSelecionada,
+      initialDate: viewModel.selectedDate ?? DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
 
-    if (dataEscolhida != null && dataEscolhida != _dataSelecionada) {
+    if (selectedDate != null) {
       setState(() {
-        _dataSelecionada = dataEscolhida;
+        viewModel.updateSelectedDate(selectedDate);
       });
     }
   }
 
-  String _formatarData(DateTime data) {
-    return '${data.day.toString().padLeft(2, '0')}/${data.month.toString().padLeft(2, '0')}/${data.year}';
-  }
-
   @override
   Widget build(BuildContext context) {
+    final isLoading = watch(viewModel.isLoading).value;
+
+    registerHandler<ValueNotifier, String?>(
+      target: viewModel.errorMessage,
+      handler: (context, newValue, _) {
+        _onErrorChanged(context, newValue);
+      },
+    );
+
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: const Text('Editar Data de Nascimento'),
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             // Campo Data de Nascimento com DatePicker
             InkWell(
-              onTap: () => _selecionarData(context),
+              onTap: isLoading ? null : () => _selectDate(context),
               child: InputDecorator(
                 decoration: const InputDecoration(
                   labelText: 'Data de Nascimento',
@@ -67,73 +77,100 @@ class _EditarDataState extends State<EditarData> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      _formatarData(_dataSelecionada),
-                      style: const TextStyle(fontSize: 16),
+                      viewModel.selectedDate != null
+                          ? viewModel.formatDate(viewModel.selectedDate!)
+                          : 'Selecione uma data',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: viewModel.selectedDate != null
+                            ? Theme.of(context).colorScheme.onSurface
+                            : Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withOpacity(0.6),
+                      ),
                     ),
-                    const Icon(Icons.calendar_today, color: Colors.grey),
+                    Icon(
+                      Icons.calendar_today,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.6),
+                    ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 8),
             // Botões Cancelar e Confirmar
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // Cancelar
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFBFC8CB),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    'Cancelar',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                // Confirmar
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF006879),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                  ),
-                  onPressed: () {
-                    // Retorna o novo valor para a tela anterior
-                    Navigator.pop(context, _formatarData(_dataSelecionada));
-                  },
-                  child: const Text(
-                    'Confirmar',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            _buildActionButtons(context, isLoading),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildActionButtons(BuildContext context, bool isLoading) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      spacing: 4,
+      children: [
+        // Cancelar
+        Expanded(
+          child: FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              foregroundColor: Theme.of(
+                context,
+              ).colorScheme.onSecondaryContainer,
+            ),
+            onPressed: () {
+              context.pop();
+            },
+            child: const Text('Cancelar'),
+          ),
+        ),
+        // Confirmar
+        Expanded(
+          child: FilledButton(
+            onPressed: isLoading
+                ? null
+                : () async {
+                    final success = await viewModel.saveBirthDate();
+                    if (success && context.mounted) {
+                      Navigator.pop(
+                        context,
+                        viewModel.selectedDate != null
+                            ? viewModel.formatDate(viewModel.selectedDate!)
+                            : null,
+                      );
+                    }
+                  },
+            child: isLoading
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : const Text('Confirmar'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _onErrorChanged(BuildContext context, String? newValue) {
+    if (newValue != null && newValue.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(newValue),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          duration: const Duration(seconds: 10),
+          showCloseIcon: true,
+        ),
+      );
+      viewModel.errorMessage.value = null;
+    }
   }
 }

@@ -1,183 +1,144 @@
 import 'package:flutter/material.dart';
 
-class EditarTelefone extends StatefulWidget {
-  final String telefoneAtual;
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:minha_saude_frontend/app/presentation/configuracoes/view_models/edit_telefone_view_model.dart';
+import 'package:watch_it/watch_it.dart';
 
-  const EditarTelefone({super.key, required this.telefoneAtual});
+class EditTelefoneView extends WatchingStatefulWidget {
+  final EditTelefoneViewModel viewModel;
+
+  const EditTelefoneView(this.viewModel, {super.key});
 
   @override
-  State<EditarTelefone> createState() => _EditarTelefoneState();
+  State<EditTelefoneView> createState() => _EditTelefoneViewState();
 }
 
-class _EditarTelefoneState extends State<EditarTelefone> {
-  final TextEditingController _telefoneController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+class _EditTelefoneViewState extends State<EditTelefoneView> {
+  EditTelefoneViewModel get viewModel => widget.viewModel;
 
   @override
   void initState() {
     super.initState();
-    _telefoneController.text = widget.telefoneAtual;
   }
 
   @override
   void dispose() {
-    _telefoneController.dispose();
+    viewModel.dispose();
     super.dispose();
-  }
-
-  void _verificarTelefone() {
-    if (_formKey.currentState!.validate()) {
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) =>
-      //         EditarCodigo(telefone: _telefoneController.text),
-      //   ),
-      // ).then((verificado) {
-      //   if (verificado != null && verificado == true) {
-      //     ScaffoldMessenger.of(context).showSnackBar(
-      //       const SnackBar(
-      //         content: Text('Telefone verificado e atualizado com sucesso!'),
-      //         duration: Duration(seconds: 2),
-      //       ),
-      //     );
-      //     Navigator.pop(context, _telefoneController.text);
-      //   }
-      // });
-    }
-  }
-
-  String? _validarTelefone(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Por favor, informe um telefone';
-    }
-
-    final numeros = value.replaceAll(RegExp(r'[^\d]'), '');
-    if (numeros.length != 11) {
-      return 'Telefone deve ter 11 dígitos';
-    }
-
-    return null;
   }
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = watch(viewModel.isLoading).value;
+
+    registerHandler<ValueNotifier, String?>(
+      target: viewModel.errorMessage,
+      handler: (context, newValue, _) {
+        _onErrorChanged(context, newValue);
+      },
+    );
+
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: const Text('Editar Telefone'),
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-
-              // Campo de telefone
-              TextFormField(
-                controller: _telefoneController,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Telefone',
-                  hintText: '(00) 00000-0000',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.phone),
+        child: Column(
+          children: [
+            // Campo Telefone
+            TextField(
+              controller: viewModel.telefoneController,
+              keyboardType: TextInputType.phone,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                MaskTextInputFormatter(
+                  mask: '+## (##) #####-####',
+                  filter: {"#": RegExp(r'[0-9]')},
+                  type: MaskAutoCompletionType.lazy,
                 ),
-                validator: _validarTelefone,
-                onChanged: (value) {
-                  final digits = value.replaceAll(RegExp(r'[^\d]'), '');
-
-                  if (digits.length <= 11) {
-                    String formatted = '';
-                    if (digits.isNotEmpty) {
-                      formatted =
-                          '(${digits.substring(0, digits.length > 2 ? 2 : digits.length)}';
-                    }
-                    if (digits.length > 2) {
-                      formatted +=
-                          ') ${digits.substring(2, digits.length > 7 ? 7 : digits.length)}';
-                    }
-                    if (digits.length > 7) {
-                      formatted += '-${digits.substring(7)}';
-                    }
-                    _telefoneController.value = TextEditingValue(
-                      text: formatted,
-                      selection: TextSelection.collapsed(
-                        offset: formatted.length,
-                      ),
-                    );
-                  }
-                },
+              ],
+              decoration: const InputDecoration(
+                labelText: 'Telefone',
+                hintText: '+55 11 95149-0211',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                prefixIcon: Icon(Icons.phone),
               ),
-
-              const SizedBox(height: 16),
-
-              // Botões Verificar e Cancelar lado a lado
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      clipBehavior: Clip.antiAlias,
-                      decoration: ShapeDecoration(
-                        color: const Color(0xFFCEE7EE),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(100),
-                        ),
-                      ),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.pop(context); // Botão Cancelar
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'Cancelar',
-                              style: TextStyle(
-                                color: Color(0xFF334A50),
-                                fontSize: 14,
-                                fontFamily: 'Roboto',
-                                fontWeight: FontWeight.w500,
-                                height: 1.43,
-                                letterSpacing: 0.10,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _verificarTelefone,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF006879),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(100),
-                        ),
-                        minimumSize: const Size.fromHeight(48),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: const Text(
-                        'Verificar Telefone',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 8),
+            // Botões Cancelar e Confirmar
+            _buildActionButtons(context, isLoading),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildActionButtons(BuildContext context, bool isLoading) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      spacing: 4,
+      children: [
+        // Cancelar
+        Expanded(
+          child: FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              foregroundColor: Theme.of(
+                context,
+              ).colorScheme.onSecondaryContainer,
+            ),
+            onPressed: () {
+              context.pop();
+            },
+            child: const Text('Cancelar'),
+          ),
+        ),
+        // Confirmar
+        Expanded(
+          child: FilledButton(
+            onPressed: isLoading
+                ? null
+                : () async {
+                    final success = await viewModel.saveTelefone();
+                    if (success && context.mounted) {
+                      Navigator.pop(context, viewModel.telefoneController.text);
+                    }
+                  },
+            child: isLoading
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : const Text('Confirmar'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _onErrorChanged(BuildContext context, String? newValue) {
+    if (newValue != null && newValue.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(newValue),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          duration: const Duration(seconds: 10),
+          showCloseIcon: true,
+        ),
+      );
+      viewModel.errorMessage.value = null;
+    }
   }
 }

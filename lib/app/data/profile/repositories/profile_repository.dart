@@ -38,21 +38,14 @@ class ProfileRepository extends ChangeNotifier {
     }
   }
 
-  Future<Result<void, Exception>> updateEmail(String newEmail) async {
-    try {
-      _cachedUser = _cachedUser?.copyWith(email: newEmail);
-      return Result.success(null);
-    } catch (e) {
-      return Result.error(Exception("Failed to update email: $e"));
-    }
-  }
-
   Future<Result<void, Exception>> updateTelefone(String newTelefone) async {
     try {
       _cachedUser = _cachedUser?.copyWith(telefone: newTelefone);
       return Result.success(null);
     } catch (e) {
       return Result.error(Exception("Failed to update telefone: $e"));
+    } finally {
+      notifyListeners();
     }
   }
 
@@ -62,6 +55,8 @@ class ProfileRepository extends ChangeNotifier {
       return Result.success(null);
     } catch (e) {
       return Result.error(Exception("Failed to update birth date: $e"));
+    } finally {
+      notifyListeners();
     }
   }
 

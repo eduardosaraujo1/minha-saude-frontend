@@ -20,9 +20,9 @@ class DocumentScanViewModel {
   }
 
   void dispose() {
-    status.dispose();
-    errorMessage.dispose();
-    _pdfController?.dispose();
+    // status.dispose();
+    // errorMessage.dispose();
+    // _pdfController?.dispose();
   }
 
   void _getDocument() async {

@@ -6,11 +6,13 @@ class ContaViewModel {
 
   final isLinkingContaGoogle = ValueNotifier<bool>(false);
   final googleVinculado = ValueNotifier<bool>(false);
+  final redirectTo = ValueNotifier<String?>(null);
 
   ContaViewModel(this.authRepository);
 
   void signout() async {
     await authRepository.signOut();
+    redirectTo.value = '/login';
   }
 
   Future<void> linkGoogleAccount() async {

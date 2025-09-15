@@ -8,8 +8,8 @@ class DocumentCreateViewModel {
   final form = DocumentFormController();
 
   void dispose() {
-    state.dispose();
-    errorMessage.dispose();
+    // state.dispose();
+    // errorMessage.dispose();
     form.dispose();
   }
 }

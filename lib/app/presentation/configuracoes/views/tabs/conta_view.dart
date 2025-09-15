@@ -20,6 +20,13 @@ class _ContaViewState extends State<ContaView> {
     final contaGoogleVinculada = watch(viewModel.googleVinculado).value;
     final isLinkingInProgress = watch(viewModel.isLinkingContaGoogle).value;
 
+    registerHandler<ValueNotifier, String?>(
+      target: viewModel.redirectTo,
+      handler: (context, newValue, cancel) {
+        context.go('/login');
+      },
+    );
+
     return Column(
       children: [
         Expanded(
@@ -71,31 +78,35 @@ class _ContaViewState extends State<ContaView> {
             ),
           ),
           // Botão de ação à direita
-          if (!contaGoogleVinculada)
-            TextButton.icon(
-              onPressed: () {
-                if (!contaGoogleVinculada) {
-                  _mostrarDialogoVincularGoogle(context);
-                }
-              },
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              icon: Icon(
-                Icons.link,
-                color: Theme.of(context).colorScheme.primary,
-                size: 20,
-              ),
-              label: Text(
-                'Vincular',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ),
+          if (isLinkingInProgress)
+            SizedBox(width: 24, height: 24, child: CircularProgressIndicator())
+          else if (!contaGoogleVinculada)
+            _buildVincularButton(),
         ],
+      ),
+    );
+  }
+
+  TextButton _buildVincularButton() {
+    return TextButton.icon(
+      onPressed: () {
+        _mostrarDialogoVincularGoogle(context);
+      },
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      icon: Icon(
+        Icons.link,
+        color: Theme.of(context).colorScheme.primary,
+        size: 20,
+      ),
+      label: Text(
+        'Vincular',
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
     );
   }
@@ -151,7 +162,6 @@ class _ContaViewState extends State<ContaView> {
             TextButton(
               onPressed: () {
                 viewModel.signout();
-                context.go('/login');
               },
               child: Text(
                 'Encerrar',

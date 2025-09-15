@@ -3,8 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/document/repositories/document_repository.dart';
 import 'package:minha_saude_frontend/app/data/document/repositories/document_upload_repository.dart';
+import 'package:minha_saude_frontend/app/data/profile/repositories/profile_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_view_model.dart';
+import 'package:minha_saude_frontend/app/presentation/configuracoes/view_models/edit_nome_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/configuracoes/views/edit_nome_view.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_create_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_scan_view_model.dart';
@@ -165,17 +167,13 @@ final router = GoRouter(
                 GoRoute(
                   path: 'edit/nome',
                   builder: (context, state) {
-                    return Placeholder();
+                    return EditNomeView(
+                      EditNomeViewModel(getIt<ProfileRepository>()),
+                    );
                   },
                 ),
                 GoRoute(
                   path: 'edit/telefone',
-                  builder: (context, state) {
-                    return Placeholder();
-                  },
-                ),
-                GoRoute(
-                  path: 'edit/email',
                   builder: (context, state) {
                     return Placeholder();
                   },

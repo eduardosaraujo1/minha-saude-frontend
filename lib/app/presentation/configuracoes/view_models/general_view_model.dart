@@ -10,6 +10,10 @@ class GeneralViewModel {
 
   GeneralViewModel(this.profileRepository) {
     _init();
+
+    profileRepository.addListener(() {
+      _init();
+    });
   }
 
   void _init() async {

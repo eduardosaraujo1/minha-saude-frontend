@@ -1,7 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/app/data/profile/models/user.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-class ProfileRepository {
+class ProfileRepository extends ChangeNotifier {
   // Mock: hardcode user for now
   User? _cachedUser = User(
     name: 'Eduardo',
@@ -32,6 +33,8 @@ class ProfileRepository {
       return Result.success(null);
     } catch (e) {
       return Result.error(Exception("Failed to update name: $e"));
+    } finally {
+      notifyListeners();
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/presentation/configuracoes/view_models/general_view_model.dart';
 import 'package:watch_it/watch_it.dart';
 
@@ -55,17 +56,23 @@ class _GeneralViewState extends State<GeneralView> {
         _UserInfoField(
           label: 'Nome completo',
           value: user.name,
-          onEdit: () => _showComingSoonSnackBar('Edição de nome'),
+          onEdit: () {
+            context.go('/configuracoes/edit/nome');
+          },
         ),
         _UserInfoField(
           label: 'Data de nascimento',
           value: user.birthDate,
-          onEdit: () => _showComingSoonSnackBar('Edição de data de nascimento'),
+          onEdit: () {
+            context.go('/configuracoes/edit/birthdate');
+          },
         ),
         _UserInfoField(
           label: 'Telefone',
           value: user.telefone,
-          onEdit: () => _showComingSoonSnackBar('Edição de telefone'),
+          onEdit: () {
+            context.go('/configuracoes/edit/telefone');
+          },
         ),
       ],
     );
@@ -94,15 +101,6 @@ class _GeneralViewState extends State<GeneralView> {
           _showExportSuccessSnackBar();
         },
         onCancel: () => Navigator.pop(context),
-      ),
-    );
-  }
-
-  void _showComingSoonSnackBar(String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$feature em breve'),
-        duration: const Duration(seconds: 2),
       ),
     );
   }

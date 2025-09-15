@@ -13,6 +13,6 @@
 
 -   [ ] Upload pdf via arquivo
 -   [ ] Pegar dados do usuário via ProfileRepository
--   [ ] Pegar dados do usuário via ProfileRepository
 -   [ ] Escrever casos de teste para avaliar edge cases (especialmente no visualizar documento)
 -   [ ] Tratativa de erro caso o backend se torne não-responsivo
+-   [ ] Tirar título duplicado da Lixeira

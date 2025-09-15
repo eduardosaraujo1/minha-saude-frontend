@@ -17,40 +17,46 @@ class SuporteView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Título Informações
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Informações',
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const _ClipboardButton('tccminhasaude2025@gmail.com'),
-                ],
-              ),
+              _buildTitleRow(textTheme),
               // Texto de descrição
-              RichText(
-                text: TextSpan(
-                  style: textTheme.bodyMedium,
-                  children: [
-                    const TextSpan(
-                      text:
-                          'Em caso de dúvidas, sugestões ou problemas, você pode entrar em contato conosco através do e-mail: ',
-                    ),
-                    TextSpan(
-                      text: 'tccminhasaude2025@gmail.com',
-                      style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _buildInfoText(textTheme, context),
             ],
           ),
         ),
+      ],
+    );
+  }
+
+  RichText _buildInfoText(TextTheme textTheme, BuildContext context) {
+    return RichText(
+      text: TextSpan(
+        style: textTheme.bodyMedium,
+        children: [
+          const TextSpan(
+            text:
+                'Em caso de dúvidas, sugestões ou problemas, você pode entrar em contato conosco através do e-mail: ',
+          ),
+          TextSpan(
+            text: 'tccminhasaude2025@gmail.com',
+            style: textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Row _buildTitleRow(TextTheme textTheme) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Informações',
+          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+        ),
+        const _ClipboardButton('tccminhasaude2025@gmail.com'),
       ],
     );
   }

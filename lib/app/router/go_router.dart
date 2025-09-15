@@ -5,6 +5,7 @@ import 'package:minha_saude_frontend/app/data/document/repositories/document_rep
 import 'package:minha_saude_frontend/app/data/document/repositories/document_upload_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_view_model.dart';
+import 'package:minha_saude_frontend/app/presentation/configuracoes/views/edit_nome_view.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_create_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_scan_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_view_model.dart';
@@ -160,6 +161,32 @@ final router = GoRouter(
               path: '/configuracoes',
               builder: (BuildContext context, GoRouterState state) =>
                   const ConfiguracoesView(),
+              routes: [
+                GoRoute(
+                  path: 'edit/nome',
+                  builder: (context, state) {
+                    return Placeholder();
+                  },
+                ),
+                GoRoute(
+                  path: 'edit/telefone',
+                  builder: (context, state) {
+                    return Placeholder();
+                  },
+                ),
+                GoRoute(
+                  path: 'edit/email',
+                  builder: (context, state) {
+                    return Placeholder();
+                  },
+                ),
+                GoRoute(
+                  path: 'edit/birthdate',
+                  builder: (context, state) {
+                    return Placeholder();
+                  },
+                ),
+              ],
             ),
           ],
         ),

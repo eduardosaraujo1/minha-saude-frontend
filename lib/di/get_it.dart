@@ -7,6 +7,7 @@ import 'package:minha_saude_frontend/app/data/auth/services/auth_remote_service.
 import 'package:minha_saude_frontend/app/data/auth/services/google_sign_in_service.dart';
 import 'package:minha_saude_frontend/app/data/document/repositories/document_repository.dart';
 import 'package:minha_saude_frontend/app/data/document/repositories/document_upload_repository.dart';
+import 'package:minha_saude_frontend/app/data/profile/repositories/profile_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/services/api_client.dart';
 import 'package:minha_saude_frontend/app/data/shared/services/document_scanner.dart';
@@ -66,6 +67,7 @@ Future<void> setupLocator() async {
   );
 
   getIt.registerSingleton<DocumentRepository>(DocumentRepository());
+  getIt.registerSingleton<ProfileRepository>(ProfileRepository());
   getIt.registerSingleton<DocumentUploadRepository>(
     DocumentUploadRepository(getIt<DocumentScanner>()),
   );

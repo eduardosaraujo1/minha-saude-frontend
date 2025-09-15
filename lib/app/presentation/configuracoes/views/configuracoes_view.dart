@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/app/data/auth/repositories/auth_repository.dart';
+import 'package:minha_saude_frontend/app/data/profile/repositories/profile_repository.dart';
 import 'package:minha_saude_frontend/app/presentation/configuracoes/view_models/conta_view_model.dart';
+import 'package:minha_saude_frontend/app/presentation/configuracoes/view_models/general_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/configuracoes/views/tabs/conta_view.dart';
 import 'package:minha_saude_frontend/app/presentation/configuracoes/views/tabs/general_view.dart';
 import 'package:minha_saude_frontend/app/presentation/configuracoes/views/tabs/suporte_view.dart';
@@ -54,7 +56,7 @@ class _ConfiguracoesViewState extends State<ConfiguracoesView>
             child: TabBarView(
               controller: _tabController,
               children: [
-                GeneralView(),
+                GeneralView(GeneralViewModel(getIt<ProfileRepository>())),
                 ContaView(ContaViewModel(getIt<AuthRepository>())),
                 SuporteView(),
               ],

@@ -1,7 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/app/data/document/models/document.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-class DocumentRepository {
+class DocumentRepository extends ChangeNotifier {
   // CREATE
 
   // READ
@@ -22,6 +23,40 @@ class DocumentRepository {
         Exception('Documento não encontrado. Tente fechar a página.'),
       );
     }
+  }
+
+  Future<Result<Document, Exception>> getDeletedDocumentById(String id) async {
+    // Simulação de busca de documento por ID
+    final documentsResult = await listDeletedDocuments();
+    if (documentsResult.isError()) {
+      return Result.error(Exception('Erro ao buscar documento'));
+    }
+
+    try {
+      final document = documentsResult.getOrThrow().firstWhere(
+        (doc) => doc.id == id,
+      );
+      return Result.success(document);
+    } catch (e) {
+      return Result.error(
+        Exception('Documento não encontrado. Tente fechar a página.'),
+      );
+    }
+  }
+
+  Future<Result<List<Document>, Exception>> listDeletedDocuments() async {
+    // Simulação de busca de documentos excluídos
+    final documentsResult = await listDocuments();
+    if (documentsResult.isError()) {
+      return Result.error(Exception('Erro ao buscar documentos'));
+    }
+
+    final deletedDocuments = documentsResult
+        .getOrThrow()
+        .where((doc) => doc.deletedAt != null)
+        .toList();
+
+    return Result.success(deletedDocuments);
   }
 
   // TODO: quando a escala do app justificar, implementar paginação via scroll infinito
@@ -145,6 +180,47 @@ class DocumentRepository {
         medico: 'Dr. João Oliveira',
         dataDocumento: DateTime.parse('2024-03-20'),
         dataAdicao: DateTime.parse('2024-03-21'),
+      ),
+      // Deleted documents for testing
+      Document(
+        id: 'deleted-1',
+        paciente: 'Ana Beatriz Rocha',
+        titulo: 'Tomografia da Ana Beatriz Rocha',
+        tipo: 'Hemograma',
+        medico: 'Dra. Carolina Mendes',
+        dataDocumento: DateTime.parse('2020-03-01'),
+        dataAdicao: DateTime.parse('2020-03-02'),
+        deletedAt: DateTime.parse('2025-06-09'),
+      ),
+      Document(
+        id: 'deleted-2',
+        paciente: 'Marcos Lima',
+        titulo: 'Hemograma do Marcos Lima',
+        tipo: 'Exame Laboratorial',
+        medico: 'Dr. Paulo Mendes',
+        dataDocumento: DateTime.parse('2020-02-01'),
+        dataAdicao: DateTime.parse('2020-02-02'),
+        deletedAt: DateTime.parse('2025-06-09'),
+      ),
+      Document(
+        id: 'deleted-3',
+        paciente: 'Ana Beatriz Rocha',
+        titulo: 'Hemograma da Ana Beatriz Rocha',
+        tipo: 'Exame Laboratorial',
+        medico: 'Dra. Carolina Mendes',
+        dataDocumento: DateTime.parse('2020-03-01'),
+        dataAdicao: DateTime.parse('2020-03-02'),
+        deletedAt: DateTime.parse('2025-06-09'),
+      ),
+      Document(
+        id: 'deleted-4',
+        paciente: 'Daniel Ferreira',
+        titulo: 'Haldol Daniel',
+        tipo: 'Receita Médica',
+        medico: 'Dr. Carlos Silva',
+        dataDocumento: DateTime.parse('2020-01-01'),
+        dataAdicao: DateTime.parse('2020-01-02'),
+        deletedAt: DateTime.parse('2025-06-09'),
       ),
     ];
     return Result.success(documentos);

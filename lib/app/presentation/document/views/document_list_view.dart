@@ -3,8 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/document/models/document.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_list_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/document/widgets/document_fab.dart';
-import 'package:minha_saude_frontend/app/presentation/document/widgets/document_item.dart';
 import 'package:minha_saude_frontend/app/presentation/shared/widgets/brand_app_bar.dart';
+import 'package:minha_saude_frontend/app/presentation/shared/widgets/document/grouped_document_grid.dart';
 import 'package:watch_it/watch_it.dart';
 
 class DocumentListView extends WatchingStatefulWidget {
@@ -48,7 +48,12 @@ class _DocumentListViewState extends State<DocumentListView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ..._makeDocumentGroups(context, documents),
+                  GroupedDocumentGrid(
+                    groupedDocuments: documents,
+                    onDocumentTap: (document) {
+                      context.go('/documentos/${document.id}');
+                    },
+                  ),
                   SizedBox(height: 60),
                 ],
               ),
@@ -85,43 +90,6 @@ class _DocumentListViewState extends State<DocumentListView> {
       );
       viewModel.clearErrorMessage();
     }
-  }
-
-  List<Widget> _makeDocumentGroups(
-    BuildContext context,
-    Map<String, List<Document>> documents,
-  ) {
-    return documents.entries
-        .map(
-          (entry) => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(entry.key, style: Theme.of(context).textTheme.titleMedium),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                  childAspectRatio: 1,
-                ),
-                itemCount: entry.value.length,
-                itemBuilder: (context, index) {
-                  final documentTitle = entry.value[index].titulo;
-                  return DocumentItem(
-                    title: documentTitle,
-                    onTap: () {
-                      context.go('/documentos/${entry.value[index].id}');
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
-        )
-        .toList();
   }
 }
 

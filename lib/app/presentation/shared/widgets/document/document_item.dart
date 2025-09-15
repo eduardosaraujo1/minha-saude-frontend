@@ -37,7 +37,7 @@ class DocumentItem extends StatelessWidget {
                   Theme.of(context).textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
-              maxLines: 3,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ],

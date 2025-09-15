@@ -1,32 +1,53 @@
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart';
 import 'package:minha_saude_frontend/app/data/document/models/document.dart';
+import 'package:minha_saude_frontend/app/data/document/repositories/document_repository.dart';
 
 class LixeiraViewModel {
-  final _deletedDocuments = [
-    // Exemplos de documentos deletados
-    Document(
-      id: '1',
-      paciente: 'João Silva',
-      titulo: 'Exame de Sangue',
-      tipo: 'Exame',
-      medico: 'Dra. Maria',
-      dataDocumento: DateTime(2023, 5, 20),
-      dataAdicao: DateTime(2023, 5, 21),
-      deletedAt: DateTime(2024, 6, 1),
-    ),
-    Document(
-      id: '2',
-      paciente: 'Ana Souza',
-      titulo: 'Receita Médica',
-      tipo: 'Receita',
-      medico: 'Dr. Carlos',
-      dataDocumento: DateTime(2023, 4, 15),
-      dataAdicao: DateTime(2023, 4, 16),
-      deletedAt: DateTime(2024, 6, 2),
-    ),
-  ];
+  DocumentRepository documentRepository;
+
+  // State management with ValueNotifiers
+  final ValueNotifier<bool> isLoading = ValueNotifier(false);
+  final ValueNotifier<String?> errorMessage = ValueNotifier(null);
+
+  List<Document> _deletedDocuments = [];
 
   List<Document> get deletedDocuments =>
       UnmodifiableListView(_deletedDocuments);
+
+  LixeiraViewModel(this.documentRepository) {
+    _init();
+    // TODO: Listen to documentRepository for changes (rerun _init)
+  }
+
+  Future<void> _init() async {
+    isLoading.value = true;
+    errorMessage.value = null;
+
+    try {
+      final result = await documentRepository.listDeletedDocuments();
+
+      if (result.isSuccess()) {
+        _deletedDocuments = result.getOrThrow();
+      } else {
+        errorMessage.value =
+            result.tryGetError()?.toString() ??
+            'Erro desconhecido ao carregar documentos';
+      }
+    } catch (e) {
+      errorMessage.value = 'Erro ao carregar documentos: ${e.toString()}';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void clearErrorMessage() {
+    errorMessage.value = null;
+  }
+
+  void dispose() {
+    isLoading.dispose();
+    errorMessage.dispose();
+  }
 }

@@ -6,6 +6,8 @@ import 'package:minha_saude_frontend/app/data/document/repositories/document_upl
 import 'package:minha_saude_frontend/app/data/profile/repositories/profile_repository.dart';
 import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/view_models/register_view_model.dart';
+import 'package:minha_saude_frontend/app/presentation/compartilhar/codigos_compartilhamento.dart';
+import 'package:minha_saude_frontend/app/presentation/compartilhar/selecionar_documentos.dart';
 import 'package:minha_saude_frontend/app/presentation/configuracoes/view_models/edit_nome_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/configuracoes/view_models/edit_birthday_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/configuracoes/view_models/edit_telefone_view_model.dart';
@@ -27,7 +29,7 @@ import 'package:minha_saude_frontend/app/presentation/auth/view_models/tos_view_
 import 'package:minha_saude_frontend/app/presentation/auth/views/login_view.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/views/register_view.dart';
 import 'package:minha_saude_frontend/app/presentation/auth/views/tos_view.dart';
-import 'package:minha_saude_frontend/app/presentation/compartilhar/views/compartilhar_view.dart';
+import 'package:minha_saude_frontend/app/presentation/compartilhar_wip/views/compartilhar_view.dart';
 import 'package:minha_saude_frontend/app/presentation/configuracoes/views/configuracoes_view.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_list_view_model.dart';
 import 'package:minha_saude_frontend/app/presentation/document/views/document_list_view.dart';
@@ -148,8 +150,24 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: '/compartilhar',
-              builder: (BuildContext context, GoRouterState state) =>
-                  const CompartilharView(),
+              builder: (BuildContext context, GoRouterState state) {
+                // return const CompartilharView();
+                return CodigosCompartilhamento();
+              },
+              routes: [
+                // GoRoute(
+                //   path: 'create',
+                //   builder: (context, state) {
+                //     return const SelecionarDocumentos();
+                //   },
+                // ),
+                // GoRoute(
+                //   path: ':codigo',
+                //   builder: (context, state) {
+                //     return const SelecionarDocumentos();
+                //   },
+                // ),
+              ],
             ),
           ],
         ),

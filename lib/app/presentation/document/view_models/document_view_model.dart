@@ -10,6 +10,7 @@ class DocumentViewModel {
 
   final errorMessage = ValueNotifier<String?>(null);
   final document = ValueNotifier<Document?>(null);
+  final redirectTo = ValueNotifier<String?>(null);
 
   final documentLoadingStatus = ValueNotifier<DocumentLoadStatus>(
     DocumentLoadStatus.loading,
@@ -40,6 +41,14 @@ class DocumentViewModel {
     );
 
     documentLoadingStatus.value = DocumentLoadStatus.loaded;
+  }
+
+  void deleteDocument(String documentId) {
+    // In a real implementation, you would call the repository to delete the document
+    // await documentRepository.deleteDocument(documentId);
+
+    // For now, just trigger navigation back to home
+    redirectTo.value = '/';
   }
 
   void dispose() {

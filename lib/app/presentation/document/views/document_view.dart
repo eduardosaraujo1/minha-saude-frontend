@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/document/models/document.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:minha_saude_frontend/app/presentation/document/view_models/document_view_model.dart';
@@ -31,6 +32,37 @@ class _DocumentViewState extends State<DocumentView> {
     }
   }
 
+  void _showDeleteConfirmationDialog(BuildContext context, Document document) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Excluir Documento'),
+          content: Text('Tem certeza que deseja excluir "${document.titulo}"?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                viewModel.deleteDocument(document.id);
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
+              child: const Text('Excluir'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final document = watch(viewModel.document).value;
@@ -40,6 +72,15 @@ class _DocumentViewState extends State<DocumentView> {
       target: viewModel.errorMessage,
       handler: (context, newValue, cancel) {
         _onErrorChanged(context, newValue);
+      },
+    );
+
+    registerHandler<ValueNotifier, String?>(
+      target: viewModel.redirectTo,
+      handler: (context, newValue, cancel) {
+        if (newValue != null) {
+          context.go(newValue);
+        }
       },
     );
 
@@ -59,6 +100,8 @@ class _DocumentViewState extends State<DocumentView> {
                     return _DocumentInfoBottomSheet(document: document);
                   },
                 );
+              } else if (action == DocumentAction.delete) {
+                _showDeleteConfirmationDialog(context, document);
               }
             }),
         ],
@@ -257,6 +300,22 @@ class _DocumentActionsMenu extends StatelessWidget {
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
+              ),
+            ],
+          ),
+        ),
+        MenuItemButton(
+          onPressed: () => onSelected(DocumentAction.delete),
+          child: Row(
+            children: [
+              Icon(
+                Icons.delete_outline,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Excluir',
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ],
           ),

@@ -11,16 +11,8 @@
 
 ## Para fazer
 
--   [ ] Unir telas feitas pelo Davi aqui
--   [ ] Tela criar documento
--   [ ] Fazer tela de adicionar documento
--   [ ] Fazer navbar e appbar
--   [ ] Fazer tela (display only) de compartilhar, lixeira e configurações de usuário
--   [ ] Fazer lógica de lixeira de documentos (frontend support)
--   [ ] Fazer lógica de lixeira de documentos (backend mock)
--   [ ] Fazer lógica de compartilhar documentos (frontend support)
--   [ ] Fazer lógica de compartilhar documentos (backend mock)
 -   [ ] Upload pdf via arquivo
+-   [ ] Pegar dados do usuário via ProfileRepository
 -   [ ] Pegar dados do usuário via ProfileRepository
 -   [ ] Escrever casos de teste para avaliar edge cases (especialmente no visualizar documento)
 -   [ ] Tratativa de erro caso o backend se torne não-responsivo

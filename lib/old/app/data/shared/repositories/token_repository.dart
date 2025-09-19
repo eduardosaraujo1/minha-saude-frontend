@@ -1,6 +1,4 @@
 import 'dart:developer';
-
-import 'package:minha_saude_frontend/app/data/shared/services/secure_storage.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 /// Shared repository responsible for managing authentication tokens only

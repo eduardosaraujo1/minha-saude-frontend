@@ -1,18 +1,17 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
 
 class ApiClient {
   final Dio _httpClient;
-  final TokenRepository _tokenRepository;
+  String? _token;
 
   // Class that handles communication with backend server
   // Has endpoint url, and handles middleware like signing out on 401 Unauthorized error
   // Simple abstraction such as get, post, put, delete methods
   // Is NOT a singleton, can be instantiated normally but it made a singleton in get_it.dart
 
-  ApiClient(this._httpClient, this._tokenRepository) {
+  ApiClient(this._httpClient) {
     _setupInterceptors();
   }
 
@@ -22,9 +21,8 @@ class ApiClient {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           // Add authorization header if we have a token
-          final token = await _tokenRepository.getToken();
-          if (token != null) {
-            options.headers['Authorization'] = 'Bearer $token';
+          if (_token != null) {
+            options.headers['Authorization'] = 'Bearer $_token';
           }
           handler.next(options);
         },
@@ -34,7 +32,7 @@ class ApiClient {
         onError: (error, handler) async {
           // TODO: If server responds with 401 Unauthorized or specific logout signal,
           // automatically clear local auth data by calling:
-          // await _tokenRepository.removeToken();
+          // clearToken();
           // This would handle cases like token expiration or forced logout
 
           if (error.response?.statusCode == 401) {
@@ -49,6 +47,16 @@ class ApiClient {
       ),
     );
   }
+
+  void setToken(String token) {
+    _token = token;
+  }
+
+  void clearToken() {
+    _token = null;
+  }
+
+  bool get hasToken => _token != null;
 
   // Simple HTTP methods that use the configured Dio instance
   Future<Response<T>> get<T>(

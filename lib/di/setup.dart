@@ -1,5 +1,14 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:minha_saude_frontend/app/data/repositories/auth_repository_impl.dart';
+import 'package:minha_saude_frontend/app/data/repositories/google_auth_repository_impl.dart';
+import 'package:minha_saude_frontend/app/data/repositories/token_repository_impl.dart';
+import 'package:minha_saude_frontend/app/data/services/api_client.dart';
+import 'package:minha_saude_frontend/app/data/services/secure_storage.dart';
+import 'package:minha_saude_frontend/app/domain/repositories/auth_repository.dart';
+import 'package:minha_saude_frontend/app/domain/repositories/google_auth_repository.dart';
+import 'package:minha_saude_frontend/app/domain/repositories/token_repository.dart';
+import 'package:minha_saude_frontend/core/config/google_auth_config.dart';
+import 'package:minha_saude_frontend/core/config/mock_endpoint_config.dart';
 import 'package:minha_saude_frontend/routing/go_router.dart';
 
 import 'container.dart';
@@ -7,14 +16,35 @@ import 'container.dart';
 class AppServiceProvider extends ServiceProvider {
   @override
   void register() {
-    container.singleton<Dio>(Dio());
-    container.singleton<RouterConfig<Object>>(RouterFactory.create());
+    container.singleton(
+      MockEndpointConfig(
+        googleSignInMode: GoogleSignInMode.mockSuccess,
+        serverAuthMode: ServerAuthMode.mockExistingUser,
+        documentCreateMode: DocumentCreateMode.scan,
+      ),
+    );
+
+    // Core services
+    container.singleton(RouterFactory.create());
+    container.singleton(Dio());
+    container.singleton(ApiClient(container<Dio>()));
+    container.singleton(SecureStorage());
+
+    // Repositories
+    container.singleton<GoogleAuthRepository>(
+      GoogleAuthRepositoryImpl(container<GoogleAuthConfig>()),
+    );
+    container.singleton<TokenRepository>(
+      TokenRepositoryImpl(container<SecureStorage>(), container<ApiClient>()),
+    );
+    container.singleton<AuthRepository>(
+      AuthRepositoryImpl(container<ApiClient>()),
+    );
   }
 
   @override
   Future<void> bind() async {
-    // Stuff to do after registering all services
-    // await getIt<TokenRepository>().reload();
+    await container<TokenRepository>().reload();
   }
 }
 

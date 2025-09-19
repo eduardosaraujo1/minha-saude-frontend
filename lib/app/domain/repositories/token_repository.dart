@@ -1,6 +1,8 @@
-class TokenRepository {
-  Future<void> reload() async {}
-  Future<void> clearToken() async {}
-  Future<void> getToken() async {}
-  Future<void> setToken(String token) async {}
+import 'package:multiple_result/multiple_result.dart';
+
+abstract class TokenRepository {
+  Future<void> reload();
+  Future<void> clearToken();
+  Future<Result<String, Exception>> getToken();
+  Future<void> setToken(String token);
 }

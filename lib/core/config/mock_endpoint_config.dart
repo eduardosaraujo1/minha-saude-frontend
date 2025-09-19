@@ -1,11 +1,12 @@
 class MockEndpointConfig {
   final GoogleSignInMode googleSignInMode;
   final ServerAuthMode serverAuthMode;
-  final DocumentCreateMode documentCreateMode = DocumentCreateMode.scan;
+  final DocumentCreateMode documentCreateMode;
 
   const MockEndpointConfig({
     required this.googleSignInMode,
     required this.serverAuthMode,
+    required this.documentCreateMode,
   });
 }
 

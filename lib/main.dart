@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/data/shared/repositories/token_repository.dart';
-import 'package:minha_saude_frontend/di/get_it.dart';
-import 'package:minha_saude_frontend/app/presentation/shared/themes/app_theme.dart';
-import 'package:watch_it/watch_it.dart';
+import 'package:minha_saude_frontend/di/container.dart';
+
+import 'di/setup.dart';
 
 void main() async {
   try {
     // Ensure Flutter bindings are initialized
     WidgetsFlutterBinding.ensureInitialized();
 
-    // Initialize all providers and dependencies
-    await setupLocator();
-
-    // Preload authentication token
-    await getIt<TokenRepository>().reload();
+    // Initialize all services and dependencies
+    await AppServiceProvider().setup();
 
     // Run the app
     runApp(const MyApp());
@@ -25,17 +20,17 @@ void main() async {
   }
 }
 
-class MyApp extends WatchingWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final appTheme = watchIt<AppTheme>();
+    final container = ServiceLocator.I;
 
     return MaterialApp.router(
       title: 'Minha Saúde 2025',
-      theme: appTheme.selectedTheme,
-      routerConfig: di<GoRouter>(),
+      // theme: appTheme.selectedTheme,
+      routerConfig: container<RouterConfig<Object>>(),
     );
   }
 }

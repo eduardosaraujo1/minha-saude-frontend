@@ -22,7 +22,6 @@ import 'package:minha_saude_frontend/app/ui/views/document/document_view.dart';
 import 'package:minha_saude_frontend/app/ui/view_models/lixeira/deleted_document_view_model.dart';
 import 'package:minha_saude_frontend/app/ui/view_models/lixeira/lixeira_view_model.dart';
 import 'package:minha_saude_frontend/app/ui/views/lixeira/deleted_document_view.dart';
-import 'package:minha_saude_frontend/di/get_it.dart';
 import 'package:minha_saude_frontend/app/ui/view_models/auth/login_view_model.dart';
 import 'package:minha_saude_frontend/app/ui/view_models/auth/tos_view_model.dart';
 import 'package:minha_saude_frontend/app/ui/views/auth/login_view.dart';
@@ -34,6 +33,7 @@ import 'package:minha_saude_frontend/app/ui/views/document/document_list_view.da
 import 'package:minha_saude_frontend/app/ui/views/lixeira/lixeira_view.dart';
 import 'package:minha_saude_frontend/app/ui/views/shared/app_view.dart';
 import 'package:minha_saude_frontend/app/ui/views/shared/not_found.dart';
+import 'package:minha_saude_frontend/di/service_locator.dart';
 
 // Global key for the shell navigator
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -41,8 +41,8 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 final router = GoRouter(
   initialLocation: '/',
   redirect: (context, state) async {
-    final authRepository = getIt<AuthRepository>();
-    final tokenRepository = getIt<TokenRepository>();
+    final authRepository = ServiceLocator.I<AuthRepository>();
+    final tokenRepository = ServiceLocator.I<TokenRepository>();
 
     // Check authentication state
     final hasSessionToken = await tokenRepository.hasToken();
@@ -97,7 +97,9 @@ final router = GoRouter(
               path: '/',
               builder: (BuildContext context, GoRouterState state) =>
                   DocumentListView(
-                    DocumentListViewModel(getIt<DocumentRepository>()),
+                    DocumentListViewModel(
+                      ServiceLocator.I<DocumentRepository>(),
+                    ),
                   ),
               routes: [
                 GoRoute(
@@ -106,7 +108,7 @@ final router = GoRouter(
                     return DocumentScanView(
                       DocumentScanViewModel(
                         DocumentCreateType.upload,
-                        getIt<DocumentUploadRepository>(),
+                        ServiceLocator.I<DocumentUploadRepository>(),
                       ),
                     );
                   },
@@ -117,7 +119,7 @@ final router = GoRouter(
                     return DocumentScanView(
                       DocumentScanViewModel(
                         DocumentCreateType.scan,
-                        getIt<DocumentUploadRepository>(),
+                        ServiceLocator.I<DocumentUploadRepository>(),
                       ),
                     );
                   },
@@ -134,7 +136,7 @@ final router = GoRouter(
                     return DocumentView(
                       DocumentViewModel(
                         state.pathParameters['id'] ?? '',
-                        getIt<DocumentRepository>(),
+                        ServiceLocator.I<DocumentRepository>(),
                       ),
                     );
                   },
@@ -175,7 +177,9 @@ final router = GoRouter(
             GoRoute(
               path: '/lixeira',
               builder: (BuildContext context, GoRouterState state) =>
-                  LixeiraView(LixeiraViewModel(getIt<DocumentRepository>())),
+                  LixeiraView(
+                    LixeiraViewModel(ServiceLocator.I<DocumentRepository>()),
+                  ),
               routes: [
                 GoRoute(
                   path: ':id',
@@ -183,7 +187,7 @@ final router = GoRouter(
                     return DeletedDocumentView(
                       DeletedDocumentViewModel(
                         state.pathParameters['id'] ?? '',
-                        getIt<DocumentRepository>(),
+                        ServiceLocator.I<DocumentRepository>(),
                       ),
                     );
                   },
@@ -204,7 +208,7 @@ final router = GoRouter(
                   path: 'edit/nome',
                   builder: (context, state) {
                     return EditNomeView(
-                      EditNomeViewModel(getIt<ProfileRepository>()),
+                      EditNomeViewModel(ServiceLocator.I<ProfileRepository>()),
                     );
                   },
                 ),
@@ -212,7 +216,9 @@ final router = GoRouter(
                   path: 'edit/telefone',
                   builder: (context, state) {
                     return EditTelefoneView(
-                      EditTelefoneViewModel(getIt<ProfileRepository>()),
+                      EditTelefoneViewModel(
+                        ServiceLocator.I<ProfileRepository>(),
+                      ),
                     );
                   },
                 ),
@@ -220,7 +226,9 @@ final router = GoRouter(
                   path: 'edit/birthdate',
                   builder: (context, state) {
                     return EditBirthdayView(
-                      EditBirthdayViewModel(getIt<ProfileRepository>()),
+                      EditBirthdayViewModel(
+                        ServiceLocator.I<ProfileRepository>(),
+                      ),
                     );
                   },
                 ),
@@ -236,7 +244,10 @@ final router = GoRouter(
       path: '/login',
       builder: (BuildContext context, GoRouterState state) {
         return LoginView(
-          LoginViewModel(getIt<AuthRepository>(), getIt<TokenRepository>()),
+          LoginViewModel(
+            ServiceLocator.I<AuthRepository>(),
+            ServiceLocator.I<TokenRepository>(),
+          ),
         );
       },
     ),
@@ -250,7 +261,10 @@ final router = GoRouter(
       path: '/register',
       builder: (BuildContext context, GoRouterState state) {
         return RegisterView(
-          RegisterViewModel(getIt<AuthRepository>(), getIt<TokenRepository>()),
+          RegisterViewModel(
+            ServiceLocator.I<AuthRepository>(),
+            ServiceLocator.I<TokenRepository>(),
+          ),
         );
       },
     ),

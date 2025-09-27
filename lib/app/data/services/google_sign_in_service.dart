@@ -19,10 +19,10 @@ class GoogleSignInService {
     GoogleSignIn signIn,
     GoogleAuthConfig config,
   ) async {
-    await signIn.initialize(
-      clientId: config.clientId,
-      serverClientId: config.serverClientId,
-    );
+    // await signIn.initialize(
+    //   clientId: config.clientId,
+    //   serverClientId: config.serverClientId,
+    // );
 
     return GoogleSignInService._(signIn);
   }

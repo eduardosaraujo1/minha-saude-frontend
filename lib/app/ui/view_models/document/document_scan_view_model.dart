@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/app/data/repositories/document_upload_repository.dart';
 import 'package:minha_saude_frontend/config/mock_endpoint_config.dart';
-import 'package:minha_saude_frontend/di/get_it.dart';
+import 'package:minha_saude_frontend/di/service_locator.dart';
 import 'package:pdfx/pdfx.dart';
 
 class DocumentScanViewModel {
@@ -30,7 +30,7 @@ class DocumentScanViewModel {
 
     if (_type == DocumentCreateType.scan) {
       // mock decision
-      if (getIt<MockEndpointConfig>().documentCreateMode ==
+      if (ServiceLocator.I<MockEndpointConfig>().documentCreateMode ==
           DocumentCreateMode.scan) {
         final result = await uploadRepository.scanDocument();
 

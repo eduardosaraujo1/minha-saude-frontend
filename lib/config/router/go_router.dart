@@ -33,7 +33,7 @@ import 'package:minha_saude_frontend/app/ui/views/document/document_list_view.da
 import 'package:minha_saude_frontend/app/ui/views/lixeira/lixeira_view.dart';
 import 'package:minha_saude_frontend/app/ui/views/shared/app_view.dart';
 import 'package:minha_saude_frontend/app/ui/views/shared/not_found.dart';
-import 'package:minha_saude_frontend/di/service_locator.dart';
+import 'package:minha_saude_frontend/config/di/service_locator.dart';
 
 // Global key for the shell navigator
 final _shellNavigatorKey = GlobalKey<NavigatorState>();

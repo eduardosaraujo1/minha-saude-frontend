@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:minha_saude_frontend/app/data/models/login_response.dart';
+import 'package:minha_saude_frontend/app/data/services/api/models/login_response/login_response.dart';
 import 'package:minha_saude_frontend/app/data/models/register_response.dart';
 import 'package:minha_saude_frontend/app/data/models/user_register_data.dart';
 import 'package:minha_saude_frontend/app/data/services/auth_remote_service.dart';

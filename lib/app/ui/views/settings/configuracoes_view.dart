@@ -7,7 +7,7 @@ import 'package:minha_saude_frontend/app/ui/views/settings/tabs/conta_view.dart'
 import 'package:minha_saude_frontend/app/ui/views/settings/tabs/general_view.dart';
 import 'package:minha_saude_frontend/app/ui/views/settings/tabs/suporte_view.dart';
 import 'package:minha_saude_frontend/app/ui/widgets/app/brand_app_bar.dart';
-import 'package:minha_saude_frontend/di/service_locator.dart';
+import 'package:minha_saude_frontend/config/di/service_locator.dart';
 
 class ConfiguracoesView extends StatefulWidget {
   const ConfiguracoesView({super.key});

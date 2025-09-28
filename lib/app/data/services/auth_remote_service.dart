@@ -1,10 +1,10 @@
 import 'dart:developer';
 
 import 'package:get_it/get_it.dart';
-import 'package:minha_saude_frontend/app/data/models/login_response.dart';
+import 'package:minha_saude_frontend/app/data/services/api/models/login_response/login_response.dart';
 import 'package:minha_saude_frontend/app/data/models/register_response.dart';
 import 'package:minha_saude_frontend/app/data/models/user_register_data.dart';
-import 'package:minha_saude_frontend/app/data/services/api_client.dart';
+import 'package:minha_saude_frontend/app/data/services/api/api_client.dart';
 import 'package:minha_saude_frontend/config/mock_endpoint_config.dart';
 import 'package:multiple_result/multiple_result.dart';
 
@@ -38,7 +38,6 @@ class AuthRemoteService {
         isRegistered: true,
         sessionToken: "session_token_example",
         registerToken: null,
-        expiresAt: DateTime.now().add(Duration(days: 30)),
       );
     } else {
       // User needs to complete registration - return register token
@@ -46,7 +45,6 @@ class AuthRemoteService {
         isRegistered: false,
         sessionToken: null,
         registerToken: "register_token_123",
-        expiresAt: DateTime.now().add(Duration(minutes: 15)),
       );
     }
 

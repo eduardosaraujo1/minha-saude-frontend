@@ -8,11 +8,11 @@ import 'package:minha_saude_frontend/app/data/repositories/document_repository.d
 import 'package:minha_saude_frontend/app/data/repositories/document_upload_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/profile_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/token_repository.dart';
-import 'package:minha_saude_frontend/app/data/services/api_client.dart';
+import 'package:minha_saude_frontend/app/data/services/api/api_client.dart';
 import 'package:minha_saude_frontend/app/data/services/document_scanner.dart';
 import 'package:minha_saude_frontend/app/data/services/secure_storage.dart';
 import 'package:minha_saude_frontend/app/ui/core/themes/app_theme.dart';
-import 'package:minha_saude_frontend/app/router/go_router.dart';
+import 'package:minha_saude_frontend/config/router/go_router.dart';
 import 'package:minha_saude_frontend/config/google_auth_config.dart';
 import 'package:minha_saude_frontend/config/mock_endpoint_config.dart';
 

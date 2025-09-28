@@ -1,4 +1,4 @@
-import 'package:minha_saude_frontend/di/service_locator.dart';
+import 'package:minha_saude_frontend/config/di/service_locator.dart';
 
 export 'app_service_provider.dart';
 export 'local_service_provider.dart';

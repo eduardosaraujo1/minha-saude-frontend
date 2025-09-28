@@ -1,5 +1,5 @@
 import 'package:get_it/get_it.dart';
-import 'package:minha_saude_frontend/di/provider/service_provider.dart';
+import 'package:minha_saude_frontend/config/di/provider/service_provider.dart';
 
 abstract class ServiceLocator {
   static ServiceLocator get I => ServiceLocatorImpl();

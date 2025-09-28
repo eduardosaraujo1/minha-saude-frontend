@@ -1,17 +1,37 @@
-class AppRoutes {
-  static const String home = '/';
-  static const String documentosUpload = 'documentos/upload';
-  static const String documentosScan = 'documentos/scan';
-  static const String documentosCreate = 'documentos/create';
-  static const String documentosId = 'documentos/:id';
-  static const String compartilhar = '/compartilhar';
-  static const String lixeira = '/lixeira';
-  static const String lixeiraId = ':id';
-  static const String configuracoes = '/configuracoes';
-  static const String editNome = 'edit/nome';
-  static const String editTelefone = 'edit/telefone';
-  static const String editBirthdate = 'edit/birthdate';
-  static const String login = '/login';
-  static const String tos = '/tos';
-  static const String register = '/register';
+// Copyright 2024 The Flutter team. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+abstract final class AppRoutes {
+  static const home = '/';
+  static const login = '/login';
+  static const tos = '/tos';
+  static const register = '/register';
+
+  // Documentos routes
+  static const documentos = '/$documentosRelative';
+  static const documentosRelative = 'documentos';
+  static const documentosUpload = '$documentos/$documentosUploadRelative';
+  static const documentosUploadRelative = 'upload';
+  static const documentosScan = '$documentos/$documentosScanRelative';
+  static const documentosScanRelative = 'scan';
+  static const documentosCreate = '$documentos/$documentosCreateRelative';
+  static const documentosCreateRelative = 'create';
+  static String documentosWithId(String id) => '$documentos/$id';
+
+  // Compartilhar routes
+  static const compartilhar = '/compartilhar';
+
+  // Lixeira routes
+  static const lixeira = '/lixeira';
+  static String lixeiraWithId(String id) => '$lixeira/$id';
+
+  // Configuracoes routes
+  static const configuracoes = '/configuracoes';
+  static const editNome = '$configuracoes/$editNomeRelative';
+  static const editNomeRelative = 'edit/nome';
+  static const editTelefone = '$configuracoes/$editTelefoneRelative';
+  static const editTelefoneRelative = 'edit/telefone';
+  static const editBirthdate = '$configuracoes/$editBirthdateRelative';
+  static const editBirthdateRelative = 'edit/birthdate';
 }

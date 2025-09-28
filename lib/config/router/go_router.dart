@@ -34,6 +34,7 @@ import 'package:minha_saude_frontend/app/ui/views/shared/app_view.dart';
 import 'package:minha_saude_frontend/app/ui/views/shared/not_found.dart';
 import 'package:minha_saude_frontend/config/di/service_locator.dart';
 import 'package:minha_saude_frontend/config/router/middleware/middleware_handler.dart';
+import 'package:minha_saude_frontend/config/router/app_routes.dart';
 
 import 'middleware/auth_middleware.dart';
 
@@ -41,10 +42,10 @@ import 'middleware/auth_middleware.dart';
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final router = GoRouter(
-  initialLocation: '/',
+  initialLocation: AppRoutes.home,
   redirect: (context, state) async {
     final middlewareHandler = MiddlewareHandler([
-      AuthMiddleware(['/login', '/tos', '/register']),
+      AuthMiddleware([AppRoutes.login, AppRoutes.tos, AppRoutes.register]),
     ]);
 
     final middlewareResponse = await middlewareHandler.run(context, state);
@@ -73,7 +74,7 @@ final router = GoRouter(
           navigatorKey: _shellNavigatorKey,
           routes: [
             GoRoute(
-              path: '/',
+              path: AppRoutes.home,
               builder: (BuildContext context, GoRouterState state) =>
                   DocumentListView(
                     DocumentListViewModel(
@@ -82,7 +83,7 @@ final router = GoRouter(
                   ),
               routes: [
                 GoRoute(
-                  path: 'documentos/upload',
+                  path: AppRoutes.documentosUploadRelative,
                   builder: (BuildContext context, GoRouterState state) {
                     return DocumentScanView(
                       DocumentScanViewModel(
@@ -93,7 +94,7 @@ final router = GoRouter(
                   },
                 ),
                 GoRoute(
-                  path: 'documentos/scan',
+                  path: AppRoutes.documentosScanRelative,
                   builder: (BuildContext context, GoRouterState state) {
                     return DocumentScanView(
                       DocumentScanViewModel(
@@ -104,13 +105,13 @@ final router = GoRouter(
                   },
                 ),
                 GoRoute(
-                  path: 'documentos/create',
+                  path: AppRoutes.documentosCreateRelative,
                   builder: (BuildContext context, GoRouterState state) {
                     return DocumentCreateView(DocumentCreateViewModel());
                   },
                 ),
                 GoRoute(
-                  path: 'documentos/:id',
+                  path: '${AppRoutes.documentosRelative}/:id',
                   builder: (BuildContext context, GoRouterState state) {
                     return DocumentView(
                       DocumentViewModel(
@@ -128,7 +129,7 @@ final router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/compartilhar',
+              path: AppRoutes.compartilhar,
               builder: (BuildContext context, GoRouterState state) {
                 // return const CompartilharView();
                 return CodigosCompartilhamento();
@@ -154,7 +155,7 @@ final router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/lixeira',
+              path: AppRoutes.lixeira,
               builder: (BuildContext context, GoRouterState state) =>
                   LixeiraView(
                     LixeiraViewModel(ServiceLocator.I<DocumentRepository>()),
@@ -179,12 +180,12 @@ final router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/configuracoes',
+              path: AppRoutes.configuracoes,
               builder: (BuildContext context, GoRouterState state) =>
                   const ConfiguracoesView(),
               routes: [
                 GoRoute(
-                  path: 'edit/nome',
+                  path: AppRoutes.editNomeRelative,
                   builder: (context, state) {
                     return EditNomeView(
                       EditNomeViewModel(ServiceLocator.I<ProfileRepository>()),
@@ -192,7 +193,7 @@ final router = GoRouter(
                   },
                 ),
                 GoRoute(
-                  path: 'edit/telefone',
+                  path: AppRoutes.editTelefoneRelative,
                   builder: (context, state) {
                     return EditTelefoneView(
                       EditTelefoneViewModel(
@@ -202,7 +203,7 @@ final router = GoRouter(
                   },
                 ),
                 GoRoute(
-                  path: 'edit/birthdate',
+                  path: AppRoutes.editBirthdateRelative,
                   builder: (context, state) {
                     return EditBirthdayView(
                       EditBirthdayViewModel(
@@ -220,19 +221,19 @@ final router = GoRouter(
 
     // Auth Routes (without bottom navigation)
     GoRoute(
-      path: '/login',
+      path: AppRoutes.login,
       builder: (BuildContext context, GoRouterState state) {
         return LoginView(LoginViewModel(ServiceLocator.I<AuthRepository>()));
       },
     ),
     GoRoute(
-      path: '/tos',
+      path: AppRoutes.tos,
       builder: (BuildContext context, GoRouterState state) {
         return TosView(TosViewModel());
       },
     ),
     GoRoute(
-      path: '/register',
+      path: AppRoutes.register,
       builder: (BuildContext context, GoRouterState state) {
         return RegisterView(
           RegisterViewModel(ServiceLocator.I<AuthRepository>()),

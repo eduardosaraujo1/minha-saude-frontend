@@ -33,30 +33,15 @@ import 'package:minha_saude_frontend/app/ui/views/lixeira/lixeira_view.dart';
 import 'package:minha_saude_frontend/app/ui/views/shared/app_view.dart';
 import 'package:minha_saude_frontend/app/ui/views/shared/not_found.dart';
 import 'package:minha_saude_frontend/config/di/service_locator.dart';
-import 'package:minha_saude_frontend/config/router/middleware/middleware_handler.dart';
+import 'package:minha_saude_frontend/config/router/redirect_handler.dart';
 import 'package:minha_saude_frontend/config/router/app_routes.dart';
-
-import 'middleware/auth_middleware.dart';
 
 // Global key for the shell navigator
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final router = GoRouter(
   initialLocation: AppRoutes.home,
-  redirect: (context, state) async {
-    final middlewareHandler = MiddlewareHandler([
-      AuthMiddleware([AppRoutes.login, AppRoutes.tos, AppRoutes.register]),
-    ]);
-
-    final middlewareResponse = await middlewareHandler.run(context, state);
-
-    if (middlewareResponse != null) {
-      return middlewareResponse;
-    }
-
-    return null;
-  },
-  errorBuilder: (context, state) => NotFoundView(state.fullPath ?? ''),
+  redirect: RedirectHandler.redirect,
   routes: [
     // Main app routes with bottom navigation
     StatefulShellRoute.indexedStack(
@@ -241,4 +226,5 @@ final router = GoRouter(
       },
     ),
   ],
+  errorBuilder: (context, state) => NotFoundView(state.fullPath ?? ''),
 );

@@ -1,11 +1,33 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/config/router/middleware/middleware.dart';
 
-class MiddlewareHandler {
-  const MiddlewareHandler(this._middlewares);
+import 'app_routes.dart';
+import 'middleware/auth_middleware.dart';
+
+class RedirectHandler {
+  const RedirectHandler(this._middlewares);
 
   final List<Middleware> _middlewares;
+
+  static FutureOr<String?> redirect(
+    BuildContext context,
+    GoRouterState state,
+  ) async {
+    final middlewareHandler = RedirectHandler([
+      AuthMiddleware([AppRoutes.login, AppRoutes.tos, AppRoutes.register]),
+    ]);
+
+    final middlewareResponse = await middlewareHandler.run(context, state);
+
+    if (middlewareResponse != null) {
+      return middlewareResponse;
+    }
+
+    return null;
+  }
 
   Future<String?> run(BuildContext context, GoRouterState state) async {
     return _runMiddleware(context, state, 0);

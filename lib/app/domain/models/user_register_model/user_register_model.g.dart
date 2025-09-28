@@ -1,13 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'register_request.dart';
+part of 'user_register_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-_RegisterRequest _$RegisterRequestFromJson(Map<String, dynamic> json) =>
-    _RegisterRequest(
+_UserRegisterModel _$UserRegisterModelFromJson(Map<String, dynamic> json) =>
+    _UserRegisterModel(
       nome: json['nome'] as String,
       cpf: json['cpf'] as String,
       dataNascimento: DateTime.parse(json['dataNascimento'] as String),
@@ -15,7 +15,7 @@ _RegisterRequest _$RegisterRequestFromJson(Map<String, dynamic> json) =>
       registerToken: json['registerToken'] as String,
     );
 
-Map<String, dynamic> _$RegisterRequestToJson(_RegisterRequest instance) =>
+Map<String, dynamic> _$UserRegisterModelToJson(_UserRegisterModel instance) =>
     <String, dynamic>{
       'nome': instance.nome,
       'cpf': instance.cpf,

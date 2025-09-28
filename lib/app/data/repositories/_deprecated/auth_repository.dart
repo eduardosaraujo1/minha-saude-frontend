@@ -2,13 +2,12 @@ import 'dart:developer';
 
 import 'package:minha_saude_frontend/app/data/services/api/models/login_response/login_response.dart';
 import 'package:minha_saude_frontend/app/data/models/register_response.dart';
-import 'package:minha_saude_frontend/app/data/models/user_register_data.dart';
 import 'package:minha_saude_frontend/app/data/services/auth_remote_service.dart';
-import 'package:minha_saude_frontend/app/data/services/google_sign_in_service.dart';
+import 'package:minha_saude_frontend/app/data/services/google/google_service.dart';
 import 'package:minha_saude_frontend/app/data/repositories/token_repository.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-class AuthRepository {
+class DEPRECATEDAuthRepository {
   final AuthRemoteService _authRemoteService;
   final GoogleSignInService _googleSignInService;
   final TokenRepository _tokenRepository;

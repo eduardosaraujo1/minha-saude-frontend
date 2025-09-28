@@ -1,6 +1,6 @@
 import 'service_provider.dart';
 
-class LocalServiceProvider extends ServiceProvider {
+class ProductionServiceProvider extends ServiceProvider {
   @override
   Future<void> register() async {}
 

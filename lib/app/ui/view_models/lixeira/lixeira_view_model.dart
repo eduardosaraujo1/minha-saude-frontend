@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
-import 'package:minha_saude_frontend/app/data/models/document.dart';
+import 'package:minha_saude_frontend/app/domain/models/document.dart';
 import 'package:minha_saude_frontend/app/data/repositories/document_repository.dart';
 
 class LixeiraViewModel {

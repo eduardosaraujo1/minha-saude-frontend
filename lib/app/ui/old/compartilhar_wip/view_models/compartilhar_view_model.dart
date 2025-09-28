@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/data/models/share.dart';
+import 'package:minha_saude_frontend/app/domain/models/share.dart';
 import 'package:minha_saude_frontend/app/data/repositories/share_repository.dart';
 
 class CompartilharViewModel {

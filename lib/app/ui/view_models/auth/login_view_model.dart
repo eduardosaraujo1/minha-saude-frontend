@@ -1,23 +1,23 @@
 import 'package:flutter/foundation.dart';
-import 'package:minha_saude_frontend/app/data/repositories/auth_repository.dart';
+import 'package:minha_saude_frontend/app/data/repositories/_deprecated/auth_repository.dart';
+import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/token_repository.dart';
 
 class LoginViewModel {
   final AuthRepository authRepository;
-  final TokenRepository tokenRepository;
 
   final ValueNotifier<String?> errorMessage = ValueNotifier(null);
   final ValueNotifier<bool> isLoading = ValueNotifier(false);
   final ValueNotifier<String?> redirectTo = ValueNotifier(null);
 
-  LoginViewModel(this.authRepository, this.tokenRepository);
+  LoginViewModel(this.authRepository);
 
   Future<void> loginWithGoogle() async {
     isLoading.value = true;
     errorMessage.value = null;
 
     try {
-      final result = await authRepository.googleLogin();
+      final result = await authRepository.loginWithGoogle();
 
       if (result.isError()) {
         errorMessage.value = result.tryGetError()!.toString();

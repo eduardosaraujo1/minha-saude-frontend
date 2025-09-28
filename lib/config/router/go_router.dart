@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/data/repositories/auth_repository.dart';
+import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/document_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/document_upload_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/profile_repository.dart';
-import 'package:minha_saude_frontend/app/data/repositories/token_repository.dart';
 import 'package:minha_saude_frontend/app/ui/view_models/auth/register_view_model.dart';
 import 'package:minha_saude_frontend/app/ui/old/compartilhar/codigos_compartilhamento.dart';
 import 'package:minha_saude_frontend/app/ui/view_models/settings/edit_nome_view_model.dart';
@@ -34,6 +33,9 @@ import 'package:minha_saude_frontend/app/ui/views/lixeira/lixeira_view.dart';
 import 'package:minha_saude_frontend/app/ui/views/shared/app_view.dart';
 import 'package:minha_saude_frontend/app/ui/views/shared/not_found.dart';
 import 'package:minha_saude_frontend/config/di/service_locator.dart';
+import 'package:minha_saude_frontend/config/router/middleware/middleware_handler.dart';
+
+import 'middleware/auth_middleware.dart';
 
 // Global key for the shell navigator
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -41,37 +43,14 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 final router = GoRouter(
   initialLocation: '/',
   redirect: (context, state) async {
-    final authRepository = ServiceLocator.I<AuthRepository>();
-    final tokenRepository = ServiceLocator.I<TokenRepository>();
+    final middlewareHandler = MiddlewareHandler([
+      AuthMiddleware(['/login', '/tos', '/register']),
+    ]);
 
-    // Check authentication state
-    final hasSessionToken = await tokenRepository.hasToken();
-    final hasRegisterToken = authRepository.hasValidRegisterToken;
+    final middlewareResponse = await middlewareHandler.run(context, state);
 
-    final authRoutes = ['/login', '/tos', '/register'];
-    final isOnAuthRoute = authRoutes.contains(state.fullPath);
-
-    // If user has session token (fully authenticated), redirect away from auth routes
-    if (hasSessionToken && isOnAuthRoute) {
-      return '/';
-    }
-
-    // If user has register token but not session token (needs to complete registration)
-    if (hasRegisterToken && !hasSessionToken) {
-      if (state.fullPath != '/tos' && state.fullPath != '/register') {
-        return '/tos'; // Start registration flow
-      }
-      return null; // Allow TOS and register routes
-    }
-
-    // If user has no valid tokens and not on auth route, go to login
-    if (!hasSessionToken && !hasRegisterToken && !isOnAuthRoute) {
-      return '/login';
-    }
-
-    // If user has session token, allow access to main app
-    if (hasSessionToken && !isOnAuthRoute) {
-      return null;
+    if (middlewareResponse != null) {
+      return middlewareResponse;
     }
 
     return null;
@@ -243,12 +222,7 @@ final router = GoRouter(
     GoRoute(
       path: '/login',
       builder: (BuildContext context, GoRouterState state) {
-        return LoginView(
-          LoginViewModel(
-            ServiceLocator.I<AuthRepository>(),
-            ServiceLocator.I<TokenRepository>(),
-          ),
-        );
+        return LoginView(LoginViewModel(ServiceLocator.I<AuthRepository>()));
       },
     ),
     GoRoute(
@@ -261,10 +235,7 @@ final router = GoRouter(
       path: '/register',
       builder: (BuildContext context, GoRouterState state) {
         return RegisterView(
-          RegisterViewModel(
-            ServiceLocator.I<AuthRepository>(),
-            ServiceLocator.I<TokenRepository>(),
-          ),
+          RegisterViewModel(ServiceLocator.I<AuthRepository>()),
         );
       },
     ),

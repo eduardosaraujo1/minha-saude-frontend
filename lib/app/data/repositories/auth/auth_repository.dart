@@ -1,6 +1,8 @@
 import 'package:minha_saude_frontend/app/data/services/api/models/login_response/login_response.dart';
-import 'package:minha_saude_frontend/app/data/services/api/models/register_request/register_request.dart';
+import 'package:minha_saude_frontend/app/domain/models/user_register_model/user_register_model.dart';
 import 'package:multiple_result/multiple_result.dart';
+
+export 'auth_repository_local.dart';
 
 abstract class AuthRepository {
   // [AUTHENTICATION]
@@ -20,16 +22,21 @@ abstract class AuthRepository {
   Future<Result<void, Exception>> requestEmailCode(String email);
 
   /// Register a new user through token from login attempt
-  Future<Result<void, Exception>> register(RegisterRequest registerRequest);
+  Future<Result<void, Exception>> register(UserRegisterModel registerModel);
 
-  /// Sign out the current user
+  /// Register a new user through token from login attempt
+  Result<String?, Exception> getRegisterToken();
+
+  /// Sign out the current user, both through server and clearing local data
   Future<void> logout();
 
   // [GOOGLE INTEGRATION]
   /// Gets the current auth token, reading from SecureStorage if unavailable in memory
   Future<Result<String?, Exception>> getGoogleServerToken();
 
-  // [TOKEN]
+  // [STORED TOKEN]
   /// Gets the current auth token, reading from SecureStorage if unavailable in memory
   Future<Result<String?, Exception>> getAuthToken();
+
+  Future<bool> hasToken();
 }

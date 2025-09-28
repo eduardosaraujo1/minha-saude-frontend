@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/data/models/document.dart';
+import 'package:minha_saude_frontend/app/domain/models/document.dart';
 import 'package:minha_saude_frontend/app/ui/view_models/document/document_list_view_model.dart';
 import 'package:minha_saude_frontend/app/ui/widgets/document/document_fab.dart';
 import 'package:minha_saude_frontend/app/ui/widgets/app/brand_app_bar.dart';

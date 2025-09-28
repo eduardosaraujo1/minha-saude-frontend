@@ -1,16 +1,14 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/data/models/user_register_data.dart';
-import 'package:minha_saude_frontend/app/data/repositories/auth_repository.dart';
-import 'package:minha_saude_frontend/app/data/repositories/token_repository.dart';
+import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
+import 'package:minha_saude_frontend/app/domain/models/user_register_model/user_register_model.dart';
 
 class RegisterViewModel {
   final RegisterForm form = RegisterForm();
   final AuthRepository authRepository;
-  final TokenRepository tokenRepository;
 
-  RegisterViewModel(this.authRepository, this.tokenRepository);
+  RegisterViewModel(this.authRepository);
 
   final ValueNotifier<String?> errorMessage = ValueNotifier(null);
 
@@ -34,7 +32,7 @@ class RegisterViewModel {
 
       isLoading.value = true;
 
-      final newUser = UserRegisterData(
+      final newUser = RegisterRequest(
         nome: form.nomeController.text.trim(),
         cpf: form.cpfController.text.replaceAll(RegExp(r'[^0-9]'), ''),
         dataNascimento: _parseDate(form.dataNascimentoController.text.trim()),

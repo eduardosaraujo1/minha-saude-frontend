@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/data/models/user.dart';
+import 'package:minha_saude_frontend/app/domain/models/user.dart';
 import 'package:minha_saude_frontend/app/data/repositories/profile_repository.dart';
 
 class GeneralViewModel {

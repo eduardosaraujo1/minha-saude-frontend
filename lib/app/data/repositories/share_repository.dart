@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/data/models/share.dart';
-import 'package:minha_saude_frontend/app/data/models/document.dart';
+import 'package:minha_saude_frontend/app/domain/models/share.dart';
+import 'package:minha_saude_frontend/app/domain/models/document.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 class ShareRepository extends ChangeNotifier {

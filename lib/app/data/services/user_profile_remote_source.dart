@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:minha_saude_frontend/app/data/models/user.dart';
+import 'package:minha_saude_frontend/app/domain/models/user.dart';
 
 /// Remote data source for user profile
 /// Handles API communication for user profile operations

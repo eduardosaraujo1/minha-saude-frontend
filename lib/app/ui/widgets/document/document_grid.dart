@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/data/models/document.dart';
+import 'package:minha_saude_frontend/app/domain/models/document.dart';
 import 'package:minha_saude_frontend/app/ui/widgets/document/document_item.dart';
 
 class DocumentGrid extends StatelessWidget {

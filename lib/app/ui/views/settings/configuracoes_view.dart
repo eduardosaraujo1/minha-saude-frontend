@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/data/repositories/auth_repository.dart';
+import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/profile_repository.dart';
 import 'package:minha_saude_frontend/app/ui/view_models/settings/conta_view_model.dart';
 import 'package:minha_saude_frontend/app/ui/view_models/settings/general_view_model.dart';

@@ -13,7 +13,7 @@ void main() async {
     // Initialize all providers and dependencies
     ServiceLocator.I.setupProviders([
       AppServiceProvider(),
-      LocalServiceProvider(),
+      DevelopmentServiceProvider(),
     ]);
 
     // Run the app

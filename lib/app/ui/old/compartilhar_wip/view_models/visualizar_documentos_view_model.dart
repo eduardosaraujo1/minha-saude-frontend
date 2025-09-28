@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/app/data/repositories/share_repository.dart';
-import 'package:minha_saude_frontend/app/data/models/document.dart';
+import 'package:minha_saude_frontend/app/domain/models/document.dart';
 
 class VisualizarDocumentosViewModel {
   VisualizarDocumentosViewModel(this.shareRepository) {

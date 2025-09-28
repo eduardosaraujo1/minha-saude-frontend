@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/data/repositories/auth_repository.dart';
+import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
 
 class ContaViewModel {
   final AuthRepository authRepository;
@@ -11,7 +11,7 @@ class ContaViewModel {
   ContaViewModel(this.authRepository);
 
   void signout() async {
-    await authRepository.signOut();
+    await authRepository.logout();
     redirectTo.value = '/login';
   }
 

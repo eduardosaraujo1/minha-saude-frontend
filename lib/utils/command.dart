@@ -27,7 +27,7 @@ abstract class Command<TSuccess, TException> extends ChangeNotifier {
 
   bool get isExecuting => _isExecuting;
 
-  bool get error {
+  bool get isError {
     if (_isExecuting) {
       throw Exception("Attempted to read error state on a running command.");
     }
@@ -63,6 +63,15 @@ abstract class Command<TSuccess, TException> extends ChangeNotifier {
       _isExecuting = false;
       notifyListeners();
     }
+  }
+
+  void clearResult() {
+    if (_isExecuting) {
+      throw Exception("Attempted to clear result on a running command.");
+    }
+
+    _result = null;
+    notifyListeners();
   }
 }
 

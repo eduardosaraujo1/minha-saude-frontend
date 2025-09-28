@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:logging/logging.dart';
 import 'package:minha_saude_frontend/app/ui/core/themes/app_theme.dart';
 import 'package:minha_saude_frontend/config/di/provider/service_provider.dart';
 import 'package:minha_saude_frontend/config/di/service_locator.dart';
@@ -7,6 +8,9 @@ import 'package:watch_it/watch_it.dart';
 
 void main() async {
   try {
+    // Configure app logging
+    Logger.root.level = Level.ALL;
+
     // Ensure Flutter bindings are initialized
     WidgetsFlutterBinding.ensureInitialized();
 

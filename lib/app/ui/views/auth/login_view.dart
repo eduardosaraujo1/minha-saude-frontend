@@ -6,10 +6,15 @@ import 'package:minha_saude_frontend/app/ui/widgets/auth/login_decorator.dart';
 import 'package:minha_saude_frontend/app/ui/view_models/auth/login_view_model.dart';
 import 'package:watch_it/watch_it.dart';
 
-class LoginView extends WatchingWidget {
+class LoginView extends StatefulWidget {
   final LoginViewModel viewModel;
   const LoginView(this.viewModel, {super.key});
 
+  @override
+  State<LoginView> createState() => _LoginViewState();
+}
+
+class _LoginViewState extends State<LoginView> {
   void _onError(BuildContext context, String? errorMessage) {
     if (errorMessage != null) {
       final snackBar = SnackBar(
@@ -18,20 +23,20 @@ class LoginView extends WatchingWidget {
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
-      viewModel.clearErrorMessages();
+      widget.viewModel.clearErrorMessages();
     }
   }
 
   void _onRedirect(BuildContext context, String? redirectPath) {
     if (redirectPath != null) {
-      viewModel.redirectTo.value = null; // Clear redirect
+      widget.viewModel.redirectTo.value = null; // Clear redirect
       context.go(redirectPath);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = viewModel;
+    final vm = widget.viewModel;
     final isLoading = watch(vm.isLoading);
 
     // Watch for error messages and handle them
@@ -74,7 +79,7 @@ class LoginView extends WatchingWidget {
                   disabled: isLoading.value,
                   onPressed: isLoading.value
                       ? null
-                      : () => vm.loginWithGoogle(),
+                      : () => vm._loginWithGoogle(),
                 ),
                 SizedBox(height: 8),
                 if (isLoading.value)

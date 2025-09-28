@@ -49,7 +49,7 @@ class AuthRepositoryLocal implements AuthRepository {
 
   // [GOOGLE INTEGRATION]
   @override
-  Future<Result<String?, Exception>> getGoogleServerToken() {
+  Future<Result<String, Exception>> getGoogleServerToken() {
     // TODO: implement getGoogleServerToken
     throw UnimplementedError();
   }

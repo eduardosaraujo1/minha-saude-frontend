@@ -1,7 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:minha_saude_frontend/app/data/repositories/_deprecated/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
-import 'package:minha_saude_frontend/app/data/repositories/token_repository.dart';
 
 class LoginViewModel {
   final AuthRepository authRepository;

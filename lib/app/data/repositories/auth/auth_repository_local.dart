@@ -36,7 +36,7 @@ class AuthRepositoryLocal implements AuthRepository {
   }
 
   @override
-  Result<String?, Exception> getRegisterToken() {
+  Result<String, Exception> getRegisterToken() {
     // TODO: implement getRegisterToken
     throw UnimplementedError();
   }

@@ -7,7 +7,8 @@ export 'auth_repository_local.dart';
 abstract class AuthRepository {
   // [AUTHENTICATION]
 
-  /// Login with Google exchanging server code for auth token
+  /// Login with Google exchanging server code for auth token and storing in SecureStorage
+  /// If the login fails because the user was not registered, the register token is remembered instead
   Future<Result<LoginResponse, Exception>> loginWithGoogle(
     String googleServerCode,
   );
@@ -32,7 +33,7 @@ abstract class AuthRepository {
 
   // [GOOGLE INTEGRATION]
   /// Gets the current auth token, reading from SecureStorage if unavailable in memory
-  Future<Result<String?, Exception>> getGoogleServerToken();
+  Future<Result<String, Exception>> getGoogleServerToken();
 
   // [STORED TOKEN]
   /// Gets the current auth token, reading from SecureStorage if unavailable in memory

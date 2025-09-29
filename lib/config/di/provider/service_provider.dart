@@ -1,6 +1,5 @@
 import '../service_locator.dart';
 
-export 'app_service_provider.dart';
 export 'development_service_provider.dart';
 export 'production_service_provider.dart';
 

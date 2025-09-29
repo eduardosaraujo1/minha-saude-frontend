@@ -1,31 +1,34 @@
-import 'dart:io';
-
 class ProjectSettings {
   ProjectSettings({
-    required bool isProduction,
+    /// The base URL the API uses
     required String apiBaseUrl,
-    required bool useGoogle,
-  }) : _isProduction = isProduction,
-       _apiBaseUrl = apiBaseUrl,
-       _useGoogle = useGoogle;
 
-  factory ProjectSettings.development() => ProjectSettings(
-    useGoogle: Platform.isAndroid || Platform.isIOS,
-    isProduction: false,
-    apiBaseUrl: 'http://localhost:3000',
-  );
+    /// Use fake ApiClient for server comunication
+    required bool mockApiClient,
 
-  factory ProjectSettings.production() => ProjectSettings(
-    useGoogle: Platform.isAndroid || Platform.isIOS,
-    isProduction: true,
-    apiBaseUrl: 'http://localhost:3000',
-  );
+    /// Use fake GoogleSignIn client
+    required bool mockGoogle,
 
-  final bool _isProduction;
+    /// Use fake DocumentScanner client that returns a default PDF
+    required bool mockScanner,
+
+    /// Mock the device storage used for token storage
+    required bool mockSecureStorage,
+  }) : _apiBaseUrl = apiBaseUrl,
+       _mockApiClient = mockApiClient,
+       _mockGoogle = mockGoogle,
+       _mockScanner = mockScanner,
+       _mockSecureStorage = mockSecureStorage;
+
   final String _apiBaseUrl;
-  final bool _useGoogle;
+  final bool _mockApiClient;
+  final bool _mockGoogle;
+  final bool _mockScanner;
+  final bool _mockSecureStorage;
 
-  bool get isProduction => _isProduction;
   String get apiBaseUrl => _apiBaseUrl;
-  bool get useGoogle => _useGoogle;
+  bool get mockApiClient => _mockApiClient;
+  bool get mockGoogle => _mockGoogle;
+  bool get mockScanner => _mockScanner;
+  bool get mockSecureStorage => _mockSecureStorage;
 }

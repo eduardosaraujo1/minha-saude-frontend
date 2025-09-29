@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
-import 'package:minha_saude_frontend/app/ui/core/themes/app_theme.dart';
 import 'package:minha_saude_frontend/app/ui/core/views/init_error_widget.dart';
 import 'package:minha_saude_frontend/config/di/provider/service_provider.dart';
 import 'package:minha_saude_frontend/config/di/service_locator.dart';
+
+import 'main.dart';
 
 void main() async {
   try {
@@ -15,7 +15,7 @@ void main() async {
     Logger.root.level = Level.ALL;
 
     // Initialize all providers and dependencies
-    ServiceLocator.I.setupProviders([DevelopmentServiceProvider()]);
+    ServiceLocator.I.setupProviders([ProductionServiceProvider()]);
 
     // Run the app
     runApp(const MyApp());
@@ -24,20 +24,5 @@ void main() async {
 
     log.severe('Failed to run app: $e');
     runApp(InitErrorWidget(e));
-  }
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final appTheme = ServiceLocator.I<AppTheme>();
-
-    return MaterialApp.router(
-      title: 'Minha Saúde',
-      theme: appTheme.selectedTheme,
-      routerConfig: ServiceLocator.I<GoRouter>(),
-    );
   }
 }

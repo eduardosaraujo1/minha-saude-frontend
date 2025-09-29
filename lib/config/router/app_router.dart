@@ -69,7 +69,7 @@ class AppRouter {
           },
           routes: [
             GoRoute(
-              path: Routes.register,
+              path: Routes.registerRelative,
               builder: (BuildContext context, GoRouterState state) {
                 return RegisterView(RegisterViewModel(_authRepository));
               },

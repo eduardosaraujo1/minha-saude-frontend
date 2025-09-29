@@ -13,7 +13,7 @@ import 'package:minha_saude_frontend/app/data/services/google/google_service.dar
 import 'package:minha_saude_frontend/app/data/services/secure_storage/secure_storage.dart';
 import 'package:minha_saude_frontend/app/ui/core/themes/app_theme.dart';
 import 'package:minha_saude_frontend/config/project_settings.dart';
-import 'package:minha_saude_frontend/config/router/go_router.dart';
+import 'package:minha_saude_frontend/config/router/app_router.dart';
 
 import 'service_provider.dart';
 

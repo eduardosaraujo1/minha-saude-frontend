@@ -117,7 +117,7 @@ class _DeletedDocumentViewState extends State<DeletedDocumentView> {
                 child: FilledButton.icon(
                   onPressed: () => _showDeleteConfirmationDialog(context),
                   icon: const Icon(Icons.delete_forever),
-                  label: const Text('Excluir Perman.'),
+                  label: const Text('Excluir'),
                   style: FilledButton.styleFrom(
                     backgroundColor: theme.colorScheme.error,
                     foregroundColor: theme.colorScheme.onError,

@@ -12,6 +12,7 @@
 ## Para fazer
 
 -   [ ] DocumentIcon: fazer a lista de documentos usar Wrap para evitar overflow ou forçar 3 colunas em telas grandes (ensure fixed width)
+-   [ ] PdfPinchController: não suportado no Windows (ferramenta de teste), se possível fazer funcionar
 -   [ ] Upload pdf via arquivo
 -   [ ] Pegar dados do usuário via ProfileRepository
 -   [ ] Escrever casos de teste para avaliar edge cases (especialmente no visualizar documento)

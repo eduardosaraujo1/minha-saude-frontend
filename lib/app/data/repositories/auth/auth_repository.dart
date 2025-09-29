@@ -1,4 +1,4 @@
-import 'package:minha_saude_frontend/app/data/services/api/models/login_response/login_response.dart';
+import 'package:minha_saude_frontend/app/domain/models/login_response/login_response.dart';
 import 'package:minha_saude_frontend/app/domain/models/user_register_model/user_register_model.dart';
 import 'package:multiple_result/multiple_result.dart';
 
@@ -35,7 +35,10 @@ abstract class AuthRepository {
   Future<Result<String?, Exception>> getAuthToken();
 
   /// Sets the current auth token in session storage
-  Future<Result<void, Exception>> setAuthToken(String? value);
+  Future<Result<void, Exception>> setAuthToken(String value);
+
+  /// Clear the auth token stored in SecureStorage
+  Future<Result<void, Exception>> clearAuthToken();
 
   /// Checks if user has auth token
   Future<bool> hasAuthToken();
@@ -45,6 +48,9 @@ abstract class AuthRepository {
 
   /// Sets the locally stored register token
   bool setRegisterToken(String? value);
+
+  /// Remove locally stored register token
+  void clearRegisterToken(String? value);
 
   /// Checks if the user has a register token
   bool hasRegisterToken();

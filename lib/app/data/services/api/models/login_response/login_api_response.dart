@@ -1,11 +1,11 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'login_response.freezed.dart';
-part 'login_response.g.dart';
+part 'login_api_response.freezed.dart';
+part 'login_api_response.g.dart';
 
 @freezed
-abstract class LoginResponse with _$LoginResponse {
-  const factory LoginResponse({
+abstract class LoginApiResponse with _$LoginApiResponse {
+  const factory LoginApiResponse({
     /// Indicates if user has completed registration
     required bool isRegistered,
 
@@ -14,8 +14,8 @@ abstract class LoginResponse with _$LoginResponse {
 
     /// Register token for users who need to complete registration (only when isRegistered = false)
     required String? registerToken,
-  }) = _LoginResponse;
+  }) = _LoginApiResponse;
 
-  factory LoginResponse.fromJson(Map<String, dynamic> json) =>
-      _$LoginResponseFromJson(json);
+  factory LoginApiResponse.fromJson(Map<String, dynamic> json) =>
+      _$LoginApiResponseFromJson(json);
 }

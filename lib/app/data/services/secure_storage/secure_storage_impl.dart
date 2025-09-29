@@ -1,10 +1,9 @@
-// Wrapper for FlutterSecureStorage
-// Provides methods to read, write, and delete key-value pairs securely.
-
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-class SecureStorage {
+import 'secure_storage.dart';
+
+class SecureStorageImpl implements SecureStorage {
   static const String tokenKey = 'session_token';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
@@ -25,6 +24,7 @@ class SecureStorage {
   }
 
   /// Read the token from secure storage
+  @override
   Future<Result<String?, Exception>> getAuthToken() async {
     try {
       final token = await _read(tokenKey);
@@ -35,13 +35,21 @@ class SecureStorage {
   }
 
   /// Set the token in secure storage
-  Future<Result<void, Exception>> setAuthToken(String? token) async {
+  @override
+  Future<Result<void, Exception>> setAuthToken(String token) async {
     try {
-      if (token == null) {
-        await _delete(tokenKey);
-      } else {
-        await _write(tokenKey, token);
-      }
+      await _write(tokenKey, token);
+
+      return Result.success(null);
+    } on Exception catch (e) {
+      return Result.error(e);
+    }
+  }
+
+  @override
+  Future<Result<void, Exception>> clearAuthToken() async {
+    try {
+      await _delete(tokenKey);
       return Result.success(null);
     } on Exception catch (e) {
       return Result.error(e);

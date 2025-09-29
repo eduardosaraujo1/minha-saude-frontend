@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:minha_saude_frontend/app/data/services/api/api_client.dart';
 import 'package:minha_saude_frontend/app/data/services/api/exceptions/bad_response_exception.dart';
-import 'package:minha_saude_frontend/app/data/services/api/models/login_response/login_response.dart';
+import 'package:minha_saude_frontend/app/data/services/api/models/login_response/login_api_response.dart';
 import 'package:minha_saude_frontend/app/data/services/api/models/register_response/register_response.dart';
 import 'package:minha_saude_frontend/app/domain/models/user_register_model/user_register_model.dart';
 import 'package:multiple_result/multiple_result.dart';
@@ -38,7 +38,7 @@ class ApiClientImpl implements ApiClient {
 
   /// Login with Google server code
   @override
-  Future<Result<LoginResponse, Exception>> authLoginGoogle(
+  Future<Result<LoginApiResponse, Exception>> authLoginGoogle(
     String tokenOauth,
   ) async {
     try {
@@ -72,7 +72,7 @@ class ApiClientImpl implements ApiClient {
         );
       }
 
-      final loginResponse = LoginResponse.fromJson(response.data);
+      final loginResponse = LoginApiResponse.fromJson(response.data);
       return Result.success(loginResponse);
     } on DioException {
       return Result.error(
@@ -114,7 +114,7 @@ class ApiClientImpl implements ApiClient {
   }
 
   @override
-  Future<Result<LoginResponse, Exception>> authLoginEmail(
+  Future<Result<LoginApiResponse, Exception>> authLoginEmail(
     String email,
     String code,
   ) async {

@@ -2,7 +2,7 @@ import 'package:minha_saude_frontend/app/domain/models/user_register_model/user_
 import 'package:multiple_result/multiple_result.dart';
 
 import 'api_client.dart';
-import 'models/login_response/login_response.dart';
+import 'models/login_response/login_api_response.dart';
 import 'models/register_response/register_response.dart';
 
 class FakeApiClient implements ApiClient {
@@ -14,12 +14,12 @@ class FakeApiClient implements ApiClient {
   }
 
   @override
-  Future<Result<LoginResponse, Exception>> authLoginGoogle(
+  Future<Result<LoginApiResponse, Exception>> authLoginGoogle(
     String tokenOauth,
   ) async {
     if (_isRegistered) {
       return Result.success(
-        LoginResponse(
+        LoginApiResponse(
           isRegistered: true,
           sessionToken: 'fake_session_token',
           registerToken: null,
@@ -27,7 +27,7 @@ class FakeApiClient implements ApiClient {
       );
     } else {
       return Result.success(
-        LoginResponse(
+        LoginApiResponse(
           isRegistered: false,
           sessionToken: null,
           registerToken: 'fake_register_token',
@@ -58,13 +58,13 @@ class FakeApiClient implements ApiClient {
   }
 
   @override
-  Future<Result<LoginResponse, Exception>> authLoginEmail(
+  Future<Result<LoginApiResponse, Exception>> authLoginEmail(
     String email,
     String code,
   ) async {
     if (_isRegistered) {
       return Result.success(
-        LoginResponse(
+        LoginApiResponse(
           isRegistered: true,
           sessionToken: 'fake_session_token',
           registerToken: null,
@@ -72,7 +72,7 @@ class FakeApiClient implements ApiClient {
       );
     } else {
       return Result.success(
-        LoginResponse(
+        LoginApiResponse(
           isRegistered: false,
           sessionToken: null,
           registerToken: 'fake_register_token',

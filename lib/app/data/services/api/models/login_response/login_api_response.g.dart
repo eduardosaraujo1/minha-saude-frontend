@@ -1,19 +1,19 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'login_response.dart';
+part of 'login_api_response.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-_LoginResponse _$LoginResponseFromJson(Map<String, dynamic> json) =>
-    _LoginResponse(
+_LoginApiResponse _$LoginApiResponseFromJson(Map<String, dynamic> json) =>
+    _LoginApiResponse(
       isRegistered: json['isRegistered'] as bool,
       sessionToken: json['sessionToken'] as String?,
       registerToken: json['registerToken'] as String?,
     );
 
-Map<String, dynamic> _$LoginResponseToJson(_LoginResponse instance) =>
+Map<String, dynamic> _$LoginApiResponseToJson(_LoginApiResponse instance) =>
     <String, dynamic>{
       'isRegistered': instance.isRegistered,
       'sessionToken': instance.sessionToken,

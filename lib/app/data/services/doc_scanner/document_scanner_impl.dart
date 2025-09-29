@@ -1,7 +1,10 @@
 import 'dart:io';
 import 'package:doc_scan_flutter/doc_scan.dart' as pl;
 
-class DocumentScanner {
+import 'document_scanner.dart';
+
+class DocumentScannerImpl implements DocumentScanner {
+  @override
   Future<File?> scanPdf() async {
     final result = await pl.DocumentScanner.scan(format: pl.DocScanFormat.pdf);
 
@@ -21,6 +24,7 @@ class DocumentScanner {
     return file;
   }
 
+  @override
   Future<List<File>> scanJpeg() async {
     final result = await pl.DocumentScanner.scan(format: pl.DocScanFormat.jpeg);
 

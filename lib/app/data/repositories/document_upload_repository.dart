@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
-import 'package:minha_saude_frontend/app/data/services/document_scanner.dart';
+import 'package:minha_saude_frontend/app/data/services/doc_scanner/document_scanner.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 /// Model representing a scanned/picked document file

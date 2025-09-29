@@ -1,4 +1,4 @@
-import 'package:minha_saude_frontend/app/data/services/api/models/login_response/login_response.dart';
+import 'package:minha_saude_frontend/app/data/services/api/models/login_response/login_api_response.dart';
 import 'package:minha_saude_frontend/app/data/services/api/models/register_response/register_response.dart';
 import 'package:minha_saude_frontend/app/domain/models/user_register_model/user_register_model.dart';
 import 'package:multiple_result/multiple_result.dart';
@@ -12,10 +12,12 @@ abstract class ApiClient {
   set authHeaderProvider(AuthHeaderProvider provider);
 
   /// Login with Google server code
-  Future<Result<LoginResponse, Exception>> authLoginGoogle(String tokenOauth);
+  Future<Result<LoginApiResponse, Exception>> authLoginGoogle(
+    String tokenOauth,
+  );
 
   /// Login with email and one time code
-  Future<Result<LoginResponse, Exception>> authLoginEmail(
+  Future<Result<LoginApiResponse, Exception>> authLoginEmail(
     String email,
     String code,
   );

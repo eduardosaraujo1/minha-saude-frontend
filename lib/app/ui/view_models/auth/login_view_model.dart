@@ -1,28 +1,43 @@
 import 'package:logging/logging.dart';
 import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
-import 'package:minha_saude_frontend/app/domain/actions/google_login_action.dart';
 import 'package:minha_saude_frontend/config/router/app_routes.dart';
 import 'package:minha_saude_frontend/utils/command.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 class LoginViewModel {
-  LoginViewModel(this._authRepository, this._googleLoginAction) {
+  LoginViewModel(this._authRepository) {
     loginWithGoogle = Command0(_loginWithGoogle);
   }
 
   final AuthRepository _authRepository;
-  final GoogleLoginAction _googleLoginAction;
   final _log = Logger("LoginViewModel");
 
   /// Command to initiate Google login, returns an app route path to redirect to
   /// Rebuild Widget when this notifies
   /// If result is error then display Snackbar and clear result
   /// If result is success, then use context.go to redirect
-  late Command0 loginWithGoogle;
+  late Command0<String?, Exception> loginWithGoogle;
 
-  Future<Result<String, Exception>> _loginWithGoogle() async {
+  Future<Result<String?, Exception>> _loginWithGoogle() async {
     try {
-      final loginResult = await _googleLoginAction.execute();
+      final googleTokenResult = await _authRepository.getGoogleServerToken();
+
+      if (googleTokenResult.isError()) {
+        return Result.error(
+          Exception("Não foi possível autenticar-se com o Google."),
+        );
+      }
+
+      final googleToken = googleTokenResult.getOrThrow();
+
+      // Continue with the login process using the obtained token
+      final loginResult = await _authRepository.loginWithGoogle(googleToken);
+
+      if (loginResult.isError()) {
+        return Result.error(
+          Exception("Não foi possível fazer login com o Google."),
+        );
+      }
 
       if (loginResult.isError()) {
         return Result.error(loginResult.tryGetError()!);
@@ -37,7 +52,7 @@ class LoginViewModel {
     } catch (e) {
       _log.severe(e);
       return Result.error(
-        Exception("Ocorreu um erro desconhecido. Por favor, tente novamente"),
+        Exception("Ocorreu um erro desconhecido. Por favor, tente novamente."),
       );
     }
   }
@@ -50,10 +65,6 @@ class LoginViewModel {
     } catch (e) {
       _log.warning("Erro durante logout: $e");
     }
-  }
-
-  void clearErrorMessages() {
-    loginWithGoogle.clearResult();
   }
 }
 

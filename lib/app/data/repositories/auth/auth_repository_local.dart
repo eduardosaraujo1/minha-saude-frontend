@@ -42,6 +42,12 @@ class AuthRepositoryLocal implements AuthRepository {
   }
 
   @override
+  bool hasRegisterToken() {
+    // TODO: implement hasRegisterToken
+    throw UnimplementedError();
+  }
+
+  @override
   Future<void> logout() {
     // TODO: implement logout
     throw UnimplementedError();

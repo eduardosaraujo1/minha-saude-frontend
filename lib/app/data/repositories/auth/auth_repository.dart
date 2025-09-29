@@ -28,6 +28,9 @@ abstract class AuthRepository {
   /// Register a new user through token from login attempt
   Result<String?, Exception> getRegisterToken();
 
+  /// Check if the user has a register token
+  bool hasRegisterToken();
+
   /// Sign out the current user, both through server and clearing local data
   Future<void> logout();
 

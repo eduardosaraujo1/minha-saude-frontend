@@ -1,5 +1,6 @@
 class TosViewModel {
-  // TODO: Carregar termos a partir do GitHub
+  const TosViewModel();
+
   final String termos = """
 Na Avalon, privacidade e segurança são prioridades e nos comprometemos com a transparência do tratamento de dados pessoais dos nossos usuários. Por isso, esta Política de Privacidade estabelece como é feita a coleta, uso e transferência de informações de clientes ou outras pessoas que acessam ou usam nosso aplicativo.
 
@@ -114,5 +115,4 @@ A Avalon se responsabiliza pelo tratamento adequado dos dados e pelo cumprimento
 - Encarregado (DPO): Eduardo Soares e Araújo
 - E-mail: eduardosaraujo1@proton.me
 """;
-  const TosViewModel();
 }

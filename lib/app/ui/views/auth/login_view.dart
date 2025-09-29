@@ -1,59 +1,74 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:logging/logging.dart';
 import 'package:minha_saude_frontend/app/ui/widgets/auth/button_sign_in.dart';
 import 'package:minha_saude_frontend/app/ui/widgets/auth/login_decorator.dart';
 import 'package:minha_saude_frontend/app/ui/view_models/auth/login_view_model.dart';
-import 'package:watch_it/watch_it.dart';
 
 class LoginView extends StatefulWidget {
-  final LoginViewModel viewModel;
   const LoginView(this.viewModel, {super.key});
+
+  final LoginViewModel viewModel;
 
   @override
   State<LoginView> createState() => _LoginViewState();
 }
 
 class _LoginViewState extends State<LoginView> {
-  void _onError(BuildContext context, String? errorMessage) {
-    if (errorMessage != null) {
-      final snackBar = SnackBar(
-        content: Text(errorMessage),
-        backgroundColor: Theme.of(context).colorScheme.error,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  LoginViewModel get viewModel => widget.viewModel;
 
-      widget.viewModel.clearErrorMessages();
+  @override
+  void initState() {
+    super.initState();
+    viewModel.loginWithGoogle.addListener(_onUpdate);
+  }
+
+  @override
+  void dispose() {
+    viewModel.loginWithGoogle.removeListener(_onUpdate);
+    super.dispose();
+  }
+
+  void _onUpdate() {
+    try {
+      final loginCommand = viewModel.loginWithGoogle;
+      final result = loginCommand.result;
+
+      if (loginCommand.isSuccess) {
+        final redirectPath = result!.getOrThrow();
+        if (mounted && redirectPath != null) {
+          context.go(redirectPath);
+        }
+        loginCommand.clearResult();
+        return;
+      }
+
+      if (loginCommand.isError) {
+        final error = result!.tryGetError()!;
+        _showErrorSnack(error.toString());
+        loginCommand.clearResult();
+        return;
+      }
+
+      setState(() {});
+    } catch (e) {
+      Logger("LoginView").severe("Ocorreu um erro desconhecido: $e");
+      _showErrorSnack("Ocorreu um erro desconhecido.");
     }
   }
 
-  void _onRedirect(BuildContext context, String? redirectPath) {
-    if (redirectPath != null) {
-      widget.viewModel.redirectTo.value = null; // Clear redirect
-      context.go(redirectPath);
-    }
+  void _showErrorSnack(String error) {
+    final snackBar = SnackBar(
+      content: Text(error),
+      backgroundColor: Theme.of(context).colorScheme.error,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = widget.viewModel;
-    final isLoading = watch(vm.isLoading);
-
-    // Watch for error messages and handle them
-    registerHandler<ValueNotifier<String?>, String?>(
-      target: vm.errorMessage,
-      handler: (context, newValue, cancel) {
-        _onError(context, newValue);
-      },
-    );
-
-    // Watch for redirects and handle them
-    registerHandler<ValueNotifier<String?>, String?>(
-      target: vm.redirectTo,
-      handler: (context, String? newValue, cancel) {
-        _onRedirect(context, newValue);
-      },
-    );
+    final loginWithGoogle = viewModel.loginWithGoogle;
 
     return Scaffold(
       body: Column(
@@ -76,13 +91,12 @@ class _LoginViewState extends State<LoginView> {
                     width: 24,
                   ),
                   label: "Entrar com Google",
-                  disabled: isLoading.value,
-                  onPressed: isLoading.value
+                  onPressed: loginWithGoogle.isExecuting
                       ? null
-                      : () => vm._loginWithGoogle(),
+                      : () => loginWithGoogle.execute(),
                 ),
                 SizedBox(height: 8),
-                if (isLoading.value)
+                if (loginWithGoogle.isExecuting)
                   SizedBox(
                     width: double.infinity,
                     child: Center(child: CircularProgressIndicator()),

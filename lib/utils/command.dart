@@ -28,26 +28,26 @@ abstract class Command<TSuccess, TException> extends ChangeNotifier {
   bool get isExecuting => _isExecuting;
 
   bool get isError {
-    if (_isExecuting) {
-      throw Exception("Attempted to read error state on a running command.");
-    }
+    // if (_isExecuting) {
+    //   throw Exception("Attempted to read error state on a running command.");
+    // }
     return _result?.isError() ?? false;
   }
 
-  bool get completed {
-    if (_isExecuting) {
-      throw Exception(
-        "Attempted to read completed state on a running command.",
-      );
-    }
+  bool get isSuccess {
+    // if (_isExecuting) {
+    //   throw Exception(
+    //     "Attempted to read completed state on a running command.",
+    //   );
+    // }
 
     return _result?.isSuccess() ?? false;
   }
 
   Result<TSuccess, TException>? get result {
-    if (_isExecuting) {
-      throw Exception("Attempted to read result on a running command.");
-    }
+    // if (_isExecuting) {
+    //   throw Exception("Attempted to read result on a running command.");
+    // }
 
     return _result;
   }

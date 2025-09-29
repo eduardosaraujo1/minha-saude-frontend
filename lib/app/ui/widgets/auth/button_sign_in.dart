@@ -4,7 +4,6 @@ class ButtonSignIn extends StatelessWidget {
   const ButtonSignIn({
     required this.label,
     required this.icon,
-    this.disabled = false,
     this.onPressed,
     super.key,
   });
@@ -12,11 +11,11 @@ class ButtonSignIn extends StatelessWidget {
   final String label;
   final Widget icon;
   final VoidCallback? onPressed;
-  final bool disabled;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final disabled = onPressed == null;
 
     return SizedBox(
       width: double.infinity,
@@ -37,7 +36,7 @@ class ButtonSignIn extends StatelessWidget {
               ? theme.colorScheme.surfaceContainerHighest
               : theme.colorScheme.surfaceContainerLowest,
           foregroundColor: disabled
-              ? theme.colorScheme.onSurface
+              ? theme.colorScheme.onSurfaceVariant
               : theme.colorScheme.onSurface,
           shape: const StadiumBorder(),
           elevation: 0,

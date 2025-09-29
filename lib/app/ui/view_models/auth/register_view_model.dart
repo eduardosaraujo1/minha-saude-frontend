@@ -1,86 +1,85 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
 import 'package:minha_saude_frontend/app/domain/models/user_register_model/user_register_model.dart';
+import 'package:minha_saude_frontend/config/router/app_routes.dart';
+import 'package:minha_saude_frontend/utils/command.dart';
+import 'package:multiple_result/multiple_result.dart';
 
 class RegisterViewModel {
+  RegisterViewModel(this._authRepository) {
+    registerCommand = Command0(_registerUser);
+  }
+
   final RegisterForm form = RegisterForm();
-  final AuthRepository authRepository;
+  final AuthRepository _authRepository;
+  final Logger _log = Logger("RegisterViewModel");
 
-  RegisterViewModel(this.authRepository);
+  // final ValueNotifier<String?> errorMessage = ValueNotifier(null);
+  // final ValueNotifier<String?> redirectTo = ValueNotifier(null);
+  // final ValueNotifier<bool> isLoading = ValueNotifier(false);
 
-  final ValueNotifier<String?> errorMessage = ValueNotifier(null);
-
-  final ValueNotifier<String?> redirectTo = ValueNotifier(null);
-
-  final ValueNotifier<bool> isLoading = ValueNotifier(false);
+  late Command0<String?, Exception> registerCommand;
 
   /// Register user with current form data
-  Future<void> registerUser() async {
+  Future<Result<String?, Exception>> _registerUser() async {
     try {
+      // Validar form antes de executar qualquer lógica
       if (!form.validate()) {
-        return;
+        return Result.success(null);
       }
 
-      // Check if we have a valid register token
-      if (!authRepository.hasValidRegisterToken) {
-        errorMessage.value =
-            "Token de registro expirado. Faça login novamente.";
-        return;
+      // Gerenciar erros para token de registro
+      final regTokenResult = _authRepository.getRegisterToken();
+
+      if (regTokenResult.isError()) {
+        _log.warning(
+          "Token de registro expirado por erro ${regTokenResult.tryGetError()!}.",
+        );
+
+        return Result.error(
+          Exception("Token de registro expirado. Faça login novamente."),
+        );
       }
 
-      isLoading.value = true;
+      if (regTokenResult.tryGetSuccess() == null) {
+        _log.warning("Token de registro definido como nulo.");
+        return Result.error(
+          Exception("Token de registro expirado. Faça login novamente."),
+        );
+      }
 
-      final newUser = RegisterRequest(
-        nome: form.nomeController.text.trim(),
-        cpf: form.cpfController.text.replaceAll(RegExp(r'[^0-9]'), ''),
-        dataNascimento: _parseDate(form.dataNascimentoController.text.trim()),
-        telefone: form.telefoneController.text.trim(),
+      final registerToken = regTokenResult.tryGetSuccess()!;
+
+      // Iniciar registro
+      final result = await _authRepository.register(
+        UserRegisterModel(
+          nome: form.nomeController.text.trim(),
+          cpf: form.cpfController.text.replaceAll(RegExp(r'[^0-9]'), ''),
+          dataNascimento: _parseDate(form.dataNascimentoController.text.trim()),
+          telefone: form.telefoneController.text.trim(),
+          registerToken: registerToken,
+        ),
       );
 
-      final result = await authRepository.register(newUser);
-
       if (result.isError()) {
-        final errorMessage =
-            result.tryGetError()?.toString() ?? "Ocorreu um erro desconhecido.";
-
-        // Check if error is due to expired token
-        if (!authRepository.hasValidRegisterToken) {
-          this.errorMessage.value =
-              "Token de registro expirado. Faça login novamente.";
-          redirectTo.value = "/login";
-        } else {
-          this.errorMessage.value = errorMessage;
-        }
-      } else {
-        redirectTo.value = "/";
+        return Result.error(
+          Exception(
+            "Ocorreu um erro desconhecido durante o processo de registro",
+          ),
+        );
       }
+
+      return Result.success(AppRoutes.home);
     } catch (e) {
-      log(e.toString());
-      errorMessage.value = "Ocorreu um erro desconhecido.";
-    } finally {
-      isLoading.value = false;
+      _log.severe("Ocorreu um erro desconhecido durante o registro: $e");
+      return Result.error(
+        Exception("Ocorreu um erro desconhecido durante o registro."),
+      );
     }
   }
 
-  void clearErrorMessages() {
-    errorMessage.value = null;
-  }
-
-  /// Check if user has a valid register token
-  bool get hasValidRegisterToken => authRepository.hasValidRegisterToken;
-
-  /// Check if user has a session token (fully authenticated)
-  Future<bool> isAuthenticated() async {
-    return await tokenRepository.hasToken();
-  }
-
-  /// Dispose form controllers and value notifiers
-  void disposeForm() {
-    form.dispose();
-  }
-
+  /// Dispose form controllers
   void dispose() {
     form.dispose();
   }

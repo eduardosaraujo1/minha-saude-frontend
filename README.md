@@ -12,9 +12,14 @@
 ## Para fazer
 
 -   [ ] DocumentIcon: fazer a lista de documentos usar Wrap para evitar overflow ou forçar 3 colunas em telas grandes (ensure fixed width)
--   [ ] PdfPinchController: não suportado no Windows (ferramenta de teste), se possível fazer funcionar
+-   [ ] Corrigir widget de loginDecorator para funcionar em telas Wide
+-   [ ] ???
+-   [ ] PdfPinchController: não suportado no Windows (ferramenta de teste), se possível verificar com Platform.\* API
 -   [ ] Upload pdf via arquivo
--   [ ] Pegar dados do usuário via ProfileRepository
+-   [ ] Refatorar DocumentRepository para usar interface e consumir ApiClient
+-   [ ] Refatorar ProfileRepository para usar interface e consumir ApiClient
+-   [ ] Refatorar ShareRepository para usar interface e consumir ApiClient
+-   [ ] Refatorar tela de compartilhamento
 -   [ ] Escrever casos de teste para avaliar edge cases (especialmente no visualizar documento)
 -   [ ] Tratativa de erro caso o backend se torne não-responsivo
 -   [ ] Tirar título duplicado da Lixeira

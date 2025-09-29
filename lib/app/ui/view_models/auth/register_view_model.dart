@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
 import 'package:minha_saude_frontend/app/domain/models/user_register_model/user_register_model.dart';
-import 'package:minha_saude_frontend/config/router/app_routes.dart';
+import 'package:minha_saude_frontend/config/router/routes.dart';
 import 'package:minha_saude_frontend/utils/command.dart';
 import 'package:multiple_result/multiple_result.dart';
 
@@ -58,7 +58,7 @@ class RegisterViewModel {
         );
       }
 
-      return Result.success(AppRoutes.home);
+      return Result.success(Routes.home);
     } catch (e) {
       _log.severe("Ocorreu um erro desconhecido durante o registro: $e");
       return Result.error(

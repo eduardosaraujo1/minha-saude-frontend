@@ -1,6 +1,6 @@
 import 'package:logging/logging.dart';
 import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
-import 'package:minha_saude_frontend/config/router/app_routes.dart';
+import 'package:minha_saude_frontend/config/router/routes.dart';
 import 'package:minha_saude_frontend/utils/command.dart';
 import 'package:multiple_result/multiple_result.dart';
 
@@ -47,8 +47,8 @@ class LoginViewModel {
 
       // Set redirect path based on registration status
       return response.isRegistered
-          ? Result.success(AppRoutes.home)
-          : Result.success(AppRoutes.tos);
+          ? Result.success(Routes.home)
+          : Result.success(Routes.tos);
     } catch (e) {
       _log.severe(e);
       return Result.error(

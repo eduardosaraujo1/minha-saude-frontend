@@ -32,199 +32,207 @@ import 'package:minha_saude_frontend/app/ui/views/document/document_list_view.da
 import 'package:minha_saude_frontend/app/ui/views/lixeira/lixeira_view.dart';
 import 'package:minha_saude_frontend/app/ui/views/shared/app_view.dart';
 import 'package:minha_saude_frontend/app/ui/views/shared/not_found.dart';
-import 'package:minha_saude_frontend/config/di/service_locator.dart';
 import 'package:minha_saude_frontend/config/router/redirect_handler.dart';
-import 'package:minha_saude_frontend/config/router/app_routes.dart';
+import 'package:minha_saude_frontend/config/router/routes.dart';
 
-// Global key for the shell navigator
-final _shellNavigatorKey = GlobalKey<NavigatorState>();
+class AppRouter {
+  AppRouter(
+    this._authRepository,
+    this._documentRepository,
+    this._uploadRepository,
+    this._profileRepository,
+  );
 
-final router = GoRouter(
-  initialLocation: AppRoutes.home,
-  redirect: RedirectHandler.redirect,
-  routes: [
-    // Main app routes with bottom navigation
-    StatefulShellRoute.indexedStack(
-      builder:
-          (
-            BuildContext context,
-            GoRouterState state,
-            StatefulNavigationShell navigationShell,
-          ) {
-            return AppView(navigationShell: navigationShell);
+  final AuthRepository _authRepository;
+  final DocumentRepository _documentRepository;
+  final DocumentUploadRepository _uploadRepository;
+  final ProfileRepository _profileRepository;
+
+  final _shellNavigatorKey = GlobalKey<NavigatorState>();
+
+  GoRouter router() {
+    return GoRouter(
+      initialLocation: Routes.home,
+      redirect: RedirectHandler.redirect,
+      routes: [
+        // Auth Routes (without bottom navigation)
+        GoRoute(
+          path: Routes.login,
+          builder: (BuildContext context, GoRouterState state) {
+            return LoginView(LoginViewModel(_authRepository));
           },
-      branches: [
-        // Documents branch
-        StatefulShellBranch(
-          navigatorKey: _shellNavigatorKey,
-          routes: [
-            GoRoute(
-              path: AppRoutes.home,
-              builder: (BuildContext context, GoRouterState state) =>
-                  DocumentListView(
-                    DocumentListViewModel(
-                      ServiceLocator.I<DocumentRepository>(),
-                    ),
-                  ),
-              routes: [
-                GoRoute(
-                  path: AppRoutes.documentosUploadRelative,
-                  builder: (BuildContext context, GoRouterState state) {
-                    return DocumentScanView(
-                      DocumentScanViewModel(
-                        DocumentCreateType.upload,
-                        ServiceLocator.I<DocumentUploadRepository>(),
-                      ),
-                    );
-                  },
-                ),
-                GoRoute(
-                  path: AppRoutes.documentosScanRelative,
-                  builder: (BuildContext context, GoRouterState state) {
-                    return DocumentScanView(
-                      DocumentScanViewModel(
-                        DocumentCreateType.scan,
-                        ServiceLocator.I<DocumentUploadRepository>(),
-                      ),
-                    );
-                  },
-                ),
-                GoRoute(
-                  path: AppRoutes.documentosCreateRelative,
-                  builder: (BuildContext context, GoRouterState state) {
-                    return DocumentCreateView(DocumentCreateViewModel());
-                  },
-                ),
-                GoRoute(
-                  path: '${AppRoutes.documentosRelative}/:id',
-                  builder: (BuildContext context, GoRouterState state) {
-                    return DocumentView(
-                      DocumentViewModel(
-                        state.pathParameters['id'] ?? '',
-                        ServiceLocator.I<DocumentRepository>(),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ],
         ),
-        // Share branch
-        StatefulShellBranch(
+        GoRoute(
+          path: Routes.tos,
+          builder: (BuildContext context, GoRouterState state) {
+            return TosView(TosViewModel());
+          },
           routes: [
             GoRoute(
-              path: AppRoutes.compartilhar,
+              path: Routes.register,
               builder: (BuildContext context, GoRouterState state) {
-                // return const CompartilharView();
-                return CodigosCompartilhamento();
+                return RegisterView(RegisterViewModel(_authRepository));
               },
-              routes: [
-                // GoRoute(
-                //   path: 'create',
-                //   builder: (context, state) {
-                //     return const SelecionarDocumentos();
-                //   },
-                // ),
-                // GoRoute(
-                //   path: ':codigo',
-                //   builder: (context, state) {
-                //     return const SelecionarDocumentos();
-                //   },
-                // ),
-              ],
             ),
           ],
         ),
-        // Trash branch
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: AppRoutes.lixeira,
-              builder: (BuildContext context, GoRouterState state) =>
-                  LixeiraView(
-                    LixeiraViewModel(ServiceLocator.I<DocumentRepository>()),
-                  ),
+        StatefulShellRoute.indexedStack(
+          builder:
+              (
+                BuildContext context,
+                GoRouterState state,
+                StatefulNavigationShell navigationShell,
+              ) {
+                return AppView(navigationShell: navigationShell);
+              },
+          branches: [
+            // Documents branch
+            StatefulShellBranch(
+              navigatorKey: _shellNavigatorKey,
               routes: [
                 GoRoute(
-                  path: ':id',
-                  builder: (context, state) {
-                    return DeletedDocumentView(
-                      DeletedDocumentViewModel(
-                        state.pathParameters['id'] ?? '',
-                        ServiceLocator.I<DocumentRepository>(),
-                      ),
+                  path: Routes.home,
+                  builder: (BuildContext context, GoRouterState state) {
+                    return DocumentListView(
+                      DocumentListViewModel(_documentRepository),
                     );
                   },
+                  routes: [
+                    GoRoute(
+                      path: Routes.documentosUploadRelative,
+                      builder: (BuildContext context, GoRouterState state) {
+                        return DocumentScanView(
+                          DocumentScanViewModel(
+                            DocumentCreateType.upload,
+                            _uploadRepository,
+                          ),
+                        );
+                      },
+                    ),
+                    GoRoute(
+                      path: Routes.documentosScanRelative,
+                      builder: (BuildContext context, GoRouterState state) {
+                        return DocumentScanView(
+                          DocumentScanViewModel(
+                            DocumentCreateType.scan,
+                            _uploadRepository,
+                          ),
+                        );
+                      },
+                    ),
+                    GoRoute(
+                      path: Routes.documentosCreateRelative,
+                      builder: (BuildContext context, GoRouterState state) {
+                        return DocumentCreateView(DocumentCreateViewModel());
+                      },
+                    ),
+                    GoRoute(
+                      path: '${Routes.documentosRelative}/:id',
+                      builder: (BuildContext context, GoRouterState state) {
+                        return DocumentView(
+                          DocumentViewModel(
+                            state.pathParameters['id'] ?? '',
+                            _documentRepository,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-        // Settings branch
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: AppRoutes.configuracoes,
-              builder: (BuildContext context, GoRouterState state) =>
-                  const ConfiguracoesView(),
+            // Share branch
+            StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: AppRoutes.editNomeRelative,
-                  builder: (context, state) {
-                    return EditNomeView(
-                      EditNomeViewModel(ServiceLocator.I<ProfileRepository>()),
-                    );
+                  path: Routes.compartilhar,
+                  builder: (BuildContext context, GoRouterState state) {
+                    // return const CompartilharView();
+                    return CodigosCompartilhamento();
                   },
+                  routes: [
+                    // GoRoute(
+                    //   path: 'create',
+                    //   builder: (context, state) {
+                    //     return const SelecionarDocumentos();
+                    //   },
+                    // ),
+                    // GoRoute(
+                    //   path: ':codigo',
+                    //   builder: (context, state) {
+                    //     return const SelecionarDocumentos();
+                    //   },
+                    // ),
+                  ],
                 ),
+              ],
+            ),
+            // Trash branch
+            StatefulShellBranch(
+              routes: [
                 GoRoute(
-                  path: AppRoutes.editTelefoneRelative,
-                  builder: (context, state) {
-                    return EditTelefoneView(
-                      EditTelefoneViewModel(
-                        ServiceLocator.I<ProfileRepository>(),
-                      ),
-                    );
-                  },
+                  path: Routes.lixeira,
+                  builder: (BuildContext context, GoRouterState state) =>
+                      LixeiraView(LixeiraViewModel(_documentRepository)),
+                  routes: [
+                    GoRoute(
+                      path: ':id',
+                      builder: (context, state) {
+                        return DeletedDocumentView(
+                          DeletedDocumentViewModel(
+                            state.pathParameters['id'] ?? '',
+                            _documentRepository,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
+              ],
+            ),
+            // Settings branch
+            StatefulShellBranch(
+              routes: [
                 GoRoute(
-                  path: AppRoutes.editBirthdateRelative,
-                  builder: (context, state) {
-                    return EditBirthdayView(
-                      EditBirthdayViewModel(
-                        ServiceLocator.I<ProfileRepository>(),
-                      ),
-                    );
-                  },
+                  path: Routes.configuracoes,
+                  builder: (BuildContext context, GoRouterState state) =>
+                      const ConfiguracoesView(),
+                  routes: [
+                    GoRoute(
+                      path: Routes.editNomeRelative,
+                      builder: (context, state) {
+                        return EditNomeView(
+                          EditNomeViewModel(_profileRepository),
+                        );
+                      },
+                    ),
+                    GoRoute(
+                      path: Routes.editTelefoneRelative,
+                      builder: (context, state) {
+                        return EditTelefoneView(
+                          EditTelefoneViewModel(_profileRepository),
+                        );
+                      },
+                    ),
+                    GoRoute(
+                      path: Routes.editBirthdateRelative,
+                      builder: (context, state) {
+                        return EditBirthdayView(
+                          EditBirthdayViewModel(_profileRepository),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
           ],
         ),
       ],
-    ),
+      errorBuilder: (context, state) => NotFoundView(state.fullPath ?? ''),
+      // Main app routes with bottom navigation
+    );
+  }
+}
 
-    // Auth Routes (without bottom navigation)
-    GoRoute(
-      path: AppRoutes.login,
-      builder: (BuildContext context, GoRouterState state) {
-        return LoginView(LoginViewModel(ServiceLocator.I<AuthRepository>()));
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.tos,
-      builder: (BuildContext context, GoRouterState state) {
-        return TosView(TosViewModel());
-      },
-    ),
-    GoRoute(
-      path: AppRoutes.register,
-      builder: (BuildContext context, GoRouterState state) {
-        return RegisterView(
-          RegisterViewModel(ServiceLocator.I<AuthRepository>()),
-        );
-      },
-    ),
-  ],
-  errorBuilder: (context, state) => NotFoundView(state.fullPath ?? ''),
-);
+// Global key for the shell navigator

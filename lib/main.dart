@@ -8,11 +8,11 @@ import 'package:watch_it/watch_it.dart';
 
 void main() async {
   try {
-    // Configure app logging
-    Logger.root.level = Level.ALL;
-
     // Ensure Flutter bindings are initialized
     WidgetsFlutterBinding.ensureInitialized();
+
+    // Configure app logging
+    Logger.root.level = Level.ALL;
 
     // Initialize all providers and dependencies
     ServiceLocator.I.setupProviders([

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/config/router/middleware/middleware.dart';
 
-import 'app_routes.dart';
+import 'routes.dart';
 import 'middleware/auth_middleware.dart';
 
 class RedirectHandler {
@@ -17,7 +17,7 @@ class RedirectHandler {
     GoRouterState state,
   ) async {
     final middlewareHandler = RedirectHandler([
-      AuthMiddleware([AppRoutes.login, AppRoutes.tos, AppRoutes.register]),
+      AuthMiddleware([Routes.login, Routes.tos, Routes.register]),
     ]);
 
     final middlewareResponse = await middlewareHandler.run(context, state);

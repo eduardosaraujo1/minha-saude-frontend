@@ -1,4 +1,8 @@
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
+import 'package:minha_saude_frontend/app/data/repositories/document_repository.dart';
+import 'package:minha_saude_frontend/app/data/repositories/document_upload_repository.dart';
+import 'package:minha_saude_frontend/app/data/repositories/profile_repository.dart';
 import 'package:minha_saude_frontend/app/data/services/google/google_service.dart';
 import 'package:minha_saude_frontend/app/data/services/document_scanner.dart';
 import 'package:minha_saude_frontend/app/data/services/secure_storage.dart';
@@ -26,7 +30,14 @@ class AppServiceProvider extends ServiceProvider {
 
     // App UI dependencies
     locator.register<AppTheme>(AppTheme());
-    locator.register<GoRouter>(router);
+    locator.register<GoRouter>(
+      AppRouter(
+        locator<AuthRepository>(),
+        locator<DocumentRepository>(),
+        locator<DocumentUploadRepository>(),
+        locator<ProfileRepository>(),
+      ).router(),
+    );
   }
 
   @override

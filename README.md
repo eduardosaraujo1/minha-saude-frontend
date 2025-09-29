@@ -11,6 +11,7 @@
 
 ## Para fazer
 
+-   [ ] DocumentIcon: fazer a lista de documentos usar Wrap para evitar overflow ou forçar 3 colunas em telas grandes (ensure fixed width)
 -   [ ] Upload pdf via arquivo
 -   [ ] Pegar dados do usuário via ProfileRepository
 -   [ ] Escrever casos de teste para avaliar edge cases (especialmente no visualizar documento)

@@ -7,12 +7,8 @@ import 'package:multiple_result/multiple_result.dart';
 
 import 'auth_repository.dart';
 
-class AuthRepositoryLocal implements AuthRepository {
-  AuthRepositoryLocal(
-    this._secureStorage,
-    this._googleService,
-    this._apiClient,
-  );
+class AuthRepositoryImpl implements AuthRepository {
+  AuthRepositoryImpl(this._secureStorage, this._googleService, this._apiClient);
 
   final SecureStorage _secureStorage;
   final GoogleService _googleService;

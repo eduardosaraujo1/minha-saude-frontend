@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/document_repository.dart';
@@ -20,7 +19,8 @@ class DevelopmentServiceProvider extends ServiceProvider {
 
     // Services
     locator.register<ApiClient>(
-      ApiClientImpl(Dio(), locator<ProjectSettings>().apiBaseUrl),
+      // ApiClientImpl(Dio(), locator<ProjectSettings>().apiBaseUrl),
+      FakeApiClient(),
     );
     locator.register<GoogleService>(
       locator<ProjectSettings>().useGoogle
@@ -33,7 +33,7 @@ class DevelopmentServiceProvider extends ServiceProvider {
 
     // Repositories
     locator.register<AuthRepository>(
-      AuthRepositoryLocal(
+      AuthRepositoryImpl(
         locator<SecureStorage>(),
         locator<GoogleService>(),
         locator<ApiClient>(),

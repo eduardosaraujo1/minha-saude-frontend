@@ -1,3 +1,5 @@
+import 'dart:io';
+
 class ProjectSettings {
   ProjectSettings({
     required bool isProduction,
@@ -8,15 +10,15 @@ class ProjectSettings {
        _useGoogle = useGoogle;
 
   factory ProjectSettings.development() => ProjectSettings(
+    useGoogle: Platform.isAndroid || Platform.isIOS,
     isProduction: false,
     apiBaseUrl: 'http://localhost:3000',
-    useGoogle: true,
   );
 
   factory ProjectSettings.production() => ProjectSettings(
+    useGoogle: Platform.isAndroid || Platform.isIOS,
     isProduction: true,
     apiBaseUrl: 'http://localhost:3000',
-    useGoogle: true,
   );
 
   final bool _isProduction;

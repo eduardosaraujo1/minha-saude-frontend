@@ -12,8 +12,8 @@ class GoogleAuthConfig {
        _scopes = scopes;
 
   factory GoogleAuthConfig.fromEnv({required List<String> scopes}) {
-    final clientId = String.fromEnvironment('CLIENT_ID');
-    final serverClientId = String.fromEnvironment('SERVER_CLIENT_ID');
+    final clientId = const String.fromEnvironment('CLIENT_ID');
+    final serverClientId = const String.fromEnvironment('SERVER_CLIENT_ID');
 
     if (clientId.isEmpty) {
       throw ArgumentError('CLIENT_ID environment variable is not set.');

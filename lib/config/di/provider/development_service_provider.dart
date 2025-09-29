@@ -42,12 +42,8 @@ class DevelopmentServiceProvider extends ServiceProvider {
     locator.register<SecureStorage>(
       settings.mockSecureStorage ? SecureStorageFake() : SecureStorageImpl(),
     );
-    locator.register<DocumentScanner>(DocumentScanner());
-
-    locator.register<ApiClient>(
-      settings.mockApiClient
-          ? FakeApiClient()
-          : ApiClientImpl(Dio(), settings.apiBaseUrl),
+    locator.register<DocumentScanner>(
+      settings.mockScanner ? DocumentScannerFake() : DocumentScannerImpl(),
     );
     locator.register<GoogleService>(
       locator<ProjectSettings>().mockGoogle
@@ -56,6 +52,11 @@ class DevelopmentServiceProvider extends ServiceProvider {
               locator<GoogleAuthConfig>(),
               GoogleSignIn.instance,
             ),
+    );
+    locator.register<ApiClient>(
+      settings.mockApiClient
+          ? FakeApiClient()
+          : ApiClientImpl(Dio(), settings.apiBaseUrl),
     );
 
     // Repositories

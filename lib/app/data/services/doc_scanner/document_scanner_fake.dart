@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'document_scanner.dart';
 
-class DocumentScannerImpl implements DocumentScanner {
+class DocumentScannerFake implements DocumentScanner {
   @override
   Future<File?> scanPdf() async {
     final blob = await rootBundle.load('assets/fake/document.pdf');

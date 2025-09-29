@@ -34,54 +34,6 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  @override
-  Future<Result<String?, Exception>> getAuthToken() async {
-    // Return cached token if available
-    if (_authTokenCache != null) {
-      return Result.success(_authTokenCache);
-    }
-
-    // Try to get token from secure storage
-    final result = await _secureStorage.getAuthToken();
-    if (result.isSuccess()) {
-      _authTokenCache = result.tryGetSuccess();
-    }
-    return result;
-  }
-
-  @override
-  Future<Result<String, Exception>> getGoogleServerToken() async {
-    final result = await _googleService.generateServerAuthCode();
-    if (result.isError()) {
-      return Result.error(result.tryGetError()!);
-    }
-
-    final serverCode = result.tryGetSuccess();
-    if (serverCode == null || serverCode.isEmpty) {
-      return Result.error(
-        Exception('Google server auth code is null or empty'),
-      );
-    }
-
-    return Result.success(serverCode);
-  }
-
-  @override
-  String? getRegisterToken() {
-    return _registerToken;
-  }
-
-  @override
-  Future<bool> hasAuthToken() async {
-    final tokenResult = await getAuthToken();
-    return tokenResult.isSuccess() && tokenResult.tryGetSuccess() != null;
-  }
-
-  @override
-  bool hasRegisterToken() {
-    return _registerToken != null;
-  }
-
   Future<Result<LoginResponse, Exception>> _login(
     Future<Result<LoginApiResponse, Exception>> Function() apiCall,
     String loginType,
@@ -125,6 +77,57 @@ class AuthRepositoryImpl implements AuthRepository {
       _log.warning("Unexpected error", e);
       return Result.error(Exception("Ocorreu um erro inesperado."));
     }
+  }
+
+  @override
+  Future<Result<String?, Exception>> getAuthToken() async {
+    // Return cached token if available
+    if (_authTokenCache != null) {
+      return Result.success(_authTokenCache);
+    }
+
+    // Try to get token from secure storage
+    final result = await _secureStorage.getAuthToken();
+    if (result.isSuccess()) {
+      _authTokenCache = result.tryGetSuccess();
+    } else {
+      return Result.error(Exception("Não foi possível autenticar o usuário."));
+    }
+
+    return Result.success(_authTokenCache);
+  }
+
+  @override
+  Future<Result<String, Exception>> getGoogleServerToken() async {
+    final result = await _googleService.generateServerAuthCode();
+    if (result.isError()) {
+      return Result.error(result.tryGetError()!);
+    }
+
+    final serverCode = result.tryGetSuccess();
+    if (serverCode == null || serverCode.isEmpty) {
+      return Result.error(
+        Exception('Não foi possível autenticar-se com o Google'),
+      );
+    }
+
+    return Result.success(serverCode);
+  }
+
+  @override
+  String? getRegisterToken() {
+    return _registerToken;
+  }
+
+  @override
+  Future<bool> hasAuthToken() async {
+    final tokenResult = await getAuthToken();
+    return tokenResult.isSuccess() && tokenResult.tryGetSuccess() != null;
+  }
+
+  @override
+  bool hasRegisterToken() {
+    return _registerToken != null;
   }
 
   @override
@@ -203,6 +206,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Result<void, Exception>> clearAuthToken() async {
     try {
+      // Limpar secureStorage
       final clearResult = await _secureStorage.clearAuthToken();
 
       if (clearResult.isError()) {
@@ -212,6 +216,9 @@ class AuthRepositoryImpl implements AuthRepository {
           ),
         );
       }
+
+      // Limpar cache
+      _authTokenCache = null;
 
       return Result.success(null);
     } catch (e) {

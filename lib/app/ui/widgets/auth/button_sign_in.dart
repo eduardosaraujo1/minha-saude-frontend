@@ -40,7 +40,7 @@ class ButtonSignIn extends StatelessWidget {
               : theme.colorScheme.onSurface,
           shape: const StadiumBorder(),
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         ),
       ),
     );

@@ -76,7 +76,10 @@ class _LoginViewState extends State<LoginView> {
         children: [
           const LoginDecoratorWidget(),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 16.0,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

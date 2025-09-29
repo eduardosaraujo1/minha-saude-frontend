@@ -6,9 +6,7 @@ export 'auth_repository_local.dart';
 
 abstract class AuthRepository {
   // [AUTHENTICATION]
-
-  /// Login with Google exchanging server code for auth token and storing in SecureStorage
-  /// If the login fails because the user was not registered, the register token is remembered instead
+  /// Login with Google exchanging server code for auth token
   Future<Result<LoginResponse, Exception>> loginWithGoogle(
     String googleServerCode,
   );
@@ -25,12 +23,6 @@ abstract class AuthRepository {
   /// Register a new user through token from login attempt
   Future<Result<void, Exception>> register(UserRegisterModel registerModel);
 
-  /// Register a new user through token from login attempt
-  Result<String?, Exception> getRegisterToken();
-
-  /// Check if the user has a register token
-  bool hasRegisterToken();
-
   /// Sign out the current user, both through server and clearing local data
   Future<void> logout();
 
@@ -38,9 +30,22 @@ abstract class AuthRepository {
   /// Gets the current auth token, reading from SecureStorage if unavailable in memory
   Future<Result<String, Exception>> getGoogleServerToken();
 
-  // [STORED TOKEN]
+  // [STORED TOKENS]
   /// Gets the current auth token, reading from SecureStorage if unavailable in memory
   Future<Result<String?, Exception>> getAuthToken();
 
-  Future<bool> hasToken();
+  /// Sets the current auth token in session storage
+  Future<Result<void, Exception>> setAuthToken(String? value);
+
+  /// Checks if user has auth token
+  Future<bool> hasAuthToken();
+
+  /// Gets the locally stored register token
+  String? getRegisterToken();
+
+  /// Sets the locally stored register token
+  bool setRegisterToken(String? value);
+
+  /// Checks if the user has a register token
+  bool hasRegisterToken();
 }

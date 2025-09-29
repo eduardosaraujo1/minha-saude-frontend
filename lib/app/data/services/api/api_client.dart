@@ -1,97 +1,33 @@
-import 'package:dio/dio.dart';
-import 'package:minha_saude_frontend/app/data/services/api/exceptions/bad_response_exception.dart';
 import 'package:minha_saude_frontend/app/data/services/api/models/login_response/login_response.dart';
+import 'package:minha_saude_frontend/app/data/services/api/models/register_response/register_response.dart';
+import 'package:minha_saude_frontend/app/domain/models/user_register_model/user_register_model.dart';
 import 'package:multiple_result/multiple_result.dart';
+
+export 'api_client_impl.dart';
+export 'fake_api_client.dart';
 
 typedef AuthHeaderProvider = Future<String?> Function();
 
-class ApiClient {
-  ApiClient(Dio dio, String baseUrl) : _dio = dio {
-    _dio.options.baseUrl = baseUrl;
-    _dio.options.connectTimeout = const Duration(seconds: 10);
-    _dio.options.receiveTimeout = const Duration(seconds: 10);
-    _dio.options.headers = {'Accept': 'application/json'};
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          if (_authHeaderProvider != null) {
-            final authHeader = await _authHeaderProvider!.call();
-            options.headers['Authorization'] = 'Bearer $authHeader';
-          }
-          return handler.next(options);
-        },
-      ),
-    );
-  }
-
-  final Dio _dio;
-
-  AuthHeaderProvider? _authHeaderProvider;
-
-  set authHeaderProvider(AuthHeaderProvider provider) {
-    _authHeaderProvider = provider;
-  }
+abstract class ApiClient {
+  set authHeaderProvider(AuthHeaderProvider provider);
 
   /// Login with Google server code
-  Future<Result<LoginResponse, Exception>> loginWithGoogle(
-    String serverAuthCode,
-  ) async {
-    try {
-      final response = await _dio.post(
-        '/auth/google/login',
-        data: {'serverAuthCode': serverAuthCode},
-      );
+  Future<Result<LoginResponse, Exception>> authLoginGoogle(String tokenOauth);
 
-      // Early return for non-200 status codes
-      if (response.statusCode != 200) {
-        return Result.error(
-          BadResponseException(
-            'Login failed: ${response.statusMessage ?? 'Unknown error'}',
-          ),
-        );
-      }
+  /// Login with email and one time code
+  Future<Result<LoginResponse, Exception>> authLoginEmail(
+    String email,
+    String code,
+  );
 
-      // Early return for null response data
-      if (response.data == null) {
-        return Result.error(
-          BadResponseException('Login failed: Server returned empty response'),
-        );
-      }
+  /// Send one time code to email
+  Future<Result<String, Exception>> authSendEmail(String email);
 
-      // Early return for invalid response format
-      if (response.data is! Map<String, dynamic>) {
-        return Result.error(
-          BadResponseException(
-            'Login failed: Server returned invalid response format',
-          ),
-        );
-      }
-
-      final loginResponse = LoginResponse.fromJson(response.data);
-      return Result.success(loginResponse);
-    } on DioException {
-      return Result.error(
-        BadResponseException('Login failed: Unable to connect to server'),
-      );
-    } catch (e) {
-      // This catches JSON parsing errors or missing required fields
-      return Result.error(
-        BadResponseException(
-          'Login failed: Server response format has changed or is invalid',
-        ),
-      );
-    }
-  }
+  /// Register new user
+  Future<Result<RegisterResponse, Exception>> authRegister(
+    UserRegisterModel data,
+  );
 
   /// Signout
-  Future<Result<void, Exception>> signOut() async {
-    try {
-      await _dio.post('/auth/signout');
-      return Result.success(null);
-    } on DioException {
-      return Result.error(
-        BadResponseException('Sign out failed: Unable to connect to server'),
-      );
-    }
-  }
+  Future<Result<void, Exception>> authLogout();
 }

@@ -18,9 +18,8 @@ class AuthMiddleware implements Middleware {
     final authRepository = ServiceLocator.I<AuthRepository>();
 
     // Check authentication state
-    final hasSessionToken = await authRepository.hasToken();
-    final hasRegisterToken =
-        authRepository.getRegisterToken().tryGetSuccess() != null;
+    final hasSessionToken = await authRepository.hasAuthToken();
+    final hasRegisterToken = authRepository.getRegisterToken() != null;
     final isOnAuthRoute = _authRoutes.contains(state.fullPath);
 
     // Early return: User is not authenticated and trying to access protected route

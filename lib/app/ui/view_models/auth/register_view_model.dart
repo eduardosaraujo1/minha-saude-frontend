@@ -30,26 +30,14 @@ class RegisterViewModel {
       }
 
       // Gerenciar erros para token de registro
-      final regTokenResult = _authRepository.getRegisterToken();
-
-      if (regTokenResult.isError()) {
-        _log.warning(
-          "Token de registro expirado por erro ${regTokenResult.tryGetError()!}.",
-        );
-
+      // final regTokenResult = _authRepository.getRegisterToken();
+      final registerToken = _authRepository.getRegisterToken();
+      if (registerToken == null) {
+        _log.fine("Token de registro definido como nulo.");
         return Result.error(
           Exception("Token de registro expirado. Faça login novamente."),
         );
       }
-
-      if (regTokenResult.tryGetSuccess() == null) {
-        _log.warning("Token de registro definido como nulo.");
-        return Result.error(
-          Exception("Token de registro expirado. Faça login novamente."),
-        );
-      }
-
-      final registerToken = regTokenResult.tryGetSuccess()!;
 
       // Iniciar registro
       final result = await _authRepository.register(

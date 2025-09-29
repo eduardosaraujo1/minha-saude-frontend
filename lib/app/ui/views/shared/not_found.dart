@@ -52,7 +52,7 @@ class NotFoundView extends StatelessWidget {
               ),
               const SizedBox(height: 48),
               FutureBuilder(
-                future: authRepository.hasToken(),
+                future: authRepository.hasAuthToken(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData && snapshot.data == true) {
                     return Column(

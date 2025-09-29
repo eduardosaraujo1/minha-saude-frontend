@@ -7,6 +7,7 @@ import 'package:minha_saude_frontend/app/data/repositories/profile_repository.da
 import 'package:minha_saude_frontend/app/data/services/api/api_client.dart';
 import 'package:minha_saude_frontend/app/data/services/document_scanner.dart';
 import 'package:minha_saude_frontend/app/data/services/google/google_service.dart';
+import 'package:minha_saude_frontend/app/data/services/secure_storage.dart';
 import 'package:minha_saude_frontend/config/project_settings.dart';
 
 import 'service_provider.dart';
@@ -19,7 +20,7 @@ class DevelopmentServiceProvider extends ServiceProvider {
 
     // Services
     locator.register<ApiClient>(
-      ApiClient(Dio(), locator<ProjectSettings>().apiBaseUrl),
+      ApiClientImpl(Dio(), locator<ProjectSettings>().apiBaseUrl),
     );
     locator.register<GoogleService>(
       locator<ProjectSettings>().useGoogle
@@ -30,7 +31,14 @@ class DevelopmentServiceProvider extends ServiceProvider {
           : GoogleServiceFake(),
     );
 
-    locator.register<AuthRepository>(AuthRepositoryLocal());
+    // Repositories
+    locator.register<AuthRepository>(
+      AuthRepositoryLocal(
+        locator<SecureStorage>(),
+        locator<GoogleService>(),
+        locator<ApiClient>(),
+      ),
+    );
     locator.register<DocumentRepository>(DocumentRepository());
     locator.register<ProfileRepository>(ProfileRepository());
     locator.register<DocumentUploadRepository>(

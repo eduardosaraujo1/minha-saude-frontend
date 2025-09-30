@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
-import 'package:minha_saude_frontend/config/di/service_locator.dart';
+import 'package:minha_saude_frontend/config/container/service_locator.dart';
 
 class NotFoundView extends StatelessWidget {
   final String fullPath;

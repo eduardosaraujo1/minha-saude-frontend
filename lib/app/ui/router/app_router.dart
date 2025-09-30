@@ -4,6 +4,7 @@ import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.
 import 'package:minha_saude_frontend/app/data/repositories/document_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/document_upload_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/profile_repository.dart';
+import 'package:minha_saude_frontend/app/ui/router/middleware/auth_middleware.dart';
 import 'package:minha_saude_frontend/app/ui/view_models/auth/register_view_model.dart';
 import 'package:minha_saude_frontend/app/ui/old/compartilhar/codigos_compartilhamento.dart';
 import 'package:minha_saude_frontend/app/ui/view_models/settings/edit_nome_view_model.dart';
@@ -32,8 +33,8 @@ import 'package:minha_saude_frontend/app/ui/views/document/document_list_view.da
 import 'package:minha_saude_frontend/app/ui/views/lixeira/lixeira_view.dart';
 import 'package:minha_saude_frontend/app/ui/views/shared/app_view.dart';
 import 'package:minha_saude_frontend/app/ui/views/shared/not_found.dart';
-import 'package:minha_saude_frontend/config/router/redirect_handler.dart';
-import 'package:minha_saude_frontend/config/router/routes.dart';
+import 'package:minha_saude_frontend/app/ui/router/utils/middleware_handler.dart';
+import 'package:minha_saude_frontend/app/ui/router/routes.dart';
 
 class AppRouter {
   AppRouter(
@@ -53,7 +54,18 @@ class AppRouter {
   GoRouter router() {
     return GoRouter(
       initialLocation: Routes.home,
-      redirect: RedirectHandler.redirect,
+      redirect: (BuildContext context, GoRouterState state) async {
+        final middlewareHandler = MiddlewareHandler([
+          AuthMiddleware([Routes.login, Routes.tos, Routes.register]),
+        ]);
+        final String? redirectUrl = await middlewareHandler.run(context, state);
+
+        if (redirectUrl != null) {
+          return redirectUrl;
+        }
+
+        return null;
+      },
       routes: [
         // Auth Routes (without bottom navigation)
         GoRoute(

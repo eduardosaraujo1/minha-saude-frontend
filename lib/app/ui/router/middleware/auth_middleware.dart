@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
-import 'package:minha_saude_frontend/config/di/service_locator.dart';
-import 'package:minha_saude_frontend/config/router/middleware/middleware.dart';
-import 'package:minha_saude_frontend/config/router/routes.dart';
+import 'package:minha_saude_frontend/config/container/service_locator.dart';
+import 'package:minha_saude_frontend/app/ui/router/middleware/middleware.dart';
+import 'package:minha_saude_frontend/app/ui/router/routes.dart';
 
 class AuthMiddleware implements Middleware {
   const AuthMiddleware(this._authRoutes);

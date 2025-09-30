@@ -1,4 +1,4 @@
-import '../service_locator.dart';
+import '../container/service_locator.dart';
 
 export 'development_service_provider.dart';
 export 'production_service_provider.dart';

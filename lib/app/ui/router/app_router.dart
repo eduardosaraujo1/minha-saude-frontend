@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/document_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/document_upload_repository.dart';
@@ -54,9 +55,14 @@ class AppRouter {
   GoRouter router() {
     return GoRouter(
       initialLocation: Routes.home,
+      refreshListenable: _authRepository,
       redirect: (BuildContext context, GoRouterState state) async {
         final middlewareHandler = MiddlewareHandler([
-          AuthMiddleware([Routes.login, Routes.tos, Routes.register]),
+          AuthMiddleware([
+            Routes.login,
+            Routes.tos,
+            Routes.register,
+          ], _authRepository),
         ]);
         final String? redirectUrl = await middlewareHandler.run(context, state);
 

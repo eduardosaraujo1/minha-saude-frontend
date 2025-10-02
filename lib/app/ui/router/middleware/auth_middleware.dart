@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
-import 'package:minha_saude_frontend/config/container/service_locator.dart';
-import 'package:minha_saude_frontend/app/ui/router/middleware/middleware.dart';
-import 'package:minha_saude_frontend/app/ui/router/routes.dart';
+
+import '../../../data/repositories/auth/auth_repository.dart';
+import '../routes.dart';
+import 'middleware.dart';
 
 class AuthMiddleware implements Middleware {
-  const AuthMiddleware(this._authRoutes);
+  const AuthMiddleware(this._authRoutes, this._authRepository);
 
   final List<String> _authRoutes;
+  final AuthRepository _authRepository;
 
   @override
   Future<String?> handle(
@@ -16,11 +17,9 @@ class AuthMiddleware implements Middleware {
     GoRouterState state,
     NextFunction next,
   ) async {
-    final authRepository = ServiceLocator.I<AuthRepository>();
-
     // Check authentication state
-    final hasSessionToken = await authRepository.hasAuthToken();
-    final hasRegisterToken = authRepository.getRegisterToken() != null;
+    final hasSessionToken = await _authRepository.hasAuthToken();
+    final hasRegisterToken = _authRepository.getRegisterToken() != null;
     final isOnAuthRoute = _authRoutes.contains(state.fullPath);
 
     // Early return: User is not authenticated and trying to access protected route

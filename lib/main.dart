@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/ui/core/themes/app_theme.dart';
-import 'package:minha_saude_frontend/config/container/service_locator.dart';
 
 import 'main_development.dart' as development;
 
@@ -14,12 +14,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appTheme = ServiceLocator.I<AppTheme>();
+    // TODO: create ThemeProvider and use riverpod-like state management
+    final appTheme = GetIt.I<AppTheme>();
 
     return MaterialApp.router(
       title: 'Minha Saúde',
       theme: appTheme.selectedTheme,
-      routerConfig: ServiceLocator.I<GoRouter>(),
+      routerConfig: GetIt.I<GoRouter>(),
     );
   }
 }

@@ -3,7 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
 import 'package:minha_saude_frontend/app/domain/models/user_register_model/user_register_model.dart';
 import 'package:minha_saude_frontend/app/ui/router/routes.dart';
-import 'package:minha_saude_frontend/utils/command.dart';
+import 'package:minha_saude_frontend/app/utils/command.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 class RegisterViewModel {

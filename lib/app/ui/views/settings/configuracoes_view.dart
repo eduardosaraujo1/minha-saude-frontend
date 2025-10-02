@@ -7,7 +7,7 @@ import 'package:minha_saude_frontend/app/ui/views/settings/tabs/conta_view.dart'
 import 'package:minha_saude_frontend/app/ui/views/settings/tabs/general_view.dart';
 import 'package:minha_saude_frontend/app/ui/views/settings/tabs/suporte_view.dart';
 import 'package:minha_saude_frontend/app/ui/widgets/app/brand_app_bar.dart';
-import 'package:minha_saude_frontend/config/container/service_locator.dart';
+import 'package:watch_it/watch_it.dart';
 
 class ConfiguracoesView extends StatefulWidget {
   const ConfiguracoesView({super.key});
@@ -56,10 +56,8 @@ class _ConfiguracoesViewState extends State<ConfiguracoesView>
             child: TabBarView(
               controller: _tabController,
               children: [
-                GeneralView(
-                  GeneralViewModel(ServiceLocator.I<ProfileRepository>()),
-                ),
-                ContaView(ContaViewModel(ServiceLocator.I<AuthRepository>())),
+                GeneralView(GeneralViewModel(GetIt.I<ProfileRepository>())),
+                ContaView(ContaViewModel(GetIt.I<AuthRepository>())),
                 SuporteView(),
               ],
             ),

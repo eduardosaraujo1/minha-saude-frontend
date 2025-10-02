@@ -1,23 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/config/bootstrap/application_config.dart';
-import 'package:minha_saude_frontend/config/container/service_locator.dart';
-import 'package:minha_saude_frontend/config/providers/service_provider.dart';
-import 'package:minha_saude_frontend/main.dart';
+import 'package:logging/logging.dart';
 
-void main() async {
-  try {
-    WidgetsFlutterBinding.ensureInitialized();
+import 'main_common.dart';
+import 'config/dependencies/development_dependencies.dart';
+import 'config/flavor_settings.dart';
 
-    final providers = [DevelopmentServiceProvider()];
-    final config = ApplicationConfig(
-      serviceLocator: ServiceLocator.I,
-      providers: providers,
-    );
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
 
-    await config.setup();
+  Logger.root.level = Level.ALL;
 
-    runApp(const MyApp());
-  } catch (e, stackTrace) {
-    runApp(ErrorApp(e, stackTrace: stackTrace));
-  }
+  FlavorSettings.setup(
+    flavor: Flavor.development,
+    apiBaseUrl: null, // set if needed
+    googleClientId: null,
+    googleServerClientId: null,
+  );
+
+  final dependencies = [
+    DevelopmentDependencies(
+      mockGoogle: true,
+      mockApiClient: true,
+      mockScanner: true,
+      mockSecureStorage: true,
+    ),
+  ];
+
+  mainCommon(dependencies);
 }

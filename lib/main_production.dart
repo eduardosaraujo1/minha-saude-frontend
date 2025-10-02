@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/config/bootstrap/application_config.dart';
-import 'package:minha_saude_frontend/config/container/service_locator.dart';
-import 'package:minha_saude_frontend/config/providers/service_provider.dart';
-import 'package:minha_saude_frontend/main.dart';
+import 'package:logging/logging.dart';
+import 'package:minha_saude_frontend/config/dependencies/production_dependencies.dart';
 
-void main() async {
-  try {
-    WidgetsFlutterBinding.ensureInitialized();
+import 'config/flavor_settings.dart';
+import 'main_common.dart';
 
-    final providers = [ProductionServiceProvider()];
-    final config = ApplicationConfig(
-      serviceLocator: ServiceLocator.I,
-      providers: providers,
-    );
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
 
-    await config.setup();
+  Logger.root.level = Level.ALL;
 
-    runApp(const MyApp());
-  } catch (e, stackTrace) {
-    runApp(ErrorApp(e, stackTrace: stackTrace));
-  }
+  FlavorSettings.setup(
+    flavor: Flavor.development,
+    apiBaseUrl: null, // set if needed
+    googleClientId: null,
+    googleServerClientId: null,
+  );
+
+  final dependencies = [ProductionDependencies()];
+
+  mainCommon(dependencies);
 }

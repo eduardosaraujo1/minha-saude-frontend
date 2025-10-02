@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
-import 'package:minha_saude_frontend/config/container/service_locator.dart';
 
 class NotFoundView extends StatelessWidget {
   final String fullPath;
@@ -10,7 +10,7 @@ class NotFoundView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authRepository = ServiceLocator.I<AuthRepository>();
+    final authRepository = GetIt.I<AuthRepository>();
 
     return Scaffold(
       body: Center(

@@ -12,6 +12,11 @@ abstract class GoogleService {
 }
 
 class GoogleServiceImpl implements GoogleService {
+  static const List<String> scopes = [
+    'https://www.googleapis.com/auth/userinfo.email',
+    'openid',
+  ];
+
   GoogleServiceImpl(this._signIn) {
     _signIn.initialize(
       clientId: FlavorSettings.instance.googleClientId,
@@ -20,10 +25,6 @@ class GoogleServiceImpl implements GoogleService {
   }
 
   final GoogleSignIn _signIn;
-  static const List<String> scopes = [
-    'https://www.googleapis.com/auth/userinfo.email',
-    'openid',
-  ];
 
   @override
   Future<Result<String?, Exception>> generateServerAuthCode() async {

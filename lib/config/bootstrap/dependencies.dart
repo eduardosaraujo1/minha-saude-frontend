@@ -1,4 +1,6 @@
-import 'dependencies/dependencies.dart';
+part of 'application.dart';
+
+var _initialized = false;
 
 Future<void> registerDependencies(List<Dependencies> dependencies) async {
   if (_initialized) {

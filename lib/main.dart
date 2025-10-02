@@ -1,34 +1,30 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
-import 'package:minha_saude_frontend/config/environment.dart';
 
+import 'config/dependencies.dart';
+import 'config/environment.dart';
 import 'app/ui/core/themes/app_theme.dart';
-import 'config/bootstrap/application.dart';
-import 'config/dependencies/development_dependencies.dart';
-import 'config/dependencies/production_dependencies.dart';
-import 'config/dependencies/shared_dependencies.dart';
 
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
 
-    final app = Application()
-        .withLogging(Level.ALL) //
-        .withDependencies([
-          SharedDependencies(),
-          Environment.appEnv.isProd()
-              ? ProductionDependencies()
-              : DevelopmentDependencies(
-                  mockGoogle: true,
-                  mockApiClient: true,
-                  mockScanner: true,
-                  mockSecureStorage: true,
-                ),
-        ]);
+    Logger.root.level = Level.ALL;
 
-    await app.init();
+    if (Environment.appEnv.isDev) {
+      await registerDependenciesDev(
+        mockApiClient: true,
+        mockGoogle: !(Platform.isAndroid || Platform.isIOS),
+        mockScanner: true,
+        mockSecureStorage: true,
+      );
+    } else {
+      await registerDependenciesProd();
+    }
 
     runApp(const MyApp());
   } catch (e, stackTrace) {

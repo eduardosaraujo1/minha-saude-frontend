@@ -3,6 +3,8 @@ import 'package:minha_saude_frontend/app/domain/models/document.dart';
 import 'package:minha_saude_frontend/app/data/repositories/document_repository.dart';
 import 'package:pdfx/pdfx.dart';
 
+import '../../../../config/asset.dart';
+
 // TODO: If loading for more than 5 seconds, show error message
 class DocumentViewModel {
   final String documentId;
@@ -37,7 +39,7 @@ class DocumentViewModel {
 
     // Load PDF
     pdfController = PdfControllerPinch(
-      document: PdfDocument.openAsset('assets/fake/document.pdf'),
+      document: PdfDocument.openAsset(Asset.fakeDocumentPdf),
     );
 
     documentLoadingStatus.value = DocumentLoadStatus.loaded;

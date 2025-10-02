@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:minha_saude_frontend/app/ui/old/compartilhar/visualizar_codigo.dart';
 import 'package:minha_saude_frontend/app/ui/widgets/app/brand_app_bar.dart';
+import '../../../../config/asset.dart';
 import 'selecionar_documentos.dart';
 
 class CodigosCompartilhamento extends StatefulWidget {
@@ -250,7 +251,7 @@ class _CodigosCompartilhamentoState extends State<CodigosCompartilhamento>
             width: _documentIconSize,
             height: _documentIconSize,
             child: SvgPicture.asset(
-              'assets/icons/document.svg',
+              Asset.documentIcon,
               width: _documentIconSize,
               height: _documentIconSize,
             ),

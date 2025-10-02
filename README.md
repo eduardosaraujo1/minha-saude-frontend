@@ -11,7 +11,7 @@
 
 ## Para fazer
 
--   [ ] HOTFIX: remover flavoring main_dev, main_prod etc, usar main.dart para tudo e ter uma classe chamada Environment com preferencias definidas no env e uma única função para fazer o GetIt funcionar. Acaba com esse caos
+-   [ ] PDFCONTROLLER SHOULD BE IN THE VIEW NOT THE VIEW MODEL!!! (same for FormControllers)
 -   [ ] DocumentIcon: fazer a lista de documentos usar Wrap para evitar overflow ou forçar 3 colunas em telas grandes (ensure fixed width)
 -   [ ] Corrigir widget de loginDecorator para funcionar em telas Wide
 -   [ ] ???

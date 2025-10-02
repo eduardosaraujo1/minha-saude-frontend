@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../config/asset.dart';
+
 class VisualizarCodigo extends StatelessWidget {
   static const double _documentIconSize = 48.0;
 
@@ -26,7 +28,7 @@ class VisualizarCodigo extends StatelessWidget {
             width: _documentIconSize,
             height: _documentIconSize,
             child: SvgPicture.asset(
-              'assets/icons/document.svg',
+              Asset.documentIcon,
               width: _documentIconSize,
               height: _documentIconSize,
             ),

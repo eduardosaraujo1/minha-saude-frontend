@@ -37,7 +37,6 @@ class GoogleServiceImpl implements GoogleService {
 
       // Now account is guaranteed non-null
       final client = account.authorizationClient;
-      // TODO: "some platforms only provide a valid server auth token on initial login. Clients requiring a server auth token should not rely on being able to re-request server auth tokens at arbitrary times, and should instead store the token when it is first available, and manage refreshes on the server side using that token.  "
       final serverAuth = await client.authorizeServer(scopes);
 
       if (serverAuth == null || serverAuth.serverAuthCode.isEmpty) {

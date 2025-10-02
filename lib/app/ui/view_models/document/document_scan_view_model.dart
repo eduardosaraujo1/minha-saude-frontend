@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/app/data/repositories/document_upload_repository.dart';
 import 'package:pdfx/pdfx.dart';
 
+import '../../../../config/asset.dart';
+
 class DocumentScanViewModel {
   final DocumentUploadRepository uploadRepository;
   final DocumentCreateType _type;
@@ -41,7 +43,7 @@ class DocumentScanViewModel {
       // }
       // Mock:
       _pdfController = PdfController(
-        document: PdfDocument.openAsset('assets/fake/document.pdf'),
+        document: PdfDocument.openAsset(Asset.fakeDocumentPdf),
       );
       status.value = PageStatus.loaded;
     } else if (_type == DocumentCreateType.upload) {

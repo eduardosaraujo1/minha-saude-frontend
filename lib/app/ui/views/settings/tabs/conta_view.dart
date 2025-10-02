@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/ui/view_models/settings/conta_view_model.dart';
+import 'package:minha_saude_frontend/config/asset.dart';
 import 'package:watch_it/watch_it.dart';
 
 class ContaView extends WatchingStatefulWidget {
@@ -62,11 +63,7 @@ class _ContaViewState extends State<ContaView> {
       child: Row(
         children: [
           // Logo Google
-          SvgPicture.asset(
-            'assets/brand/google/logo.svg',
-            width: 44,
-            height: 44,
-          ),
+          SvgPicture.asset(Asset.googleLogo, width: 44, height: 44),
           const SizedBox(width: 12),
           // Texto no centro, com wrapping se necessário
           Expanded(

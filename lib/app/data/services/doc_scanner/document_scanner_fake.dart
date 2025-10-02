@@ -3,12 +3,13 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../../../config/asset.dart';
 import 'document_scanner.dart';
 
 class DocumentScannerFake implements DocumentScanner {
   @override
   Future<File?> scanPdf() async {
-    final blob = await rootBundle.load('assets/fake/document.pdf');
+    final blob = await rootBundle.load(Asset.fakeDocumentPdf);
     final tempDir = await getTemporaryDirectory();
 
     final file = File("${tempDir.path}/fake/document.pdf");

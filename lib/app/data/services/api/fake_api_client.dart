@@ -1,9 +1,9 @@
-import 'package:minha_saude_frontend/app/domain/models/user_register_model/user_register_model.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-import 'api_client.dart';
+import '../../../domain/models/user_register_model/user_register_model.dart';
 import 'models/login_response/login_api_response.dart';
 import 'models/register_response/register_response.dart';
+import 'api_client.dart';
 
 class FakeApiClient implements ApiClient {
   bool _isRegistered = false;

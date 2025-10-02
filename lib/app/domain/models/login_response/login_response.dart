@@ -16,19 +16,19 @@ abstract class LoginResponse with _$LoginResponse {
   /// Create polymorphic LoginResponse from an APIResponse
   /// Throws Exception if the ApiResponse is in an invalid state (says user isRegistered but did not provide valid sessionToken)
   factory LoginResponse.fromApi(LoginApiResponse response) {
-    if (response.isRegistered &&
-        response.sessionToken != null &&
-        response.sessionToken!.isNotEmpty) {
-      return LoginResponse.successful(sessionToken: response.sessionToken!);
-    } else if (!response.isRegistered &&
-        response.registerToken != null &&
-        response.registerToken!.isNotEmpty) {
-      return LoginResponse.needsRegistration(
-        registerToken: response.registerToken!,
-      );
+    if (response.isRegistered) {
+      if (response.sessionToken != null && response.sessionToken!.isNotEmpty) {
+        return LoginResponse.successful(sessionToken: response.sessionToken!);
+      }
     } else {
-      throw Exception("LoginApiResponse returned an invalid response object");
+      if (response.registerToken != null &&
+          response.registerToken!.isNotEmpty) {
+        return LoginResponse.needsRegistration(
+          registerToken: response.registerToken!,
+        );
+      }
     }
+    throw Exception("LoginApiResponse returned an invalid response object");
   }
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) =>

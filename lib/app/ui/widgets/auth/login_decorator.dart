@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:minha_saude_frontend/config/asset.dart';
 
 class LoginDecoratorWidget extends StatelessWidget {
   const LoginDecoratorWidget({super.key});
@@ -13,9 +14,7 @@ class LoginDecoratorWidget extends StatelessWidget {
         color: theme.colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.only(bottomRight: Radius.circular(128)),
       ),
-      child: SafeArea(
-        child: SvgPicture.asset('assets/brand/minha_saude/logo.svg'),
-      ),
+      child: SafeArea(child: SvgPicture.asset(Asset.minhaSaudeLogo)),
     );
   }
 }

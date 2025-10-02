@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../config/asset.dart';
+
 class DocumentItem extends StatelessWidget {
   const DocumentItem({
     super.key,
@@ -23,11 +25,7 @@ class DocumentItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SvgPicture.asset(
-              'assets/icons/document.svg',
-              width: 60,
-              height: 60,
-            ),
+            SvgPicture.asset(Asset.documentIcon, width: 60, height: 60),
             const SizedBox(height: 8),
             Text(
               title,

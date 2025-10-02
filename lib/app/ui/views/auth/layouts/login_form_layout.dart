@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/config/asset.dart';
 
 class LoginFormLayout extends StatelessWidget {
   final Widget child;
@@ -89,10 +90,7 @@ class LoginDecoratorVariant extends StatelessWidget {
               left: 0,
               right: 0,
               child: Center(
-                child: SvgPicture.asset(
-                  'assets/brand/minha_saude/logo_icon.svg',
-                  width: 100,
-                ),
+                child: SvgPicture.asset(Asset.minhaSaudeLogoIcon, width: 100),
               ),
             ),
           ],

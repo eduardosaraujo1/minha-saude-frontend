@@ -6,6 +6,8 @@ import 'package:minha_saude_frontend/app/ui/widgets/auth/button_sign_in.dart';
 import 'package:minha_saude_frontend/app/ui/widgets/auth/login_decorator.dart';
 import 'package:minha_saude_frontend/app/ui/view_models/auth/login_view_model.dart';
 
+import '../../../../config/asset.dart';
+
 class LoginView extends StatefulWidget {
   const LoginView(this.viewModel, {super.key});
 
@@ -89,10 +91,7 @@ class _LoginViewState extends State<LoginView> {
                 ),
                 const SizedBox(height: 16),
                 ButtonSignIn(
-                  icon: SvgPicture.asset(
-                    'assets/brand/google/logo.svg',
-                    width: 24,
-                  ),
+                  icon: SvgPicture.asset(Asset.googleLogo, width: 24),
                   label: "Entrar com Google",
                   onPressed: loginWithGoogle.isExecuting
                       ? null

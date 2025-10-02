@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/config/asset.dart';
 
 /// A wrapper around AppBar that includes the Minha Saúde brand icon.
 ///
@@ -54,7 +55,7 @@ class BrandAppBar extends StatelessWidget implements PreferredSizeWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SvgPicture.asset(
-        'assets/brand/minha_saude/logo_icon.svg',
+        Asset.minhaSaudeLogoIcon,
         width: 32.0,
         height: 32.0,
         semanticsLabel: 'Ícone Minha Saúde',

@@ -6,9 +6,8 @@ enum AppEnv {
   development,
   production;
 
-  isProd() {
-    return this == AppEnv.production;
-  }
+  bool get isProd => this == AppEnv.production;
+  bool get isDev => this == AppEnv.development;
 }
 
 /// Provides static access to environment configuration values.

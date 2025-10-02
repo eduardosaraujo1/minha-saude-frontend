@@ -1,8 +1,8 @@
-import 'package:minha_saude_frontend/app/data/services/api/models/login_response/login_api_response.dart';
-import 'package:minha_saude_frontend/app/data/services/api/models/register_response/register_response.dart';
-import 'package:minha_saude_frontend/app/domain/models/user_register_model/user_register_model.dart';
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../../../app/data/services/api/models/login_response/login_api_response.dart';
+import '../../../../app/data/services/api/models/register_response/register_response.dart';
+import '../../../../app/domain/models/user_register_model/user_register_model.dart';
 export 'api_client_impl.dart';
 export 'fake_api_client.dart';
 

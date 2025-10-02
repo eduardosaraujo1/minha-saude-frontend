@@ -1,7 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+import '../../../../config/asset.dart';
 
 class SelecionarDocumentos extends StatefulWidget {
   const SelecionarDocumentos({super.key});
@@ -226,7 +227,7 @@ class _SelecionarDocumentosState extends State<SelecionarDocumentos> {
       },
     );
 
-    if (result != null && context.mounted) {
+    if (result != null && mounted) {
       Navigator.of(context).pop(result);
     }
   }
@@ -246,7 +247,7 @@ class _SelecionarDocumentosState extends State<SelecionarDocumentos> {
                 width: _documentIconSize,
                 height: _documentIconSize,
                 child: SvgPicture.asset(
-                  'assets/icons/document.svg',
+                  Asset.documentIcon,
                   width: _documentIconSize,
                   height: _documentIconSize,
                 ),

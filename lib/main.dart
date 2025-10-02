@@ -2,56 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
-import 'package:minha_saude_frontend/config/environment/google_env.dart';
+import 'package:minha_saude_frontend/config/environment.dart';
 
 import 'app/ui/core/themes/app_theme.dart';
-import 'main_common.dart';
-import 'main_development.dart' as development;
+import 'config/bootstrap/application.dart';
+import 'config/dependencies/development_dependencies.dart';
+import 'config/dependencies/production_dependencies.dart';
+import 'config/dependencies/shared_dependencies.dart';
 
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
 
-    Application(Flavor.development)
-        .withLogging(Level.ALL)
-        .withEnvironmentOverrides(
-          baseUrl: 'https://minha-saude-api-dev.example.com',
-          googleclientId: 'test',
-          googleClientServerId: 'test',
-        )
-        .registerDependencies([
+    final app = Application()
+        .withLogging(Level.ALL) //
+        .withDependencies([
           SharedDependencies(),
-          DevelopmentDependencies(
-            mockGoogle: true,
-            mockApiClient: true,
-            mockScanner: true,
-            mockSecureStorage: true,
-          ),
-        ])
-        .init();
+          Environment.appEnv.isProd()
+              ? ProductionDependencies()
+              : DevelopmentDependencies(
+                  mockGoogle: true,
+                  mockApiClient: true,
+                  mockScanner: true,
+                  mockSecureStorage: true,
+                ),
+        ]);
 
-    // Logger.root.level = Level.ALL;
+    await app.init();
 
-    // Environment.init().overrideWith();
-
-    // FlavorSettings.setup(
-    //   flavor: Flavor.development,
-    //   apiBaseUrl: null, // set if needed
-    //   googleClientId: null,
-    //   googleServerClientId: null,
-    // );
-
-    // final dependencies = [
-    //   DevelopmentDependencies(
-    //     mockGoogle: true,
-    //     mockApiClient: true,
-    //     mockScanner: true,
-    //     mockSecureStorage: true,
-    //   ),
-    // ];
-    // await registerDependencies([SharedDependencies(), ...dependencies]);
-
-    // runApp(const MyApp());
+    runApp(const MyApp());
   } catch (e, stackTrace) {
     runApp(ErrorApp(e, stackTrace: stackTrace));
   }

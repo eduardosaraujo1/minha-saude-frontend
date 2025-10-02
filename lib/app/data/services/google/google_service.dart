@@ -1,5 +1,5 @@
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:minha_saude_frontend/config/flavor_settings.dart';
+import 'package:minha_saude_frontend/config/environment.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 export 'google_service_fake.dart';
@@ -19,8 +19,8 @@ class GoogleServiceImpl implements GoogleService {
 
   GoogleServiceImpl(this._signIn) {
     _signIn.initialize(
-      clientId: FlavorSettings.instance.googleClientId,
-      serverClientId: FlavorSettings.instance.googleServerClientId,
+      clientId: Environment.googleClientId,
+      serverClientId: Environment.googleServerClientId,
     );
   }
 

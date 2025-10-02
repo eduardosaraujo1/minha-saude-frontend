@@ -42,19 +42,17 @@ Future<void> registerDependenciesDev({
   );
 
   // Repositories
-  _getIt.registerSingletonWithDependencies<AuthRepository>(
-    () => AuthRepositoryImpl(
+  _getIt.registerSingleton<AuthRepository>(
+    AuthRepositoryImpl(
       _getIt<SecureStorage>(),
       _getIt<GoogleService>(),
       _getIt<ApiClient>(),
     ),
-    dependsOn: [SecureStorage, GoogleService, ApiClient],
   );
   _getIt.registerSingleton<DocumentRepository>(DocumentRepository());
   _getIt.registerSingleton<ProfileRepository>(ProfileRepository());
-  _getIt.registerSingletonWithDependencies<DocumentUploadRepository>(
-    () => DocumentUploadRepository(_getIt<DocumentScanner>()),
-    dependsOn: [DocumentScanner],
+  _getIt.registerSingleton<DocumentUploadRepository>(
+    DocumentUploadRepository(_getIt<DocumentScanner>()),
   );
 }
 

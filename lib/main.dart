@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
+import 'package:minha_saude_frontend/app/ui/router/app_router.dart';
 
 import 'config/dependencies.dart';
 import 'config/environment.dart';
@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'Minha Saúde',
       theme: appTheme.selectedTheme,
-      routerConfig: GetIt.I<GoRouter>(),
+      routerConfig: router(),
     );
   }
 }

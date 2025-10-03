@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/domain/models/document.dart';
-import 'package:minha_saude_frontend/app/ui/view_models/document/document_list_view_model.dart';
-import 'package:minha_saude_frontend/app/ui/widgets/document/document_fab.dart';
-import 'package:minha_saude_frontend/app/ui/widgets/app/brand_app_bar.dart';
-import 'package:minha_saude_frontend/app/ui/widgets/document/grouped_document_grid.dart';
 import 'package:watch_it/watch_it.dart';
+
+import '../../../domain/models/document.dart';
+import '../../core/widgets/brand_app_bar.dart';
+import '../view_models/document_list_view_model.dart';
+// import 'package:minha_saude_frontend/app/ui/view_models/document/document_list_view_model.dart';
+// import 'package:minha_saude_frontend/app/ui/widgets/document/document_fab.dart';
+// import 'package:minha_saude_frontend/app/ui/widgets/app/brand_app_bar.dart';
+// import 'package:minha_saude_frontend/app/ui/widgets/document/grouped_document_grid.dart';
 
 class DocumentListView extends WatchingStatefulWidget {
   final DocumentListViewModel viewModel;

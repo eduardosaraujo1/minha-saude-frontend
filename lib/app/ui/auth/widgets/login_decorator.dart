@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:minha_saude_frontend/config/asset.dart';
 
-class LoginDecoratorWidget extends StatelessWidget {
-  const LoginDecoratorWidget({super.key});
+class LoginDecorator extends StatelessWidget {
+  const LoginDecorator({super.key});
 
   @override
   Widget build(BuildContext context) {

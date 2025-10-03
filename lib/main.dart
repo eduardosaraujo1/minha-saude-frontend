@@ -5,7 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:logging/logging.dart';
 
 import 'app/routing/router.dart';
-import 'app/ui/core/themes/app_theme.dart';
+import 'app/ui/core/theme_provider.dart';
 import 'config/dependencies.dart';
 import 'config/environment.dart';
 
@@ -32,17 +32,44 @@ void main() async {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final themeProvider = GetIt.I<ThemeProvider>();
+
+  @override
+  void initState() {
+    super.initState();
+
+    themeProvider.mode.addListener(_onThemeChanged);
+  }
+
+  @override
+  void dispose() {
+    themeProvider.mode.removeListener(_onThemeChanged);
+
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // TODO: create ThemeProvider and use riverpod-like state management
-    final appTheme = GetIt.I<AppTheme>();
+    final ThemeData darkTheme = themeProvider.darkTheme;
+    final ThemeData lightTheme = themeProvider.lightTheme;
 
     return MaterialApp.router(
       title: 'Minha Saúde',
-      theme: appTheme.selectedTheme,
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: themeProvider.mode.value,
       routerConfig: router(),
     );
   }

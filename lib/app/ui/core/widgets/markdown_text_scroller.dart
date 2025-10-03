@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
-class TextScroller extends StatelessWidget {
-  const TextScroller({super.key, required this.text});
+class MarkdownTextScroller extends StatelessWidget {
+  const MarkdownTextScroller({super.key, required this.text});
 
   final String text;
 

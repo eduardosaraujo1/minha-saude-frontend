@@ -1,50 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/ui/core/widgets/scaffold_with_navbar.dart';
 
 import '../data/repositories/auth/auth_repository.dart';
 import '../data/repositories/document_repository.dart';
 import '../data/repositories/document_upload_repository.dart';
 import '../data/repositories/profile_repository.dart';
 import '../domain/actions/auth/login_with_google.dart';
-import '../ui/view_models/auth/register_view_model.dart';
-import '../ui/old/compartilhar/codigos_compartilhamento.dart';
-import '../ui/view_models/settings/edit_nome_view_model.dart';
-import '../ui/view_models/settings/edit_birthday_view_model.dart';
-import '../ui/view_models/settings/edit_telefone_view_model.dart';
-import '../ui/views/profile/edit_nome_view.dart';
-import '../ui/views/profile/edit_birthday_view.dart';
-import '../ui/views/profile/edit_telefone_view.dart';
-import '../ui/view_models/document/document_create_view_model.dart';
-import '../ui/view_models/document/document_scan_view_model.dart';
-import '../ui/view_models/document/document_view_model.dart';
-import '../ui/views/document/document_create_view.dart';
-import '../ui/views/document/document_scan_view.dart';
-import '../ui/views/document/document_view.dart';
-import '../ui/view_models/lixeira/deleted_document_view_model.dart';
-import '../ui/view_models/lixeira/lixeira_view_model.dart';
-import '../ui/views/lixeira/deleted_document_view.dart';
-import '../ui/view_models/auth/login_view_model.dart';
-import '../ui/view_models/auth/tos_view_model.dart';
-import '../ui/views/auth/login_view.dart';
-import '../ui/views/auth/register_view.dart';
-import '../ui/views/auth/tos_view.dart';
-import '../ui/views/settings/configuracoes_view.dart';
-import '../ui/view_models/document/document_list_view_model.dart';
-import '../ui/views/document/document_list_view.dart';
-import '../ui/views/lixeira/lixeira_view.dart';
-import '../ui/views/shared/app_view.dart';
-import '../ui/views/shared/not_found.dart';
+import '../ui/auth/view_models/login_view_model.dart';
+import '../ui/auth/view_models/register_view_model.dart';
+import '../ui/auth/view_models/tos_view_model.dart';
+import '../ui/auth/widgets/login_view.dart';
+import '../ui/auth/widgets/register_view.dart';
+import '../ui/auth/widgets/tos_view.dart';
 import 'routes.dart';
 
 final _getIt = GetIt.I;
 
-final _shellNavigatorKey = GlobalKey<NavigatorState>();
+final _rootNavigatorKey = GlobalKey<NavigatorState>();
+final _documentNavigatorKey = GlobalKey<NavigatorState>();
 
 GoRouter router() {
   final authRepository = _getIt<AuthRepository>();
 
   return GoRouter(
+    navigatorKey: _rootNavigatorKey,
     initialLocation: Routes.home,
     refreshListenable: authRepository,
     redirect: (BuildContext context, GoRouterState state) {
@@ -81,12 +62,12 @@ GoRouter router() {
               GoRouterState state,
               StatefulNavigationShell navigationShell,
             ) {
-              return AppView(navigationShell: navigationShell);
+              return ScaffoldWithNavbar(navigationShell: navigationShell);
             },
         branches: [
           // Documents branch
           StatefulShellBranch(
-            navigatorKey: _shellNavigatorKey,
+            navigatorKey: _documentNavigatorKey,
             routes: [
               GoRoute(
                 path: Routes.home,

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
-import 'package:minha_saude_frontend/app/ui/widgets/auth/button_sign_in.dart';
-import 'package:minha_saude_frontend/app/ui/widgets/auth/login_decorator.dart';
-import 'package:minha_saude_frontend/app/ui/view_models/auth/login_view_model.dart';
 
 import '../../../../config/asset.dart';
+import '../view_models/login_view_model.dart';
+import 'button_sign_in.dart';
+import 'login_decorator.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView(this.viewModel, {super.key});
@@ -76,7 +76,7 @@ class _LoginViewState extends State<LoginView> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const LoginDecoratorWidget(),
+          const LoginDecorator(),
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 16.0,

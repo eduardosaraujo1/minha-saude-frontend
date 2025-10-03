@@ -1,12 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/ui/core/themes/variants/theme_variant.dart';
+part of '../theme_provider.dart';
 
-class LightTheme implements ThemeVariant {
+class _LightTheme {
   static const seedColor = Color(0xFF003039);
 
-  @override
-  ThemeData getTheme() {
+  ThemeData theme() {
     final scheme = colorScheme();
+
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
@@ -15,9 +14,8 @@ class LightTheme implements ThemeVariant {
     );
   }
 
-  @override
   ColorScheme colorScheme() {
-    final seededScheme = ColorScheme.fromSeed(seedColor: LightTheme.seedColor);
+    final seededScheme = ColorScheme.fromSeed(seedColor: _LightTheme.seedColor);
 
     return seededScheme.copyWith(
       // primary: Color(0xFF006879),

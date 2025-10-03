@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/ui/widgets/app/navbar.dart';
 
-class AppView extends StatelessWidget {
+import 'navbar.dart';
+
+class ScaffoldWithNavbar extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const AppView({super.key, required this.navigationShell});
+  const ScaffoldWithNavbar({required this.navigationShell, super.key});
 
   void _onDestinationSelected(BuildContext context, int index) {
     // Use the StatefulNavigationShell's goBranch method for proper navigation

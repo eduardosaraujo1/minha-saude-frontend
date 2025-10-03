@@ -5,7 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../app/data/services/api/auth/fake_auth_api_client.dart';
 import '../app/domain/actions/auth/login_with_google.dart';
 import 'environment.dart';
-import '../app/ui/core/themes/app_theme.dart';
+import '../app/ui/core/theme_provider.dart';
 import '../app/data/repositories/document_repository.dart';
 import '../app/data/repositories/document_upload_repository.dart';
 import '../app/data/repositories/profile_repository.dart';
@@ -18,7 +18,7 @@ import '../app/data/services/secure_storage/secure_storage.dart';
 final _getIt = GetIt.instance;
 
 Future<void> _registerDependenciesShared() async {
-  _getIt.registerSingleton<AppTheme>(AppTheme());
+  _getIt.registerSingleton<ThemeProvider>(ThemeProvider());
 }
 
 Future<void> registerDependenciesDev({
@@ -59,8 +59,6 @@ Future<void> registerDependenciesDev({
     DocumentUploadRepository(_getIt<DocumentScanner>()),
   );
 
-  // TODO: find a way to make it so I can register this in the sharedDependencies without
-  // Throwing the "AuthRepository not found" error
   _getIt.registerSingleton<LoginWithGoogle>(
     LoginWithGoogle(_getIt<AuthRepository>()),
   );

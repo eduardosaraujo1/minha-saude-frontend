@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // TODO: implement with DocumentRepository real creation
-class DocumentCreateViewModel {
+class DocumentInfoFormViewModel {
   final state = ValueNotifier<PageStatus>(PageStatus.initial);
   final errorMessage = ValueNotifier<String?>(null);
   final form = DocumentFormController();

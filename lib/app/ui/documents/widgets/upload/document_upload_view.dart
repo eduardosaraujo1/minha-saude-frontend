@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/ui/view_models/document/document_scan_view_model.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:watch_it/watch_it.dart';
 
-class DocumentScanView extends WatchingStatefulWidget {
-  final DocumentScanViewModel viewModel;
-  const DocumentScanView(this.viewModel, {super.key});
+import '../../view_models/upload/document_upload_view_model.dart';
+
+class DocumentUploadView extends WatchingStatefulWidget {
+  final DocumentUploadViewModel viewModel;
+  const DocumentUploadView(this.viewModel, {super.key});
 
   @override
-  State<DocumentScanView> createState() => _MyWidgetState();
+  State<DocumentUploadView> createState() => _MyWidgetState();
 }
 
-class _MyWidgetState extends State<DocumentScanView> {
-  DocumentScanViewModel get viewModel => widget.viewModel;
+class _MyWidgetState extends State<DocumentUploadView> {
+  DocumentUploadViewModel get viewModel => widget.viewModel;
   @override
   void dispose() {
     viewModel.dispose();

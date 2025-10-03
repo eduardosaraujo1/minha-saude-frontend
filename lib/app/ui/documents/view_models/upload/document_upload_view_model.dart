@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/app/data/repositories/document_upload_repository.dart';
 import 'package:pdfx/pdfx.dart';
 
-import '../../../../config/asset.dart';
+import '../../../../../config/asset.dart';
 
-class DocumentScanViewModel {
+class DocumentUploadViewModel {
   final DocumentUploadRepository uploadRepository;
   final DocumentCreateType _type;
 
@@ -15,7 +15,7 @@ class DocumentScanViewModel {
 
   PdfController? get pdfController => _pdfController;
 
-  DocumentScanViewModel(this._type, this.uploadRepository) {
+  DocumentUploadViewModel(this._type, this.uploadRepository) {
     _getDocument();
   }
 

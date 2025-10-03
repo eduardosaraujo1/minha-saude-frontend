@@ -1,3 +1,4 @@
+// TODO: remove this file, not sure why sorted_documents can't handle the list view with Wrap
 import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/app/domain/models/document.dart';
 import 'package:minha_saude_frontend/app/ui/widgets/document/document_grid.dart';

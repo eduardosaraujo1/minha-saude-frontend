@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/ui/view_models/document/document_create_view_model.dart';
 import 'package:watch_it/watch_it.dart';
 
-class DocumentCreateView extends WatchingStatefulWidget {
-  final DocumentCreateViewModel viewModel;
+import '../../view_models/upload/document_info_form_view_model.dart';
 
-  const DocumentCreateView(this.viewModel, {super.key});
+class DocumentInfoFormView extends WatchingStatefulWidget {
+  final DocumentInfoFormViewModel viewModel;
+
+  const DocumentInfoFormView(this.viewModel, {super.key});
 
   @override
-  State<DocumentCreateView> createState() => _DocumentCreateViewState();
+  State<DocumentInfoFormView> createState() => _DocumentCreateViewState();
 }
 
-class _DocumentCreateViewState extends State<DocumentCreateView> {
-  DocumentCreateViewModel get viewModel => widget.viewModel;
+class _DocumentCreateViewState extends State<DocumentInfoFormView> {
+  DocumentInfoFormViewModel get viewModel => widget.viewModel;
 
   @override
   void dispose() {

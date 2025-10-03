@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:minha_saude_frontend/app/ui/view_models/auth/register_view_model.dart';
-import 'package:minha_saude_frontend/app/ui/views/auth/layouts/login_form_layout.dart';
-import 'package:watch_it/watch_it.dart';
+
+import '../view_models/register_view_model.dart';
+import 'layouts/login_form_layout.dart';
 
 // Wrapper for RegisterView to handle ViewModel disposal
-class RegisterView extends WatchingStatefulWidget {
+class RegisterView extends StatefulWidget {
   const RegisterView(this.viewModel, {super.key});
 
   final RegisterViewModel viewModel;

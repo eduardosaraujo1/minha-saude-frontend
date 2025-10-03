@@ -11,7 +11,6 @@
 
 ## Para fazer
 
--   [ ] PDFCONTROLLER SHOULD BE IN THE VIEW NOT THE VIEW MODEL!!! (same for FormControllers)
 -   [ ] DocumentIcon: fazer a lista de documentos usar Wrap para evitar overflow ou forçar 3 colunas em telas grandes (ensure fixed width)
 -   [ ] Corrigir widget de loginDecorator para funcionar em telas Wide
 -   [ ] ???

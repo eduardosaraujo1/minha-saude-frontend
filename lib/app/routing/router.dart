@@ -6,7 +6,6 @@ import '../data/repositories/auth/auth_repository.dart';
 import '../data/repositories/document_repository.dart';
 import '../data/repositories/document_upload_repository.dart';
 import '../data/repositories/profile_repository.dart';
-import 'middleware/auth_middleware.dart';
 import '../ui/view_models/auth/register_view_model.dart';
 import '../ui/old/compartilhar/codigos_compartilhamento.dart';
 import '../ui/view_models/settings/edit_nome_view_model.dart';
@@ -35,7 +34,6 @@ import '../ui/views/document/document_list_view.dart';
 import '../ui/views/lixeira/lixeira_view.dart';
 import '../ui/views/shared/app_view.dart';
 import '../ui/views/shared/not_found.dart';
-import 'utils/middleware_handler.dart';
 import 'routes.dart';
 
 final _getIt = GetIt.I;
@@ -43,24 +41,13 @@ final _getIt = GetIt.I;
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 GoRouter router() {
+  final authRepository = _getIt<AuthRepository>();
+
   return GoRouter(
     initialLocation: Routes.home,
-    refreshListenable: _getIt<AuthRepository>(),
-    redirect: (BuildContext context, GoRouterState state) async {
-      final middlewareHandler = MiddlewareHandler([
-        AuthMiddleware([
-          Routes.login,
-          Routes.tos,
-          Routes.register,
-        ], _getIt<AuthRepository>()),
-      ]);
-      final String? redirectUrl = await middlewareHandler.run(context, state);
-
-      if (redirectUrl != null) {
-        return redirectUrl;
-      }
-
-      return null;
+    refreshListenable: authRepository,
+    redirect: (BuildContext context, GoRouterState state) {
+      return _redirectHandler(context, state, authRepository);
     },
     routes: [
       // Auth Routes (without bottom navigation)
@@ -240,4 +227,30 @@ GoRouter router() {
     errorBuilder: (context, state) => NotFoundView(state.fullPath ?? ''),
     // Main app routes with bottom navigation
   );
+}
+
+Future<String?> _redirectHandler(
+  BuildContext context,
+  GoRouterState state,
+  AuthRepository authRepository,
+) async {
+  const authRoutes = <String>{Routes.login, Routes.tos, Routes.register};
+
+  final isAuthed = await authRepository.hasAuthToken();
+  final isRegistering = authRepository.getRegisterToken() != null;
+  final requestedRoute = state.fullPath ?? state.matchedLocation;
+  final isOnAuthRoute = authRoutes.contains(requestedRoute);
+
+  if (!isAuthed && !isOnAuthRoute) {
+    if (isRegistering) {
+      return Routes.register;
+    }
+    return Routes.login;
+  }
+
+  if (isAuthed && isOnAuthRoute) {
+    return Routes.home;
+  }
+
+  return null;
 }

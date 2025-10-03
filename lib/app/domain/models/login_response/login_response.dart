@@ -5,7 +5,7 @@ part 'login_response.freezed.dart';
 part 'login_response.g.dart';
 
 @freezed
-abstract class LoginResponse with _$LoginResponse {
+sealed class LoginResponse with _$LoginResponse {
   const factory LoginResponse.successful({required String sessionToken}) =
       SuccessfulLoginResponse;
 

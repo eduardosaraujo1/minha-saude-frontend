@@ -6,6 +6,7 @@ import '../data/repositories/auth/auth_repository.dart';
 import '../data/repositories/document_repository.dart';
 import '../data/repositories/document_upload_repository.dart';
 import '../data/repositories/profile_repository.dart';
+import '../domain/actions/auth/login_with_google.dart';
 import '../ui/view_models/auth/register_view_model.dart';
 import '../ui/old/compartilhar/codigos_compartilhamento.dart';
 import '../ui/view_models/settings/edit_nome_view_model.dart';
@@ -54,7 +55,9 @@ GoRouter router() {
       GoRoute(
         path: Routes.login,
         builder: (BuildContext context, GoRouterState state) {
-          return LoginView(LoginViewModel(_getIt<AuthRepository>()));
+          return LoginView(
+            LoginViewModel(_getIt<AuthRepository>(), _getIt<LoginWithGoogle>()),
+          );
         },
       ),
       GoRoute(

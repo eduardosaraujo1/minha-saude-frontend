@@ -109,10 +109,7 @@ final _that = this;
 switch (_that) {
 case SuccessfulLoginResponse():
 return successful(_that);case NeedsRegistrationLoginResponse():
-return needsRegistration(_that);case _:
-  throw StateError('Unexpected subclass');
-
-}
+return needsRegistration(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -174,10 +171,7 @@ return needsRegistration(_that.registerToken);case _:
 switch (_that) {
 case SuccessfulLoginResponse():
 return successful(_that.sessionToken);case NeedsRegistrationLoginResponse():
-return needsRegistration(_that.registerToken);case _:
-  throw StateError('Unexpected subclass');
-
-}
+return needsRegistration(_that.registerToken);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///

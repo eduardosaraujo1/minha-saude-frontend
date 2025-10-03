@@ -1,1 +1,3 @@
-abstract class Action {}
+abstract class Action<T> {
+  T execute();
+}

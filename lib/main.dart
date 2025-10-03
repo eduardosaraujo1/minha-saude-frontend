@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logging/logging.dart';
-import 'package:minha_saude_frontend/app/ui/router/app_router.dart';
 
+import 'app/routing/app_router.dart';
+import 'app/ui/core/themes/app_theme.dart';
 import 'config/dependencies.dart';
 import 'config/environment.dart';
-import 'app/ui/core/themes/app_theme.dart';
 
 void main() async {
   try {

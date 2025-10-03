@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../data/repositories/auth/auth_repository.dart';
+import '../../data/repositories/auth/auth_repository.dart';
 import '../routes.dart';
 import 'middleware.dart';
 

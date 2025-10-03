@@ -1,6 +1,6 @@
 import 'package:logging/logging.dart';
-import 'package:minha_saude_frontend/app/data/services/api/api_client.dart';
-import 'package:minha_saude_frontend/app/data/services/api/models/login_response/login_api_response.dart';
+import 'package:minha_saude_frontend/app/data/services/api/auth/auth_api_client.dart';
+import 'package:minha_saude_frontend/app/data/services/api/auth/models/login_response/login_api_response.dart';
 import 'package:minha_saude_frontend/app/data/services/google/google_service.dart';
 import 'package:minha_saude_frontend/app/data/services/secure_storage/secure_storage.dart';
 import 'package:minha_saude_frontend/app/domain/models/login_response/login_response.dart';
@@ -14,7 +14,7 @@ class AuthRepositoryImpl extends AuthRepository {
 
   final SecureStorage _secureStorage;
   final GoogleService _googleService;
-  final ApiClient _apiClient;
+  final AuthApiClient _apiClient;
   final Logger _log = Logger("AuthRepositoryImplementation");
 
   String? _registerToken;

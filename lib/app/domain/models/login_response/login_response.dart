@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:minha_saude_frontend/app/data/services/api/models/login_response/login_api_response.dart';
+import 'package:minha_saude_frontend/app/data/services/api/auth/models/login_response/login_api_response.dart';
 
 part 'login_response.freezed.dart';
 part 'login_response.g.dart';

@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/ui/view_models/auth/tos_view_model.dart';
 import 'package:minha_saude_frontend/app/ui/views/auth/layouts/login_form_layout.dart';
 import 'package:minha_saude_frontend/app/ui/widgets/auth/text_scroller.dart';
-import 'package:minha_saude_frontend/app/ui/router/routes.dart';
+import 'package:minha_saude_frontend/app/routing/routes.dart';
 
 class TosView extends StatelessWidget {
   final TosViewModel viewModel;

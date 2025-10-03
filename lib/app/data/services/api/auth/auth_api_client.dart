@@ -1,14 +1,41 @@
 import 'package:dio/dio.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-import '../../../../app/data/services/api/api_client.dart';
-import '../../../../app/data/services/api/exceptions/bad_response_exception.dart';
-import '../../../../app/data/services/api/models/login_response/login_api_response.dart';
-import '../../../../app/data/services/api/models/register_response/register_response.dart';
-import '../../../../app/domain/models/user_register_model/user_register_model.dart';
+import '../exceptions/bad_response_exception.dart';
+import 'models/login_response/login_api_response.dart';
+import 'models/register_response/register_response.dart';
+import '../../../../domain/models/user_register_model/user_register_model.dart';
 
-class ApiClientImpl implements ApiClient {
-  ApiClientImpl(Dio dio, String baseUrl) : _dio = dio {
+typedef AuthHeaderProvider = Future<String?> Function();
+
+abstract class AuthApiClient {
+  set authHeaderProvider(AuthHeaderProvider provider);
+
+  /// Login with Google server code
+  Future<Result<LoginApiResponse, Exception>> authLoginGoogle(
+    String tokenOauth,
+  );
+
+  /// Login with email and one time code
+  Future<Result<LoginApiResponse, Exception>> authLoginEmail(
+    String email,
+    String code,
+  );
+
+  /// Send one time code to email
+  Future<Result<String, Exception>> authSendEmail(String email);
+
+  /// Register new user
+  Future<Result<RegisterResponse, Exception>> authRegister(
+    UserRegisterModel data,
+  );
+
+  /// Signout
+  Future<Result<void, Exception>> authLogout();
+}
+
+class AuthApiClientImpl implements AuthApiClient {
+  AuthApiClientImpl(Dio dio, String baseUrl) : _dio = dio {
     _dio.options.baseUrl = baseUrl;
     _dio.options.connectTimeout = const Duration(seconds: 10);
     _dio.options.receiveTimeout = const Duration(seconds: 10);

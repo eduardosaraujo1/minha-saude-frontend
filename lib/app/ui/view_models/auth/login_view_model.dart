@@ -36,20 +36,47 @@ class LoginViewModel {
 
       if (loginResult.isError()) {
         return Result.error(
-          Exception("Não foi possível fazer login com o Google."),
+          loginResult.tryGetError() ??
+              Exception("Não foi possível fazer login com o Google."),
         );
-      }
-
-      if (loginResult.isError()) {
-        return Result.error(loginResult.tryGetError()!);
       }
 
       final response = loginResult.getOrThrow();
 
-      // Set redirect path based on registration status
-      return response is SuccessfulLoginResponse
-          ? Result.success(Routes.home)
-          : Result.success(Routes.tos);
+      if (response is SuccessfulLoginResponse) {
+        final tokenResult = await _authRepository.setAuthToken(
+          response.sessionToken,
+        );
+
+        if (tokenResult.isError()) {
+          return Result.error(
+            Exception(
+              "Não foi possível salvar as credenciais de autenticação.",
+            ),
+          );
+        }
+
+        _authRepository.clearRegisterToken(null);
+        return Result.success(Routes.home);
+      }
+
+      if (response is NeedsRegistrationLoginResponse) {
+        _authRepository.setRegisterToken(response.registerToken);
+
+        final clearAuthResult = await _authRepository.clearAuthToken();
+        if (clearAuthResult.isError()) {
+          return Result.error(
+            Exception("Não foi possível limpar o token de autenticação atual."),
+          );
+        }
+
+        return Result.success(Routes.tos);
+      }
+
+      _log.warning("Invalid state of LoginResponse: $response");
+      return Result.error(
+        Exception("Ocorreu um erro desconhecido. Por favor, tente novamente."),
+      );
     } catch (e) {
       _log.severe(e);
       return Result.error(

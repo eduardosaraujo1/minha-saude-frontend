@@ -34,51 +34,6 @@ class AuthRepositoryImpl extends AuthRepository {
     }
   }
 
-  Future<Result<LoginResponse, Exception>> _login(
-    Future<Result<LoginApiResponse, Exception>> Function() apiCall,
-    String loginType,
-  ) async {
-    try {
-      final result = await apiCall();
-
-      if (result.isError()) {
-        _log.severe(
-          "Login $loginType tentativa falhou: ",
-          result.tryGetError()!,
-        );
-        return Result.error(
-          Exception("Ocorreu um erro desconhecido ao fazer login."),
-        );
-      }
-
-      final apiLoginResponse = result.tryGetSuccess()!;
-
-      // Parse API login response into valid domain object
-      final loginResponseResult = _parseApiLoginResponse(apiLoginResponse);
-
-      if (loginResponseResult.isError()) {
-        return Result.error(Exception("Ocorreu um erro ao fazer login."));
-      }
-
-      final loginResponse = loginResponseResult.tryGetSuccess()!;
-
-      // Handle login response based on registration status
-      if (loginResponse is SuccessfulLoginResponse) {
-        await setAuthToken(apiLoginResponse.sessionToken!);
-      } else if (loginResponse is NeedsRegistrationLoginResponse) {
-        setRegisterToken(loginResponse.registerToken);
-      } else {
-        _log.warning("Invalid state of LoginResponse: $loginResponse");
-        return Result.error(Exception("Ocorreu um erro desconhecido."));
-      }
-
-      return Result.success(loginResponse);
-    } on Exception catch (e) {
-      _log.warning("Unexpected error", e);
-      return Result.error(Exception("Ocorreu um erro inesperado."));
-    }
-  }
-
   @override
   Future<Result<String?, Exception>> getAuthToken() async {
     // Return cached token if available
@@ -135,14 +90,56 @@ class AuthRepositoryImpl extends AuthRepository {
     String email,
     String code,
   ) async {
-    return _login(() => _apiClient.authLoginEmail(email, code), "E-mail");
+    try {
+      final result = await _apiClient.authLoginEmail(email, code);
+
+      if (result.isError()) {
+        _log.severe("Login E-mail tentativa falhou: ", result.tryGetError()!);
+        return Result.error(
+          Exception("Ocorreu um erro desconhecido ao fazer login."),
+        );
+      }
+
+      final apiLoginResponse = result.tryGetSuccess()!;
+      final loginResponseResult = _parseApiLoginResponse(apiLoginResponse);
+
+      if (loginResponseResult.isError()) {
+        return Result.error(Exception("Ocorreu um erro ao fazer login."));
+      }
+
+      return Result.success(loginResponseResult.tryGetSuccess()!);
+    } on Exception catch (e) {
+      _log.warning("Unexpected error", e);
+      return Result.error(Exception("Ocorreu um erro inesperado."));
+    }
   }
 
   @override
   Future<Result<LoginResponse, Exception>> loginWithGoogle(
     String googleServerCode,
   ) async {
-    return _login(() => _apiClient.authLoginGoogle(googleServerCode), "Google");
+    try {
+      final result = await _apiClient.authLoginGoogle(googleServerCode);
+
+      if (result.isError()) {
+        _log.severe("Login Google tentativa falhou: ", result.tryGetError()!);
+        return Result.error(
+          Exception("Ocorreu um erro desconhecido ao fazer login."),
+        );
+      }
+
+      final apiLoginResponse = result.tryGetSuccess()!;
+      final loginResponseResult = _parseApiLoginResponse(apiLoginResponse);
+
+      if (loginResponseResult.isError()) {
+        return Result.error(Exception("Ocorreu um erro ao fazer login."));
+      }
+
+      return Result.success(loginResponseResult.tryGetSuccess()!);
+    } on Exception catch (e) {
+      _log.warning("Unexpected error", e);
+      return Result.error(Exception("Ocorreu um erro inesperado."));
+    }
   }
 
   @override

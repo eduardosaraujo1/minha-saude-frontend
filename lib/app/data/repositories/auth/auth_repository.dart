@@ -48,7 +48,7 @@ abstract class AuthRepository extends ChangeNotifier {
   String? getRegisterToken();
 
   /// Sets the locally stored register token
-  bool setRegisterToken(String? value);
+  void setRegisterToken(String? value);
 
   /// Remove locally stored register token
   void clearRegisterToken(String? value);

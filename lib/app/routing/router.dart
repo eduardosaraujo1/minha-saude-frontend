@@ -14,6 +14,8 @@ import '../ui/auth/view_models/tos_view_model.dart';
 import '../ui/auth/widgets/login_view.dart';
 import '../ui/auth/widgets/register_view.dart';
 import '../ui/auth/widgets/tos_view.dart';
+import '../ui/documents/view_models/index/document_list_view_model.dart';
+import '../ui/documents/widgets/index/document_list_view.dart';
 import 'routes.dart';
 
 final _getIt = GetIt.I;

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/domain/models/document.dart';
 import 'package:pdfx/pdfx.dart';
-import 'package:minha_saude_frontend/app/ui/view_models/document/document_view_model.dart';
-import 'package:watch_it/watch_it.dart';
 import 'package:intl/intl.dart';
 
-class DocumentView extends WatchingStatefulWidget {
+import '../../../domain/models/document.dart';
+import '../view_models/document_view_model.dart';
+
+class DocumentView extends StatefulWidget {
   final DocumentViewModel viewModel;
   const DocumentView(this.viewModel, {super.key});
 

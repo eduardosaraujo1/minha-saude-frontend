@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../config/asset.dart';
+import '../../../../../config/asset.dart';
 
 class DocumentItem extends StatelessWidget {
   const DocumentItem({

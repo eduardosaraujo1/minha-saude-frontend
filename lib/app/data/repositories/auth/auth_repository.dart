@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/domain/models/login_response/login_response.dart';
-import 'package:minha_saude_frontend/app/domain/models/user_register_model/user_register_model.dart';
+import 'package:minha_saude_frontend/app/domain/models/auth/login_response/login_result.dart';
+import 'package:minha_saude_frontend/app/domain/models/auth/user_register_model/user_register_model.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 export 'auth_repository_impl.dart';
@@ -8,12 +8,12 @@ export 'auth_repository_impl.dart';
 abstract class AuthRepository extends ChangeNotifier {
   // [AUTHENTICATION]
   /// Login with Google exchanging server code for auth token
-  Future<Result<LoginResponse, Exception>> loginWithGoogle(
+  Future<Result<LoginResult, Exception>> loginWithGoogle(
     String googleServerCode,
   );
 
   /// Login with email and code
-  Future<Result<LoginResponse, Exception>> loginWithEmail(
+  Future<Result<LoginResult, Exception>> loginWithEmail(
     String email,
     String code,
   );

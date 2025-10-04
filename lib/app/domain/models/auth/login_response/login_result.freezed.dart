@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'login_response.dart';
+part of 'login_result.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -11,16 +11,16 @@ part of 'login_response.dart';
 
 // dart format off
 T _$identity<T>(T value) => value;
-LoginResponse _$LoginResponseFromJson(
+LoginResult _$LoginResultFromJson(
   Map<String, dynamic> json
 ) {
         switch (json['runtimeType']) {
                   case 'successful':
-          return SuccessfulLoginResponse.fromJson(
+          return SuccessfulLoginResult.fromJson(
             json
           );
                 case 'needsRegistration':
-          return NeedsRegistrationLoginResponse.fromJson(
+          return NeedsRegistrationLoginResult.fromJson(
             json
           );
         
@@ -28,7 +28,7 @@ LoginResponse _$LoginResponseFromJson(
             throw CheckedFromJsonException(
   json,
   'runtimeType',
-  'LoginResponse',
+  'LoginResult',
   'Invalid union type "${json['runtimeType']}"!'
 );
         }
@@ -36,17 +36,17 @@ LoginResponse _$LoginResponseFromJson(
 }
 
 /// @nodoc
-mixin _$LoginResponse {
+mixin _$LoginResult {
 
 
 
-  /// Serializes this LoginResponse to a JSON map.
+  /// Serializes this LoginResult to a JSON map.
   Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoginResponse);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoginResult);
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -55,20 +55,20 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'LoginResponse()';
+  return 'LoginResult()';
 }
 
 
 }
 
 /// @nodoc
-class $LoginResponseCopyWith<$Res>  {
-$LoginResponseCopyWith(LoginResponse _, $Res Function(LoginResponse) __);
+class $LoginResultCopyWith<$Res>  {
+$LoginResultCopyWith(LoginResult _, $Res Function(LoginResult) __);
 }
 
 
-/// Adds pattern-matching-related methods to [LoginResponse].
-extension LoginResponsePatterns on LoginResponse {
+/// Adds pattern-matching-related methods to [LoginResult].
+extension LoginResultPatterns on LoginResult {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -81,11 +81,11 @@ extension LoginResponsePatterns on LoginResponse {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( SuccessfulLoginResponse value)?  successful,TResult Function( NeedsRegistrationLoginResponse value)?  needsRegistration,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( SuccessfulLoginResult value)?  successful,TResult Function( NeedsRegistrationLoginResult value)?  needsRegistration,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case SuccessfulLoginResponse() when successful != null:
-return successful(_that);case NeedsRegistrationLoginResponse() when needsRegistration != null:
+case SuccessfulLoginResult() when successful != null:
+return successful(_that);case NeedsRegistrationLoginResult() when needsRegistration != null:
 return needsRegistration(_that);case _:
   return orElse();
 
@@ -104,11 +104,11 @@ return needsRegistration(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( SuccessfulLoginResponse value)  successful,required TResult Function( NeedsRegistrationLoginResponse value)  needsRegistration,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( SuccessfulLoginResult value)  successful,required TResult Function( NeedsRegistrationLoginResult value)  needsRegistration,}){
 final _that = this;
 switch (_that) {
-case SuccessfulLoginResponse():
-return successful(_that);case NeedsRegistrationLoginResponse():
+case SuccessfulLoginResult():
+return successful(_that);case NeedsRegistrationLoginResult():
 return needsRegistration(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
@@ -123,11 +123,11 @@ return needsRegistration(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( SuccessfulLoginResponse value)?  successful,TResult? Function( NeedsRegistrationLoginResponse value)?  needsRegistration,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( SuccessfulLoginResult value)?  successful,TResult? Function( NeedsRegistrationLoginResult value)?  needsRegistration,}){
 final _that = this;
 switch (_that) {
-case SuccessfulLoginResponse() when successful != null:
-return successful(_that);case NeedsRegistrationLoginResponse() when needsRegistration != null:
+case SuccessfulLoginResult() when successful != null:
+return successful(_that);case NeedsRegistrationLoginResult() when needsRegistration != null:
 return needsRegistration(_that);case _:
   return null;
 
@@ -147,8 +147,8 @@ return needsRegistration(_that);case _:
 
 @optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String sessionToken)?  successful,TResult Function( String registerToken)?  needsRegistration,required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case SuccessfulLoginResponse() when successful != null:
-return successful(_that.sessionToken);case NeedsRegistrationLoginResponse() when needsRegistration != null:
+case SuccessfulLoginResult() when successful != null:
+return successful(_that.sessionToken);case NeedsRegistrationLoginResult() when needsRegistration != null:
 return needsRegistration(_that.registerToken);case _:
   return orElse();
 
@@ -169,8 +169,8 @@ return needsRegistration(_that.registerToken);case _:
 
 @optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String sessionToken)  successful,required TResult Function( String registerToken)  needsRegistration,}) {final _that = this;
 switch (_that) {
-case SuccessfulLoginResponse():
-return successful(_that.sessionToken);case NeedsRegistrationLoginResponse():
+case SuccessfulLoginResult():
+return successful(_that.sessionToken);case NeedsRegistrationLoginResult():
 return needsRegistration(_that.registerToken);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -187,8 +187,8 @@ return needsRegistration(_that.registerToken);}
 
 @optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String sessionToken)?  successful,TResult? Function( String registerToken)?  needsRegistration,}) {final _that = this;
 switch (_that) {
-case SuccessfulLoginResponse() when successful != null:
-return successful(_that.sessionToken);case NeedsRegistrationLoginResponse() when needsRegistration != null:
+case SuccessfulLoginResult() when successful != null:
+return successful(_that.sessionToken);case NeedsRegistrationLoginResult() when needsRegistration != null:
 return needsRegistration(_that.registerToken);case _:
   return null;
 
@@ -200,9 +200,9 @@ return needsRegistration(_that.registerToken);case _:
 /// @nodoc
 @JsonSerializable()
 
-class SuccessfulLoginResponse implements LoginResponse {
-  const SuccessfulLoginResponse({required this.sessionToken, final  String? $type}): $type = $type ?? 'successful';
-  factory SuccessfulLoginResponse.fromJson(Map<String, dynamic> json) => _$SuccessfulLoginResponseFromJson(json);
+class SuccessfulLoginResult implements LoginResult {
+  const SuccessfulLoginResult({required this.sessionToken, final  String? $type}): $type = $type ?? 'successful';
+  factory SuccessfulLoginResult.fromJson(Map<String, dynamic> json) => _$SuccessfulLoginResponseFromJson(json);
 
  final  String sessionToken;
 
@@ -210,11 +210,11 @@ class SuccessfulLoginResponse implements LoginResponse {
 final String $type;
 
 
-/// Create a copy of LoginResponse
+/// Create a copy of LoginResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$SuccessfulLoginResponseCopyWith<SuccessfulLoginResponse> get copyWith => _$SuccessfulLoginResponseCopyWithImpl<SuccessfulLoginResponse>(this, _$identity);
+$SuccessfulLoginResponseCopyWith<SuccessfulLoginResult> get copyWith => _$SuccessfulLoginResponseCopyWithImpl<SuccessfulLoginResult>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
@@ -223,7 +223,7 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SuccessfulLoginResponse&&(identical(other.sessionToken, sessionToken) || other.sessionToken == sessionToken));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SuccessfulLoginResult&&(identical(other.sessionToken, sessionToken) || other.sessionToken == sessionToken));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -232,15 +232,15 @@ int get hashCode => Object.hash(runtimeType,sessionToken);
 
 @override
 String toString() {
-  return 'LoginResponse.successful(sessionToken: $sessionToken)';
+  return 'LoginResult.successful(sessionToken: $sessionToken)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $SuccessfulLoginResponseCopyWith<$Res> implements $LoginResponseCopyWith<$Res> {
-  factory $SuccessfulLoginResponseCopyWith(SuccessfulLoginResponse value, $Res Function(SuccessfulLoginResponse) _then) = _$SuccessfulLoginResponseCopyWithImpl;
+abstract mixin class $SuccessfulLoginResponseCopyWith<$Res> implements $LoginResultCopyWith<$Res> {
+  factory $SuccessfulLoginResponseCopyWith(SuccessfulLoginResult value, $Res Function(SuccessfulLoginResult) _then) = _$SuccessfulLoginResponseCopyWithImpl;
 @useResult
 $Res call({
  String sessionToken
@@ -255,13 +255,13 @@ class _$SuccessfulLoginResponseCopyWithImpl<$Res>
     implements $SuccessfulLoginResponseCopyWith<$Res> {
   _$SuccessfulLoginResponseCopyWithImpl(this._self, this._then);
 
-  final SuccessfulLoginResponse _self;
-  final $Res Function(SuccessfulLoginResponse) _then;
+  final SuccessfulLoginResult _self;
+  final $Res Function(SuccessfulLoginResult) _then;
 
-/// Create a copy of LoginResponse
+/// Create a copy of LoginResult
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? sessionToken = null,}) {
-  return _then(SuccessfulLoginResponse(
+  return _then(SuccessfulLoginResult(
 sessionToken: null == sessionToken ? _self.sessionToken : sessionToken // ignore: cast_nullable_to_non_nullable
 as String,
   ));
@@ -273,9 +273,9 @@ as String,
 /// @nodoc
 @JsonSerializable()
 
-class NeedsRegistrationLoginResponse implements LoginResponse {
-  const NeedsRegistrationLoginResponse({required this.registerToken, final  String? $type}): $type = $type ?? 'needsRegistration';
-  factory NeedsRegistrationLoginResponse.fromJson(Map<String, dynamic> json) => _$NeedsRegistrationLoginResponseFromJson(json);
+class NeedsRegistrationLoginResult implements LoginResult {
+  const NeedsRegistrationLoginResult({required this.registerToken, final  String? $type}): $type = $type ?? 'needsRegistration';
+  factory NeedsRegistrationLoginResult.fromJson(Map<String, dynamic> json) => _$NeedsRegistrationLoginResponseFromJson(json);
 
  final  String registerToken;
 
@@ -283,11 +283,11 @@ class NeedsRegistrationLoginResponse implements LoginResponse {
 final String $type;
 
 
-/// Create a copy of LoginResponse
+/// Create a copy of LoginResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$NeedsRegistrationLoginResponseCopyWith<NeedsRegistrationLoginResponse> get copyWith => _$NeedsRegistrationLoginResponseCopyWithImpl<NeedsRegistrationLoginResponse>(this, _$identity);
+$NeedsRegistrationLoginResponseCopyWith<NeedsRegistrationLoginResult> get copyWith => _$NeedsRegistrationLoginResponseCopyWithImpl<NeedsRegistrationLoginResult>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
@@ -296,7 +296,7 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NeedsRegistrationLoginResponse&&(identical(other.registerToken, registerToken) || other.registerToken == registerToken));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NeedsRegistrationLoginResult&&(identical(other.registerToken, registerToken) || other.registerToken == registerToken));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -305,15 +305,15 @@ int get hashCode => Object.hash(runtimeType,registerToken);
 
 @override
 String toString() {
-  return 'LoginResponse.needsRegistration(registerToken: $registerToken)';
+  return 'LoginResult.needsRegistration(registerToken: $registerToken)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $NeedsRegistrationLoginResponseCopyWith<$Res> implements $LoginResponseCopyWith<$Res> {
-  factory $NeedsRegistrationLoginResponseCopyWith(NeedsRegistrationLoginResponse value, $Res Function(NeedsRegistrationLoginResponse) _then) = _$NeedsRegistrationLoginResponseCopyWithImpl;
+abstract mixin class $NeedsRegistrationLoginResponseCopyWith<$Res> implements $LoginResultCopyWith<$Res> {
+  factory $NeedsRegistrationLoginResponseCopyWith(NeedsRegistrationLoginResult value, $Res Function(NeedsRegistrationLoginResult) _then) = _$NeedsRegistrationLoginResponseCopyWithImpl;
 @useResult
 $Res call({
  String registerToken
@@ -328,13 +328,13 @@ class _$NeedsRegistrationLoginResponseCopyWithImpl<$Res>
     implements $NeedsRegistrationLoginResponseCopyWith<$Res> {
   _$NeedsRegistrationLoginResponseCopyWithImpl(this._self, this._then);
 
-  final NeedsRegistrationLoginResponse _self;
-  final $Res Function(NeedsRegistrationLoginResponse) _then;
+  final NeedsRegistrationLoginResult _self;
+  final $Res Function(NeedsRegistrationLoginResult) _then;
 
-/// Create a copy of LoginResponse
+/// Create a copy of LoginResult
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? registerToken = null,}) {
-  return _then(NeedsRegistrationLoginResponse(
+  return _then(NeedsRegistrationLoginResult(
 registerToken: null == registerToken ? _self.registerToken : registerToken // ignore: cast_nullable_to_non_nullable
 as String,
   ));

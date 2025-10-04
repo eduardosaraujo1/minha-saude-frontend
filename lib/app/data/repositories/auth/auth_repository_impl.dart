@@ -3,8 +3,8 @@ import 'package:minha_saude_frontend/app/data/services/api/auth/auth_api_client.
 import 'package:minha_saude_frontend/app/data/services/api/auth/models/login_response/login_api_response.dart';
 import 'package:minha_saude_frontend/app/data/services/google/google_service.dart';
 import 'package:minha_saude_frontend/app/data/services/secure_storage/secure_storage.dart';
-import 'package:minha_saude_frontend/app/domain/models/login_response/login_response.dart';
-import 'package:minha_saude_frontend/app/domain/models/user_register_model/user_register_model.dart';
+import 'package:minha_saude_frontend/app/domain/models/auth/login_response/login_result.dart';
+import 'package:minha_saude_frontend/app/domain/models/auth/user_register_model/user_register_model.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import 'auth_repository.dart';
@@ -20,11 +20,11 @@ class AuthRepositoryImpl extends AuthRepository {
   String? _registerToken;
   String? _authTokenCache;
 
-  Result<LoginResponse, Exception> _parseApiLoginResponse(
+  Result<LoginResult, Exception> _parseApiLoginResponse(
     LoginApiResponse response,
   ) {
     try {
-      final loginResponse = LoginResponse.fromApi(response);
+      final loginResponse = LoginResult.fromApi(response);
       return Result.success(loginResponse);
     } on Exception catch (e) {
       _log.warning("Invalid API Login Response: $response", e);
@@ -86,7 +86,7 @@ class AuthRepositoryImpl extends AuthRepository {
   }
 
   @override
-  Future<Result<LoginResponse, Exception>> loginWithEmail(
+  Future<Result<LoginResult, Exception>> loginWithEmail(
     String email,
     String code,
   ) async {
@@ -115,7 +115,7 @@ class AuthRepositoryImpl extends AuthRepository {
   }
 
   @override
-  Future<Result<LoginResponse, Exception>> loginWithGoogle(
+  Future<Result<LoginResult, Exception>> loginWithGoogle(
     String googleServerCode,
   ) async {
     try {

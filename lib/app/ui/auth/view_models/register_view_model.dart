@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
-import 'package:minha_saude_frontend/app/domain/models/user_register_model/user_register_model.dart';
+import 'package:minha_saude_frontend/app/domain/models/auth/user_register_model/user_register_model.dart';
 import 'package:minha_saude_frontend/app/routing/routes.dart';
 import 'package:minha_saude_frontend/app/utils/command.dart';
 import 'package:multiple_result/multiple_result.dart';

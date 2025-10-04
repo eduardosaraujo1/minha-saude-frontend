@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:watch_it/watch_it.dart';
 
 import '../../../domain/models/document.dart';
 import '../../core/widgets/brand_app_bar.dart';
@@ -10,7 +9,7 @@ import '../view_models/document_list_view_model.dart';
 // import 'package:minha_saude_frontend/app/ui/widgets/app/brand_app_bar.dart';
 // import 'package:minha_saude_frontend/app/ui/widgets/document/grouped_document_grid.dart';
 
-class DocumentListView extends WatchingStatefulWidget {
+class DocumentListView extends StatefulWidget {
   final DocumentListViewModel viewModel;
 
   const DocumentListView(this.viewModel, {super.key});
@@ -21,6 +20,23 @@ class DocumentListView extends WatchingStatefulWidget {
 
 class _DocumentListViewState extends State<DocumentListView> {
   DocumentListViewModel get viewModel => widget.viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+
+    viewModel.addListener(_onUpdate);
+  }
+
+  @override
+  void dispose() {
+    viewModel.removeListener(_onUpdate);
+    super.dispose();
+  }
+
+  void _onUpdate() {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {

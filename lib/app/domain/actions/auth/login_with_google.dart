@@ -2,7 +2,7 @@ import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../../data/repositories/auth/auth_repository.dart';
-import '../../models/login_response/login_response.dart';
+import '../../models/auth/login_response/login_result.dart';
 import '../action.dart';
 
 class LoginWithGoogle implements Action {
@@ -35,10 +35,8 @@ class LoginWithGoogle implements Action {
 
       // Decide if login token should be stored or if user needs to register
       return switch (loginResponse) {
-        SuccessfulLoginResponse() => await _setAuthenticatedState(
-          loginResponse,
-        ),
-        NeedsRegistrationLoginResponse() => await _setRegisteringState(
+        SuccessfulLoginResult() => await _setAuthenticatedState(loginResponse),
+        NeedsRegistrationLoginResult() => await _setRegisteringState(
           loginResponse,
         ),
       };
@@ -51,7 +49,7 @@ class LoginWithGoogle implements Action {
   }
 
   Future<Result<RedirectResponse, Exception>> _setAuthenticatedState(
-    SuccessfulLoginResponse loginResponse,
+    SuccessfulLoginResult loginResponse,
   ) async {
     final tokenResult = await _authRepository.setAuthToken(
       loginResponse.sessionToken,
@@ -73,7 +71,7 @@ class LoginWithGoogle implements Action {
   }
 
   Future _setRegisteringState(
-    NeedsRegistrationLoginResponse loginResponse,
+    NeedsRegistrationLoginResult loginResponse,
   ) async {
     _authRepository.setRegisterToken(loginResponse.registerToken);
 

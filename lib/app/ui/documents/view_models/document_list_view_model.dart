@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/app/domain/models/document.dart';
 import 'package:minha_saude_frontend/app/data/repositories/document_repository.dart';
+import 'package:minha_saude_frontend/app/ui/documents/widgets/sorted_document_list.dart';
 
-class DocumentListViewModel {
+class DocumentListViewModel extends ChangeNotifier {
   final DocumentRepository documentRepository;
 
   DocumentListViewModel(this.documentRepository) {
@@ -91,7 +92,7 @@ class DocumentListViewModel {
     return '$monthName ${date.year}';
   }
 
-  void setSelectedAlgorithm(GroupAlgorithm algorithm) {
+  void setSelectedAlgorithm(GroupingAlgorithm algorithm) {
     selectedAlgorithm.value = algorithm;
     groupedDocuments.value = groupDocuments(documents.value, algorithm);
   }
@@ -100,5 +101,3 @@ class DocumentListViewModel {
     errorMessage.value = null;
   }
 }
-
-enum GroupAlgorithm { paciente, tipo, medico, data }

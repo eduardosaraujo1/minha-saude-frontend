@@ -1,34 +1,34 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'login_response.dart';
+part of 'login_result.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-SuccessfulLoginResponse _$SuccessfulLoginResponseFromJson(
+SuccessfulLoginResult _$SuccessfulLoginResponseFromJson(
   Map<String, dynamic> json,
-) => SuccessfulLoginResponse(
+) => SuccessfulLoginResult(
   sessionToken: json['sessionToken'] as String,
   $type: json['runtimeType'] as String?,
 );
 
 Map<String, dynamic> _$SuccessfulLoginResponseToJson(
-  SuccessfulLoginResponse instance,
+  SuccessfulLoginResult instance,
 ) => <String, dynamic>{
   'sessionToken': instance.sessionToken,
   'runtimeType': instance.$type,
 };
 
-NeedsRegistrationLoginResponse _$NeedsRegistrationLoginResponseFromJson(
+NeedsRegistrationLoginResult _$NeedsRegistrationLoginResponseFromJson(
   Map<String, dynamic> json,
-) => NeedsRegistrationLoginResponse(
+) => NeedsRegistrationLoginResult(
   registerToken: json['registerToken'] as String,
   $type: json['runtimeType'] as String?,
 );
 
 Map<String, dynamic> _$NeedsRegistrationLoginResponseToJson(
-  NeedsRegistrationLoginResponse instance,
+  NeedsRegistrationLoginResult instance,
 ) => <String, dynamic>{
   'registerToken': instance.registerToken,
   'runtimeType': instance.$type,

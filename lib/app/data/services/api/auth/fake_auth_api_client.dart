@@ -1,6 +1,6 @@
 import 'package:multiple_result/multiple_result.dart';
 
-import '../../../../domain/models/user_register_model/user_register_model.dart';
+import '../../../../domain/models/auth/user_register_model/user_register_model.dart';
 import 'models/login_response/login_api_response.dart';
 import 'models/register_response/register_response.dart';
 import 'auth_api_client.dart';

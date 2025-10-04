@@ -2,15 +2,13 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../app/data/repositories/document/document_repository_impl.dart';
-import '../app/data/services/api/auth/fake_auth_api_client.dart';
-import '../app/domain/actions/auth/login_with_google.dart';
 import 'environment.dart';
 import '../app/ui/core/theme_provider.dart';
+import '../app/domain/actions/auth/login_with_google.dart';
+import '../app/data/repositories/document/document_repository_impl.dart';
 import '../app/data/repositories/document/document_repository.dart';
-import '../app/data/repositories/document_upload_repository.dart';
-import '../app/data/repositories/profile_repository.dart';
 import '../app/data/repositories/auth/auth_repository.dart';
+import '../app/data/services/api/auth/fake_auth_api_client.dart';
 import '../app/data/services/api/auth/auth_api_client.dart';
 import '../app/data/services/doc_scanner/document_scanner.dart';
 import '../app/data/services/google/google_service.dart';
@@ -55,10 +53,6 @@ Future<void> registerDependenciesDev({
     ),
   );
   _getIt.registerSingleton<DocumentRepository>(DocumentRepositoryImpl());
-  _getIt.registerSingleton<ProfileRepository>(ProfileRepository());
-  _getIt.registerSingleton<DocumentUploadRepository>(
-    DocumentUploadRepository(_getIt<DocumentScanner>()),
-  );
 
   _getIt.registerSingleton<LoginWithGoogle>(
     LoginWithGoogle(_getIt<AuthRepository>()),

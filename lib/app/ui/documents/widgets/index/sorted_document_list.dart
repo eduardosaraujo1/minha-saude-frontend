@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 
-import '../../../../domain/models/document.dart';
+import '../../../../domain/models/document/document.dart';
 import 'document_item.dart';
 
 class SortedDocumentList extends StatelessWidget {

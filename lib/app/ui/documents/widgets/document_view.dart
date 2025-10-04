@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:intl/intl.dart';
 
-import '../../../domain/models/document.dart';
+import '../../../domain/models/document/document.dart';
 import '../view_models/document_view_model.dart';
 
 class DocumentView extends StatefulWidget {
@@ -64,24 +64,24 @@ class _DocumentViewState extends State<DocumentView> {
 
   @override
   Widget build(BuildContext context) {
-    final document = watch(viewModel.document).value;
-    final loadingStatus = watch(viewModel.documentLoadingStatus).value;
+    // final document = watch(viewModel.document).value;
+    // final loadingStatus = watch(viewModel.documentLoadingStatus).value;
 
-    registerHandler<ValueNotifier, String?>(
-      target: viewModel.errorMessage,
-      handler: (context, newValue, cancel) {
-        _onErrorChanged(context, newValue);
-      },
-    );
+    // registerHandler<ValueNotifier, String?>(
+    //   target: viewModel.errorMessage,
+    //   handler: (context, newValue, cancel) {
+    //     _onErrorChanged(context, newValue);
+    //   },
+    // );
 
-    registerHandler<ValueNotifier, String?>(
-      target: viewModel.redirectTo,
-      handler: (context, newValue, cancel) {
-        if (newValue != null) {
-          context.go(newValue);
-        }
-      },
-    );
+    // registerHandler<ValueNotifier, String?>(
+    //   target: viewModel.redirectTo,
+    //   handler: (context, newValue, cancel) {
+    //     if (newValue != null) {
+    //       context.go(newValue);
+    //     }
+    //   },
+    // );
 
     return Scaffold(
       appBar: AppBar(

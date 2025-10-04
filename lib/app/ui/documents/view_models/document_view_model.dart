@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/domain/models/document.dart';
-import 'package:minha_saude_frontend/app/data/repositories/document_repository.dart';
+import 'package:minha_saude_frontend/app/data/repositories/document/document_repository.dart';
 import 'package:pdfx/pdfx.dart';
 
 import '../../../../config/asset.dart';
+import '../../../domain/models/document/document.dart';
 
-// TODO: If loading for more than 5 seconds, show error message
 class DocumentViewModel {
+  DocumentViewModel(this.documentId, this.documentRepository) {
+    _loadDocument();
+  }
+
   final String documentId;
   final DocumentRepository documentRepository;
 
@@ -20,10 +23,6 @@ class DocumentViewModel {
 
   PdfControllerPinch? pdfController;
 
-  DocumentViewModel(this.documentId, this.documentRepository) {
-    _loadDocument();
-  }
-
   Future<void> _loadDocument() async {
     documentLoadingStatus.value = DocumentLoadStatus.loading;
     // Load metadata
@@ -35,7 +34,8 @@ class DocumentViewModel {
       return;
     }
 
-    document.value = documentQuery.getOrThrow();
+    // TODO: I have no idea what's going on
+    // document.value = documentQuery.getOrThrow();
 
     // Load PDF
     pdfController = PdfControllerPinch(

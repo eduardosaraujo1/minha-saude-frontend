@@ -202,7 +202,7 @@ return needsRegistration(_that.registerToken);case _:
 
 class SuccessfulLoginResult implements LoginResult {
   const SuccessfulLoginResult({required this.sessionToken, final  String? $type}): $type = $type ?? 'successful';
-  factory SuccessfulLoginResult.fromJson(Map<String, dynamic> json) => _$SuccessfulLoginResponseFromJson(json);
+  factory SuccessfulLoginResult.fromJson(Map<String, dynamic> json) => _$SuccessfulLoginResultFromJson(json);
 
  final  String sessionToken;
 
@@ -214,11 +214,11 @@ final String $type;
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$SuccessfulLoginResponseCopyWith<SuccessfulLoginResult> get copyWith => _$SuccessfulLoginResponseCopyWithImpl<SuccessfulLoginResult>(this, _$identity);
+$SuccessfulLoginResultCopyWith<SuccessfulLoginResult> get copyWith => _$SuccessfulLoginResultCopyWithImpl<SuccessfulLoginResult>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
-  return _$SuccessfulLoginResponseToJson(this, );
+  return _$SuccessfulLoginResultToJson(this, );
 }
 
 @override
@@ -239,8 +239,8 @@ String toString() {
 }
 
 /// @nodoc
-abstract mixin class $SuccessfulLoginResponseCopyWith<$Res> implements $LoginResultCopyWith<$Res> {
-  factory $SuccessfulLoginResponseCopyWith(SuccessfulLoginResult value, $Res Function(SuccessfulLoginResult) _then) = _$SuccessfulLoginResponseCopyWithImpl;
+abstract mixin class $SuccessfulLoginResultCopyWith<$Res> implements $LoginResultCopyWith<$Res> {
+  factory $SuccessfulLoginResultCopyWith(SuccessfulLoginResult value, $Res Function(SuccessfulLoginResult) _then) = _$SuccessfulLoginResultCopyWithImpl;
 @useResult
 $Res call({
  String sessionToken
@@ -251,9 +251,9 @@ $Res call({
 
 }
 /// @nodoc
-class _$SuccessfulLoginResponseCopyWithImpl<$Res>
-    implements $SuccessfulLoginResponseCopyWith<$Res> {
-  _$SuccessfulLoginResponseCopyWithImpl(this._self, this._then);
+class _$SuccessfulLoginResultCopyWithImpl<$Res>
+    implements $SuccessfulLoginResultCopyWith<$Res> {
+  _$SuccessfulLoginResultCopyWithImpl(this._self, this._then);
 
   final SuccessfulLoginResult _self;
   final $Res Function(SuccessfulLoginResult) _then;
@@ -275,7 +275,7 @@ as String,
 
 class NeedsRegistrationLoginResult implements LoginResult {
   const NeedsRegistrationLoginResult({required this.registerToken, final  String? $type}): $type = $type ?? 'needsRegistration';
-  factory NeedsRegistrationLoginResult.fromJson(Map<String, dynamic> json) => _$NeedsRegistrationLoginResponseFromJson(json);
+  factory NeedsRegistrationLoginResult.fromJson(Map<String, dynamic> json) => _$NeedsRegistrationLoginResultFromJson(json);
 
  final  String registerToken;
 
@@ -287,11 +287,11 @@ final String $type;
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$NeedsRegistrationLoginResponseCopyWith<NeedsRegistrationLoginResult> get copyWith => _$NeedsRegistrationLoginResponseCopyWithImpl<NeedsRegistrationLoginResult>(this, _$identity);
+$NeedsRegistrationLoginResultCopyWith<NeedsRegistrationLoginResult> get copyWith => _$NeedsRegistrationLoginResultCopyWithImpl<NeedsRegistrationLoginResult>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
-  return _$NeedsRegistrationLoginResponseToJson(this, );
+  return _$NeedsRegistrationLoginResultToJson(this, );
 }
 
 @override
@@ -312,8 +312,8 @@ String toString() {
 }
 
 /// @nodoc
-abstract mixin class $NeedsRegistrationLoginResponseCopyWith<$Res> implements $LoginResultCopyWith<$Res> {
-  factory $NeedsRegistrationLoginResponseCopyWith(NeedsRegistrationLoginResult value, $Res Function(NeedsRegistrationLoginResult) _then) = _$NeedsRegistrationLoginResponseCopyWithImpl;
+abstract mixin class $NeedsRegistrationLoginResultCopyWith<$Res> implements $LoginResultCopyWith<$Res> {
+  factory $NeedsRegistrationLoginResultCopyWith(NeedsRegistrationLoginResult value, $Res Function(NeedsRegistrationLoginResult) _then) = _$NeedsRegistrationLoginResultCopyWithImpl;
 @useResult
 $Res call({
  String registerToken
@@ -324,9 +324,9 @@ $Res call({
 
 }
 /// @nodoc
-class _$NeedsRegistrationLoginResponseCopyWithImpl<$Res>
-    implements $NeedsRegistrationLoginResponseCopyWith<$Res> {
-  _$NeedsRegistrationLoginResponseCopyWithImpl(this._self, this._then);
+class _$NeedsRegistrationLoginResultCopyWithImpl<$Res>
+    implements $NeedsRegistrationLoginResultCopyWith<$Res> {
+  _$NeedsRegistrationLoginResultCopyWithImpl(this._self, this._then);
 
   final NeedsRegistrationLoginResult _self;
   final $Res Function(NeedsRegistrationLoginResult) _then;

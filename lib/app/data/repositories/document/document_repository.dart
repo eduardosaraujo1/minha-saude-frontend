@@ -1,17 +1,17 @@
-import 'package:minha_saude_frontend/app/domain/models/document.dart';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:minha_saude_frontend/app/domain/models/document2/document.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 class DocumentDownloadResource {
   const DocumentDownloadResource({
-    this.fileBytes,
-    this.fileName,
+    required this.fileBytes,
+    required this.fileName,
     this.downloadUri,
-  }) : assert(
-         fileBytes != null || downloadUri != null,
-         'Either fileBytes or downloadUri must be provided.',
-       );
+  });
 
-  final List<int>? fileBytes;
+  final Uint8List? fileBytes;
   final String? fileName;
   final Uri? downloadUri;
 }
@@ -93,21 +93,13 @@ abstract class DocumentRepository {
   );
 
   /// Updates metadata for an existing document.
-  Future<Result<Document, Exception>> updateDocumentMetadata(
-    String documentId,
-    DocumentMetadataUpdatePayload payload,
-  );
+  Future<Result<Document, Exception>> updateDocument(Document documentModel);
 
   /// Soft deletes a document and updates local cache state accordingly.
   Future<Result<void, Exception>> deleteDocument(String documentId);
 
   /// Retrieves a downloadable artifact for the given document id.
-  Future<Result<DocumentDownloadResource, Exception>> downloadDocument(
-    String documentId,
-  );
-
-  /// Hydrates caches from remote API on app start or explicit refresh requests.
-  Future<Result<void, Exception>> warmUp();
+  Future<Result<File, Exception>> downloadDocument(String documentId);
 
   /// Clears local caches, used when user signs out or switches account.
   Future<void> clearCache();

@@ -3,8 +3,8 @@ import 'package:logging/logging.dart';
 import 'package:minha_saude_frontend/app/utils/command.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-import '../../../../domain/models/document.dart';
-import '../../../../data/repositories/document_repository.dart';
+import '../../../../domain/models/document/document.dart';
+import '../../../../data/repositories/document/document_repository.dart';
 import '../../widgets/index/sorted_document_list.dart' show GroupingAlgorithm;
 
 class DocumentListViewModel extends ChangeNotifier {
@@ -47,7 +47,7 @@ class DocumentListViewModel extends ChangeNotifier {
     final fetchedDocuments = documentsQuery.getOrThrow();
     documents
       ..clear()
-      ..addAll(fetchedDocuments);
+      ..addAll(fetchedDocuments as Iterable<Document>);
 
     return Result.success(null);
   }

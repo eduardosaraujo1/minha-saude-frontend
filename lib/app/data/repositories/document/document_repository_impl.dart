@@ -5,39 +5,25 @@ import 'package:multiple_result/multiple_result.dart';
 import '../../../domain/models/document/document.dart';
 import 'document_repository.dart';
 
-class DocumentRepositoryImpl implements DocumentRepository {
-  @override
-  Future<void> clearCache() {
-    // TODO: implement clearCache
-    throw UnimplementedError();
-  }
+class DocumentRepositoryImpl extends DocumentRepository {
+  DocumentRepositoryImpl();
 
   @override
-  Future<Result<void, Exception>> deleteDocument(String documentId) {
-    // TODO: implement deleteDocument
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Result<File, Exception>> downloadDocument(String documentId) {
-    // TODO: implement downloadDocument
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Result<Document, Exception>> getDocumentById(
-    String documentId, {
-    bool forceRefresh = false,
+  Future<Result<Document, Exception>> editDocument(
+    String id, {
+    String? titulo,
+    String? paciente,
+    String? tipo,
+    String? medico,
+    DateTime? dataDocumento,
   }) {
-    // TODO: implement getDocumentById
+    // TODO: implement editDocument
     throw UnimplementedError();
   }
 
   @override
-  Future<Result<List<Document>, Exception>> listDeletedDocuments({
-    bool forceRefresh = false,
-  }) {
-    // TODO: implement listDeletedDocuments
+  Future<Result<Document, Exception>> getDocument(String id) {
+    // TODO: implement getDocument
     throw UnimplementedError();
   }
 
@@ -50,27 +36,32 @@ class DocumentRepositoryImpl implements DocumentRepository {
   }
 
   @override
-  Stream<List<Document>> observeDeletedDocuments() {
-    // TODO: implement observeDeletedDocuments
+  Future<Result<void, Exception>> moveToTrash(String id) {
+    // TODO: implement moveToTrash
     throw UnimplementedError();
   }
 
   @override
-  Stream<List<Document>> observeDocuments() {
-    // TODO: implement observeDocuments
+  Future<Result<File, Exception>> pickDocumentFile() {
+    // TODO: implement pickDocumentFile
     throw UnimplementedError();
   }
 
   @override
-  Future<Result<Document, Exception>> updateDocument(Document documentModel) {
-    // TODO: implement updateDocument
+  Future<Result<File, Exception>> scanDocumentFile() {
+    // TODO: implement scanDocumentFile
     throw UnimplementedError();
   }
 
   @override
-  Future<Result<Document, Exception>> uploadDocument(
-    DocumentUploadPayload payload,
-  ) {
+  Future<Result<void, Exception>> uploadDocument(
+    File file, {
+    required String paciente,
+    required String titulo,
+    required String tipo,
+    required String medico,
+    required DateTime dataDocumento,
+  }) {
     // TODO: implement uploadDocument
     throw UnimplementedError();
   }

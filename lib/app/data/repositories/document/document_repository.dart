@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:minha_saude_frontend/app/domain/models/document2/document.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 class DocumentDownloadResource {

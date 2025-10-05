@@ -7,7 +7,6 @@ part of 'document.dart';
 // **************************************************************************
 
 _Document _$DocumentFromJson(Map<String, dynamic> json) => _Document(
-  id: json['id'] as String,
   uuid: json['uuid'] as String,
   paciente: json['paciente'] as String?,
   titulo: json['titulo'] as String?,
@@ -23,7 +22,6 @@ _Document _$DocumentFromJson(Map<String, dynamic> json) => _Document(
 );
 
 Map<String, dynamic> _$DocumentToJson(_Document instance) => <String, dynamic>{
-  'id': instance.id,
   'uuid': instance.uuid,
   'paciente': instance.paciente,
   'titulo': instance.titulo,

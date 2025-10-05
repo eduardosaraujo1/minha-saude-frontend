@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:multiple_result/multiple_result.dart';
@@ -34,9 +35,18 @@ class FileSystemServiceImpl implements FileSystemService {
   }
 
   @override
-  Future<Result<void, Exception>> storeDocument(String uuid) {
+  Future<Result<void, Exception>> storeDocumentBytes(
+    String uuid,
+    Uint8List bytes,
+  ) {
     // TODO: implement storeDocument
     // getApplicationDocumentsDirectory()
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<void, Exception>> storeDocumentFile(String uuid, File file) {
+    // TODO: implement storeDocumentFile
     throw UnimplementedError();
   }
 }

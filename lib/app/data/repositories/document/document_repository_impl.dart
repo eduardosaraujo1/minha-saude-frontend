@@ -6,7 +6,7 @@ import 'package:multiple_result/multiple_result.dart';
 import '../../services/api/document/document_api_client.dart';
 import '../../services/doc_scanner/document_scanner.dart';
 import '../../services/file_system_service/file_system_service.dart';
-import '../../services/local_database/local_database.dart';
+import '../../services/cache_database/cache_database.dart';
 import '../../../domain/models/document/document.dart';
 import 'document_repository.dart';
 
@@ -19,7 +19,7 @@ class DocumentRepositoryImpl extends DocumentRepository {
   );
 
   final DocumentApiClient _documentApiClient;
-  final LocalDatabase _localDatabase;
+  final CacheDatabase _localDatabase;
   final DocumentScanner _documentScanner;
   final FileSystemService _filePickerService;
 
@@ -59,7 +59,7 @@ class DocumentRepositoryImpl extends DocumentRepository {
   }
 
   @override
-  Future<Result<Document, Exception>> editDocument(
+  Future<Result<Document, Exception>> updateDocument(
     String id, {
     String? titulo,
     String? paciente,

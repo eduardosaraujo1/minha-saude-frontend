@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:multiple_result/multiple_result.dart';
 
@@ -8,7 +9,12 @@ abstract class FileSystemService {
 
   /// Store a document in app-specific storage (documentStorage) with the provided UUID.
   /// Override any document if it already exists.
-  Future<Result<void, Exception>> storeDocument(String uuid);
+  Future<Result<void, Exception>> storeDocumentBytes(
+    String uuid,
+    Uint8List bytes,
+  );
+
+  Future<Result<void, Exception>> storeDocumentFile(String uuid, File file);
 
   /// Retrieve a document file by its UUID from app-specific storage (documentStorage).
   Future<Result<File, Exception>> getDocument(String uuid);

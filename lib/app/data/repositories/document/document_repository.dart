@@ -5,6 +5,12 @@ import 'package:multiple_result/multiple_result.dart';
 
 import '../../../domain/models/document/document.dart';
 
+/// Repository interface for managing documents, including uploading, fetching,
+/// editing, and deleting documents. It abstracts the underlying data sources,
+/// such as remote APIs and local databases.
+///
+/// This repository should handle caching through the CacheDatabase service to ensure
+/// offline access to document metadata, and FileSystemService to store document files.
 abstract class DocumentRepository extends ChangeNotifier {
   // [DOCUMENT QUERY FROM USER]
   /// Get document file from file picker
@@ -41,7 +47,7 @@ abstract class DocumentRepository extends ChangeNotifier {
 
   // [DOCUMENT EDITING AND DELETION]
   /// Edit document metadata on server and update local cache, returns updated Document model
-  Future<Result<Document, Exception>> editDocument(
+  Future<Result<Document, Exception>> updateDocument(
     String id, {
     String? titulo,
     String? paciente,
@@ -54,3 +60,12 @@ abstract class DocumentRepository extends ChangeNotifier {
   /// Document is not deleted permanently, it can be restored
   Future<Result<void, Exception>> moveToTrash(String id);
 }
+
+/*
+What I foresee is having to write in each method that involves a specific document:
+- Read the database for that document and see if it exists
+- If it exists, see if the cache time is greater than 1 hour (if it's not then just return its metadata or check if the file with the associated UUID exsits and return it; depends on what the function is)
+- If the cache is greater than 1 hour, try to connect to the documents/{uuid} endpoint or documents/{uuid}/download. If the connection fails then log it and return the cached value
+- With the new refreshed file or metadata, run an update query in the CacheDatabase with the document UUID with the new data, update the cachedAt column
+- For the file, I'll call .replaceFile(uuid, file), await for it to be completed
+ */

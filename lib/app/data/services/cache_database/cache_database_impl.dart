@@ -1,9 +1,9 @@
 import 'package:sqflite/sqflite.dart';
 
 import '../../../domain/models/document/document.dart';
-import 'local_database.dart';
+import 'cache_database.dart';
 
-class LocalDatabaseImpl implements LocalDatabase {
+class CacheDatabaseImpl implements CacheDatabase {
   Database? _database;
 
   Database get database {
@@ -33,7 +33,8 @@ class LocalDatabaseImpl implements LocalDatabase {
             tipo TEXT NULL,
             data_documento TEXT NULL,
             created_at TEXT NOT NULL,
-            deleted_at TEXT
+            deleted_at TEXT,
+            cached_at TEXT NOT NULL
           )
         ''');
       },

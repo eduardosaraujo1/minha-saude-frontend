@@ -2,7 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:minha_saude_frontend/app/data/services/api/auth/auth_api_client_impl.dart';
 import 'package:minha_saude_frontend/app/data/services/api/document/document_api_client.dart';
-import 'package:minha_saude_frontend/app/data/services/local_database/local_database.dart';
+import 'package:minha_saude_frontend/app/data/services/cache_database/cache_database.dart';
 import 'package:minha_saude_frontend/app/data/services/api/http_client.dart';
 
 import '../app/data/services/file_system_service/file_system_service.dart';
@@ -61,7 +61,7 @@ Future<void> registerDependenciesDev({
   _getIt.registerSingleton<DocumentRepository>(
     DocumentRepositoryImpl(
       _getIt<DocumentApiClient>(),
-      _getIt<LocalDatabase>(),
+      _getIt<CacheDatabase>(),
       _getIt<DocumentScanner>(),
       _getIt<FileSystemService>(),
     ),

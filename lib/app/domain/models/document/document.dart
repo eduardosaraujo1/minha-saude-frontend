@@ -1,3 +1,5 @@
+// TODO: hide field "id" from the client
+// Use only UUID for external references
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'document.freezed.dart';
@@ -6,7 +8,6 @@ part 'document.g.dart';
 @freezed
 abstract class Document with _$Document {
   const factory Document({
-    required String id,
     required String uuid,
     String? paciente,
     String? titulo,

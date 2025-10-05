@@ -8,7 +8,6 @@ part of 'document_api_model.dart';
 
 _DocumentApiModel _$DocumentApiModelFromJson(Map<String, dynamic> json) =>
     _DocumentApiModel(
-      idDocumento: json['idDocumento'] as String,
       uuid: json['uuid'] as String,
       titulo: json['titulo'] as String,
       nomePaciente: json['nomePaciente'] as String?,
@@ -25,7 +24,6 @@ _DocumentApiModel _$DocumentApiModelFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$DocumentApiModelToJson(_DocumentApiModel instance) =>
     <String, dynamic>{
-      'idDocumento': instance.idDocumento,
       'uuid': instance.uuid,
       'titulo': instance.titulo,
       'nomePaciente': instance.nomePaciente,

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DocumentApiModel {
 
- String get idDocumento; String get uuid; String get titulo; String? get nomePaciente; String? get nomeMedico; String? get tipoDocumento; DateTime? get dataDocumento; DateTime get createdAt; DateTime? get deletedAt;
+ String get uuid; String get titulo; String? get nomePaciente; String? get nomeMedico; String? get tipoDocumento; DateTime? get dataDocumento; DateTime get createdAt; DateTime? get deletedAt;
 /// Create a copy of DocumentApiModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $DocumentApiModelCopyWith<DocumentApiModel> get copyWith => _$DocumentApiModelCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DocumentApiModel&&(identical(other.idDocumento, idDocumento) || other.idDocumento == idDocumento)&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.titulo, titulo) || other.titulo == titulo)&&(identical(other.nomePaciente, nomePaciente) || other.nomePaciente == nomePaciente)&&(identical(other.nomeMedico, nomeMedico) || other.nomeMedico == nomeMedico)&&(identical(other.tipoDocumento, tipoDocumento) || other.tipoDocumento == tipoDocumento)&&(identical(other.dataDocumento, dataDocumento) || other.dataDocumento == dataDocumento)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DocumentApiModel&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.titulo, titulo) || other.titulo == titulo)&&(identical(other.nomePaciente, nomePaciente) || other.nomePaciente == nomePaciente)&&(identical(other.nomeMedico, nomeMedico) || other.nomeMedico == nomeMedico)&&(identical(other.tipoDocumento, tipoDocumento) || other.tipoDocumento == tipoDocumento)&&(identical(other.dataDocumento, dataDocumento) || other.dataDocumento == dataDocumento)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,idDocumento,uuid,titulo,nomePaciente,nomeMedico,tipoDocumento,dataDocumento,createdAt,deletedAt);
+int get hashCode => Object.hash(runtimeType,uuid,titulo,nomePaciente,nomeMedico,tipoDocumento,dataDocumento,createdAt,deletedAt);
 
 @override
 String toString() {
-  return 'DocumentApiModel(idDocumento: $idDocumento, uuid: $uuid, titulo: $titulo, nomePaciente: $nomePaciente, nomeMedico: $nomeMedico, tipoDocumento: $tipoDocumento, dataDocumento: $dataDocumento, createdAt: $createdAt, deletedAt: $deletedAt)';
+  return 'DocumentApiModel(uuid: $uuid, titulo: $titulo, nomePaciente: $nomePaciente, nomeMedico: $nomeMedico, tipoDocumento: $tipoDocumento, dataDocumento: $dataDocumento, createdAt: $createdAt, deletedAt: $deletedAt)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $DocumentApiModelCopyWith<$Res>  {
   factory $DocumentApiModelCopyWith(DocumentApiModel value, $Res Function(DocumentApiModel) _then) = _$DocumentApiModelCopyWithImpl;
 @useResult
 $Res call({
- String idDocumento, String uuid, String titulo, String? nomePaciente, String? nomeMedico, String? tipoDocumento, DateTime? dataDocumento, DateTime createdAt, DateTime? deletedAt
+ String uuid, String titulo, String? nomePaciente, String? nomeMedico, String? tipoDocumento, DateTime? dataDocumento, DateTime createdAt, DateTime? deletedAt
 });
 
 
@@ -65,10 +65,9 @@ class _$DocumentApiModelCopyWithImpl<$Res>
 
 /// Create a copy of DocumentApiModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? idDocumento = null,Object? uuid = null,Object? titulo = null,Object? nomePaciente = freezed,Object? nomeMedico = freezed,Object? tipoDocumento = freezed,Object? dataDocumento = freezed,Object? createdAt = null,Object? deletedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? uuid = null,Object? titulo = null,Object? nomePaciente = freezed,Object? nomeMedico = freezed,Object? tipoDocumento = freezed,Object? dataDocumento = freezed,Object? createdAt = null,Object? deletedAt = freezed,}) {
   return _then(_self.copyWith(
-idDocumento: null == idDocumento ? _self.idDocumento : idDocumento // ignore: cast_nullable_to_non_nullable
-as String,uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
+uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
 as String,titulo: null == titulo ? _self.titulo : titulo // ignore: cast_nullable_to_non_nullable
 as String,nomePaciente: freezed == nomePaciente ? _self.nomePaciente : nomePaciente // ignore: cast_nullable_to_non_nullable
 as String?,nomeMedico: freezed == nomeMedico ? _self.nomeMedico : nomeMedico // ignore: cast_nullable_to_non_nullable
@@ -161,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String idDocumento,  String uuid,  String titulo,  String? nomePaciente,  String? nomeMedico,  String? tipoDocumento,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uuid,  String titulo,  String? nomePaciente,  String? nomeMedico,  String? tipoDocumento,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DocumentApiModel() when $default != null:
-return $default(_that.idDocumento,_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_that.tipoDocumento,_that.dataDocumento,_that.createdAt,_that.deletedAt);case _:
+return $default(_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_that.tipoDocumento,_that.dataDocumento,_that.createdAt,_that.deletedAt);case _:
   return orElse();
 
 }
@@ -182,10 +181,10 @@ return $default(_that.idDocumento,_that.uuid,_that.titulo,_that.nomePaciente,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String idDocumento,  String uuid,  String titulo,  String? nomePaciente,  String? nomeMedico,  String? tipoDocumento,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uuid,  String titulo,  String? nomePaciente,  String? nomeMedico,  String? tipoDocumento,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt)  $default,) {final _that = this;
 switch (_that) {
 case _DocumentApiModel():
-return $default(_that.idDocumento,_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_that.tipoDocumento,_that.dataDocumento,_that.createdAt,_that.deletedAt);case _:
+return $default(_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_that.tipoDocumento,_that.dataDocumento,_that.createdAt,_that.deletedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +201,10 @@ return $default(_that.idDocumento,_that.uuid,_that.titulo,_that.nomePaciente,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String idDocumento,  String uuid,  String titulo,  String? nomePaciente,  String? nomeMedico,  String? tipoDocumento,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uuid,  String titulo,  String? nomePaciente,  String? nomeMedico,  String? tipoDocumento,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _DocumentApiModel() when $default != null:
-return $default(_that.idDocumento,_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_that.tipoDocumento,_that.dataDocumento,_that.createdAt,_that.deletedAt);case _:
+return $default(_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_that.tipoDocumento,_that.dataDocumento,_that.createdAt,_that.deletedAt);case _:
   return null;
 
 }
@@ -217,10 +216,9 @@ return $default(_that.idDocumento,_that.uuid,_that.titulo,_that.nomePaciente,_th
 @JsonSerializable()
 
 class _DocumentApiModel extends DocumentApiModel {
-  const _DocumentApiModel({required this.idDocumento, required this.uuid, required this.titulo, this.nomePaciente, this.nomeMedico, this.tipoDocumento, this.dataDocumento, required this.createdAt, this.deletedAt}): super._();
+  const _DocumentApiModel({required this.uuid, required this.titulo, this.nomePaciente, this.nomeMedico, this.tipoDocumento, this.dataDocumento, required this.createdAt, this.deletedAt}): super._();
   factory _DocumentApiModel.fromJson(Map<String, dynamic> json) => _$DocumentApiModelFromJson(json);
 
-@override final  String idDocumento;
 @override final  String uuid;
 @override final  String titulo;
 @override final  String? nomePaciente;
@@ -243,16 +241,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DocumentApiModel&&(identical(other.idDocumento, idDocumento) || other.idDocumento == idDocumento)&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.titulo, titulo) || other.titulo == titulo)&&(identical(other.nomePaciente, nomePaciente) || other.nomePaciente == nomePaciente)&&(identical(other.nomeMedico, nomeMedico) || other.nomeMedico == nomeMedico)&&(identical(other.tipoDocumento, tipoDocumento) || other.tipoDocumento == tipoDocumento)&&(identical(other.dataDocumento, dataDocumento) || other.dataDocumento == dataDocumento)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DocumentApiModel&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.titulo, titulo) || other.titulo == titulo)&&(identical(other.nomePaciente, nomePaciente) || other.nomePaciente == nomePaciente)&&(identical(other.nomeMedico, nomeMedico) || other.nomeMedico == nomeMedico)&&(identical(other.tipoDocumento, tipoDocumento) || other.tipoDocumento == tipoDocumento)&&(identical(other.dataDocumento, dataDocumento) || other.dataDocumento == dataDocumento)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,idDocumento,uuid,titulo,nomePaciente,nomeMedico,tipoDocumento,dataDocumento,createdAt,deletedAt);
+int get hashCode => Object.hash(runtimeType,uuid,titulo,nomePaciente,nomeMedico,tipoDocumento,dataDocumento,createdAt,deletedAt);
 
 @override
 String toString() {
-  return 'DocumentApiModel(idDocumento: $idDocumento, uuid: $uuid, titulo: $titulo, nomePaciente: $nomePaciente, nomeMedico: $nomeMedico, tipoDocumento: $tipoDocumento, dataDocumento: $dataDocumento, createdAt: $createdAt, deletedAt: $deletedAt)';
+  return 'DocumentApiModel(uuid: $uuid, titulo: $titulo, nomePaciente: $nomePaciente, nomeMedico: $nomeMedico, tipoDocumento: $tipoDocumento, dataDocumento: $dataDocumento, createdAt: $createdAt, deletedAt: $deletedAt)';
 }
 
 
@@ -263,7 +261,7 @@ abstract mixin class _$DocumentApiModelCopyWith<$Res> implements $DocumentApiMod
   factory _$DocumentApiModelCopyWith(_DocumentApiModel value, $Res Function(_DocumentApiModel) _then) = __$DocumentApiModelCopyWithImpl;
 @override @useResult
 $Res call({
- String idDocumento, String uuid, String titulo, String? nomePaciente, String? nomeMedico, String? tipoDocumento, DateTime? dataDocumento, DateTime createdAt, DateTime? deletedAt
+ String uuid, String titulo, String? nomePaciente, String? nomeMedico, String? tipoDocumento, DateTime? dataDocumento, DateTime createdAt, DateTime? deletedAt
 });
 
 
@@ -280,10 +278,9 @@ class __$DocumentApiModelCopyWithImpl<$Res>
 
 /// Create a copy of DocumentApiModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? idDocumento = null,Object? uuid = null,Object? titulo = null,Object? nomePaciente = freezed,Object? nomeMedico = freezed,Object? tipoDocumento = freezed,Object? dataDocumento = freezed,Object? createdAt = null,Object? deletedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? uuid = null,Object? titulo = null,Object? nomePaciente = freezed,Object? nomeMedico = freezed,Object? tipoDocumento = freezed,Object? dataDocumento = freezed,Object? createdAt = null,Object? deletedAt = freezed,}) {
   return _then(_DocumentApiModel(
-idDocumento: null == idDocumento ? _self.idDocumento : idDocumento // ignore: cast_nullable_to_non_nullable
-as String,uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
+uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
 as String,titulo: null == titulo ? _self.titulo : titulo // ignore: cast_nullable_to_non_nullable
 as String,nomePaciente: freezed == nomePaciente ? _self.nomePaciente : nomePaciente // ignore: cast_nullable_to_non_nullable
 as String?,nomeMedico: freezed == nomeMedico ? _self.nomeMedico : nomeMedico // ignore: cast_nullable_to_non_nullable

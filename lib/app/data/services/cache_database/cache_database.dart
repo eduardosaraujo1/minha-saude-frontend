@@ -5,7 +5,7 @@ import '../../../domain/models/document/document.dart';
 /// This service wraps SQLite database, currently it's used for ensuring offline access of Documents.
 /// It should be able to store document metadata and retreive when needed.
 /// It must also have a clear method called when user logs out to prevent data leakage.
-abstract class LocalDatabase {
+abstract class CacheDatabase {
   /// Initialize the database. Must be called before any other operations.
   Future<void> init();
 

@@ -1,7 +1,11 @@
-import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:minha_saude_frontend/app/data/services/api/auth/auth_api_client_impl.dart';
+import 'package:minha_saude_frontend/app/data/services/api/document/document_api_client.dart';
+import 'package:minha_saude_frontend/app/data/services/local_database/local_database.dart';
+import 'package:minha_saude_frontend/app/data/services/api/http_client.dart';
 
+import '../app/data/services/file_system_service/file_system_service.dart';
 import 'environment.dart';
 import '../app/ui/core/theme_provider.dart';
 import '../app/domain/actions/auth/login_with_google.dart';
@@ -38,10 +42,12 @@ Future<void> registerDependenciesDev({
   _getIt.registerSingleton<GoogleService>(
     mockGoogle ? GoogleServiceFake() : GoogleServiceImpl(GoogleSignIn.instance),
   );
+  _getIt.registerSingleton<HttpClient>(HttpClient(baseUrl: Environment.apiUrl));
+
   _getIt.registerSingleton<AuthApiClient>(
     mockApiClient
         ? FakeAuthApiClient()
-        : AuthApiClientImpl(Dio(), Environment.apiUrl),
+        : AuthApiClientImpl(_getIt<HttpClient>()),
   );
 
   // Repositories
@@ -52,11 +58,29 @@ Future<void> registerDependenciesDev({
       _getIt<AuthApiClient>(),
     ),
   );
-  _getIt.registerSingleton<DocumentRepository>(DocumentRepositoryImpl());
+  _getIt.registerSingleton<DocumentRepository>(
+    DocumentRepositoryImpl(
+      _getIt<DocumentApiClient>(),
+      _getIt<LocalDatabase>(),
+      _getIt<DocumentScanner>(),
+      _getIt<FileSystemService>(),
+    ),
+  );
 
   _getIt.registerSingleton<LoginWithGoogle>(
     LoginWithGoogle(_getIt<AuthRepository>()),
   );
+
+  _getIt<HttpClient>().authHeaderProvider = () async {
+    final token = await _getIt<AuthRepository>().getAuthToken();
+    final t = token.tryGetSuccess();
+
+    if (t == null) {
+      return null;
+    }
+
+    return t;
+  };
 }
 
 Future<void> registerDependenciesProd() async {

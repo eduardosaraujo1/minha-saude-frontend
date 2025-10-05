@@ -5,7 +5,7 @@ import 'package:multiple_result/multiple_result.dart';
 
 import '../../services/api/document/document_api_client.dart';
 import '../../services/doc_scanner/document_scanner.dart';
-import '../../services/file_picker_service/file_picker_service.dart';
+import '../../services/file_system_service/file_system_service.dart';
 import '../../services/local_database/local_database.dart';
 import '../../../domain/models/document/document.dart';
 import 'document_repository.dart';
@@ -21,47 +21,13 @@ class DocumentRepositoryImpl extends DocumentRepository {
   final DocumentApiClient _documentApiClient;
   final LocalDatabase _localDatabase;
   final DocumentScanner _documentScanner;
-  final FilePickerService _filePickerService;
+  final FileSystemService _filePickerService;
 
   final _log = Logger("DocumentRepositoryImpl");
-
-  @override
-  Future<Result<Document, Exception>> editDocument(
-    String id, {
-    String? titulo,
-    String? paciente,
-    String? tipo,
-    String? medico,
-    DateTime? dataDocumento,
-  }) {
-    // TODO: implement editDocument
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Result<Document, Exception>> getDocument(String id) {
-    // TODO: implement getDocument
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Result<List<Document>, Exception>> listDocuments({
-    bool forceRefresh = false,
-  }) {
-    // TODO: implement listDocuments
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Result<void, Exception>> moveToTrash(String id) {
-    // TODO: implement moveToTrash
-    throw UnimplementedError();
-  }
-
   @override
   Future<Result<File, Exception>> pickDocumentFile() async {
     try {
-      final file = await _filePickerService.getPdfFile();
+      final file = await _filePickerService.pickPdfFile();
 
       if (file == null) {
         _log.warning("User canceled file picking");
@@ -93,13 +59,52 @@ class DocumentRepositoryImpl extends DocumentRepository {
   }
 
   @override
+  Future<Result<Document, Exception>> editDocument(
+    String id, {
+    String? titulo,
+    String? paciente,
+    String? tipo,
+    String? medico,
+    DateTime? dataDocumento,
+  }) {
+    // TODO: implement editDocument
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<File, Exception>> getDocumentFile(String id) {
+    // TODO: implement getDocumentFile
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<Document, Exception>> getDocumentMeta(String id) {
+    // TODO: implement getDocumentMeta
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<List<Document>, Exception>> listDocuments({
+    bool forceRefresh = false,
+  }) {
+    // TODO: implement listDocuments
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<void, Exception>> moveToTrash(String id) {
+    // TODO: implement moveToTrash
+    throw UnimplementedError();
+  }
+
+  @override
   Future<Result<void, Exception>> uploadDocument(
     File file, {
     required String paciente,
-    required String titulo,
-    required String tipo,
-    required String medico,
-    required DateTime dataDocumento,
+    required String? titulo,
+    required String? tipo,
+    required String? medico,
+    required DateTime? dataDocumento,
   }) {
     // TODO: implement uploadDocument
     throw UnimplementedError();

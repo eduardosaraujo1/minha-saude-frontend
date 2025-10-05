@@ -9,11 +9,6 @@ class FakeAuthApiClient implements AuthApiClient {
   bool _isRegistered = false;
 
   @override
-  set authHeaderProvider(AuthHeaderProvider provider) {
-    return;
-  }
-
-  @override
   Future<Result<LoginApiResponse, Exception>> authLoginGoogle(
     String tokenOauth,
   ) async {

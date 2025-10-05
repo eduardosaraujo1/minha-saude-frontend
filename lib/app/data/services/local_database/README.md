@@ -18,15 +18,15 @@ The `LocalDatabase` service provides a simple interface for persisting document 
 ## Database Schema
 
 ```sql
-CREATE TABLE tb_documento (
+CREATE TABLE documents (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   uuid TEXT NOT NULL UNIQUE,
-  titulo TEXT NOT NULL,
-  paciente TEXT NOT NULL,
-  medico TEXT NOT NULL,
-  tipo TEXT NOT NULL,
-  data_documento TEXT NOT NULL,
-  data_adicao TEXT NOT NULL,
+  titulo TEXT NULL,
+  paciente TEXT NULL,
+  medico TEXT NULL,
+  tipo TEXT NULL,
+  data_documento TEXT NULL,
+  data_adicao TEXT NULL,
   local_file_path TEXT,
   deleted_at TEXT
 )

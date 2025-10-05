@@ -24,16 +24,15 @@ class LocalDatabaseImpl implements LocalDatabase {
       version: 1,
       onCreate: (db, version) async {
         await db.execute('''
-          CREATE TABLE tb_documento (
+          CREATE TABLE documents (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             uuid TEXT NOT NULL UNIQUE,
-            titulo TEXT NOT NULL,
-            paciente TEXT NOT NULL,
-            medico TEXT NOT NULL,
-            tipo TEXT NOT NULL,
-            data_documento TEXT NOT NULL,
-            data_adicao TEXT NOT NULL,
-            local_file_path TEXT,
+            titulo TEXT NULL,
+            paciente TEXT NULL,
+            medico TEXT NULL,
+            tipo TEXT NULL,
+            data_documento TEXT NULL,
+            created_at TEXT NOT NULL,
             deleted_at TEXT
           )
         ''');
@@ -43,21 +42,21 @@ class LocalDatabaseImpl implements LocalDatabase {
 
   @override
   Future<void> clear() async {
-    await database.delete('tb_documento');
+    await database.delete('documents');
   }
 
   @override
   Future<void> addDocument({
     required String uuid,
-    required String titulo,
-    required String paciente,
-    required String medico,
-    required String tipo,
-    required DateTime dataDocumento,
-    required DateTime dataAdicao,
-    String? localFilePath,
+    String? titulo,
+    String? paciente,
+    String? medico,
+    String? tipo,
+    DateTime? dataDocumento,
+    required DateTime createdAt,
+    DateTime? deletedAt,
   }) async {
-    await database.insert('tb_documento', {
+    await database.insert('documents', {
       'uuid': uuid,
       'titulo': titulo,
       'paciente': paciente,
@@ -72,7 +71,7 @@ class LocalDatabaseImpl implements LocalDatabase {
 
   @override
   Future<void> removeDocument(String uuid) async {
-    await database.delete('tb_documento', where: 'uuid = ?', whereArgs: [uuid]);
+    await database.delete('documents', where: 'uuid = ?', whereArgs: [uuid]);
   }
 
   @override
@@ -104,7 +103,7 @@ class LocalDatabaseImpl implements LocalDatabase {
     if (updates.isEmpty) return;
 
     await database.update(
-      'tb_documento',
+      'documents',
       updates,
       where: 'uuid = ?',
       whereArgs: [uuid],
@@ -114,7 +113,7 @@ class LocalDatabaseImpl implements LocalDatabase {
   @override
   Future<List<Document>> getDocuments() async {
     final List<Map<String, dynamic>> maps = await database.query(
-      'tb_documento',
+      'documents',
       orderBy: 'data_adicao DESC',
     );
 
@@ -124,7 +123,7 @@ class LocalDatabaseImpl implements LocalDatabase {
   @override
   Future<Document?> getDocument(String uuid) async {
     final List<Map<String, dynamic>> maps = await database.query(
-      'tb_documento',
+      'documents',
       where: 'uuid = ?',
       whereArgs: [uuid],
       limit: 1,
@@ -138,7 +137,7 @@ class LocalDatabaseImpl implements LocalDatabase {
   @override
   Future<bool> hasDocument(String uuid) async {
     final result = await database.query(
-      'tb_documento',
+      'documents',
       columns: ['uuid'],
       where: 'uuid = ?',
       whereArgs: [uuid],
@@ -151,7 +150,7 @@ class LocalDatabaseImpl implements LocalDatabase {
   @override
   Future<void> updateLocalFilePath(String uuid, String? filePath) async {
     await database.update(
-      'tb_documento',
+      'documents',
       {'local_file_path': filePath},
       where: 'uuid = ?',
       whereArgs: [uuid],

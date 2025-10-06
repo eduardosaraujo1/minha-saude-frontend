@@ -75,7 +75,7 @@ as String?,tipo: freezed == tipo ? _self.tipo : tipo // ignore: cast_nullable_to
 as String?,dataDocumento: freezed == dataDocumento ? _self.dataDocumento : dataDocumento // ignore: cast_nullable_to_non_nullable
 as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,cachedAt: freezed == cachedAt ? _self.cachedAt! : cachedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,cachedAt: freezed == cachedAt ? _self.cachedAt : cachedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
 }

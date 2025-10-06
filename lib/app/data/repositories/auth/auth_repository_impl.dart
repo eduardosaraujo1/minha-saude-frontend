@@ -1,12 +1,12 @@
 import 'package:logging/logging.dart';
-import 'package:minha_saude_frontend/app/data/services/api/auth/auth_api_client.dart';
-import 'package:minha_saude_frontend/app/data/services/api/auth/models/login_response/login_api_response.dart';
-import 'package:minha_saude_frontend/app/data/services/google/google_service.dart';
-import 'package:minha_saude_frontend/app/data/services/secure_storage/secure_storage.dart';
-import 'package:minha_saude_frontend/app/domain/models/auth/login_response/login_result.dart';
-import 'package:minha_saude_frontend/app/domain/models/auth/user_register_model/user_register_model.dart';
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../services/api/auth/auth_api_client.dart';
+import '../../services/api/auth/models/login_response/login_api_response.dart';
+import '../../services/google/google_service.dart';
+import '../../services/secure_storage/secure_storage.dart';
+import '../../../domain/models/auth/login_response/login_result.dart';
+import '../../../domain/models/auth/user_register_model/user_register_model.dart';
 import 'auth_repository.dart';
 
 class AuthRepositoryImpl extends AuthRepository {

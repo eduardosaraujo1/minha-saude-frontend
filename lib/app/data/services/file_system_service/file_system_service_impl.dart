@@ -23,30 +23,109 @@ class FileSystemServiceImpl implements FileSystemService {
   }
 
   @override
-  Future<Result<void, Exception>> clearDocuments() {
-    // TODO: implement clearDocuments
-    throw UnimplementedError();
+  Future<Result<void, Exception>> clearDocuments() async {
+    try {
+      final cacheDir = await getApplicationCacheDirectory();
+      final documentsDir = Directory('${cacheDir.path}/$documentsPathPrefix');
+
+      if (await documentsDir.exists()) {
+        await documentsDir.delete(recursive: true);
+      }
+
+      return const Success(null);
+    } on Exception catch (e) {
+      return Error(e);
+    } catch (e) {
+      return Error(Exception('Failed to clear documents: $e'));
+    }
   }
 
   @override
-  Future<Result<File, Exception>> getDocument(String uuid) {
-    // TODO: implement getDocument
-    throw UnimplementedError();
+  Future<Result<File, Exception>> getDocument(String uuid) async {
+    try {
+      final cacheDir = await getApplicationCacheDirectory();
+      final filePath = '${cacheDir.path}/$documentsPathPrefix$uuid.pdf';
+      final file = File(filePath);
+
+      if (!await file.exists()) {
+        return Error(Exception('Document with UUID $uuid not found'));
+      }
+
+      return Success(file);
+    } on Exception catch (e) {
+      return Error(e);
+    } catch (e) {
+      return Error(Exception('Failed to get document: $e'));
+    }
   }
 
   @override
   Future<Result<void, Exception>> storeDocumentBytes(
     String uuid,
     Uint8List bytes,
-  ) {
-    // TODO: implement storeDocument
-    // getApplicationDocumentsDirectory()
-    throw UnimplementedError();
+  ) async {
+    try {
+      final cacheDir = await getApplicationCacheDirectory();
+      final documentsDir = Directory('${cacheDir.path}/$documentsPathPrefix');
+
+      // Ensure the documents directory exists
+      if (!await documentsDir.exists()) {
+        await documentsDir.create(recursive: true);
+      }
+
+      final filePath = '${documentsDir.path}$uuid.pdf';
+      final oldFilePath = '${documentsDir.path}${uuid}_old.pdf';
+      final file = File(filePath);
+      final oldFile = File(oldFilePath);
+
+      // If there's already an _old file, delete it
+      if (await oldFile.exists()) {
+        await oldFile.delete();
+      }
+
+      // If the target file exists, rename it to _old
+      bool hadExistingFile = false;
+      if (await file.exists()) {
+        await file.rename(oldFilePath);
+        hadExistingFile = true;
+      }
+
+      try {
+        // Write the new file
+        await file.writeAsBytes(bytes);
+
+        // If successful and we had an old file, delete it
+        if (hadExistingFile && await oldFile.exists()) {
+          await oldFile.delete();
+        }
+
+        return const Success(null);
+      } catch (e) {
+        // If writing failed and we renamed an old file, restore it
+        if (hadExistingFile && await oldFile.exists()) {
+          await oldFile.rename(filePath);
+        }
+        rethrow;
+      }
+    } on Exception catch (e) {
+      return Error(e);
+    } catch (e) {
+      return Error(Exception('Failed to store document: $e'));
+    }
   }
 
   @override
-  Future<Result<void, Exception>> storeDocumentFile(String uuid, File file) {
-    // TODO: implement storeDocumentFile
-    throw UnimplementedError();
+  Future<Result<void, Exception>> storeDocumentFile(
+    String uuid,
+    File file,
+  ) async {
+    try {
+      final bytes = await file.readAsBytes();
+      return await storeDocumentBytes(uuid, bytes);
+    } on Exception catch (e) {
+      return Error(e);
+    } catch (e) {
+      return Error(Exception('Failed to store document file: $e'));
+    }
   }
 }

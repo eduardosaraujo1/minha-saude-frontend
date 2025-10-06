@@ -34,7 +34,7 @@ abstract class DocumentRepository extends ChangeNotifier {
 
   // [DOCUMENT READING AND LISTING]
   /// List documents stored locally and remotely with metadata and file path (Document model)
-  /// Pagination is a TODO
+  /// TODO: Pagination is not implemented yet
   Future<Result<List<Document>, Exception>> listDocuments({
     bool forceRefresh = false,
   });

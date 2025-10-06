@@ -13,6 +13,7 @@ abstract class CacheDatabase {
   Future<void> clear();
 
   /// Add a document to the local database
+  /// By default, fills cachedAt with current time
   Future<void> addDocument({
     required String uuid,
     String? titulo,
@@ -22,6 +23,7 @@ abstract class CacheDatabase {
     DateTime? dataDocumento,
     required DateTime createdAt,
     DateTime? deletedAt,
+    DateTime? cachedAt,
   });
 
   /// Remove a document by its UUID

@@ -1,13 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'document_api_model.dart';
+part of 'document_db_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-_DocumentApiModel _$DocumentApiModelFromJson(Map<String, dynamic> json) =>
-    _DocumentApiModel(
+_DocumentDbModel _$DocumentDbModelFromJson(Map<String, dynamic> json) =>
+    _DocumentDbModel(
       uuid: json['uuid'] as String,
       titulo: json['titulo'] as String?,
       nomePaciente: json['nomePaciente'] as String?,
@@ -20,10 +20,12 @@ _DocumentApiModel _$DocumentApiModelFromJson(Map<String, dynamic> json) =>
       deletedAt: json['deletedAt'] == null
           ? null
           : DateTime.parse(json['deletedAt'] as String),
+      cachedAt: json['cachedAt'],
     );
 
-Map<String, dynamic> _$DocumentApiModelToJson(_DocumentApiModel instance) =>
+Map<String, dynamic> _$DocumentDbModelToJson(_DocumentDbModel instance) =>
     <String, dynamic>{
+      'cachedAt': instance.cachedAt.toIso8601String(),
       'uuid': instance.uuid,
       'titulo': instance.titulo,
       'nomePaciente': instance.nomePaciente,

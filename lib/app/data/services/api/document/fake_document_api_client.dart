@@ -76,7 +76,7 @@ class FakeDocumentApiClient implements DocumentApiClient {
       final document = DocumentApiModel(
         idDocumento: documentId,
         uuid: uuid,
-        titulo: titulo ?? filename ?? 'Untitled Document',
+        titulo: titulo ?? filename ?? 'Documento sem título',
         nomePaciente: nomePaciente,
         nomeMedico: nomeMedico,
         tipoDocumento: tipoDocumento,

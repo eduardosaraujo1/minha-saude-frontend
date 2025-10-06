@@ -11,7 +11,9 @@
 
 ## Para fazer
 
--   [ ] DocumentIcon: fazer a lista de documentos usar Wrap para evitar overflow ou forçar 3 colunas em telas grandes (ensure fixed width)
+-   [ ] Escrever testes para DocumentRepository agora que o comportamento está definido (incomplete TDD)
+-   [ ] Corrigir o FakeDocumentApiClient
+-   [ ] Implementar métodos do DocumentRepository
 -   [ ] Corrigir widget de loginDecorator para funcionar em telas Wide
 -   [ ] ???
 -   [ ] PdfPinchController: não suportado no Windows (ferramenta de teste), se possível verificar com Platform.\* API

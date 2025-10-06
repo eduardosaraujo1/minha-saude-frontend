@@ -84,8 +84,8 @@ class DocumentRepositoryImpl extends DocumentRepository {
   @override
   Future<Result<File, Exception>> getDocumentFile(String uuid) {
     // 1. Query cache database for document metadata using UUID
-    //    - Guard: If cache entry doesn't exist -> log and return error (no document cache status
-    // found, must call getDocumentMeta first to create it)
+    //    - Guard: If cache entry doesn't exist -> call getDocumentMeta(uuid) to
+    //update cache and store in variable
 
     // 2. Check if file exists locally using FileSystemService with UUID
     //    - Store result as boolean for later use

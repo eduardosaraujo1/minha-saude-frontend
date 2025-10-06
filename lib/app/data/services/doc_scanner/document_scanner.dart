@@ -1,6 +1,6 @@
 import 'dart:io';
 
-export 'document_scanner_fake.dart';
+export 'fake_document_scanner.dart';
 export 'document_scanner_impl.dart';
 
 abstract class DocumentScanner {

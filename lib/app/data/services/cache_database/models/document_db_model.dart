@@ -10,12 +10,14 @@ sealed class DocumentDbModel with _$DocumentDbModel {
   DocumentDbModel._({DateTime? cachedAt})
     : cachedAt = cachedAt ?? DateTime.now();
 
+  // ignore: invalid_annotation_target
+  @JsonSerializable(fieldRename: FieldRename.snake)
   factory DocumentDbModel({
     required String uuid,
     String? titulo,
-    String? nomePaciente,
-    String? nomeMedico,
-    String? tipoDocumento,
+    String? paciente,
+    String? medico,
+    String? tipo,
     DateTime? dataDocumento,
     required DateTime createdAt,
     DateTime? deletedAt,

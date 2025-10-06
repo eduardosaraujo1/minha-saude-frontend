@@ -8,15 +8,13 @@ import 'package:uuid/uuid.dart';
 import 'models/document_api_model.dart';
 import 'document_api_client.dart';
 
-// TODO: fix this file to use the correct fields and types from DocumentApiModel
+/// Fake implementation of DocumentApiClient for testing/development
+/// Simulates backend API behavior using in-memory storage and temporary files
 class FakeDocumentApiClient implements DocumentApiClient {
-  // In-memory storage for document metadata
+  // In-memory storage for document metadata (simulates database)
   final List<DocumentApiModel> _documents = [];
 
-  // Counter for generating incrementing IDs
-  int _nextId = 1;
-
-  // UUID generator
+  // UUID generator (simulates server-side UUID generation)
   final _uuid = const Uuid();
 
   @override
@@ -47,9 +45,8 @@ class FakeDocumentApiClient implements DocumentApiClient {
   }
 
   @override
-  Future<Result<void, Exception>> documentUpload({
+  Future<Result<DocumentApiModel, Exception>> documentUpload({
     required File file,
-    String? filename,
     String? titulo,
     String? nomePaciente,
     String? nomeMedico,
@@ -57,12 +54,10 @@ class FakeDocumentApiClient implements DocumentApiClient {
     DateTime? dataDocumento,
   }) async {
     try {
-      // Generate new document ID and UUID
-      final documentId = _nextId.toString();
-      _nextId++;
+      // Generate new UUID (simulates server-side generation)
       final uuid = _uuid.v4();
 
-      // Copy file to temporary directory
+      // Copy file to temporary directory (simulates Storage::Laravel facade)
       final tempDir = await getTemporaryDirectory();
       final fakeDocsDir = Directory('${tempDir.path}/fake_docs');
       if (!await fakeDocsDir.exists()) {
@@ -74,9 +69,8 @@ class FakeDocumentApiClient implements DocumentApiClient {
 
       // Create document metadata
       final document = DocumentApiModel(
-        idDocumento: documentId,
         uuid: uuid,
-        titulo: titulo ?? filename ?? 'Documento sem título',
+        titulo: titulo ?? 'Documento sem título',
         nomePaciente: nomePaciente,
         nomeMedico: nomeMedico,
         tipoDocumento: tipoDocumento,
@@ -86,7 +80,7 @@ class FakeDocumentApiClient implements DocumentApiClient {
 
       _documents.add(document);
 
-      return const Success(null);
+      return Success(document);
     } catch (e) {
       return Error(Exception('Failed to upload document: $e'));
     }
@@ -107,17 +101,20 @@ class FakeDocumentApiClient implements DocumentApiClient {
   }
 
   @override
-  Future<Result<Uint8List, Exception>> downloadDocument(
-    String documentId,
-  ) async {
+  Future<Result<Uint8List, Exception>> downloadDocument(String uuid) async {
     try {
-      // Find the document by ID
+      // Find the document by UUID
       final document = _documents.firstWhere(
-        (doc) => doc.idDocumento == documentId,
+        (doc) => doc.uuid == uuid,
         orElse: () => throw Exception('Document not found'),
       );
 
-      // Read file from temporary directory
+      // Check if document is soft-deleted
+      if (document.deletedAt != null) {
+        return Error(Exception('Document has been deleted'));
+      }
+
+      // Read file from temporary directory (simulates Storage::Laravel facade)
       final tempDir = await getTemporaryDirectory();
       final file = File('${tempDir.path}/fake_docs/${document.uuid}');
 
@@ -134,15 +131,16 @@ class FakeDocumentApiClient implements DocumentApiClient {
 
   @override
   Future<Result<DocumentApiModel, Exception>> getDocumentMeta(
-    String documentId,
+    String uuid,
   ) async {
     try {
-      // Find the document by ID
+      // Find the document by UUID
       final document = _documents.firstWhere(
-        (doc) => doc.idDocumento == documentId,
+        (doc) => doc.uuid == uuid,
         orElse: () => throw Exception('Document not found'),
       );
 
+      // Return document with all metadata (including deletedAt if present)
       return Success(document);
     } catch (e) {
       return Error(Exception('Failed to get document metadata: $e'));
@@ -151,7 +149,7 @@ class FakeDocumentApiClient implements DocumentApiClient {
 
   @override
   Future<Result<DocumentApiModel, Exception>> updateDocument(
-    String documentId, {
+    String uuid, {
     String? titulo,
     String? nomePaciente,
     String? nomeMedico,
@@ -159,17 +157,21 @@ class FakeDocumentApiClient implements DocumentApiClient {
     DateTime? dataDocumento,
   }) async {
     try {
-      // Find the document by ID
-      final index = _documents.indexWhere(
-        (doc) => doc.idDocumento == documentId,
-      );
+      // Find the document by UUID
+      final index = _documents.indexWhere((doc) => doc.uuid == uuid);
 
       if (index == -1) {
         return Error(Exception('Document not found'));
       }
 
-      // Update the document with new metadata
       final document = _documents[index];
+
+      // Check if document is soft-deleted
+      if (document.deletedAt != null) {
+        return Error(Exception('Cannot update deleted document'));
+      }
+
+      // Update the document with new metadata (only update provided fields)
       final updatedDocument = document.copyWith(
         titulo: titulo ?? document.titulo,
         nomePaciente: nomePaciente ?? document.nomePaciente,

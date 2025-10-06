@@ -14,6 +14,8 @@ abstract class FileSystemService {
     Uint8List bytes,
   );
 
+  /// Store a document in app-specific storage (documentStorage) with the provided UUID.
+  /// Override any document if it already exists.
   Future<Result<void, Exception>> storeDocumentFile(String uuid, File file);
 
   /// Retrieve a document file by its UUID from app-specific storage (documentStorage).

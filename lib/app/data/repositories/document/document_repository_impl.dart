@@ -20,8 +20,8 @@ class DocumentRepositoryImpl extends DocumentRepository {
   );
 
   final DocumentApiClient _documentApiClient;
-  final CacheDatabase _localDatabase;
   final DocumentScanner _documentScanner;
+  final CacheDatabase _localDatabase;
   final FileSystemService _filePickerService;
 
   final _log = Logger("DocumentRepositoryImpl");

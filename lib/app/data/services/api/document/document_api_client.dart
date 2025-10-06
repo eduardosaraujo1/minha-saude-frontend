@@ -9,7 +9,7 @@ import 'package:multiple_result/multiple_result.dart';
 abstract class DocumentApiClient {
   // | POST | /documents/upload | {arquivo,titulo?,nomePaciente?,nomeMedico?,tipoDocumento?,dataDocumento?} | {uuid,titulo,nomePaciente?,nomeMedico?,tipoDocumento?,dataDocumento?,createdAt} | Enviar arquivo |
   /// Upload a document file with optional metadata
-  Future<Result<void, Exception>> documentUpload({
+  Future<Result<DocumentApiModel, Exception>> documentUpload({
     required File file,
     String? titulo,
     String? nomePaciente,

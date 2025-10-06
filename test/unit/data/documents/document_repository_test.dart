@@ -1,153 +1,71 @@
+import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
+import 'package:minha_saude_frontend/app/data/services/api/document/document_api_client.dart';
+import 'package:minha_saude_frontend/app/data/services/api/document/fake_document_api_client.dart';
+import 'package:minha_saude_frontend/app/data/services/cache_database/cache_database.dart';
+import 'package:minha_saude_frontend/app/data/services/doc_scanner/document_scanner.dart';
+import 'package:minha_saude_frontend/app/data/services/file_system_service/file_system_service.dart';
+
+class MockDocumentApiClient extends Mock implements FakeDocumentApiClient {}
+
+class MockDocumentScanner extends Mock implements FakeDocumentScanner {}
+
+class MockCacheDatabase extends Mock implements CacheDatabase {
+  @override
+  Future<void> init() async {}
+}
+
+class MockFileSystemService extends Mock implements FileSystemService {}
+
 void main() {
-  group('DocumentRepositoryImpl - listDocuments', () {
-    test(
-      'returns cached documents without hitting API when cache is warm',
-      () {},
-      skip: 'TODO: Implement',
-    );
+  late DocumentApiClient _documentApiClient;
+  late DocumentScanner _documentScanner;
+  late CacheDatabase _localDatabase;
+  late FileSystemService _filePickerService;
 
-    test(
-      'fetches remote documents and refreshes cache when forceRefresh is true',
-      () {},
-      skip: 'TODO: Implement',
-    );
-
-    test(
-      'propagates API failures as error results and leaves cache untouched',
-      () {},
-      skip: 'TODO: Implement',
-    );
+  setUp(() {
+    _documentApiClient = MockDocumentApiClient();
+    _documentScanner = MockDocumentScanner();
+    _localDatabase = MockCacheDatabase();
+    _filePickerService = MockFileSystemService();
   });
 
-  group('DocumentRepositoryImpl - observeDocuments', () {
-    test(
-      'emits cached documents immediately upon subscription',
-      () {},
-      skip: 'TODO: Implement',
-    );
+  group("scanDocumentFile", () {
+    test("calls scanPdf function", () {
+      // Hook mockery to track scanPdf function calls but do nothing
 
-    test(
-      'pushes updates when uploadDocument succeeds',
-      () {},
-      skip: 'TODO: Implement',
-    );
+      // Call pickDocumentFile function
 
-    test(
-      'does not emit duplicates when remote data matches cache',
-      () {},
-      skip: 'TODO: Implement',
-    );
+      // Assert scanPdf function was called
+    });
   });
 
-  group('DocumentRepositoryImpl - getDocumentById', () {
-    test(
-      'serves document from cache when available',
-      () {},
-      skip: 'TODO: Implement',
-    );
+  //
+  group("pickDocumentFile ", () {
+    test("calls pickPdfFile function", () {
+      // Hook mockery to track pickPdfFile function calls but do nothing
 
-    test(
-      'fetches from API and updates cache when cache miss occurs',
-      () {},
-      skip: 'TODO: Implement',
-    );
+      // Call pickDocumentFile function
 
-    test(
-      'returns error when both cache and API miss the document',
-      () {},
-      skip: 'TODO: Implement',
-    );
+      // Assert scanPdf function was called
+    });
   });
 
-  group('DocumentRepositoryImpl - listDeletedDocuments', () {
-    test(
-      'filters deleted documents from cache and keeps metadata intact',
-      () {},
-      skip: 'TODO: Implement',
-    );
+  // uploadDocument uploads data through DocumentApiClient and stores cache in CacheDatabase
 
-    test(
-      'refreshes deleted cache entries after remote sync',
-      () {},
-      skip: 'TODO: Implement',
-    );
-  });
+  // listDocuments returns a list of documents provided by ApiClient, and caches the result on future calls
+  // listDocuments does not cache results the second time if forceRefresh was true
 
-  group('DocumentRepositoryImpl - uploadDocument', () {
-    test(
-      'uploads file via DocumentApiClient and merges new document into cache',
-      () {},
-      skip: 'TODO: Implement',
-    );
+  // getDocumentMeta if called with non-existent document UUID on server returns Error
+  // getDocumentMeta returns document metadata provided by ApiClient, and calls CacheDatabase to cache result
 
-    test(
-      'returns error when upload fails and leaves cache unchanged',
-      () {},
-      skip: 'TODO: Implement',
-    );
-  });
+  // getDocumentFile if called with non-existent document UUID on server returns Error
+  // getDocumentFile returns document file provided by ApiClient, and calls FileSystemService to cache result
 
-  group('DocumentRepositoryImpl - updateDocumentMetadata', () {
-    test(
-      'sends metadata update to API and patches cached document',
-      () {},
-      skip: 'TODO: Implement',
-    );
+  // updateDocument if called with non-existent document UUID on server returns Error
+  // updateDocument if called with existent document UUID on server renews cache and returns Success with Document
 
-    test(
-      'rolls back cache when remote update fails',
-      () {},
-      skip: 'TODO: Implement',
-    );
-  });
-
-  group('DocumentRepositoryImpl - deleteDocument', () {
-    test(
-      'marks document as deleted in cache after successful API call',
-      () {},
-      skip: 'TODO: Implement',
-    );
-
-    test(
-      'restores previous state when API deletion fails',
-      () {},
-      skip: 'TODO: Implement',
-    );
-  });
-
-  group('DocumentRepositoryImpl - downloadDocument', () {
-    test(
-      'returns base64 payload when provided by API client',
-      () {},
-      skip: 'TODO: Implement',
-    );
-
-    test(
-      'returns download link when payload omits base64 data',
-      () {},
-      skip: 'TODO: Implement',
-    );
-
-    test(
-      'surfaces error when API client fails to download',
-      () {},
-      skip: 'TODO: Implement',
-    );
-  });
-
-  group('DocumentRepositoryImpl - warmUp & clearCache', () {
-    test(
-      'hydrates cache from remote source during warmUp',
-      () {},
-      skip: 'TODO: Implement',
-    );
-
-    test(
-      'clears in-memory and persistent caches on clearCache',
-      () {},
-      skip: 'TODO: Implement',
-    );
-  });
+  // moveToTrash if called with non-existent document UUID on server returns Error
+  // moveToTrash if called with existent document UUID on server fills deletedAt field on server and updates cache
 }

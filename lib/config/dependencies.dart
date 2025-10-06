@@ -37,7 +37,7 @@ Future<void> registerDependenciesDev({
     mockSecureStorage ? SecureStorageFake() : SecureStorageImpl(),
   );
   _getIt.registerSingleton<DocumentScanner>(
-    mockScanner ? DocumentScannerFake() : DocumentScannerImpl(),
+    mockScanner ? FakeDocumentScanner() : DocumentScannerImpl(),
   );
   _getIt.registerSingleton<GoogleService>(
     mockGoogle ? GoogleServiceFake() : GoogleServiceImpl(GoogleSignIn.instance),

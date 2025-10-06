@@ -1,12 +1,13 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:minha_saude_frontend/app/data/services/api/document/document_api_client.dart';
-import 'package:minha_saude_frontend/app/data/services/api/document/models/document_api_model.dart';
 import 'package:multiple_result/multiple_result.dart';
+
+import 'document_api_client.dart';
+import 'models/document_api_model.dart';
 
 class DocumentApiClientImpl implements DocumentApiClient {
   @override
-  Future<Result<void, Exception>> documentUpload({
+  Future<Result<DocumentApiModel, Exception>> documentUpload({
     required File file,
     String? titulo,
     String? nomePaciente,

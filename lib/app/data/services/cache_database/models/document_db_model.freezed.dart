@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DocumentDbModel {
 
- DateTime get cachedAt; String get uuid; String? get titulo; String? get nomePaciente; String? get nomeMedico; String? get tipoDocumento; DateTime? get dataDocumento; DateTime get createdAt; DateTime? get deletedAt;
+ DateTime get cachedAt; String get uuid; String? get titulo; String? get paciente; String? get medico; String? get tipo; DateTime? get dataDocumento; DateTime get createdAt; DateTime? get deletedAt;
 /// Create a copy of DocumentDbModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $DocumentDbModelCopyWith<DocumentDbModel> get copyWith => _$DocumentDbModelCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DocumentDbModel&&(identical(other.cachedAt, cachedAt) || other.cachedAt == cachedAt)&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.titulo, titulo) || other.titulo == titulo)&&(identical(other.nomePaciente, nomePaciente) || other.nomePaciente == nomePaciente)&&(identical(other.nomeMedico, nomeMedico) || other.nomeMedico == nomeMedico)&&(identical(other.tipoDocumento, tipoDocumento) || other.tipoDocumento == tipoDocumento)&&(identical(other.dataDocumento, dataDocumento) || other.dataDocumento == dataDocumento)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DocumentDbModel&&(identical(other.cachedAt, cachedAt) || other.cachedAt == cachedAt)&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.titulo, titulo) || other.titulo == titulo)&&(identical(other.paciente, paciente) || other.paciente == paciente)&&(identical(other.medico, medico) || other.medico == medico)&&(identical(other.tipo, tipo) || other.tipo == tipo)&&(identical(other.dataDocumento, dataDocumento) || other.dataDocumento == dataDocumento)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,cachedAt,uuid,titulo,nomePaciente,nomeMedico,tipoDocumento,dataDocumento,createdAt,deletedAt);
+int get hashCode => Object.hash(runtimeType,cachedAt,uuid,titulo,paciente,medico,tipo,dataDocumento,createdAt,deletedAt);
 
 @override
 String toString() {
-  return 'DocumentDbModel(cachedAt: $cachedAt, uuid: $uuid, titulo: $titulo, nomePaciente: $nomePaciente, nomeMedico: $nomeMedico, tipoDocumento: $tipoDocumento, dataDocumento: $dataDocumento, createdAt: $createdAt, deletedAt: $deletedAt)';
+  return 'DocumentDbModel(cachedAt: $cachedAt, uuid: $uuid, titulo: $titulo, paciente: $paciente, medico: $medico, tipo: $tipo, dataDocumento: $dataDocumento, createdAt: $createdAt, deletedAt: $deletedAt)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $DocumentDbModelCopyWith<$Res>  {
   factory $DocumentDbModelCopyWith(DocumentDbModel value, $Res Function(DocumentDbModel) _then) = _$DocumentDbModelCopyWithImpl;
 @useResult
 $Res call({
- String uuid, String? titulo, String? nomePaciente, String? nomeMedico, String? tipoDocumento, DateTime? dataDocumento, DateTime createdAt, DateTime? deletedAt, DateTime? cachedAt
+ String uuid, String? titulo, String? paciente, String? medico, String? tipo, DateTime? dataDocumento, DateTime createdAt, DateTime? deletedAt, DateTime? cachedAt
 });
 
 
@@ -65,13 +65,13 @@ class _$DocumentDbModelCopyWithImpl<$Res>
 
 /// Create a copy of DocumentDbModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? uuid = null,Object? titulo = freezed,Object? nomePaciente = freezed,Object? nomeMedico = freezed,Object? tipoDocumento = freezed,Object? dataDocumento = freezed,Object? createdAt = null,Object? deletedAt = freezed,Object? cachedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? uuid = null,Object? titulo = freezed,Object? paciente = freezed,Object? medico = freezed,Object? tipo = freezed,Object? dataDocumento = freezed,Object? createdAt = null,Object? deletedAt = freezed,Object? cachedAt = freezed,}) {
   return _then(_self.copyWith(
 uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
 as String,titulo: freezed == titulo ? _self.titulo : titulo // ignore: cast_nullable_to_non_nullable
-as String?,nomePaciente: freezed == nomePaciente ? _self.nomePaciente : nomePaciente // ignore: cast_nullable_to_non_nullable
-as String?,nomeMedico: freezed == nomeMedico ? _self.nomeMedico : nomeMedico // ignore: cast_nullable_to_non_nullable
-as String?,tipoDocumento: freezed == tipoDocumento ? _self.tipoDocumento : tipoDocumento // ignore: cast_nullable_to_non_nullable
+as String?,paciente: freezed == paciente ? _self.paciente : paciente // ignore: cast_nullable_to_non_nullable
+as String?,medico: freezed == medico ? _self.medico : medico // ignore: cast_nullable_to_non_nullable
+as String?,tipo: freezed == tipo ? _self.tipo : tipo // ignore: cast_nullable_to_non_nullable
 as String?,dataDocumento: freezed == dataDocumento ? _self.dataDocumento : dataDocumento // ignore: cast_nullable_to_non_nullable
 as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
@@ -158,10 +158,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uuid,  String? titulo,  String? nomePaciente,  String? nomeMedico,  String? tipoDocumento,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt,  DateTime? cachedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uuid,  String? titulo,  String? paciente,  String? medico,  String? tipo,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt,  DateTime? cachedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DocumentDbModel() when $default != null:
-return $default(_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_that.tipoDocumento,_that.dataDocumento,_that.createdAt,_that.deletedAt,_that.cachedAt);case _:
+return $default(_that.uuid,_that.titulo,_that.paciente,_that.medico,_that.tipo,_that.dataDocumento,_that.createdAt,_that.deletedAt,_that.cachedAt);case _:
   return orElse();
 
 }
@@ -179,10 +179,10 @@ return $default(_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uuid,  String? titulo,  String? nomePaciente,  String? nomeMedico,  String? tipoDocumento,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt,  DateTime? cachedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uuid,  String? titulo,  String? paciente,  String? medico,  String? tipo,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt,  DateTime? cachedAt)  $default,) {final _that = this;
 switch (_that) {
 case _DocumentDbModel():
-return $default(_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_that.tipoDocumento,_that.dataDocumento,_that.createdAt,_that.deletedAt,_that.cachedAt);}
+return $default(_that.uuid,_that.titulo,_that.paciente,_that.medico,_that.tipo,_that.dataDocumento,_that.createdAt,_that.deletedAt,_that.cachedAt);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -196,10 +196,10 @@ return $default(_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uuid,  String? titulo,  String? nomePaciente,  String? nomeMedico,  String? tipoDocumento,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt,  DateTime? cachedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uuid,  String? titulo,  String? paciente,  String? medico,  String? tipo,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt,  DateTime? cachedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _DocumentDbModel() when $default != null:
-return $default(_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_that.tipoDocumento,_that.dataDocumento,_that.createdAt,_that.deletedAt,_that.cachedAt);case _:
+return $default(_that.uuid,_that.titulo,_that.paciente,_that.medico,_that.tipo,_that.dataDocumento,_that.createdAt,_that.deletedAt,_that.cachedAt);case _:
   return null;
 
 }
@@ -208,17 +208,17 @@ return $default(_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_tha
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class _DocumentDbModel extends DocumentDbModel {
-   _DocumentDbModel({required this.uuid, this.titulo, this.nomePaciente, this.nomeMedico, this.tipoDocumento, this.dataDocumento, required this.createdAt, this.deletedAt, super.cachedAt}): super._();
+   _DocumentDbModel({required this.uuid, this.titulo, this.paciente, this.medico, this.tipo, this.dataDocumento, required this.createdAt, this.deletedAt, final  DateTime? cachedAt}): super._(cachedAt: cachedAt);
   factory _DocumentDbModel.fromJson(Map<String, dynamic> json) => _$DocumentDbModelFromJson(json);
 
 @override final  String uuid;
 @override final  String? titulo;
-@override final  String? nomePaciente;
-@override final  String? nomeMedico;
-@override final  String? tipoDocumento;
+@override final  String? paciente;
+@override final  String? medico;
+@override final  String? tipo;
 @override final  DateTime? dataDocumento;
 @override final  DateTime createdAt;
 @override final  DateTime? deletedAt;
@@ -236,16 +236,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DocumentDbModel&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.titulo, titulo) || other.titulo == titulo)&&(identical(other.nomePaciente, nomePaciente) || other.nomePaciente == nomePaciente)&&(identical(other.nomeMedico, nomeMedico) || other.nomeMedico == nomeMedico)&&(identical(other.tipoDocumento, tipoDocumento) || other.tipoDocumento == tipoDocumento)&&(identical(other.dataDocumento, dataDocumento) || other.dataDocumento == dataDocumento)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.cachedAt, cachedAt) || other.cachedAt == cachedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DocumentDbModel&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.titulo, titulo) || other.titulo == titulo)&&(identical(other.paciente, paciente) || other.paciente == paciente)&&(identical(other.medico, medico) || other.medico == medico)&&(identical(other.tipo, tipo) || other.tipo == tipo)&&(identical(other.dataDocumento, dataDocumento) || other.dataDocumento == dataDocumento)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.cachedAt, cachedAt) || other.cachedAt == cachedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,uuid,titulo,nomePaciente,nomeMedico,tipoDocumento,dataDocumento,createdAt,deletedAt,cachedAt);
+int get hashCode => Object.hash(runtimeType,uuid,titulo,paciente,medico,tipo,dataDocumento,createdAt,deletedAt,cachedAt);
 
 @override
 String toString() {
-  return 'DocumentDbModel(uuid: $uuid, titulo: $titulo, nomePaciente: $nomePaciente, nomeMedico: $nomeMedico, tipoDocumento: $tipoDocumento, dataDocumento: $dataDocumento, createdAt: $createdAt, deletedAt: $deletedAt, cachedAt: $cachedAt)';
+  return 'DocumentDbModel(uuid: $uuid, titulo: $titulo, paciente: $paciente, medico: $medico, tipo: $tipo, dataDocumento: $dataDocumento, createdAt: $createdAt, deletedAt: $deletedAt, cachedAt: $cachedAt)';
 }
 
 
@@ -256,7 +256,7 @@ abstract mixin class _$DocumentDbModelCopyWith<$Res> implements $DocumentDbModel
   factory _$DocumentDbModelCopyWith(_DocumentDbModel value, $Res Function(_DocumentDbModel) _then) = __$DocumentDbModelCopyWithImpl;
 @override @useResult
 $Res call({
- String uuid, String? titulo, String? nomePaciente, String? nomeMedico, String? tipoDocumento, DateTime? dataDocumento, DateTime createdAt, DateTime? deletedAt, DateTime? cachedAt
+ String uuid, String? titulo, String? paciente, String? medico, String? tipo, DateTime? dataDocumento, DateTime createdAt, DateTime? deletedAt, DateTime? cachedAt
 });
 
 
@@ -273,13 +273,13 @@ class __$DocumentDbModelCopyWithImpl<$Res>
 
 /// Create a copy of DocumentDbModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? uuid = null,Object? titulo = freezed,Object? nomePaciente = freezed,Object? nomeMedico = freezed,Object? tipoDocumento = freezed,Object? dataDocumento = freezed,Object? createdAt = null,Object? deletedAt = freezed,Object? cachedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? uuid = null,Object? titulo = freezed,Object? paciente = freezed,Object? medico = freezed,Object? tipo = freezed,Object? dataDocumento = freezed,Object? createdAt = null,Object? deletedAt = freezed,Object? cachedAt = freezed,}) {
   return _then(_DocumentDbModel(
 uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
 as String,titulo: freezed == titulo ? _self.titulo : titulo // ignore: cast_nullable_to_non_nullable
-as String?,nomePaciente: freezed == nomePaciente ? _self.nomePaciente : nomePaciente // ignore: cast_nullable_to_non_nullable
-as String?,nomeMedico: freezed == nomeMedico ? _self.nomeMedico : nomeMedico // ignore: cast_nullable_to_non_nullable
-as String?,tipoDocumento: freezed == tipoDocumento ? _self.tipoDocumento : tipoDocumento // ignore: cast_nullable_to_non_nullable
+as String?,paciente: freezed == paciente ? _self.paciente : paciente // ignore: cast_nullable_to_non_nullable
+as String?,medico: freezed == medico ? _self.medico : medico // ignore: cast_nullable_to_non_nullable
+as String?,tipo: freezed == tipo ? _self.tipo : tipo // ignore: cast_nullable_to_non_nullable
 as String?,dataDocumento: freezed == dataDocumento ? _self.dataDocumento : dataDocumento // ignore: cast_nullable_to_non_nullable
 as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable

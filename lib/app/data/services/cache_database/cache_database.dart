@@ -1,6 +1,6 @@
 import 'package:multiple_result/multiple_result.dart';
 
-import '../../../domain/models/document/document.dart';
+import 'models/document_db_model.dart';
 
 /// This service wraps SQLite database, currently it's used for ensuring offline access of Documents.
 /// It should be able to store document metadata and retreive when needed.
@@ -10,12 +10,12 @@ abstract class CacheDatabase {
   Future<void> init();
 
   /// Clear all data from the database (used on logout)
-  Future<void> clear();
+  Future<Result<void, Exception>> clear();
 
-  /// Add a document to the local database
+  /// Add a document to the local database, or update it if it already exists (by UUID).
   /// By default, fills cachedAt with current time
-  Future<void> addDocument({
-    required String uuid,
+  Future<Result<DocumentDbModel, Exception>> upsertDocument(
+    String uuid, {
     String? titulo,
     String? paciente,
     String? medico,
@@ -26,30 +26,15 @@ abstract class CacheDatabase {
     DateTime? cachedAt,
   });
 
-  /// Remove a document by its UUID
-  Future<Result<void, Exception>> removeDocument(String uuid);
+  /// Get all documents from the local database
+  Future<Result<List<DocumentDbModel>, Exception>> listDocuments();
 
-  /// Update a document's information
-  /// May be used to delete (soft delete) a document by setting deletedAt
-  Future<Result<void, Exception>> updateDocument({
-    required String uuid,
-    String? titulo,
-    String? paciente,
-    String? medico,
-    String? tipo,
-    DateTime? dataDocumento,
-    required DateTime createdAt,
-  });
+  /// Get a single document by its UUID
+  Future<Result<DocumentDbModel?, Exception>> getDocument(String uuid);
 
   /// Move document to trash (deleted_at field) by its UUID
   Future<Result<void, Exception>> trashDocument(String uuid);
 
-  /// Get all documents from the local database
-  Future<Result<List<Document>, Exception>> getDocuments();
-
-  /// Get a single document by its UUID
-  Future<Result<Document?, Exception>> getDocument(String uuid);
-
-  /// Check if a document exists locally by UUID
-  Future<bool> hasDocument(String uuid);
+  /// Remove a document by its UUID
+  Future<Result<void, Exception>> removeDocument(String uuid);
 }

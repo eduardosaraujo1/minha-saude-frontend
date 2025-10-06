@@ -1,8 +1,11 @@
+import 'package:multiple_result/multiple_result.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../../../domain/models/document/document.dart';
+import 'models/document_db_model.dart';
 import 'cache_database.dart';
 
+/// Implementation of CacheDatabase using SQLite via sqflite package.
+/// Uses DocumentDbModel for database operations with snake_case field mapping.
 class CacheDatabaseImpl implements CacheDatabase {
   Database? _database;
 
@@ -42,13 +45,18 @@ class CacheDatabaseImpl implements CacheDatabase {
   }
 
   @override
-  Future<void> clear() async {
-    await database.delete('documents');
+  Future<Result<void, Exception>> clear() async {
+    try {
+      await database.delete('documents');
+      return const Success(null);
+    } catch (e) {
+      return Error(Exception('Failed to clear database: $e'));
+    }
   }
 
   @override
-  Future<void> addDocument({
-    required String uuid,
+  Future<Result<DocumentDbModel, Exception>> upsertDocument(
+    String uuid, {
     String? titulo,
     String? paciente,
     String? medico,
@@ -56,124 +64,114 @@ class CacheDatabaseImpl implements CacheDatabase {
     DateTime? dataDocumento,
     required DateTime createdAt,
     DateTime? deletedAt,
+    DateTime? cachedAt,
   }) async {
-    await database.insert('documents', {
-      'uuid': uuid,
-      'titulo': titulo,
-      'paciente': paciente,
-      'medico': medico,
-      'tipo': tipo,
-      'data_documento': dataDocumento.toIso8601String(),
-      'data_adicao': dataAdicao.toIso8601String(),
-      'local_file_path': localFilePath,
-      'deleted_at': null,
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
-  }
+    try {
+      // Create document with cachedAt defaulting to now if not provided
+      final document = DocumentDbModel(
+        uuid: uuid,
+        titulo: titulo,
+        paciente: paciente,
+        medico: medico,
+        tipo: tipo,
+        dataDocumento: dataDocumento,
+        createdAt: createdAt,
+        deletedAt: deletedAt,
+        cachedAt: cachedAt ?? DateTime.now(),
+      );
 
-  @override
-  Future<void> removeDocument(String uuid) async {
-    await database.delete('documents', where: 'uuid = ?', whereArgs: [uuid]);
-  }
+      // Use toJson to get snake_case mapped fields
+      // ConflictAlgorithm.replace makes this an upsert operation
+      await database.insert(
+        'documents',
+        document.toJson(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
 
-  @override
-  Future<void> updateDocument({
-    required String uuid,
-    String? titulo,
-    String? paciente,
-    String? medico,
-    String? tipo,
-    DateTime? dataDocumento,
-    DateTime? dataAdicao,
-    String? localFilePath,
-  }) async {
-    // Build update map with only provided fields
-    final Map<String, dynamic> updates = {};
-
-    if (titulo != null) updates['titulo'] = titulo;
-    if (paciente != null) updates['paciente'] = paciente;
-    if (medico != null) updates['medico'] = medico;
-    if (tipo != null) updates['tipo'] = tipo;
-    if (dataDocumento != null) {
-      updates['data_documento'] = dataDocumento.toIso8601String();
+      return Success(document);
+    } catch (e) {
+      return Error(Exception('Failed to upsert document: $e'));
     }
-    if (dataAdicao != null) {
-      updates['data_adicao'] = dataAdicao.toIso8601String();
+  }
+
+  @override
+  Future<Result<void, Exception>> removeDocument(String uuid) async {
+    try {
+      final count = await database.delete(
+        'documents',
+        where: 'uuid = ?',
+        whereArgs: [uuid],
+      );
+
+      if (count == 0) {
+        return Error(Exception('Document not found'));
+      }
+
+      return const Success(null);
+    } catch (e) {
+      return Error(Exception('Failed to remove document: $e'));
     }
-    if (localFilePath != null) updates['local_file_path'] = localFilePath;
-
-    if (updates.isEmpty) return;
-
-    await database.update(
-      'documents',
-      updates,
-      where: 'uuid = ?',
-      whereArgs: [uuid],
-    );
   }
 
   @override
-  Future<List<Document>> getDocuments() async {
-    final List<Map<String, dynamic>> maps = await database.query(
-      'documents',
-      orderBy: 'data_adicao DESC',
-    );
+  Future<Result<List<DocumentDbModel>, Exception>> listDocuments() async {
+    try {
+      final List<Map<String, dynamic>> maps = await database.query(
+        'documents',
+        orderBy: 'created_at DESC',
+      );
 
-    return maps.map(Document.fromJson).toList();
+      // Convert from database maps to DocumentDbModel using fromJson (handles snake_case)
+      final documents = maps.map((map) {
+        return DocumentDbModel.fromJson(map);
+      }).toList();
+
+      return Success(documents);
+    } catch (e) {
+      return Error(Exception('Failed to list documents: $e'));
+    }
   }
 
   @override
-  Future<Document?> getDocument(String uuid) async {
-    final List<Map<String, dynamic>> maps = await database.query(
-      'documents',
-      where: 'uuid = ?',
-      whereArgs: [uuid],
-      limit: 1,
-    );
+  Future<Result<DocumentDbModel?, Exception>> getDocument(String uuid) async {
+    try {
+      final List<Map<String, dynamic>> maps = await database.query(
+        'documents',
+        where: 'uuid = ?',
+        whereArgs: [uuid],
+        limit: 1,
+      );
 
-    if (maps.isEmpty) return null;
+      if (maps.isEmpty) {
+        return const Success(null);
+      }
 
-    return Document.fromJson(maps.first);
+      // Convert from database map to DocumentDbModel using fromJson (handles snake_case)
+      final document = DocumentDbModel.fromJson(maps.first);
+
+      return Success(document);
+    } catch (e) {
+      return Error(Exception('Failed to get document: $e'));
+    }
   }
 
   @override
-  Future<bool> hasDocument(String uuid) async {
-    final result = await database.query(
-      'documents',
-      columns: ['uuid'],
-      where: 'uuid = ?',
-      whereArgs: [uuid],
-      limit: 1,
-    );
+  Future<Result<void, Exception>> trashDocument(String uuid) async {
+    try {
+      final count = await database.update(
+        'documents',
+        {'deleted_at': DateTime.now().toIso8601String()},
+        where: 'uuid = ?',
+        whereArgs: [uuid],
+      );
 
-    return result.isNotEmpty;
+      if (count == 0) {
+        return Error(Exception('Document not found'));
+      }
+
+      return const Success(null);
+    } catch (e) {
+      return Error(Exception('Failed to trash document: $e'));
+    }
   }
-
-  @override
-  Future<void> updateLocalFilePath(String uuid, String? filePath) async {
-    await database.update(
-      'documents',
-      {'local_file_path': filePath},
-      where: 'uuid = ?',
-      whereArgs: [uuid],
-    );
-  }
-
-  /// Helper method to convert database map to Document model
-  // Replaced by document.fromJson()
-  // Document _mapToDocument(Map<String, dynamic> map) {
-  //   return Document(
-  //     // Use uuid as id for local documents since we don't have a server id yet
-  //     id: map['uuid'] as String,
-  //     uuid: map['uuid'] as String,
-  //     titulo: map['titulo'] as String,
-  //     paciente: map['paciente'] as String,
-  //     medico: map['medico'] as String,
-  //     tipo: map['tipo'] as String,
-  //     dataDocumento: DateTime.parse(map['data_documento'] as String),
-  //     dataAdicao: DateTime.parse(map['data_adicao'] as String),
-  //     deletedAt: map['deleted_at'] != null
-  //         ? DateTime.parse(map['deleted_at'] as String)
-  //         : null,
-  //   );
-  // }
 }

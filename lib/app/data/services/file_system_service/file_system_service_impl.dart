@@ -8,7 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'file_system_service.dart';
 
 class FileSystemServiceImpl implements FileSystemService {
-  static const String path_prefix = "documents/";
+  static const String documentsPathPrefix = "documents/";
 
   @override
   Future<File?> pickPdfFile() async {

@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import 'models/document_api_model.dart';
 import 'document_api_client.dart';
 
+// TODO: fix this file to use the correct fields and types from DocumentApiModel
 class FakeDocumentApiClient implements DocumentApiClient {
   // In-memory storage for document metadata
   final List<DocumentApiModel> _documents = [];
@@ -19,12 +20,10 @@ class FakeDocumentApiClient implements DocumentApiClient {
   final _uuid = const Uuid();
 
   @override
-  Future<Result<void, Exception>> deleteDocument(String documentId) async {
+  Future<Result<void, Exception>> trashDocument(String uuid) async {
     try {
       // Find the document by ID
-      final index = _documents.indexWhere(
-        (doc) => doc.idDocumento == documentId,
-      );
+      final index = _documents.indexWhere((doc) => doc.uuid == uuid);
 
       if (index == -1) {
         return Error(Exception('Document not found'));

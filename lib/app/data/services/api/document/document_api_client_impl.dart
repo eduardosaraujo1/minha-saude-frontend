@@ -6,48 +6,45 @@ import 'package:multiple_result/multiple_result.dart';
 
 class DocumentApiClientImpl implements DocumentApiClient {
   @override
-  Future<Result<void, Exception>> deleteDocument(String documentId) async {
-    // TODO: implement deleteDocument
-    throw UnimplementedError();
-  }
-
-  @override
   Future<Result<void, Exception>> documentUpload({
     required File file,
-    String? filename,
     String? titulo,
     String? nomePaciente,
     String? nomeMedico,
     String? tipoDocumento,
     DateTime? dataDocumento,
-  }) async {
+  }) {
     // TODO: implement documentUpload
     throw UnimplementedError();
   }
 
   @override
-  Future<Result<List<DocumentApiModel>, Exception>> documentsList() async {
+  Future<Result<List<DocumentApiModel>, Exception>> documentsList() {
     // TODO: implement documentsList
     throw UnimplementedError();
   }
 
   @override
-  Future<Result<Uint8List, Exception>> downloadDocument(String documentId) {
+  Future<Result<Uint8List, Exception>> downloadDocument(String uuid) {
     // TODO: implement downloadDocument
     throw UnimplementedError();
   }
 
   @override
-  Future<Result<DocumentApiModel, Exception>> getDocumentMeta(
-    String documentId,
-  ) {
-    // TODO: implement getDocument
+  Future<Result<DocumentApiModel, Exception>> getDocumentMeta(String uuid) {
+    // TODO: implement getDocumentMeta
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<void, Exception>> trashDocument(String uuid) {
+    // TODO: implement trashDocument
     throw UnimplementedError();
   }
 
   @override
   Future<Result<DocumentApiModel, Exception>> updateDocument(
-    String documentId, {
+    String uuid, {
     String? titulo,
     String? nomePaciente,
     String? nomeMedico,

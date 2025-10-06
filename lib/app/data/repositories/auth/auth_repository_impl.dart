@@ -152,6 +152,9 @@ class AuthRepositoryImpl extends AuthRepository {
     // Clear all local auth state
     await clearAuthToken();
     setRegisterToken(null);
+
+    // Reset CacheDatabase
+    // TODO: implement this
   }
 
   @override

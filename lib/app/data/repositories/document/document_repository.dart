@@ -40,15 +40,15 @@ abstract class DocumentRepository extends ChangeNotifier {
   });
 
   /// Get single document by id with metadata (Document model)
-  Future<Result<Document, Exception>> getDocumentMeta(String id);
+  Future<Result<Document, Exception>> getDocumentMeta(String uuid);
 
   /// Get single document by id with metadata (Document model)
-  Future<Result<File, Exception>> getDocumentFile(String id);
+  Future<Result<File, Exception>> getDocumentFile(String uuid);
 
   // [DOCUMENT EDITING AND DELETION]
   /// Edit document metadata on server and update local cache, returns updated Document model
   Future<Result<Document, Exception>> updateDocument(
-    String id, {
+    String uuid, {
     String? titulo,
     String? paciente,
     String? tipo,
@@ -58,7 +58,7 @@ abstract class DocumentRepository extends ChangeNotifier {
 
   /// Move document to trash on server and update local cache
   /// Document is not deleted permanently, it can be restored
-  Future<Result<void, Exception>> moveToTrash(String id);
+  Future<Result<void, Exception>> moveToTrash(String uuid);
 }
 
 /*

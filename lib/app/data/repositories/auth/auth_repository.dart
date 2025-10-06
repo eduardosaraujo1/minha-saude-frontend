@@ -25,6 +25,7 @@ abstract class AuthRepository extends ChangeNotifier {
   Future<Result<void, Exception>> register(UserRegisterModel registerModel);
 
   /// Sign out the current user, both through server and clearing local data
+  /// Clears the CacheDatabase as well as the auth token stored in SecureStorage
   Future<void> logout();
 
   // [GOOGLE INTEGRATION]

@@ -26,8 +26,6 @@ class MockFileSystemService extends Mock implements FileSystemService {}
 
 class MockFile extends Mock implements File {}
 
-class FakeFile extends Fake implements File {}
-
 void main() {
   late DocumentApiClient _documentApiClient;
   late DocumentScanner _documentScanner;
@@ -37,7 +35,7 @@ void main() {
 
   setUpAll(() {
     // Register fallback values for mocktail
-    registerFallbackValue(FakeFile());
+    registerFallbackValue(File("file.pdf"));
     registerFallbackValue(Uint8List(0));
   });
 
@@ -130,7 +128,7 @@ void main() {
           ),
         );
 
-        final storedFile = MockFile();
+        final storedFile = File("/documents/test-uuid-123.pdf");
         final fileBytes = Uint8List.fromList([1, 2, 3]);
         final mockFile = MockFile();
 

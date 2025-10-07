@@ -69,6 +69,8 @@ class FileSystemServiceImpl implements FileSystemService {
     Uint8List bytes,
   ) async {
     try {
+      final sanitizedUuid = uuid.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
+
       final cacheDir = await getApplicationCacheDirectory();
       final documentsDir = Directory('${cacheDir.path}/$documentsPathPrefix');
 
@@ -77,8 +79,8 @@ class FileSystemServiceImpl implements FileSystemService {
         await documentsDir.create(recursive: true);
       }
 
-      final filePath = '${documentsDir.path}$uuid.pdf';
-      final oldFilePath = '${documentsDir.path}${uuid}_old.pdf';
+      final filePath = '${documentsDir.path}$sanitizedUuid.pdf';
+      final oldFilePath = '${documentsDir.path}${sanitizedUuid}_old.pdf';
       final file = File(filePath);
       final oldFile = File(oldFilePath);
 

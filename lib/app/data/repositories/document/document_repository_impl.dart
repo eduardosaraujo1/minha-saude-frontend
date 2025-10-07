@@ -91,12 +91,16 @@ class DocumentRepositoryImpl extends DocumentRepository {
       }
 
       final apiDocument = uploadResult.tryGetSuccess()!;
+      final document = _mapApiModelToDocument(apiDocument);
 
       final cacheResult = await _cacheDocumentMetadata(apiDocument);
       if (cacheResult.isError()) {
         final error = cacheResult.tryGetError()!;
-        _log.warning("Failed to cache uploaded document metadata", error);
-        return Result.error(error);
+        _log.warning(
+          "Failed to cache uploaded document metadata, but document is on remote",
+          error,
+        );
+        return Result.success(document);
       }
 
       Uint8List fileBytes;
@@ -104,7 +108,7 @@ class DocumentRepositoryImpl extends DocumentRepository {
         fileBytes = await file.readAsBytes();
       } catch (e) {
         _log.warning("Failed to read uploaded file bytes for local storage", e);
-        return Result.error(Exception("Failed to read uploaded file bytes"));
+        return Result.success(document);
       }
 
       final storeResult = await _fileSystemService.storeDocument(
@@ -115,13 +119,13 @@ class DocumentRepositoryImpl extends DocumentRepository {
       if (storeResult.isError()) {
         final error = storeResult.tryGetError()!;
         _log.warning("Failed to store uploaded document locally", error);
-        return Result.error(error);
+        return Result.success(document);
       }
 
       _documentListCache = null;
       notifyListeners();
 
-      return Result.success(_mapApiModelToDocument(apiDocument));
+      return Result.success(document);
     } on Exception catch (e, stackTrace) {
       _log.severe("Unexpected error uploading document", e, stackTrace);
       return Result.error(e);
@@ -156,11 +160,12 @@ class DocumentRepositoryImpl extends DocumentRepository {
 
       final bytes = downloadResult.tryGetSuccess()!;
 
+      // Store the file locally
       final storeResult = await _fileSystemService.storeDocument(uuid, bytes);
 
       if (storeResult.isError()) {
         _log.warning(
-          "Failed to persist downloaded document bytes locally: returning bytes without caching",
+          "Failed to persist downloaded document bytes locally: returning placing in temp file",
           storeResult.tryGetError()!,
         );
         final file = await _writeBytesToTempFile(uuid, bytes);
@@ -442,4 +447,11 @@ class DocumentRepositoryImpl extends DocumentRepository {
     await file.writeAsBytes(bytes, flush: true);
     return file;
   }
+}
+
+class _DocumentListCache {
+  // In-memory cache for document list to avoid frequent database queries
+  // May be refreshed from database or API by the repository through a method call
+  // Has defined expiration date controlled by CachedElement
+  // Has query methods like getByUuid, previously implemented on the repository directly
 }

@@ -1,9 +1,9 @@
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:minha_saude_frontend/app/data/repositories/session/session_repository.dart';
-import 'package:minha_saude_frontend/app/domain/actions/auth/logout.dart';
-import 'package:minha_saude_frontend/app/domain/actions/auth/register_action.dart';
 
+import '../app/data/repositories/session/session_repository.dart';
+import '../app/domain/actions/auth/logout.dart';
+import '../app/domain/actions/auth/register_action.dart';
 import '../app/data/services/file_system_service/file_system_service_impl.dart';
 import '../app/data/services/api/auth/auth_api_client_impl.dart';
 import '../app/data/services/api/document/document_api_client.dart';

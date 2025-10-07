@@ -47,7 +47,7 @@ class LoginWithGoogle implements Action {
         ),
       };
     } catch (e) {
-      _log.severe(e);
+      _log.severe("Ocorreu um erro desconhecido: ", e);
       return Result.error(
         Exception("Ocorreu um erro desconhecido. Por favor, tente novamente."),
       );
@@ -76,7 +76,7 @@ class LoginWithGoogle implements Action {
     return Result.success(RedirectResponse.toHome);
   }
 
-  Future _setRegisteringState(
+  Future<Result<RedirectResponse, Exception>> _setRegisteringState(
     NeedsRegistrationLoginResult loginResponse,
   ) async {
     _sessionRepository.setRegisterToken(loginResponse.registerToken);

@@ -646,8 +646,6 @@ void main() {
             cachedAt: any(named: 'cachedAt'),
           ),
         ).called(1);
-
-        verify(() => _documentApiClient.listDocuments()).called(1);
       },
     );
   });
@@ -700,8 +698,6 @@ void main() {
 
         // Assert CacheDatabase trashDocument was called
         verify(() => _localDatabase.trashDocument("test-uuid")).called(1);
-
-        verify(() => _documentApiClient.listDocuments()).called(1);
       },
     );
   });

@@ -29,4 +29,10 @@ sealed class DocumentDbModel with _$DocumentDbModel {
 
   factory DocumentDbModel.fromJson(Map<String, dynamic> json) =>
       _$DocumentDbModelFromJson(json);
+
+  bool isStale({required Duration ttl, DateTime? timeStamp}) {
+    final now = timeStamp ?? DateTime.now();
+    final age = now.difference(cachedAt);
+    return age > ttl;
+  }
 }

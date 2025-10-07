@@ -29,7 +29,7 @@ class DocumentRepositoryImpl extends DocumentRepository {
 
   final _log = Logger("DocumentRepositoryImpl");
 
-  CachedElement<List<Document>>? _documentListCache;
+  final _documentListCache = _DocumentListCache();
 
   @override
   Future<Result<File, Exception>> pickDocumentFile() async {
@@ -122,7 +122,7 @@ class DocumentRepositoryImpl extends DocumentRepository {
         return Result.success(document);
       }
 
-      _documentListCache = null;
+      _documentListCache.clear();
       notifyListeners();
 
       return Result.success(document);
@@ -189,24 +189,26 @@ class DocumentRepositoryImpl extends DocumentRepository {
     bool forceRefresh = false,
   }) async {
     try {
-      final memoryDocument = _getDocumentFromMemory(uuid);
-      if (!forceRefresh && memoryDocument != null) {
-        return Result.success(memoryDocument);
-      }
-
       DocumentDbModel? cachedModel;
-      final cacheResult = await _localDatabase.getDocument(uuid);
-      if (cacheResult.isError()) {
-        _log.warning(
-          "Unexpected error fetching document metadata from cache",
-          cacheResult.tryGetError()!,
-        );
-      } else {
-        cachedModel = cacheResult.tryGetSuccess();
-        if (!forceRefresh &&
-            cachedModel != null &&
-            !_isDbMetadataCacheStale(cachedModel)) {
-          return Result.success(_mapDbModelToDocument(cachedModel));
+      if (!forceRefresh) {
+        final memoryDocument = _documentListCache.getByUuid(uuid);
+        if (memoryDocument != null) {
+          return Result.success(memoryDocument);
+        }
+
+        final cacheResult = await _localDatabase.getDocument(uuid);
+        if (cacheResult.isError()) {
+          _log.warning(
+            "Unexpected error fetching document metadata from cache",
+            cacheResult.tryGetError()!,
+          );
+        } else {
+          // Reading from CacheDatabase was successful
+          cachedModel = cacheResult.tryGetSuccess();
+          if (cachedModel != null &&
+              !cachedModel.isStale(ttl: Duration(hours: 1))) {
+            return Result.success(_mapDbModelToDocument(cachedModel));
+          }
         }
       }
 
@@ -254,54 +256,81 @@ class DocumentRepositoryImpl extends DocumentRepository {
     bool forceRefresh = false,
   }) async {
     try {
-      final cache = _documentListCache;
-      if (!forceRefresh && cache != null) {
-        if (!cache.isStale(maxAge: CachedElement.defaultMaxAge)) {
-          return Result.success(List.unmodifiable(cache.data));
+      // Guard clause: return cached list if available and not forcing refresh
+      if (!forceRefresh) {
+        final cachedList = _documentListCache.get();
+        if (cachedList != null) {
+          return Result.success(cachedList);
         }
       }
 
+      // Try to fetch from API
       final apiResult = await _documentApiClient.listDocuments();
-      if (apiResult.isError()) {
-        _log.warning(
-          "Failed to fetch document list from API",
-          apiResult.tryGetError()!,
-        );
-
-        final dbResult = await _localDatabase.listDocuments();
-        if (dbResult.isError()) {
-          final error = dbResult.tryGetError()!;
-          _log.severe("Failed to fetch document list from cache", error);
-          return Result.error(error);
-        }
-
-        final dbDocuments = dbResult
-            .tryGetSuccess()!
-            .where((dbDoc) => dbDoc.deletedAt == null)
-            .map(_mapDbModelToDocument)
-            .toList(growable: false);
-
-        final immutableDocs = List<Document>.unmodifiable(dbDocuments);
-        _documentListCache = CachedElement(immutableDocs);
-        notifyListeners();
-        return Result.success(immutableDocs);
+      if (apiResult.isSuccess()) {
+        return _handleSuccessfulApiResponse(apiResult.tryGetSuccess()!);
       }
 
-      final apiDocuments = apiResult.tryGetSuccess()!;
-      final documents = apiDocuments
-          .where((apiDoc) => apiDoc.deletedAt == null)
-          .map(_mapApiModelToDocument)
-          .toList(growable: false);
-
-      final immutableDocs = List<Document>.unmodifiable(documents);
-      _documentListCache = CachedElement(immutableDocs);
-      notifyListeners();
-
-      return Result.success(immutableDocs);
+      // API failed, log and fall back to database
+      _log.warning(
+        "Failed to fetch document list from API",
+        apiResult.tryGetError()!,
+      );
+      return _handleApiFallbackToDatabase();
     } on Exception catch (e, stackTrace) {
       _log.severe("Unexpected error listing documents", e, stackTrace);
       return Result.error(e);
     }
+  }
+
+  Future<Result<List<Document>, Exception>> _handleSuccessfulApiResponse(
+    List<DocumentApiModel> apiDocuments,
+  ) async {
+    final documents = apiDocuments
+        .where((apiDoc) => apiDoc.deletedAt == null)
+        .map(_mapApiModelToDocument)
+        .toList(growable: false);
+
+    return _updateCacheAndNotify(documents);
+  }
+
+  Future<Result<List<Document>, Exception>>
+  _handleApiFallbackToDatabase() async {
+    final dbDocumentsResult = await _listDbDocuments();
+
+    if (dbDocumentsResult.isError()) {
+      final error = dbDocumentsResult.tryGetError()!;
+      _log.severe("Failed to fetch document list from cache", error);
+      return Result.error(error);
+    }
+
+    final dbDocuments = dbDocumentsResult.tryGetSuccess()!;
+    return _updateCacheAndNotify(dbDocuments);
+  }
+
+  Result<List<Document>, Exception> _updateCacheAndNotify(
+    List<Document> documents,
+  ) {
+    _documentListCache.set(documents);
+    notifyListeners();
+    return Result.success(List.unmodifiable(documents));
+  }
+
+  Future<Result<List<Document>, Exception>> _listDbDocuments() async {
+    final dbResult = await _localDatabase.listDocuments();
+
+    if (dbResult.isError()) {
+      final error = dbResult.tryGetError()!;
+      _log.severe("Failed to fetch document list from cache", error);
+      return Result.error(error);
+    }
+
+    final dbDocuments = dbResult
+        .tryGetSuccess()!
+        .where((dbDoc) => dbDoc.deletedAt == null)
+        .map(_mapDbModelToDocument)
+        .toList(growable: false);
+
+    return Result.success(List.unmodifiable(dbDocuments));
   }
 
   @override
@@ -338,7 +367,9 @@ class DocumentRepositoryImpl extends DocumentRepository {
         );
       }
 
-      await listDocuments(forceRefresh: true);
+      // await listDocuments(forceRefresh: true); // eager-loading
+      _documentListCache.clear(); // lazy-loading
+      notifyListeners();
 
       return Result.success(_mapApiModelToDocument(apiDocument));
     } on Exception catch (e, stackTrace) {
@@ -364,7 +395,9 @@ class DocumentRepositoryImpl extends DocumentRepository {
         return Result.error(error);
       }
 
-      await listDocuments(forceRefresh: true);
+      // await listDocuments(forceRefresh: true); // eager-loading
+      _documentListCache.clear(); // lazy-loading
+      notifyListeners();
 
       return Result.success(null);
     } on Exception catch (e, stackTrace) {
@@ -415,22 +448,55 @@ class DocumentRepositoryImpl extends DocumentRepository {
     );
   }
 
-  bool _isDbMetadataCacheStale(DocumentDbModel model) {
-    final age = DateTime.now().difference(model.cachedAt);
-    return age > CachedElement.defaultMaxAge;
+  Future<File> _writeBytesToTempFile(String uuid, Uint8List bytes) async {
+    final sanitizedUuid = uuid.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
+    final filePath = 'tmp_documents/document_$sanitizedUuid.pdf';
+    return await _fileSystemService.writeTempFile(bytes, filePath);
+  }
+}
+
+class _DocumentListCache {
+  CachedElement<List<Document>>? _cache;
+
+  /// Returns true if the cache exists and is not stale
+  bool isValid() {
+    final cache = _cache;
+    if (cache == null) {
+      return false;
+    }
+    return !cache.isStale(maxAge: CachedElement.defaultMaxAge);
   }
 
-  Document? _getDocumentFromMemory(String uuid) {
-    final cache = _documentListCache;
-    if (cache == null) {
+  /// Returns the cached list if it exists and is valid, otherwise null
+  List<Document>? get() {
+    if (!isValid()) {
+      return null;
+    }
+    return _cache?.data;
+  }
+
+  /// Stores a new list in the cache
+  void set(List<Document> documents) {
+    _cache = CachedElement(List.unmodifiable(documents));
+  }
+
+  /// Clears the cache
+  void clear() {
+    _cache = null;
+  }
+
+  /// Retrieves a document by UUID from the cache if available
+  Document? getByUuid(String uuid) {
+    if (!isValid()) {
       return null;
     }
 
-    if (cache.isStale(maxAge: CachedElement.defaultMaxAge)) {
+    final data = _cache?.data;
+    if (data == null) {
       return null;
     }
 
-    for (final document in cache.data) {
+    for (final document in data) {
       if (document.uuid == uuid) {
         return document;
       }
@@ -438,20 +504,4 @@ class DocumentRepositoryImpl extends DocumentRepository {
 
     return null;
   }
-
-  Future<File> _writeBytesToTempFile(String uuid, Uint8List bytes) async {
-    final sanitizedUuid = uuid.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
-    final filePath =
-        '${Directory.systemTemp.path}${Platform.pathSeparator}document_$sanitizedUuid.pdf';
-    final file = File(filePath);
-    await file.writeAsBytes(bytes, flush: true);
-    return file;
-  }
-}
-
-class _DocumentListCache {
-  // In-memory cache for document list to avoid frequent database queries
-  // May be refreshed from database or API by the repository through a method call
-  // Has defined expiration date controlled by CachedElement
-  // Has query methods like getByUuid, previously implemented on the repository directly
 }

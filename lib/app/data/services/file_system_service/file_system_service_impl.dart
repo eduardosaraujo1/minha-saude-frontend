@@ -119,4 +119,12 @@ class FileSystemServiceImpl implements FileSystemService {
       return Error(Exception('Failed to store document: $e'));
     }
   }
+
+  @override
+  Future<File> writeTempFile(Uint8List bytes, String filepath) async {
+    final tempDir = await getTemporaryDirectory();
+    final tempFile = File('${tempDir.path}/$filepath');
+    await tempFile.writeAsBytes(bytes, flush: true);
+    return tempFile;
+  }
 }

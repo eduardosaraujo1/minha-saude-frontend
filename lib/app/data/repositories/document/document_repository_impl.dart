@@ -81,6 +81,10 @@ class DocumentRepositoryImpl extends DocumentRepository {
     throw UnimplementedError();
   }
 
+  // TODO CHANGE: getDocumentFile or getDocumentMeta no longer invalidates file cache; files are always the same
+  // no matter the metadata, so we can keep them indefinitely
+  // Metadata is cached for 1 hour, files are cached indefinitely until the user logs out
+  // This means that getDocumentMeta can invalidate metadata cache, but getDocumentFile never invalidates file cache
   @override
   Future<Result<File, Exception>> getDocumentFile(String uuid) {
     // 1. Query cache database for document metadata using UUID

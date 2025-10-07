@@ -4,10 +4,15 @@ import 'package:multiple_result/multiple_result.dart';
 
 import 'document_api_client.dart';
 import 'models/document_api_model.dart';
+import '../http_client.dart';
 
 class DocumentApiClientImpl implements DocumentApiClient {
+  DocumentApiClientImpl(this._httpClient);
+
+  final HttpClient _httpClient;
+
   @override
-  Future<Result<DocumentApiModel, Exception>> documentUpload({
+  Future<Result<DocumentApiModel, Exception>> uploadDocument({
     required File file,
     String? titulo,
     String? nomePaciente,
@@ -20,7 +25,7 @@ class DocumentApiClientImpl implements DocumentApiClient {
   }
 
   @override
-  Future<Result<List<DocumentApiModel>, Exception>> documentsList() {
+  Future<Result<List<DocumentApiModel>, Exception>> listDocuments() {
     // TODO: implement documentsList
     throw UnimplementedError();
   }

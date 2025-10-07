@@ -45,7 +45,7 @@ class FakeDocumentApiClient implements DocumentApiClient {
   }
 
   @override
-  Future<Result<DocumentApiModel, Exception>> documentUpload({
+  Future<Result<DocumentApiModel, Exception>> uploadDocument({
     required File file,
     String? titulo,
     String? nomePaciente,
@@ -87,7 +87,7 @@ class FakeDocumentApiClient implements DocumentApiClient {
   }
 
   @override
-  Future<Result<List<DocumentApiModel>, Exception>> documentsList() async {
+  Future<Result<List<DocumentApiModel>, Exception>> listDocuments() async {
     try {
       // Filter out soft-deleted documents
       final activeDocuments = _documents

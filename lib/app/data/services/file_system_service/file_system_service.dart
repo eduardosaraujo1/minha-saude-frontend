@@ -19,7 +19,7 @@ abstract class FileSystemService {
   Future<Result<void, Exception>> storeDocumentFile(String uuid, File file);
 
   /// Retrieve a document file by its UUID from app-specific storage (applicationCache).
-  Future<Result<File, Exception>> getDocument(String uuid);
+  Future<Result<File?, Exception>> getDocument(String uuid);
 
   /// Clear all documents from app-specific storage (applicationCache).
   Future<Result<void, Exception>> clearDocuments();

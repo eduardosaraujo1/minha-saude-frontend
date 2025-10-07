@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -9,6 +10,8 @@ import 'file_system_service.dart';
 
 class FileSystemServiceImpl implements FileSystemService {
   static const String documentsPathPrefix = "documents/";
+
+  final _log = Logger("FileSystemServiceImpl");
 
   @override
   Future<File?> pickPdfFile() async {
@@ -41,14 +44,15 @@ class FileSystemServiceImpl implements FileSystemService {
   }
 
   @override
-  Future<Result<File, Exception>> getDocument(String uuid) async {
+  Future<Result<File?, Exception>> getDocument(String uuid) async {
     try {
       final cacheDir = await getApplicationCacheDirectory();
       final filePath = '${cacheDir.path}/$documentsPathPrefix$uuid.pdf';
       final file = File(filePath);
 
       if (!await file.exists()) {
-        return Error(Exception('Document with UUID $uuid not found'));
+        _log.warning('Document with UUID $uuid not found');
+        return Success(null);
       }
 
       return Success(file);

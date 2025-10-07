@@ -1,10 +1,14 @@
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:minha_saude_frontend/app/data/services/api/auth/auth_api_client_impl.dart';
-import 'package:minha_saude_frontend/app/data/services/api/document/document_api_client.dart';
-import 'package:minha_saude_frontend/app/data/services/cache_database/cache_database.dart';
-import 'package:minha_saude_frontend/app/data/services/api/http_client.dart';
 
+import '../app/data/services/file_system_service/file_system_service_impl.dart';
+import '../app/data/services/api/auth/auth_api_client_impl.dart';
+import '../app/data/services/api/document/document_api_client.dart';
+import '../app/data/services/cache_database/cache_database.dart';
+import '../app/data/services/api/http_client.dart';
+import '../app/data/services/cache_database/cache_database_impl.dart';
+import '../app/data/services/api/document/document_api_client_impl.dart';
+import '../app/data/services/api/document/fake_document_api_client.dart';
 import '../app/data/services/file_system_service/file_system_service.dart';
 import 'environment.dart';
 import '../app/ui/core/theme_provider.dart';
@@ -43,12 +47,18 @@ Future<void> registerDependenciesDev({
     mockGoogle ? GoogleServiceFake() : GoogleServiceImpl(GoogleSignIn.instance),
   );
   _getIt.registerSingleton<HttpClient>(HttpClient(baseUrl: Environment.apiUrl));
-
   _getIt.registerSingleton<AuthApiClient>(
     mockApiClient
         ? FakeAuthApiClient()
         : AuthApiClientImpl(_getIt<HttpClient>()),
   );
+  _getIt.registerSingleton<DocumentApiClient>(
+    mockApiClient
+        ? FakeDocumentApiClient()
+        : DocumentApiClientImpl(_getIt<HttpClient>()),
+  );
+  _getIt.registerSingleton<CacheDatabase>(CacheDatabaseImpl());
+  _getIt.registerSingleton<FileSystemService>(FileSystemServiceImpl());
 
   // Repositories
   _getIt.registerSingleton<AuthRepository>(
@@ -67,10 +77,12 @@ Future<void> registerDependenciesDev({
     ),
   );
 
+  // Actions
   _getIt.registerSingleton<LoginWithGoogle>(
     LoginWithGoogle(_getIt<AuthRepository>()),
   );
 
+  // Binds
   _getIt<HttpClient>().authHeaderProvider = () async {
     final token = await _getIt<AuthRepository>().getAuthToken();
     final t = token.tryGetSuccess();

@@ -1,11 +1,11 @@
-/*
 import 'package:flutter/material.dart';
+import 'package:minha_saude_frontend/app/utils/command.dart';
+import 'package:multiple_result/multiple_result.dart';
 import 'package:pdfx/pdfx.dart';
 
 import '../../../../data/repositories/document/document_repository.dart';
-import '../../../../../config/asset.dart';
 
-class DocumentUploadViewModel {
+class DocumentUploadViewModel extends ChangeNotifier {
   // First calls the Repository to either call file uploader or scan document
   // Then, if successful, creates a PdfController to be used as a preview
   // Finally, SOMEHOW, needs to pass the file to the next step (DocumentInfoForm, unsure if go_router can send it)
@@ -13,55 +13,78 @@ class DocumentUploadViewModel {
   final DocumentRepository documentRepository;
   final DocumentCreateType _type;
 
-  final status = ValueNotifier<PageStatus>(PageStatus.initial);
-  final errorMessage = ValueNotifier<String?>(null);
-
+  PageStatus _status = PageStatus.initial;
+  String? _errorMessage;
   PdfController? _pdfController;
 
+  PageStatus get status => _status;
+  String? get errorMessage => _errorMessage;
   PdfController? get pdfController => _pdfController;
 
+  late final Command0<void, Exception> loadDocument;
+
   DocumentUploadViewModel(this._type, this.documentRepository) {
-    _getDocument();
+    loadDocument = Command0(_loadDocument);
+    loadDocument.execute();
   }
 
+  @override
   void dispose() {
-    // status.dispose();
-    // errorMessage.dispose();
-    // _pdfController?.dispose();
+    _pdfController?.dispose();
+    super.dispose();
   }
 
-  void _getDocument() async {
-    status.value = PageStatus.loading;
+  Future<Result<void, Exception>> _loadDocument() async {
+    _status = PageStatus.loading;
+    _errorMessage = null;
+    notifyListeners();
 
-    if (_type == DocumentCreateType.scan) {
-      // mock decision
-      //   DocumentCreateMode.scan) {
-      // final result = await uploadRepository.scanDocument();
+    try {
+      if (_type == DocumentCreateType.scan) {
+        final result = await documentRepository.scanDocumentFile();
 
-      // if (result.isError()) {
-      //   status.value = PageStatus.error;
-      //   errorMessage.value = result.tryGetError()?.toString();
-      // } else {
-      //   _pdfController = PdfController(
-      //     document: PdfDocument.openFile(result.getOrThrow().path),
-      //   );
-      // }
-      // Mock:
-      _pdfController = PdfController(
-        document: PdfDocument.openAsset(Asset.fakeDocumentPdf),
-      );
-      status.value = PageStatus.loaded;
-    } else if (_type == DocumentCreateType.upload) {
-      final result = await documentRepository.uploadDocument();
+        if (result.isError()) {
+          _status = PageStatus.error;
+          _errorMessage = result.tryGetError()?.toString();
+          notifyListeners();
+          return Result.error(result.tryGetError()!);
+        }
 
-      if (result.isError()) {
-        status.value = PageStatus.error;
-        errorMessage.value = result.tryGetError()?.toString();
+        _pdfController = PdfController(
+          document: PdfDocument.openFile(result.getOrThrow().path),
+        );
+        _status = PageStatus.loaded;
+        notifyListeners();
+        return Result.success(null);
+      } else if (_type == DocumentCreateType.upload) {
+        final result = await documentRepository.pickDocumentFile();
+
+        if (result.isError()) {
+          _status = PageStatus.error;
+          _errorMessage = result.tryGetError()?.toString();
+          notifyListeners();
+          return Result.error(result.tryGetError()!);
+        }
+
+        _pdfController = PdfController(
+          document: PdfDocument.openFile(result.getOrThrow().path),
+        );
+        _status = PageStatus.loaded;
+        notifyListeners();
+        return Result.success(null);
+      } else {
+        _status = PageStatus.error;
+        _errorMessage = 'Tipo de criação de documento inválido.';
+        notifyListeners();
+        return Result.error(
+          Exception('Tipo de criação de documento inválido.'),
+        );
       }
-      status.value = PageStatus.loaded;
-    } else {
-      status.value = PageStatus.error;
-      errorMessage.value = 'Tipo de criação de documento inválido.';
+    } catch (e) {
+      _status = PageStatus.error;
+      _errorMessage = e.toString();
+      notifyListeners();
+      return Result.error(Exception(e.toString()));
     }
   }
 }
@@ -69,4 +92,3 @@ class DocumentUploadViewModel {
 enum DocumentCreateType { scan, upload }
 
 enum PageStatus { initial, loading, loaded, error }
-*/

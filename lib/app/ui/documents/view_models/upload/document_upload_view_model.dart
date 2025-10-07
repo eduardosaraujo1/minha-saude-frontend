@@ -5,6 +5,7 @@ import 'package:pdfx/pdfx.dart';
 
 import '../../../../data/repositories/document/document_repository.dart';
 
+START FIXING STUFF HERE
 class DocumentUploadViewModel extends ChangeNotifier {
   // First calls the Repository to either call file uploader or scan document
   // Then, if successful, creates a PdfController to be used as a preview

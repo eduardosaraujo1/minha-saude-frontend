@@ -12,14 +12,10 @@
 ## Para fazer
 
 -   [ ] URGENT: compile-time type safety for get_it (riverpod?)
--   [ ] Escrever testes para DocumentRepository agora que o comportamento está definido (incomplete TDD)
--   [ ] Corrigir o FakeDocumentApiClient
--   [ ] Implementar métodos do DocumentRepository
+-   [ ] Implementar upload de documentos
 -   [ ] Corrigir widget de loginDecorator para funcionar em telas Wide
--   [ ] ???
 -   [ ] PdfPinchController: não suportado no Windows (ferramenta de teste), se possível verificar com Platform.\* API
--   [ ] Upload pdf via arquivo
--   [ ] Refatorar DocumentRepository para usar interface e consumir ApiClient
+-   [ ] Upload pdf via arquivo seletor
 -   [ ] Refatorar ProfileRepository para usar interface e consumir ApiClient
 -   [ ] Refatorar ShareRepository para usar interface e consumir ApiClient
 -   [ ] Refatorar tela de compartilhamento

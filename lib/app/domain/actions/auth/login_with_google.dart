@@ -4,9 +4,8 @@ import 'package:multiple_result/multiple_result.dart';
 import '../../../data/repositories/session/session_repository.dart';
 import '../../../data/repositories/auth/auth_repository.dart';
 import '../../models/auth/login_response/login_result.dart';
-import '../action.dart';
 
-class LoginWithGoogle implements Action {
+class LoginWithGoogle {
   LoginWithGoogle({
     required AuthRepository authRepository,
     required SessionRepository sessionRepository,
@@ -17,7 +16,6 @@ class LoginWithGoogle implements Action {
   final SessionRepository _sessionRepository;
   final _log = Logger("LoginWithGoogleAction");
 
-  @override
   Future<Result<RedirectResponse, Exception>> execute() async {
     try {
       // Get Google server auth token

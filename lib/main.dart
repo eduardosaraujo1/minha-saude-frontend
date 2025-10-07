@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logging/logging.dart';
@@ -18,7 +16,8 @@ void main() async {
     if (Environment.appEnv.isDev) {
       await registerDependenciesDev(
         mockApiClient: true,
-        mockGoogle: !(Platform.isAndroid || Platform.isIOS),
+        // mockGoogle: !(Platform.isAndroid || Platform.isIOS),
+        mockGoogle: true,
         mockScanner: true,
         mockSecureStorage: true,
       );

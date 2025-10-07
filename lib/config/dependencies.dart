@@ -13,7 +13,6 @@ import '../app/data/services/cache_database/cache_database_impl.dart';
 import '../app/data/services/api/document/document_api_client_impl.dart';
 import '../app/data/services/api/document/fake_document_api_client.dart';
 import '../app/data/services/file_system_service/file_system_service.dart';
-import 'environment.dart';
 import '../app/ui/core/theme_provider.dart';
 import '../app/domain/actions/auth/login_with_google.dart';
 import '../app/data/repositories/document/document_repository_impl.dart';
@@ -24,6 +23,7 @@ import '../app/data/services/api/auth/auth_api_client.dart';
 import '../app/data/services/doc_scanner/document_scanner.dart';
 import '../app/data/services/google/google_service.dart';
 import '../app/data/services/secure_storage/secure_storage.dart';
+import 'environment.dart';
 
 final _getIt = GetIt.instance;
 

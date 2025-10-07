@@ -95,7 +95,7 @@ class _DocumentListViewState extends State<DocumentListView> {
                   documents: viewModel.documents,
                   groupingAlgorithm: viewModel.selectedAlgorithm,
                   onDocumentTap: (document) {
-                    context.go('/documentos/${document.id}');
+                    context.go('/documentos/${document.uuid}');
                   },
                 ),
                 SizedBox(height: 60),

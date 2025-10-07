@@ -1,7 +1,8 @@
+/*
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/data/repositories/document_upload_repository.dart';
 import 'package:pdfx/pdfx.dart';
 
+import '../../../../data/repositories/document/document_repository.dart';
 import '../../../../../config/asset.dart';
 
 class DocumentUploadViewModel {
@@ -9,7 +10,7 @@ class DocumentUploadViewModel {
   // Then, if successful, creates a PdfController to be used as a preview
   // Finally, SOMEHOW, needs to pass the file to the next step (DocumentInfoForm, unsure if go_router can send it)
 
-  final DocumentUploadRepository uploadRepository;
+  final DocumentRepository documentRepository;
   final DocumentCreateType _type;
 
   final status = ValueNotifier<PageStatus>(PageStatus.initial);
@@ -19,7 +20,7 @@ class DocumentUploadViewModel {
 
   PdfController? get pdfController => _pdfController;
 
-  DocumentUploadViewModel(this._type, this.uploadRepository) {
+  DocumentUploadViewModel(this._type, this.documentRepository) {
     _getDocument();
   }
 
@@ -51,7 +52,7 @@ class DocumentUploadViewModel {
       );
       status.value = PageStatus.loaded;
     } else if (_type == DocumentCreateType.upload) {
-      final result = await uploadRepository.uploadDocumentFromFile();
+      final result = await documentRepository.uploadDocument();
 
       if (result.isError()) {
         status.value = PageStatus.error;
@@ -68,3 +69,4 @@ class DocumentUploadViewModel {
 enum DocumentCreateType { scan, upload }
 
 enum PageStatus { initial, loading, loaded, error }
+*/

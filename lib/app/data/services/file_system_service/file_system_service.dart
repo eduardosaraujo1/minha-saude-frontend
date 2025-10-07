@@ -9,14 +9,7 @@ abstract class FileSystemService {
 
   /// Store a document in app-specific storage (applicationCache) with the provided UUID.
   /// Override any document if it already exists.
-  Future<Result<void, Exception>> storeDocumentBytes(
-    String uuid,
-    Uint8List bytes,
-  );
-
-  /// Store a document in app-specific storage (applicationCache) with the provided UUID.
-  /// Override any document if it already exists.
-  Future<Result<void, Exception>> storeDocumentFile(String uuid, File file);
+  Future<Result<File, Exception>> storeDocument(String uuid, Uint8List bytes);
 
   /// Retrieve a document file by its UUID from app-specific storage (applicationCache).
   Future<Result<File?, Exception>> getDocument(String uuid);

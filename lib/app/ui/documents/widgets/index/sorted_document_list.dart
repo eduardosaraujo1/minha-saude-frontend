@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 
 import '../../../../domain/models/document/document.dart';
@@ -35,7 +33,7 @@ class SortedDocumentList extends StatelessWidget {
   static const _uncategorizedLabel = 'Não organizado';
 
   Map<String, List<Document>> _groupDocuments() {
-    final LinkedHashMap<String, List<Document>> grouped = LinkedHashMap();
+    final Map<String, List<Document>> grouped = {};
 
     for (final document in documents) {
       final key = _resolveGroupKey(document);
@@ -54,12 +52,17 @@ class SortedDocumentList extends StatelessWidget {
       case GroupingAlgorithm.medico:
         return _normalizeKey(document.medico);
       case GroupingAlgorithm.data:
-        return _formatDateToMonthYear(document.dataDocumento);
+        return _normalizeDateKey(document.dataDocumento);
     }
   }
 
-  String _normalizeKey(String value) {
+  String _normalizeKey(String? value) {
+    if (value == null) {
+      return _uncategorizedLabel;
+    }
+
     final normalized = value.trim();
+
     if (normalized.isEmpty) {
       return _uncategorizedLabel;
     }
@@ -67,9 +70,31 @@ class SortedDocumentList extends StatelessWidget {
     return normalized;
   }
 
-  String _formatDateToMonthYear(DateTime date) {
+  String _normalizeDateKey(DateTime? date) {
+    if (date == null) {
+      return _uncategorizedLabel;
+    }
     final monthName = _months[date.month - 1];
     return '$monthName ${date.year}';
+  }
+
+  List<String> _sortedKeys(Iterable<String> keys) {
+    if (groupingAlgorithm == GroupingAlgorithm.data) {
+      return keys.toList();
+    }
+
+    final result = keys.toList()
+      ..sort((a, b) {
+        if (a == _uncategorizedLabel) {
+          return -1;
+        }
+        if (b == _uncategorizedLabel) {
+          return 1;
+        }
+        return a.compareTo(b);
+      });
+
+    return result;
   }
 
   @override
@@ -85,15 +110,18 @@ class SortedDocumentList extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(key, style: Theme.of(context).textTheme.titleMedium),
+          children: <Widget>[
+            Text(
+              key, //
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: groupDocuments.map((document) {
                 return DocumentItem(
-                  title: document.titulo,
+                  title: document.titulo ?? "Sem nome",
                   onTap: () => onDocumentTap(document),
                 );
               }).toList(),
@@ -103,25 +131,6 @@ class SortedDocumentList extends StatelessWidget {
         );
       }).toList(),
     );
-  }
-
-  List<String> _sortedKeys(Iterable<String> keys) {
-    if (groupingAlgorithm == GroupingAlgorithm.data) {
-      return keys.toList();
-    }
-
-    final result = keys.toList()
-      ..sort((a, b) {
-        if (a == _uncategorizedLabel) {
-          return 1;
-        }
-        if (b == _uncategorizedLabel) {
-          return -1;
-        }
-        return a.compareTo(b);
-      });
-
-    return result;
   }
 }
 

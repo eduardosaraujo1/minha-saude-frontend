@@ -1,13 +1,16 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:logging/logging.dart';
 import 'package:minha_saude_frontend/app/utils/cached_element/cached_element.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../services/api/document/document_api_client.dart';
+import '../../services/api/document/models/document_api_model.dart';
 import '../../services/doc_scanner/document_scanner.dart';
 import '../../services/file_system_service/file_system_service.dart';
 import '../../services/cache_database/cache_database.dart';
+import '../../services/cache_database/models/document_db_model.dart';
 import '../../../domain/models/document/document.dart';
 import 'document_repository.dart';
 
@@ -16,13 +19,13 @@ class DocumentRepositoryImpl extends DocumentRepository {
     this._documentApiClient,
     this._localDatabase,
     this._documentScanner,
-    this._filePickerService,
+    this._fileSystemService,
   );
 
   final DocumentApiClient _documentApiClient;
   final DocumentScanner _documentScanner;
   final CacheDatabase _localDatabase;
-  final FileSystemService _filePickerService;
+  final FileSystemService _fileSystemService;
 
   final _log = Logger("DocumentRepositoryImpl");
 
@@ -31,7 +34,7 @@ class DocumentRepositoryImpl extends DocumentRepository {
   @override
   Future<Result<File, Exception>> pickDocumentFile() async {
     try {
-      final file = await _filePickerService.pickPdfFile();
+      final file = await _fileSystemService.pickPdfFile();
 
       if (file == null) {
         _log.warning("User canceled file picking");
@@ -63,77 +66,237 @@ class DocumentRepositoryImpl extends DocumentRepository {
   }
 
   @override
-  Future<Result<void, Exception>> uploadDocument(
+  Future<Result<Document, Exception>> uploadDocument(
     File file, {
     required String paciente,
     required String? titulo,
     required String? tipo,
     required String? medico,
     required DateTime? dataDocumento,
-  }) {
-    // 1. Upload document to API, retreiving DocumentApiModel
+  }) async {
+    try {
+      final uploadResult = await _documentApiClient.uploadDocument(
+        file: file,
+        titulo: titulo,
+        nomePaciente: paciente,
+        nomeMedico: medico,
+        tipoDocumento: tipo,
+        dataDocumento: dataDocumento,
+      );
 
-    // 2. Store metadata in local database
+      if (uploadResult.isError()) {
+        final error = uploadResult.tryGetError()!;
+        _log.severe("Failed to upload document", error);
+        return Result.error(error);
+      }
 
-    // 3. Store file locally using UUID from the DocumentApiModel
+      final apiDocument = uploadResult.tryGetSuccess()!;
 
-    // Always use try/catch to return Result.error on exceptions for handling on ui
-    throw UnimplementedError();
+      final cacheResult = await _cacheDocumentMetadata(apiDocument);
+      if (cacheResult.isError()) {
+        final error = cacheResult.tryGetError()!;
+        _log.warning("Failed to cache uploaded document metadata", error);
+        return Result.error(error);
+      }
+
+      Uint8List fileBytes;
+      try {
+        fileBytes = await file.readAsBytes();
+      } catch (e) {
+        _log.warning("Failed to read uploaded file bytes for local storage", e);
+        return Result.error(Exception("Failed to read uploaded file bytes"));
+      }
+
+      final storeResult = await _fileSystemService.storeDocument(
+        apiDocument.uuid,
+        fileBytes,
+      );
+
+      if (storeResult.isError()) {
+        final error = storeResult.tryGetError()!;
+        _log.warning("Failed to store uploaded document locally", error);
+        return Result.error(error);
+      }
+
+      _documentListCache = null;
+      notifyListeners();
+
+      return Result.success(_mapApiModelToDocument(apiDocument));
+    } on Exception catch (e, stackTrace) {
+      _log.severe("Unexpected error uploading document", e, stackTrace);
+      return Result.error(e);
+    }
   }
 
-  // TODO CHANGE: getDocumentFile or getDocumentMeta no longer invalidates file cache; files are always the same
-  // no matter the metadata, so we can keep them indefinitely
-  // Metadata is cached for 1 hour, files are cached indefinitely until the user logs out
-  // This means that getDocumentMeta can invalidate metadata cache, but getDocumentFile never invalidates file cache
-  // That way, getDocumentFile does not query the CacheDatabase and just checks if file exists locally
   @override
-  Future<Result<File, Exception>> getDocumentFile(String uuid) {
-    // 2. Check if file exists locally using FileSystemService with UUID
-    //    - Store result as boolean for later use
+  Future<Result<File, Exception>> getDocumentFile(String uuid) async {
+    try {
+      final localResult = await _fileSystemService.getDocument(uuid);
 
-    // 3. Guard: If cache is not stale (expired) and local file exists
-    // -> return local file immediately (cache hit)
+      if (localResult.isError()) {
+        _log.warning(
+          "Failed to retrieve document from local storage",
+          localResult.tryGetError()!,
+        );
+      }
 
-    // 4. Download document from API using UUID
-    //    - Guard: If download fails -> check if we have file as fallback
-    //      - If fallback exists -> log warning and return stale cached file
-    //      - If no fallback -> return error
+      // If file exists locally, return it
+      final localFile = localResult.tryGetSuccess();
+      if (localFile != null) {
+        return Result.success(localFile);
+      }
 
-    // 5. Save downloaded file to FileSystemService using UUID
-    //    - Guard: If save fails -> log error but still return downloaded file (don't fail the request)
+      // Get file from remote and store locally ASAP
+      final downloadResult = await _documentApiClient.downloadDocument(uuid);
+      if (downloadResult.isError()) {
+        final error = downloadResult.tryGetError()!;
+        _log.severe("Failed to download document", error);
+        return Result.error(error);
+      }
 
-    // 7. Return the downloaded file
+      final bytes = downloadResult.tryGetSuccess()!;
 
-    throw UnimplementedError();
+      final storeResult = await _fileSystemService.storeDocument(uuid, bytes);
+
+      if (storeResult.isError()) {
+        _log.warning(
+          "Failed to persist downloaded document bytes locally: returning bytes without caching",
+          storeResult.tryGetError()!,
+        );
+        final file = await _writeBytesToTempFile(uuid, bytes);
+
+        return Result.success(file);
+      }
+
+      // Return the stored file
+      final storedFile = storeResult.tryGetSuccess()!;
+
+      return Result.success(storedFile);
+    } on Exception catch (e, stackTrace) {
+      _log.severe("Unexpected error fetching document file", e, stackTrace);
+      return Result.error(e);
+    }
   }
 
   @override
-  Future<Result<Document, Exception>> getDocumentMeta(String uuid) {
-    // 1. Query cache database for document metadata using UUID
+  Future<Result<Document, Exception>> getDocumentMeta(
+    String uuid, {
+    bool forceRefresh = false,
+  }) async {
+    try {
+      final memoryDocument = _getDocumentFromMemory(uuid);
+      if (!forceRefresh && memoryDocument != null) {
+        return Result.success(memoryDocument);
+      }
 
-    // 2. If cache exists and is not stale -> return cached metadata (cache hit)
+      DocumentDbModel? cachedModel;
+      final cacheResult = await _localDatabase.getDocument(uuid);
+      if (cacheResult.isError()) {
+        _log.warning(
+          "Unexpected error fetching document metadata from cache",
+          cacheResult.tryGetError()!,
+        );
+      } else {
+        cachedModel = cacheResult.tryGetSuccess();
+        if (!forceRefresh &&
+            cachedModel != null &&
+            !_isDbMetadataCacheStale(cachedModel)) {
+          return Result.success(_mapDbModelToDocument(cachedModel));
+        }
+      }
 
-    // 3. Fetch document metadata from API using UUID
+      final apiResult = await _documentApiClient.getDocument(uuid);
+      if (apiResult.isError()) {
+        final error = apiResult.tryGetError()!;
+        if (cachedModel != null) {
+          _log.warning(
+            "API error fetching document metadata, returning cached value",
+            error,
+          );
+          return Result.success(_mapDbModelToDocument(cachedModel));
+        }
 
-    // 4. Store or update metadata in cache database with new data and current timestamp
+        _log.severe("Failed to fetch document metadata", error);
+        return Result.error(error);
+      }
 
-    // TODO: implement getDocumentMeta
-    throw UnimplementedError();
+      final apiDocument = apiResult.tryGetSuccess()!;
+      final cacheResult2 = await _cacheDocumentMetadata(apiDocument);
+      if (cacheResult2.isError()) {
+        _log.warning(
+          "Failed to cache document metadata after API refresh",
+          cacheResult2.tryGetError()!,
+        );
+      }
+
+      final document = _mapApiModelToDocument(apiDocument);
+
+      await listDocuments(forceRefresh: true);
+
+      return Result.success(document);
+    } on Exception catch (e, stackTrace) {
+      _log.severe(
+        "Unexpected error retrieving document metadata",
+        e,
+        stackTrace,
+      );
+      return Result.error(e);
+    }
   }
 
   @override
   Future<Result<List<Document>, Exception>> listDocuments({
     bool forceRefresh = false,
-  }) {
-    // 1. If we have a cached list and it's not stale and forceRefresh is false
-    // -> return cached list (cache hit)
+  }) async {
+    try {
+      final cache = _documentListCache;
+      if (!forceRefresh && cache != null) {
+        if (!cache.isStale(maxAge: CachedElement.defaultMaxAge)) {
+          return Result.success(List.unmodifiable(cache.data));
+        }
+      }
 
-    // 2. Fetch document list from API
-    //    - Guard: If fetch fails -> log and return error
+      final apiResult = await _documentApiClient.listDocuments();
+      if (apiResult.isError()) {
+        _log.warning(
+          "Failed to fetch document list from API",
+          apiResult.tryGetError()!,
+        );
 
-    // 3. Store or update document list in cache database with new data and current timestamp
+        final dbResult = await _localDatabase.listDocuments();
+        if (dbResult.isError()) {
+          final error = dbResult.tryGetError()!;
+          _log.severe("Failed to fetch document list from cache", error);
+          return Result.error(error);
+        }
 
-    throw UnimplementedError();
+        final dbDocuments = dbResult
+            .tryGetSuccess()!
+            .where((dbDoc) => dbDoc.deletedAt == null)
+            .map(_mapDbModelToDocument)
+            .toList(growable: false);
+
+        final immutableDocs = List<Document>.unmodifiable(dbDocuments);
+        _documentListCache = CachedElement(immutableDocs);
+        notifyListeners();
+        return Result.success(immutableDocs);
+      }
+
+      final apiDocuments = apiResult.tryGetSuccess()!;
+      final documents = apiDocuments
+          .where((apiDoc) => apiDoc.deletedAt == null)
+          .map(_mapApiModelToDocument)
+          .toList(growable: false);
+
+      final immutableDocs = List<Document>.unmodifiable(documents);
+      _documentListCache = CachedElement(immutableDocs);
+      notifyListeners();
+
+      return Result.success(immutableDocs);
+    } on Exception catch (e, stackTrace) {
+      _log.severe("Unexpected error listing documents", e, stackTrace);
+      return Result.error(e);
+    }
   }
 
   @override
@@ -144,22 +307,139 @@ class DocumentRepositoryImpl extends DocumentRepository {
     String? tipo,
     String? medico,
     DateTime? dataDocumento,
-  }) {
-    // 1. Send update request to API with new metadata
-    //    - Guard: If update fails -> log and return error
+  }) async {
+    try {
+      final apiResult = await _documentApiClient.updateDocument(
+        uuid,
+        titulo: titulo,
+        nomePaciente: paciente,
+        nomeMedico: medico,
+        tipoDocumento: tipo,
+        dataDocumento: dataDocumento,
+      );
 
-    // 2. Update metadata in cache database with new data and current timestamp
+      if (apiResult.isError()) {
+        final error = apiResult.tryGetError()!;
+        _log.severe("Failed to update document metadata", error);
+        return Result.error(error);
+      }
 
-    // 3. Return updated Document model
-    throw UnimplementedError();
+      final apiDocument = apiResult.tryGetSuccess()!;
+      final cacheResult = await _cacheDocumentMetadata(apiDocument);
+      if (cacheResult.isError()) {
+        _log.warning(
+          "Failed to update cached document metadata",
+          cacheResult.tryGetError()!,
+        );
+      }
+
+      await listDocuments(forceRefresh: true);
+
+      return Result.success(_mapApiModelToDocument(apiDocument));
+    } on Exception catch (e, stackTrace) {
+      _log.severe("Unexpected error updating document metadata", e, stackTrace);
+      return Result.error(e);
+    }
   }
 
   @override
-  Future<Result<void, Exception>> moveToTrash(String uuid) {
-    // 1. Send delete request to API to move document to trash
-    //    - Guard: If update fails -> log and return error
+  Future<Result<void, Exception>> moveToTrash(String uuid) async {
+    try {
+      final remoteResult = await _documentApiClient.trashDocument(uuid);
+      if (remoteResult.isError()) {
+        final error = remoteResult.tryGetError()!;
+        _log.severe("Failed to move document to trash on server", error);
+        return Result.error(error);
+      }
 
-    // 2. Update metadata in cache database to reflect trashed status and current timestamp
-    throw UnimplementedError();
+      final cacheResult = await _localDatabase.trashDocument(uuid);
+      if (cacheResult.isError()) {
+        final error = cacheResult.tryGetError()!;
+        _log.warning("Failed to update cached document trash status", error);
+        return Result.error(error);
+      }
+
+      await listDocuments(forceRefresh: true);
+
+      return Result.success(null);
+    } on Exception catch (e, stackTrace) {
+      _log.severe("Unexpected error moving document to trash", e, stackTrace);
+      return Result.error(e);
+    }
+  }
+
+  Future<Result<DocumentDbModel, Exception>> _cacheDocumentMetadata(
+    DocumentApiModel apiModel,
+  ) {
+    return _localDatabase.upsertDocument(
+      apiModel.uuid,
+      titulo: apiModel.titulo,
+      paciente: apiModel.nomePaciente,
+      medico: apiModel.nomeMedico,
+      tipo: apiModel.tipoDocumento,
+      dataDocumento: apiModel.dataDocumento,
+      createdAt: apiModel.createdAt,
+      deletedAt: apiModel.deletedAt,
+      cachedAt: DateTime.now(),
+    );
+  }
+
+  Document _mapApiModelToDocument(DocumentApiModel apiModel) {
+    return Document(
+      uuid: apiModel.uuid,
+      paciente: apiModel.nomePaciente,
+      titulo: apiModel.titulo,
+      tipo: apiModel.tipoDocumento,
+      medico: apiModel.nomeMedico,
+      dataDocumento: apiModel.dataDocumento,
+      createdAt: apiModel.createdAt,
+      deletedAt: apiModel.deletedAt,
+    );
+  }
+
+  Document _mapDbModelToDocument(DocumentDbModel dbModel) {
+    return Document(
+      uuid: dbModel.uuid,
+      paciente: dbModel.paciente,
+      titulo: dbModel.titulo,
+      tipo: dbModel.tipo,
+      medico: dbModel.medico,
+      dataDocumento: dbModel.dataDocumento,
+      createdAt: dbModel.createdAt,
+      deletedAt: dbModel.deletedAt,
+    );
+  }
+
+  bool _isDbMetadataCacheStale(DocumentDbModel model) {
+    final age = DateTime.now().difference(model.cachedAt);
+    return age > CachedElement.defaultMaxAge;
+  }
+
+  Document? _getDocumentFromMemory(String uuid) {
+    final cache = _documentListCache;
+    if (cache == null) {
+      return null;
+    }
+
+    if (cache.isStale(maxAge: CachedElement.defaultMaxAge)) {
+      return null;
+    }
+
+    for (final document in cache.data) {
+      if (document.uuid == uuid) {
+        return document;
+      }
+    }
+
+    return null;
+  }
+
+  Future<File> _writeBytesToTempFile(String uuid, Uint8List bytes) async {
+    final sanitizedUuid = uuid.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
+    final filePath =
+        '${Directory.systemTemp.path}${Platform.pathSeparator}document_$sanitizedUuid.pdf';
+    final file = File(filePath);
+    await file.writeAsBytes(bytes, flush: true);
+    return file;
   }
 }

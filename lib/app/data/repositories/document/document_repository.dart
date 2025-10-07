@@ -23,7 +23,7 @@ abstract class DocumentRepository extends ChangeNotifier {
   /// Upload document file with metadata to server
   /// Also stored document metadata locally through LocalDatabase, only if the server
   /// upload is successful.
-  Future<Result<void, Exception>> uploadDocument(
+  Future<Result<Document, Exception>> uploadDocument(
     File file, {
     required String paciente,
     required String? titulo,
@@ -40,7 +40,10 @@ abstract class DocumentRepository extends ChangeNotifier {
   });
 
   /// Get single document by id with metadata (Document model)
-  Future<Result<Document, Exception>> getDocumentMeta(String uuid);
+  Future<Result<Document, Exception>> getDocumentMeta(
+    String uuid, {
+    bool forceRefresh = false,
+  });
 
   /// Get single document by id with metadata (Document model)
   Future<Result<File, Exception>> getDocumentFile(String uuid);
@@ -60,12 +63,3 @@ abstract class DocumentRepository extends ChangeNotifier {
   /// Document is not deleted permanently, it can be restored
   Future<Result<void, Exception>> moveToTrash(String uuid);
 }
-
-/*
-What I foresee is having to write in each method that involves a specific document:
-- Read the database for that document and see if it exists
-- If it exists, see if the cache time is greater than 1 hour (if it's not then just return its metadata or check if the file with the associated UUID exsits and return it; depends on what the function is)
-- If the cache is greater than 1 hour, try to connect to the documents/{uuid} endpoint or documents/{uuid}/download. If the connection fails then log it and return the cached value
-- With the new refreshed file or metadata, run an update query in the CacheDatabase with the document UUID with the new data, update the cachedAt column
-- For the file, I'll call .replaceFile(uuid, file), await for it to be completed
- */

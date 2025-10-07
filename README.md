@@ -25,4 +25,4 @@
 -   [ ] Escrever casos de teste para avaliar edge cases (especialmente no visualizar documento)
 -   [ ] Tratativa de erro caso o backend se torne não-responsivo
 -   [ ] Tirar título duplicado da Lixeira
--   [ ] Arrumar temas
+-   [ ] SE tiver tempo, considerar fazer a organização dos documentos ocorrer no backend via API para evitar um array com todos os documentos na memoria RAM (permitirá paginação). Requer repensar a arquitetura dos documentos

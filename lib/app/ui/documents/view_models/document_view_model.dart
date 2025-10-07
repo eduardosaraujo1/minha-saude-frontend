@@ -6,11 +6,11 @@ import '../../../../config/asset.dart';
 import '../../../domain/models/document/document.dart';
 
 class DocumentViewModel {
-  DocumentViewModel(this.documentId, this.documentRepository) {
+  DocumentViewModel(this.documentUuid, this.documentRepository) {
     _loadDocument();
   }
 
-  final String documentId;
+  final String documentUuid;
   final DocumentRepository documentRepository;
 
   final errorMessage = ValueNotifier<String?>(null);
@@ -26,7 +26,9 @@ class DocumentViewModel {
   Future<void> _loadDocument() async {
     documentLoadingStatus.value = DocumentLoadStatus.loading;
     // Load metadata
-    final documentQuery = await documentRepository.getDocumentById(documentId);
+    final documentQuery = await documentRepository.getDocumentMeta(
+      documentUuid,
+    );
 
     if (documentQuery.isError()) {
       errorMessage.value = documentQuery.tryGetError()!.toString();

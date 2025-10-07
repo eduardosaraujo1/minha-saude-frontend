@@ -18,7 +18,7 @@ sealed class CachedElement<T> with _$CachedElement<T> {
   @override
   final DateTime timestamp;
 
-  bool isStale(Duration? maxAge) {
+  bool isStale({Duration? maxAge}) {
     final age = DateTime.now().difference(timestamp);
     return forceStale || age > (maxAge ?? defaultMaxAge);
   }

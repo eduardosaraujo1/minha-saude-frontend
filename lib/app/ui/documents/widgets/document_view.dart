@@ -1,3 +1,4 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:intl/intl.dart';
@@ -376,3 +377,4 @@ class _DocumentInfoCard extends StatelessWidget {
     );
   }
 }
+*/

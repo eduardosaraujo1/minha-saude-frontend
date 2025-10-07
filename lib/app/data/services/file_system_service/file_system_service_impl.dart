@@ -64,7 +64,7 @@ class FileSystemServiceImpl implements FileSystemService {
   }
 
   @override
-  Future<Result<void, Exception>> storeDocumentBytes(
+  Future<Result<File, Exception>> storeDocument(
     String uuid,
     Uint8List bytes,
   ) async {
@@ -103,7 +103,7 @@ class FileSystemServiceImpl implements FileSystemService {
           await oldFile.delete();
         }
 
-        return const Success(null);
+        return Success(file);
       } catch (e) {
         // If writing failed and we renamed an old file, restore it
         if (hadExistingFile && await oldFile.exists()) {
@@ -115,21 +115,6 @@ class FileSystemServiceImpl implements FileSystemService {
       return Error(e);
     } catch (e) {
       return Error(Exception('Failed to store document: $e'));
-    }
-  }
-
-  @override
-  Future<Result<void, Exception>> storeDocumentFile(
-    String uuid,
-    File file,
-  ) async {
-    try {
-      final bytes = await file.readAsBytes();
-      return await storeDocumentBytes(uuid, bytes);
-    } on Exception catch (e) {
-      return Error(e);
-    } catch (e) {
-      return Error(Exception('Failed to store document file: $e'));
     }
   }
 }

@@ -130,9 +130,7 @@ class FakeDocumentApiClient implements DocumentApiClient {
   }
 
   @override
-  Future<Result<DocumentApiModel, Exception>> getDocumentMeta(
-    String uuid,
-  ) async {
+  Future<Result<DocumentApiModel, Exception>> getDocument(String uuid) async {
     try {
       // Find the document by UUID
       final document = _documents.firstWhere(

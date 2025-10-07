@@ -37,7 +37,7 @@ class DocumentApiClientImpl implements DocumentApiClient {
   }
 
   @override
-  Future<Result<DocumentApiModel, Exception>> getDocumentMeta(String uuid) {
+  Future<Result<DocumentApiModel, Exception>> getDocument(String uuid) {
     // TODO: implement getDocumentMeta
     throw UnimplementedError();
   }

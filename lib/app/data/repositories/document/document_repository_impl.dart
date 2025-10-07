@@ -85,12 +85,9 @@ class DocumentRepositoryImpl extends DocumentRepository {
   // no matter the metadata, so we can keep them indefinitely
   // Metadata is cached for 1 hour, files are cached indefinitely until the user logs out
   // This means that getDocumentMeta can invalidate metadata cache, but getDocumentFile never invalidates file cache
+  // That way, getDocumentFile does not query the CacheDatabase and just checks if file exists locally
   @override
   Future<Result<File, Exception>> getDocumentFile(String uuid) {
-    // 1. Query cache database for document metadata using UUID
-    //    - Guard: If cache entry doesn't exist -> call getDocumentMeta(uuid) to
-    //update cache and store in variable
-
     // 2. Check if file exists locally using FileSystemService with UUID
     //    - Store result as boolean for later use
 

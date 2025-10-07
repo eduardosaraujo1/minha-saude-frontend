@@ -24,7 +24,7 @@ abstract class DocumentApiClient {
 
   // | GET | /documents/{id} | {} | {uuid,titulo,nomePaciente?,nomeMedico?,tipoDocumento?,dataDocumento?,createdAt,deletedAt?} | Ver documento e metadados |
   /// Get a single document by ID
-  Future<Result<DocumentApiModel, Exception>> getDocumentMeta(String uuid);
+  Future<Result<DocumentApiModel, Exception>> getDocument(String uuid);
 
   // | PUT | /documents/{id} | {titulo?,nomePaciente?,nomeMedico?,tipoDocumento?,dataDocumento?} | {titulo,nomePaciente?,nomeMedico?,tipoDocumento?,dataDocumento?} | Editar metadados |
   /// Update document metadata

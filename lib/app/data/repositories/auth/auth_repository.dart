@@ -22,7 +22,9 @@ abstract class AuthRepository extends ChangeNotifier {
   Future<Result<void, Exception>> requestEmailCode(String email);
 
   /// Register a new user through token from login attempt
-  Future<Result<void, Exception>> register(UserRegisterModel registerModel);
+  ///
+  /// Returns [String] which is the auth session token if registration succeeds
+  Future<Result<String, Exception>> register(UserRegisterModel registerModel);
 
   /// Sign out the current user, both through server and clearing local data
   /// Clears the CacheDatabase as well as the auth token stored in SecureStorage
@@ -31,29 +33,4 @@ abstract class AuthRepository extends ChangeNotifier {
   // [GOOGLE INTEGRATION]
   /// Gets the current auth token, reading from SecureStorage if unavailable in memory
   Future<Result<String, Exception>> getGoogleServerToken();
-
-  // [STORED TOKENS]
-  /// Gets the current auth token, reading from SecureStorage if unavailable in memory
-  Future<Result<String?, Exception>> getAuthToken();
-
-  /// Sets the current auth token in session storage
-  Future<Result<void, Exception>> setAuthToken(String value);
-
-  /// Clear the auth token stored in SecureStorage
-  Future<Result<void, Exception>> clearAuthToken();
-
-  /// Checks if user has auth token
-  Future<bool> hasAuthToken();
-
-  /// Gets the locally stored register token
-  String? getRegisterToken();
-
-  /// Sets the locally stored register token
-  void setRegisterToken(String? value);
-
-  /// Remove locally stored register token
-  void clearRegisterToken(String? value);
-
-  /// Checks if the user has a register token
-  bool hasRegisterToken();
 }

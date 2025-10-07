@@ -453,6 +453,12 @@ class DocumentRepositoryImpl extends DocumentRepository {
     final filePath = 'tmp_documents/document_$sanitizedUuid.pdf';
     return await _fileSystemService.writeTempFile(bytes, filePath);
   }
+
+  @override
+  Future<void> resetCache() async {
+    _documentListCache.clear();
+    await _localDatabase.clear();
+  }
 }
 
 class _DocumentListCache {

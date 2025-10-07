@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/data/repositories/session/session_repository.dart';
+import 'package:minha_saude_frontend/app/domain/actions/auth/register_action.dart';
 import 'package:minha_saude_frontend/app/ui/core/widgets/scaffold_with_navbar.dart';
 
 import '../data/repositories/auth/auth_repository.dart';
@@ -25,14 +27,14 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _documentNavigatorKey = GlobalKey<NavigatorState>();
 
 GoRouter router() {
-  final authRepository = _getIt<AuthRepository>();
+  final sessionRepository = _getIt<SessionRepository>();
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: Routes.home,
-    refreshListenable: authRepository,
+    refreshListenable: sessionRepository,
     redirect: (BuildContext context, GoRouterState state) {
-      return _redirectHandler(context, state, authRepository);
+      return _redirectHandler(context, state, sessionRepository);
     },
     routes: [
       // Auth Routes (without bottom navigation)
@@ -53,7 +55,9 @@ GoRouter router() {
           GoRoute(
             path: Routes.registerRelative,
             builder: (BuildContext context, GoRouterState state) {
-              return RegisterView(RegisterViewModel(_getIt<AuthRepository>()));
+              return RegisterView(
+                RegisterViewModel(registerAction: _getIt<RegisterAction>()),
+              );
             },
           ),
         ],
@@ -219,12 +223,12 @@ GoRouter router() {
 Future<String?> _redirectHandler(
   BuildContext context,
   GoRouterState state,
-  AuthRepository authRepository,
+  SessionRepository sessionRepository,
 ) async {
   const authRoutes = <String>{Routes.login, Routes.tos, Routes.register};
 
-  final isAuthed = await authRepository.hasAuthToken();
-  final isRegistering = authRepository.getRegisterToken() != null;
+  final isAuthed = await sessionRepository.hasAuthToken();
+  final isRegistering = sessionRepository.getRegisterToken() != null;
   final requestedRoute = state.fullPath ?? state.matchedLocation;
   final isOnAuthRoute = authRoutes.contains(requestedRoute);
 

@@ -4,21 +4,20 @@ import 'package:multiple_result/multiple_result.dart';
 import '../../services/api/auth/auth_api_client.dart';
 import '../../services/api/auth/models/login_response/login_api_response.dart';
 import '../../services/google/google_service.dart';
-import '../../services/secure_storage/secure_storage.dart';
 import '../../../domain/models/auth/login_response/login_result.dart';
 import '../../../domain/models/auth/user_register_model/user_register_model.dart';
 import 'auth_repository.dart';
 
 class AuthRepositoryImpl extends AuthRepository {
-  AuthRepositoryImpl(this._secureStorage, this._googleService, this._apiClient);
+  AuthRepositoryImpl({
+    required GoogleService googleService,
+    required AuthApiClient apiClient,
+  }) : _googleService = googleService,
+       _apiClient = apiClient;
 
-  final SecureStorage _secureStorage;
   final GoogleService _googleService;
   final AuthApiClient _apiClient;
   final Logger _log = Logger("AuthRepositoryImplementation");
-
-  String? _registerToken;
-  String? _authTokenCache;
 
   Result<LoginResult, Exception> _parseApiLoginResponse(
     LoginApiResponse response,
@@ -32,24 +31,6 @@ class AuthRepositoryImpl extends AuthRepository {
         Exception("Não foi possível determinar situação de login"),
       );
     }
-  }
-
-  @override
-  Future<Result<String?, Exception>> getAuthToken() async {
-    // Return cached token if available
-    if (_authTokenCache != null) {
-      return Result.success(_authTokenCache);
-    }
-
-    // Try to get token from secure storage
-    final result = await _secureStorage.getAuthToken();
-    if (result.isSuccess()) {
-      _authTokenCache = result.tryGetSuccess();
-    } else {
-      return Result.error(Exception("Não foi possível autenticar o usuário."));
-    }
-
-    return Result.success(_authTokenCache);
   }
 
   @override
@@ -67,22 +48,6 @@ class AuthRepositoryImpl extends AuthRepository {
     }
 
     return Result.success(serverCode);
-  }
-
-  @override
-  String? getRegisterToken() {
-    return _registerToken;
-  }
-
-  @override
-  Future<bool> hasAuthToken() async {
-    final tokenResult = await getAuthToken();
-    return tokenResult.isSuccess() && tokenResult.tryGetSuccess() != null;
-  }
-
-  @override
-  bool hasRegisterToken() {
-    return _registerToken != null;
   }
 
   @override
@@ -144,21 +109,11 @@ class AuthRepositoryImpl extends AuthRepository {
 
   @override
   Future<void> logout() async {
-    // Call API logout if we have a token
-    if (_authTokenCache != null) {
-      await _apiClient.authLogout();
-    }
-
-    // Clear all local auth state
-    await clearAuthToken();
-    setRegisterToken(null);
-
-    // Reset CacheDatabase
-    // TODO: implement this
+    await _apiClient.authLogout();
   }
 
   @override
-  Future<Result<void, Exception>> register(
+  Future<Result<String, Exception>> register(
     UserRegisterModel registerModel,
   ) async {
     final result = await _apiClient.authRegister(registerModel);
@@ -169,15 +124,14 @@ class AuthRepositoryImpl extends AuthRepository {
 
     final registerResponse = result.tryGetSuccess()!;
 
-    // Clear register token since registration is complete
-    setRegisterToken(null);
-
-    // Store session token
-    if (registerResponse.sessionToken != null) {
-      await setAuthToken(registerResponse.sessionToken!);
+    if (registerResponse.sessionToken == null ||
+        registerResponse.sessionToken!.isEmpty) {
+      return Result.error(
+        Exception("Ocorreu um erro desconhecido ao tentar registrar."),
+      );
     }
 
-    return Result.success(null);
+    return Result.success(registerResponse.sessionToken!);
   }
 
   @override
@@ -189,49 +143,5 @@ class AuthRepositoryImpl extends AuthRepository {
     }
 
     return Result.success(null);
-  }
-
-  @override
-  Future<Result<void, Exception>> setAuthToken(String value) async {
-    _authTokenCache = value;
-    return await _secureStorage.setAuthToken(value);
-  }
-
-  @override
-  bool setRegisterToken(String? value) {
-    _registerToken = value;
-    return true;
-  }
-
-  @override
-  Future<Result<void, Exception>> clearAuthToken() async {
-    try {
-      // Limpar secureStorage
-      final clearResult = await _secureStorage.clearAuthToken();
-
-      if (clearResult.isError()) {
-        return Result.error(
-          Exception(
-            "Ocorreu um erro inesperado ao tentar remover o token de autenticação",
-          ),
-        );
-      }
-
-      // Limpar cache
-      _authTokenCache = null;
-
-      return Result.success(null);
-    } catch (e) {
-      return Result.error(
-        Exception(
-          "Ocorreu um eror crítico ao tentar remover o token de autenticação",
-        ),
-      );
-    }
-  }
-
-  @override
-  void clearRegisterToken(String? value) {
-    _registerToken = null;
   }
 }

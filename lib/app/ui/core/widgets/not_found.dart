@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
+
+import '../../../data/repositories/session/session_repository.dart';
+import '../../../domain/actions/auth/logout.dart';
 
 class NotFoundView extends StatelessWidget {
   final String fullPath;
@@ -10,7 +12,9 @@ class NotFoundView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authRepository = GetIt.I<AuthRepository>();
+    // final authRepository = GetIt.I<AuthRepository>();
+    final sessionRepository = GetIt.I<SessionRepository>();
+    final logoutAction = GetIt.I<Logout>();
 
     return Scaffold(
       body: Center(
@@ -52,7 +56,7 @@ class NotFoundView extends StatelessWidget {
               ),
               const SizedBox(height: 48),
               FutureBuilder(
-                future: authRepository.hasAuthToken(),
+                future: sessionRepository.hasAuthToken(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData && snapshot.data == true) {
                     return Column(
@@ -69,7 +73,7 @@ class NotFoundView extends StatelessWidget {
                         OutlinedButton.icon(
                           onPressed: () async {
                             // Clear registration status and auth token
-                            await authRepository.logout();
+                            await logoutAction.execute();
                             if (context.mounted) {
                               context.go('/login');
                             }

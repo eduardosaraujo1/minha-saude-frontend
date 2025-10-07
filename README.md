@@ -11,6 +11,7 @@
 
 ## Para fazer
 
+-   [ ] URGENT: compile-time type safety for get_it (riverpod?)
 -   [ ] Escrever testes para DocumentRepository agora que o comportamento está definido (incomplete TDD)
 -   [ ] Corrigir o FakeDocumentApiClient
 -   [ ] Implementar métodos do DocumentRepository

@@ -1,14 +1,20 @@
 import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../../data/repositories/session/session_repository.dart';
 import '../../../data/repositories/auth/auth_repository.dart';
 import '../../models/auth/login_response/login_result.dart';
 import '../action.dart';
 
 class LoginWithGoogle implements Action {
-  LoginWithGoogle(this._authRepository);
+  LoginWithGoogle({
+    required AuthRepository authRepository,
+    required SessionRepository sessionRepository,
+  }) : _authRepository = authRepository,
+       _sessionRepository = sessionRepository;
 
   final AuthRepository _authRepository;
+  final SessionRepository _sessionRepository;
   final _log = Logger("LoginWithGoogleAction");
 
   @override
@@ -51,7 +57,7 @@ class LoginWithGoogle implements Action {
   Future<Result<RedirectResponse, Exception>> _setAuthenticatedState(
     SuccessfulLoginResult loginResponse,
   ) async {
-    final tokenResult = await _authRepository.setAuthToken(
+    final tokenResult = await _sessionRepository.setAuthToken(
       loginResponse.sessionToken,
     );
 
@@ -65,7 +71,7 @@ class LoginWithGoogle implements Action {
     }
 
     // Clear any registration token that might be set from a previous registration attempt
-    _authRepository.clearRegisterToken(null);
+    _sessionRepository.clearRegisterToken();
 
     return Result.success(RedirectResponse.toHome);
   }
@@ -73,9 +79,9 @@ class LoginWithGoogle implements Action {
   Future _setRegisteringState(
     NeedsRegistrationLoginResult loginResponse,
   ) async {
-    _authRepository.setRegisterToken(loginResponse.registerToken);
+    _sessionRepository.setRegisterToken(loginResponse.registerToken);
 
-    final clearAuthResult = await _authRepository.clearAuthToken();
+    final clearAuthResult = await _sessionRepository.clearAuthToken();
     if (clearAuthResult.isError()) {
       return Result.error(
         Exception("Não foi possível limpar o token de autenticação atual."),

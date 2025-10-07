@@ -62,4 +62,6 @@ abstract class DocumentRepository extends ChangeNotifier {
   /// Move document to trash on server and update local cache
   /// Document is not deleted permanently, it can be restored
   Future<Result<void, Exception>> moveToTrash(String uuid);
+
+  Future<void> resetCache();
 }

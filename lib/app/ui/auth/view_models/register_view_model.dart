@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
-import 'package:minha_saude_frontend/app/domain/models/auth/user_register_model/user_register_model.dart';
-import 'package:minha_saude_frontend/app/routing/routes.dart';
-import 'package:minha_saude_frontend/app/utils/command.dart';
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../../routing/routes.dart';
+import '../../../utils/command.dart';
+import '../../../domain/actions/auth/register_action.dart';
+
 class RegisterViewModel {
-  RegisterViewModel(this._authRepository) {
+  RegisterViewModel({required RegisterAction registerAction})
+    : _registerAction = registerAction {
     registerCommand = Command0(_registerUser);
   }
 
   final RegisterForm form = RegisterForm();
-  final AuthRepository _authRepository;
+  final RegisterAction _registerAction;
   final Logger _log = Logger("RegisterViewModel");
 
   // final ValueNotifier<String?> errorMessage = ValueNotifier(null);
@@ -29,33 +30,24 @@ class RegisterViewModel {
         return Result.success(null);
       }
 
-      // Gerenciar erros para token de registro
-      // final regTokenResult = _authRepository.getRegisterToken();
-      final registerToken = _authRepository.getRegisterToken();
-      if (registerToken == null) {
-        _log.fine("Token de registro definido como nulo.");
-        return Result.error(
-          Exception("Token de registro expirado. Faça login novamente."),
-        );
-      }
-
       // Iniciar registro
-      final result = await _authRepository.register(
-        UserRegisterModel(
-          nome: form.nomeController.text.trim(),
-          cpf: form.cpfController.text.replaceAll(RegExp(r'[^0-9]'), ''),
-          dataNascimento: _parseDate(form.dataNascimentoController.text.trim()),
-          telefone: form.telefoneController.text.trim(),
-          registerToken: registerToken,
-        ),
+      final result = await _registerAction.execute(
+        nome: form.nomeController.text.trim(),
+        cpf: form.cpfController.text.replaceAll(RegExp(r'[^0-9]'), ''),
+        dataNascimento: _parseDate(form.dataNascimentoController.text.trim()),
+        telefone: form.telefoneController.text.trim(),
       );
 
       if (result.isError()) {
-        return Result.error(
-          Exception(
-            "Ocorreu um erro desconhecido durante o processo de registro",
-          ),
-        );
+        final error = result.tryGetError()!;
+
+        if (error is ExpiredLoginException) {
+          await Future.delayed(Duration(milliseconds: 500));
+          // TODO: display snackbar "Login expirado. Faça login novamente para continuar."
+          return Result.success(Routes.login);
+        }
+
+        return Result.error(result.tryGetError()!);
       }
 
       return Result.success(Routes.home);

@@ -1,5 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:minha_saude_frontend/app/data/repositories/session/session_repository.dart';
+import 'package:minha_saude_frontend/app/domain/actions/auth/logout.dart';
+import 'package:minha_saude_frontend/app/domain/actions/auth/register_action.dart';
 
 import '../app/data/services/file_system_service/file_system_service_impl.dart';
 import '../app/data/services/api/auth/auth_api_client_impl.dart';
@@ -63,9 +66,13 @@ Future<void> registerDependenciesDev({
   // Repositories
   _getIt.registerSingleton<AuthRepository>(
     AuthRepositoryImpl(
-      _getIt<SecureStorage>(),
-      _getIt<GoogleService>(),
-      _getIt<AuthApiClient>(),
+      googleService: _getIt<GoogleService>(),
+      apiClient: _getIt<AuthApiClient>(),
+    ),
+  );
+  _getIt.registerSingleton<SessionRepository>(
+    SessionRepositoryImpl(
+      secureStorage: _getIt<SecureStorage>(), //
     ),
   );
   _getIt.registerSingleton<DocumentRepository>(
@@ -79,12 +86,28 @@ Future<void> registerDependenciesDev({
 
   // Actions
   _getIt.registerSingleton<LoginWithGoogle>(
-    LoginWithGoogle(_getIt<AuthRepository>()),
+    LoginWithGoogle(
+      authRepository: _getIt<AuthRepository>(),
+      sessionRepository: _getIt<SessionRepository>(),
+    ),
+  );
+  _getIt.registerSingleton<Logout>(
+    Logout(
+      authRepository: _getIt<AuthRepository>(),
+      sessionRepository: _getIt<SessionRepository>(),
+      documentRepository: _getIt<DocumentRepository>(),
+    ),
+  );
+  _getIt.registerSingleton<RegisterAction>(
+    RegisterAction(
+      sessionRepository: _getIt<SessionRepository>(),
+      authRepository: _getIt<AuthRepository>(),
+    ),
   );
 
   // Binds
   _getIt<HttpClient>().authHeaderProvider = () async {
-    final token = await _getIt<AuthRepository>().getAuthToken();
+    final token = await _getIt<SessionRepository>().getAuthToken();
     final t = token.tryGetSuccess();
 
     if (t == null) {

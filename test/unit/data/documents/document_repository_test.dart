@@ -9,7 +9,7 @@ import 'package:multiple_result/multiple_result.dart';
 import 'package:test/test.dart';
 
 import 'package:minha_saude_frontend/app/data/services/api/document/document_api_client.dart';
-import 'package:minha_saude_frontend/app/data/services/cache_database/cache_database.dart';
+import 'package:minha_saude_frontend/app/data/services/cache_database/document_cache_database.dart';
 import 'package:minha_saude_frontend/app/data/services/doc_scanner/document_scanner.dart';
 import 'package:minha_saude_frontend/app/data/services/file_system_service/file_system_service.dart';
 
@@ -17,7 +17,7 @@ class MockDocumentApiClient extends Mock implements DocumentApiClient {}
 
 class MockDocumentScanner extends Mock implements DocumentScanner {}
 
-class MockCacheDatabase extends Mock implements CacheDatabase {
+class MockCacheDatabase extends Mock implements DocumentCacheDatabase {
   @override
   Future<void> init() async {}
 }
@@ -29,7 +29,7 @@ class MockFile extends Mock implements File {}
 void main() {
   late DocumentApiClient _documentApiClient;
   late DocumentScanner _documentScanner;
-  late CacheDatabase _localDatabase;
+  late DocumentCacheDatabase _localDatabase;
   late FileSystemService _fileSystemService;
   late DocumentRepositoryImpl _documentRepository;
 

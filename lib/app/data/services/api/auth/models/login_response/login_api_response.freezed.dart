@@ -214,7 +214,7 @@ return $default(_that.isRegistered,_that.sessionToken,_that.registerToken);case 
 @JsonSerializable()
 
 class _LoginApiResponse implements LoginApiResponse {
-  const _LoginApiResponse({required this.isRegistered, required this.sessionToken, required this.registerToken});
+  const _LoginApiResponse({required this.isRegistered, this.sessionToken, this.registerToken});
   factory _LoginApiResponse.fromJson(Map<String, dynamic> json) => _$LoginApiResponseFromJson(json);
 
 /// Indicates if user has completed registration

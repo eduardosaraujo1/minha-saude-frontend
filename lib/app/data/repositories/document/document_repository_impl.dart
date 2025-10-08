@@ -9,7 +9,7 @@ import '../../services/api/document/document_api_client.dart';
 import '../../services/api/document/models/document_api_model.dart';
 import '../../services/doc_scanner/document_scanner.dart';
 import '../../services/file_system_service/file_system_service.dart';
-import '../../services/cache_database/cache_database.dart';
+import '../../services/cache_database/document_cache_database.dart';
 import '../../services/cache_database/models/document_db_model.dart';
 import '../../../domain/models/document/document.dart';
 import 'document_repository.dart';
@@ -24,7 +24,7 @@ class DocumentRepositoryImpl extends DocumentRepository {
 
   final DocumentApiClient _documentApiClient;
   final DocumentScanner _documentScanner;
-  final CacheDatabase _localDatabase;
+  final DocumentCacheDatabase _localDatabase;
   final FileSystemService _fileSystemService;
 
   final _log = Logger("DocumentRepositoryImpl");

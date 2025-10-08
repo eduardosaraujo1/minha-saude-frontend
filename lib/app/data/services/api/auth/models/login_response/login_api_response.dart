@@ -10,10 +10,10 @@ abstract class LoginApiResponse with _$LoginApiResponse {
     required bool isRegistered,
 
     /// Session token for authenticated users (only when isRegistered = true)
-    required String? sessionToken,
+    String? sessionToken,
 
     /// Register token for users who need to complete registration (only when isRegistered = false)
-    required String? registerToken,
+    String? registerToken,
   }) = _LoginApiResponse;
 
   factory LoginApiResponse.fromJson(Map<String, dynamic> json) =>

@@ -2,11 +2,11 @@ import 'package:multiple_result/multiple_result.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'models/document_db_model.dart';
-import 'cache_database.dart';
+import 'document_cache_database.dart';
 
 /// Implementation of CacheDatabase using SQLite via sqflite package.
 /// Uses DocumentDbModel for database operations with snake_case field mapping.
-class CacheDatabaseImpl implements CacheDatabase {
+class DocumentCacheDatabaseImpl implements DocumentCacheDatabase {
   Database? _database;
 
   Database get database {

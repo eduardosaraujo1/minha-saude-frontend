@@ -65,7 +65,7 @@ class _$CachedElementCopyWithImpl<T,$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? data = freezed,Object? timestamp = freezed,Object? forceStale = null,}) {
   return _then(_self.copyWith(
 data: freezed == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
-as T,timestamp: freezed == timestamp ? _self.timestamp : timestamp // ignore: cast_nullable_to_non_nullable
+as T,timestamp: freezed == timestamp ? _self.timestamp! : timestamp // ignore: cast_nullable_to_non_nullable
 as DateTime?,forceStale: null == forceStale ? _self.forceStale : forceStale // ignore: cast_nullable_to_non_nullable
 as bool,
   ));

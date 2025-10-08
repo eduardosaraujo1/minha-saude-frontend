@@ -7,9 +7,9 @@ import '../app/domain/actions/auth/register_action.dart';
 import '../app/data/services/file_system_service/file_system_service_impl.dart';
 import '../app/data/services/api/auth/auth_api_client_impl.dart';
 import '../app/data/services/api/document/document_api_client.dart';
-import '../app/data/services/cache_database/cache_database.dart';
+import '../app/data/services/cache_database/document_cache_database.dart';
 import '../app/data/services/api/http_client.dart';
-import '../app/data/services/cache_database/cache_database_impl.dart';
+import '../app/data/services/cache_database/document_cache_database_impl.dart';
 import '../app/data/services/api/document/document_api_client_impl.dart';
 import '../app/data/services/api/document/fake_document_api_client.dart';
 import '../app/data/services/file_system_service/file_system_service.dart';
@@ -61,9 +61,9 @@ Future<void> registerDependenciesDev({
         : DocumentApiClientImpl(_getIt<HttpClient>()),
   );
 
-  final cacheDb = CacheDatabaseImpl();
+  final cacheDb = DocumentCacheDatabaseImpl();
   await cacheDb.init();
-  _getIt.registerSingleton<CacheDatabase>(cacheDb);
+  _getIt.registerSingleton<DocumentCacheDatabase>(cacheDb);
   _getIt.registerSingleton<FileSystemService>(FileSystemServiceImpl());
 
   // Repositories
@@ -81,7 +81,7 @@ Future<void> registerDependenciesDev({
   _getIt.registerSingleton<DocumentRepository>(
     DocumentRepositoryImpl(
       _getIt<DocumentApiClient>(),
-      _getIt<CacheDatabase>(),
+      _getIt<DocumentCacheDatabase>(),
       _getIt<DocumentScanner>(),
       _getIt<FileSystemService>(),
     ),

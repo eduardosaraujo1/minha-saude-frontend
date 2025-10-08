@@ -103,7 +103,7 @@ class SortedDocumentList extends StatelessWidget {
     final sortedKeys = _sortedKeys(groupedDocuments.keys);
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: sortedKeys.map((key) {
         final groupDocuments = groupedDocuments[key]!;
 

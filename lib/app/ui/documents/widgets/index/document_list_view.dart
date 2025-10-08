@@ -84,20 +84,34 @@ class _DocumentListViewState extends State<DocumentListView> {
             );
           }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SortedDocumentList(
-                  documents: viewModel.documents,
-                  groupingAlgorithm: viewModel.selectedAlgorithm,
-                  onDocumentTap: (document) {
-                    context.go('/documentos/${document.uuid}');
-                  },
-                ),
-                SizedBox(height: 60),
-              ],
+          return RefreshIndicator(
+            onRefresh: () async {
+              viewModel.load.execute(true);
+            },
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (viewModel.documents.isEmpty)
+                    Center(
+                      child: Text(
+                        'Nenhum documento encontrado.\nClique no botão abaixo para adicionar.',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                  SortedDocumentList(
+                    documents: viewModel.documents,
+                    groupingAlgorithm: viewModel.selectedAlgorithm,
+                    onDocumentTap: (document) {
+                      context.go('/documentos/${document.uuid}');
+                    },
+                  ),
+                  SizedBox(height: 60),
+                ],
+              ),
             ),
           );
         },

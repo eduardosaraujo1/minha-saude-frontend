@@ -85,12 +85,13 @@ class Command0<TSuccess, TException> extends Command<TSuccess, TException> {
   }
 }
 
-class Command1<TSuccess, TException> extends Command<TSuccess, TException> {
+class Command1<TSuccess, TException, TParam>
+    extends Command<TSuccess, TException> {
   Command1(this._action);
 
-  final CommandAction1<TSuccess, TException, dynamic> _action;
+  final CommandAction1<TSuccess, TException, TParam> _action;
 
-  Future<void> execute<T>(T param) async {
+  Future<void> execute(TParam param) async {
     await _execute(() => _action(param));
   }
 }

@@ -5,7 +5,7 @@
 abstract final class Routes {
   static const home = '/';
   static const login = '/login';
-  static const tos = '/register/tos';
+  static const tos = '/register';
   static const register = '$tos/$registerRelative';
   static const registerRelative = 'form';
 

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/ui/documents/widgets/index/document_upload_fab.dart';
 
 import '../../../../routing/routes.dart';
 import '../../../core/widgets/brand_app_bar.dart';
 import '../../view_models/index/document_list_view_model.dart';
+import 'document_upload_fab.dart';
 import 'sorted_document_list.dart';
 
 class DocumentListView extends StatefulWidget {

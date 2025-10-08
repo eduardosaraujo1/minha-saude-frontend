@@ -35,21 +35,20 @@ class _LoginViewState extends State<LoginView> {
   void _onUpdate() {
     try {
       final loginCommand = viewModel.loginWithGoogle;
-      final result = loginCommand.result;
+      final result = loginCommand.value;
 
-      if (loginCommand.isSuccess) {
-        final redirectPath = result!.getOrThrow();
-        if (mounted && redirectPath != null) {
-          context.go(redirectPath);
-        }
-        loginCommand.clearResult();
+      if (result == null) return;
+
+      if (result.isSuccess()) {
+        final redirectPath = result.getOrThrow();
+        if (mounted) context.go(redirectPath);
+
         return;
       }
 
-      if (loginCommand.isError) {
-        final error = result!.tryGetError()!;
+      if (result.isError()) {
+        final error = result.tryGetError()!;
         _showErrorSnack(error.toString());
-        loginCommand.clearResult();
         return;
       }
 
@@ -82,28 +81,35 @@ class _LoginViewState extends State<LoginView> {
               horizontal: 16.0,
               vertical: 16.0,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Iniciar Sessão",
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 16),
-                ButtonSignIn(
-                  icon: SvgPicture.asset(Asset.googleLogo, width: 24),
-                  label: "Entrar com Google",
-                  onPressed: loginWithGoogle.isExecuting
-                      ? null
-                      : () => loginWithGoogle.execute(),
-                ),
-                SizedBox(height: 8),
-                if (loginWithGoogle.isExecuting)
-                  SizedBox(
-                    width: double.infinity,
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-              ],
+            child: ListenableBuilder(
+              listenable: Listenable.merge([
+                loginWithGoogle.isExecuting, //
+              ]),
+              builder: (context, child) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Iniciar Sessão",
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    ButtonSignIn(
+                      icon: SvgPicture.asset(Asset.googleLogo, width: 24),
+                      label: "Entrar com Google",
+                      onPressed: loginWithGoogle.isExecuting.value
+                          ? null
+                          : () => loginWithGoogle.execute(),
+                    ),
+                    SizedBox(height: 8),
+                    if (loginWithGoogle.isExecuting.value)
+                      SizedBox(
+                        width: double.infinity,
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                  ],
+                );
+              },
             ),
           ),
         ],

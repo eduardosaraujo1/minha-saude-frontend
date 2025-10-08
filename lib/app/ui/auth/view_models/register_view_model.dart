@@ -1,33 +1,34 @@
+import 'package:command_it/command_it.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-import '../../../routing/routes.dart';
-import '../../../utils/command.dart';
 import '../../../domain/actions/auth/register_action.dart';
 
 class RegisterViewModel {
   RegisterViewModel({required RegisterAction registerAction})
     : _registerAction = registerAction {
-    registerCommand = Command0(_registerUser);
+    registerCommand = Command.createAsyncNoParam(
+      _registerUser,
+      initialValue: null,
+    );
   }
 
-  final RegisterForm form = RegisterForm();
   final RegisterAction _registerAction;
   final Logger _log = Logger("RegisterViewModel");
 
-  // final ValueNotifier<String?> errorMessage = ValueNotifier(null);
-  // final ValueNotifier<String?> redirectTo = ValueNotifier(null);
-  // final ValueNotifier<bool> isLoading = ValueNotifier(false);
+  final RegisterForm _form = RegisterForm();
 
-  late Command0<String?, Exception> registerCommand;
+  RegisterForm get form => _form;
+
+  late Command<void, Result<RegisterResult, Exception>?> registerCommand;
 
   /// Register user with current form data
-  Future<Result<String?, Exception>> _registerUser() async {
+  Future<Result<RegisterResult, Exception>?> _registerUser() async {
     try {
       // Validar form antes de executar qualquer lógica
       if (!form.validate()) {
-        return Result.success(null);
+        return null;
       }
 
       // Iniciar registro
@@ -42,15 +43,14 @@ class RegisterViewModel {
         final error = result.tryGetError()!;
 
         if (error is ExpiredLoginException) {
-          await Future.delayed(Duration(milliseconds: 500));
           // TODO: display snackbar "Login expirado. Faça login novamente para continuar."
-          return Result.success(Routes.login);
+          return Result.success(RegisterResult.tokenExpired);
         }
 
         return Result.error(result.tryGetError()!);
       }
 
-      return Result.success(Routes.home);
+      return Result.success(RegisterResult.success);
     } catch (e) {
       _log.severe("Ocorreu um erro desconhecido durante o registro: $e");
       return Result.error(
@@ -79,7 +79,7 @@ class RegisterViewModel {
   }
 }
 
-enum RegisterState { initial, loading, success, error, tokenExpired }
+enum RegisterResult { success, tokenExpired }
 
 class RegisterForm {
   final formKey = GlobalKey<FormState>();

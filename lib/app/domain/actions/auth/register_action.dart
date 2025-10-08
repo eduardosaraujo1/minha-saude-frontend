@@ -26,7 +26,9 @@ class RegisterAction {
       if (registerToken == null) {
         _log.severe("Token de registro definido como nulo.");
         return Result.error(
-          Exception("Login expirado. Faça login novamente para continuar."),
+          ExpiredLoginException(
+            "Login expirado. Faça login novamente para continuar.",
+          ),
         );
       }
 
@@ -70,6 +72,10 @@ class RegisterAction {
 }
 
 class ExpiredLoginException implements Exception {
+  ExpiredLoginException(this.message);
+
+  final String message;
+
   @override
-  String toString() => "Login expirado. Faça login novamente para continuar.";
+  String toString() => message;
 }

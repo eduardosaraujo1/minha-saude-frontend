@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:minha_saude_frontend/app/routing/routes.dart';
 
 import '../view_models/register_view_model.dart';
 import 'layouts/login_form_layout.dart';
 
-// Wrapper for RegisterView to handle ViewModel disposal
 class RegisterView extends StatefulWidget {
   const RegisterView(this.viewModel, {super.key});
 
@@ -18,6 +18,7 @@ class RegisterView extends StatefulWidget {
 
 class _RegisterViewState extends State<RegisterView> {
   RegisterViewModel get viewModel => widget.viewModel;
+
   @override
   void initState() {
     super.initState();
@@ -36,36 +37,43 @@ class _RegisterViewState extends State<RegisterView> {
   void _onUpdate() {
     try {
       final registerCommand = viewModel.registerCommand;
-      final registerResult = registerCommand.result;
+      final registerResult = registerCommand.value;
 
-      if (registerCommand.isSuccess) {
-        final redirectPath = registerResult!.getOrThrow();
-        if (mounted && redirectPath != null) {
-          context.go(redirectPath);
+      if (registerResult == null) {
+        return;
+      }
+
+      if (registerResult.isSuccess()) {
+        final registerStatus = registerResult.tryGetSuccess()!;
+        if (mounted) {
+          switch (registerStatus) {
+            case RegisterResult.success:
+              context.go(Routes.home);
+              break;
+            case RegisterResult.tokenExpired:
+              _showSnack(
+                "Login expirado. Faça login novamente para continuar.",
+              );
+              context.go(Routes.login);
+              break;
+          }
         }
-        registerCommand.clearResult();
         return;
       }
 
-      if (registerCommand.isError) {
-        final error = registerResult!.tryGetError()!;
-        _showErrorSnack(error.toString());
-        registerCommand.clearResult();
+      if (registerResult.isError()) {
+        final error = registerResult.tryGetError()!;
+        _showSnack("Erro: ${error.toString()}");
         return;
       }
-
-      setState(() {});
     } catch (e) {
       Logger("RegisterView").severe("Ocorreu um erro desconhecido: $e");
-      _showErrorSnack("Ocorreu um erro desconhecido.");
+      _showSnack("Ocorreu um erro desconhecido.");
     }
   }
 
-  void _showErrorSnack(String error) {
-    final snackBar = SnackBar(
-      content: Text(error),
-      backgroundColor: Theme.of(context).colorScheme.error,
-    );
+  void _showSnack(String message) {
+    final snackBar = SnackBar(content: Text(message));
 
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
@@ -79,6 +87,7 @@ class _RegisterViewState extends State<RegisterView> {
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
+
     if (pickedDate != null) {
       dtNascimentoController.value = TextEditingValue(
         text: "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}",
@@ -89,7 +98,6 @@ class _RegisterViewState extends State<RegisterView> {
   @override
   Widget build(BuildContext context) {
     final form = viewModel.form;
-    final bool isExecutingRegister = viewModel.registerCommand.isExecuting;
 
     return LoginFormLayout(
       child: Padding(
@@ -176,36 +184,42 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                 ],
               ),
-              FilledButton(
-                onPressed: isExecutingRegister
-                    ? null
-                    : () => viewModel.registerCommand.execute(),
-                style: FilledButton.styleFrom(
-                  backgroundColor: isExecutingRegister
-                      ? Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.12)
-                      : Theme.of(context).primaryColor,
-                  foregroundColor: isExecutingRegister
-                      ? Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.38)
-                      : Theme.of(context).colorScheme.onPrimary,
-                ),
-                child: isExecutingRegister
-                    ? SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.38),
-                          ),
-                        ),
-                      )
-                    : const Text('Confirmar cadastro'),
+              ValueListenableBuilder(
+                valueListenable: viewModel.registerCommand.isExecuting,
+                builder: (context, isExecuting, child) {
+                  return FilledButton(
+                    onPressed: isExecuting
+                        ? null
+                        : () => viewModel.registerCommand.execute(),
+                    // style: FilledButton.styleFrom(
+                    // TODO: ver se remover isso mudou algo
+                    //   backgroundColor: isExecuting
+                    //       ? Theme.of(
+                    //           context,
+                    //         ).colorScheme.onSurface.withValues(alpha: 0.12)
+                    //       : Theme.of(context).primaryColor,
+                    //   foregroundColor: isExecuting
+                    //       ? Theme.of(
+                    //           context,
+                    //         ).colorScheme.onSurface.withValues(alpha: 0.38)
+                    //       : Theme.of(context).colorScheme.onPrimary,
+                    // ),
+                    child: isExecuting
+                        ? SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.38),
+                              ),
+                            ),
+                          )
+                        : const Text('Confirmar cadastro'),
+                  );
+                },
               ),
             ],
           ),

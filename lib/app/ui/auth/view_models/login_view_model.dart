@@ -1,13 +1,17 @@
+import 'package:command_it/command_it.dart';
 import 'package:logging/logging.dart';
-import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
-import 'package:minha_saude_frontend/app/domain/actions/auth/login_with_google.dart';
-import 'package:minha_saude_frontend/app/routing/routes.dart';
-import 'package:minha_saude_frontend/app/utils/command.dart';
 import 'package:multiple_result/multiple_result.dart';
+
+import '../../../data/repositories/auth/auth_repository.dart';
+import '../../../domain/actions/auth/login_with_google.dart';
+import '../../../routing/routes.dart';
 
 class LoginViewModel {
   LoginViewModel(this._authRepository, this._loginWithGoogleAction) {
-    loginWithGoogle = Command0(_loginWithGoogle);
+    loginWithGoogle = Command.createAsyncNoParam(
+      _loginWithGoogle,
+      initialValue: null,
+    );
   }
 
   final AuthRepository _authRepository;
@@ -18,11 +22,11 @@ class LoginViewModel {
   /// Rebuild Widget when this notifies
   /// If result is error then display Snackbar and clear result
   /// If result is success, then use context.go to redirect
-  late Command0<String?, Exception> loginWithGoogle;
+  late Command<void, Result<String, Exception>?> loginWithGoogle;
 
   /// Perform login with Google action
   /// Returns a nullable string that is the route to redirect to
-  Future<Result<String?, Exception>> _loginWithGoogle() async {
+  Future<Result<String, Exception>> _loginWithGoogle() async {
     try {
       final Exception defaultErr = Exception(
         "Não foi possível fazer login com o Google.",
@@ -37,7 +41,7 @@ class LoginViewModel {
 
       return switch (redirectResult.getOrThrow()) {
         RedirectResponse.toHome => Result.success(Routes.home),
-        RedirectResponse.toRegister => Result.success(Routes.register),
+        RedirectResponse.toRegister => Result.success(Routes.tos),
       };
     } catch (e) {
       _log.severe("Ocorreu um erro desconhecido:", e);

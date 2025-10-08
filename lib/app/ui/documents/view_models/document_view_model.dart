@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:command_it/command_it.dart';
+import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
@@ -26,6 +27,9 @@ class DocumentViewModel {
   final Logger _logger = Logger('DocumentViewModel');
 
   late final Command<void, Result<DocumentWithFile?, Exception>> loadDocument;
+
+  final ValueNotifier<int> currentPage = ValueNotifier<int>(-1);
+  final ValueNotifier<int> totalPages = ValueNotifier<int>(-1);
 
   Future<Result<DocumentWithFile, Exception>> _loadDocument() async {
     try {

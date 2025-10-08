@@ -1,283 +1,209 @@
-import 'dart:async';
-import 'dart:developer';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pdfx/pdfx.dart';
 
+import '../../../routing/routes.dart';
 import '../view_models/document_view_model.dart';
+import 'document_pdf_viewer.dart';
+import 'page_counter.dart';
 
-class DocumentView extends StatelessWidget {
+class DocumentView extends StatefulWidget {
   const DocumentView(this.viewModel, {super.key});
 
   final DocumentViewModel viewModel;
 
   @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: viewModel.loadDocument.results,
-      builder: (context, loadDocResult, child) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Visualizar Documento'),
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-            actions: [
-              if (loadDocResult.hasData && loadDocResult.data != null) ...[
-                _DocumentActionsMenu((DocumentAction action) {
-                  if (action == DocumentAction.view) {
-                    // Show info
-                  } else if (action == DocumentAction.edit) {
-                    // Edit document
-                  } else if (action == DocumentAction.delete) {
-                    // Delete document
-                    log('Delete action selected');
-                  }
-                }),
-              ],
-            ],
-          ),
-          body: Builder(
-            builder: (context) {
-              if (loadDocResult.isExecuting ||
-                  !loadDocResult.hasData ||
-                  loadDocResult.data == null) {
-                return const Center(
-                  child: CircularProgressIndicator(), //
-                );
-              }
-
-              if (loadDocResult.data!.isError()) {
-                final error = loadDocResult.data!.tryGetError()!;
-
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Erro ao carregar documento',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        error.toString(),
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => viewModel.loadDocument.execute(),
-                        child: const Text('Tentar novamente'),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              final documentFile = loadDocResult.data!.tryGetSuccess()!;
-
-              return Stack(
-                children: [
-                  _DocumentPdfViewer(
-                    document: PdfDocument.openFile(documentFile.file.path),
-                    onPageChanged: (page) {
-                      viewModel.currentPage.value = page;
-                    },
-                    onDocumentLoaded: (documentFile) {
-                      viewModel.totalPages.value = documentFile.pagesCount;
-                      viewModel.currentPage.value = 1;
-                    },
-                  ),
-                  Positioned(
-                    bottom: 16,
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: _PageCounter(
-                        currentPage: viewModel.currentPage,
-                        totalPages: viewModel.totalPages,
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
+  State<DocumentView> createState() => _DocumentViewState();
 }
 
-class _PageCounter extends StatefulWidget {
-  const _PageCounter({required this.currentPage, required this.totalPages});
-
-  final ValueNotifier<int> currentPage;
-  final ValueNotifier<int> totalPages;
-
-  @override
-  State<_PageCounter> createState() => _PageCounterState();
-}
-
-class _PageCounterState extends State<_PageCounter>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
-  Timer? _fadeOutTimer;
+class _DocumentViewState extends State<DocumentView> {
+  DocumentViewModel get viewModel => widget.viewModel;
 
   @override
   void initState() {
     super.initState();
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
-    );
 
-    // Show initially
-    _fadeController.forward();
-    _scheduleFadeOut();
-
-    // Listen to page changes
-    widget.currentPage.addListener(_onPageChanged);
+    viewModel.loadDocument.results.addListener(_rebuild);
+    viewModel.deleteDocument.addListener(_handleDeleteDocument);
   }
 
   @override
   void dispose() {
-    widget.currentPage.removeListener(_onPageChanged);
-    _fadeOutTimer?.cancel();
-    _fadeController.dispose();
+    viewModel.loadDocument.results.removeListener(_rebuild);
+
     super.dispose();
   }
 
-  void _onPageChanged() {
-    // Cancel any existing timer (debounce behavior)
-    _fadeOutTimer?.cancel();
-
-    // Show the counter and schedule fade out
-    _fadeController.forward();
-    _scheduleFadeOut();
+  void _rebuild() {
+    setState(() {});
   }
 
-  void _scheduleFadeOut() {
-    // Cancel previous timer if it exists
-    _fadeOutTimer?.cancel();
+  void _handleDeleteDocument() {
+    final command = viewModel.deleteDocument;
 
-    // Create new timer
-    _fadeOutTimer = Timer(const Duration(seconds: 2), () {
-      if (mounted) {
-        _fadeController.reverse();
-      }
-    });
+    if (command.isExecuting.value || command.value == null) {
+      return; // Still executing or no result yet
+    }
+
+    // Show snackbar with success or error message
+    if (command.value!.isError()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Ocorreu um erro desconhecido ao excluir o documento."),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Documento movido para a lixeira.")),
+      );
+    }
+
+    // Navigate back to home or previous screen
+    context.go(Routes.home);
   }
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: widget.totalPages,
-      builder: (context, totalPages, child) {
-        return ValueListenableBuilder<int>(
-          valueListenable: widget.currentPage,
-          builder: (context, currentPage, child) {
-            var theme = Theme.of(context);
-            var colorScheme = theme.colorScheme;
+    final loadDocResult = viewModel.loadDocument.results.value;
 
-            return FadeTransition(
-              opacity: _fadeAnimation,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: colorScheme.inverseSurface.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Text(
-                  '$currentPage de $totalPages',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onInverseSurface,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Visualizar Documento'),
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+        actions: [
+          if (loadDocResult.hasData && loadDocResult.data != null) ...[
+            _DocumentActionsMenu((DocumentAction action) {
+              if (action == DocumentAction.view) {
+                // Show info
+              } else if (action == DocumentAction.edit) {
+                // Edit document
+              } else if (action == DocumentAction.delete) {
+                // Delete document
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return _DeleteDocumentDialog(
+                      document: loadDocResult.data!.tryGetSuccess()!,
+                      onConfirm: () {
+                        // Call delete command
+                        viewModel.triggerDocumentDelete();
+                      },
+                    );
+                  },
+                );
+              }
+            }),
+          ],
+        ],
+      ),
+      body: Builder(
+        builder: (context) {
+          if (loadDocResult.isExecuting ||
+              !loadDocResult.hasData ||
+              loadDocResult.data == null) {
+            return const Center(
+              child: CircularProgressIndicator(), //
+            );
+          }
+
+          if (loadDocResult.data!.isError()) {
+            final error = loadDocResult.data!.tryGetError()!;
+
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Erro ao carregar documento',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    error.toString(),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => widget.viewModel.loadDocument.execute(),
+                    child: const Text('Tentar novamente'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          final documentFile = loadDocResult.data!.tryGetSuccess()!;
+
+          return Stack(
+            children: [
+              DocumentPdfViewer(
+                document: PdfDocument.openFile(documentFile.file.path),
+                onPageChanged: (page) {
+                  widget.viewModel.currentPage.value = page;
+                },
+                onDocumentLoaded: (documentFile) {
+                  widget.viewModel.totalPages.value = documentFile.pagesCount;
+                  widget.viewModel.currentPage.value = 1;
+                },
+              ),
+              Positioned(
+                bottom: 16,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: PageCounter(
+                    currentPage: widget.viewModel.currentPage,
+                    totalPages: widget.viewModel.totalPages,
                   ),
                 ),
               ),
-            );
-          },
-        );
-      },
+            ],
+          );
+        },
+      ),
     );
   }
 }
 
-class _DocumentPdfViewer extends StatefulWidget {
-  const _DocumentPdfViewer({
-    required this.document,
-    this.onPageChanged,
-    this.onDocumentLoaded,
-  });
-  final void Function(int page)? onPageChanged;
-  final void Function(PdfDocument doc)? onDocumentLoaded;
+class _DeleteDocumentDialog extends StatelessWidget {
+  const _DeleteDocumentDialog({required this.document, this.onConfirm});
 
-  final Future<PdfDocument> document;
-
-  @override
-  State<_DocumentPdfViewer> createState() => _DocumentPdfViewerState();
-}
-
-class _DocumentPdfViewerState extends State<_DocumentPdfViewer> {
-  static bool supportsPinchView = Platform.isAndroid || Platform.isIOS;
-  late final dynamic _pdfController;
-
-  @override
-  void initState() {
-    super.initState();
-    _pdfController = supportsPinchView
-        ? PdfControllerPinch(document: widget.document)
-        : PdfController(document: widget.document);
-  }
-
-  @override
-  void dispose() {
-    _pdfController.dispose();
-    super.dispose();
-  }
+  final DocumentWithFile document;
+  final VoidCallback? onConfirm;
 
   @override
   Widget build(BuildContext context) {
-    if (_pdfController is PdfControllerPinch) {
-      return PdfViewPinch(
-        controller: _pdfController,
-        scrollDirection: Axis.vertical,
-        onPageChanged: widget.onPageChanged,
-        onDocumentLoaded: widget.onDocumentLoaded,
-      );
-    } else if (_pdfController is PdfController) {
-      return PdfView(
-        controller: _pdfController,
-        scrollDirection: Axis.vertical,
-        pageSnapping: false,
-      );
-    } else {
-      return Center(
-        child: Text(
-          'Visualização de PDF não suportada nesta plataforma.',
-          style: Theme.of(context).textTheme.bodyMedium,
+    var theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return AlertDialog(
+      title: const Text('Excluir Documento'),
+      content: Text('''
+Tem certeza que deseja excluir "${document.document.titulo}"?
+Ele permanecerá disponível na lixeira e será apagado permanentemente em 30 dias.
+'''),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          style: TextButton.styleFrom(
+            foregroundColor: colorScheme.onSurfaceVariant,
+          ),
+          child: const Text('Cancelar'),
         ),
-      );
-    }
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            onConfirm?.call();
+          },
+          style: TextButton.styleFrom(foregroundColor: theme.colorScheme.error),
+          child: const Text('Excluir'),
+        ),
+      ],
+    );
   }
 }
 

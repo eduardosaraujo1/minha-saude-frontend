@@ -11,6 +11,19 @@ class _LightTheme {
       brightness: Brightness.light,
       colorScheme: scheme,
       scaffoldBackgroundColor: scheme.surfaceBright,
+      snackBarTheme: snackBarTheme(),
+    );
+  }
+
+  SnackBarThemeData snackBarTheme() {
+    final scheme = colorScheme();
+
+    return SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: scheme.inverseSurface,
+      contentTextStyle: TextStyle(color: scheme.onInverseSurface),
+      actionTextColor: scheme.inversePrimary,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     );
   }
 

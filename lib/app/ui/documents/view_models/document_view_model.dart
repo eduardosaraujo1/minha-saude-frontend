@@ -15,10 +15,14 @@ class DocumentViewModel {
   }) : _documentUuid = documentUuid,
        _documentRepository = documentRepository {
     loadDocument =
-        Command.createAsyncNoParam<Result<DocumentWithFile?, Exception>>(
+        Command.createAsyncNoParam<Result<DocumentWithFile, Exception>?>(
           _loadDocument,
-          initialValue: Success(null),
+          initialValue: null,
         );
+    deleteDocument = Command.createAsync<Document, Result<void, Exception>?>(
+      _handleDeleteDocument,
+      initialValue: null,
+    );
     loadDocument.execute();
   }
 
@@ -26,7 +30,8 @@ class DocumentViewModel {
   final DocumentRepository _documentRepository;
   final Logger _logger = Logger('DocumentViewModel');
 
-  late final Command<void, Result<DocumentWithFile?, Exception>> loadDocument;
+  late final Command<void, Result<DocumentWithFile, Exception>?> loadDocument;
+  late final Command<Document, Result<void, Exception>?> deleteDocument;
 
   final ValueNotifier<int> currentPage = ValueNotifier<int>(-1);
   final ValueNotifier<int> totalPages = ValueNotifier<int>(-1);
@@ -68,6 +73,28 @@ class DocumentViewModel {
       return Result.error(
         Exception("Ocorreu um erro desconhecido ao carregar o documento."),
       );
+    }
+  }
+
+  Future<Result<void, Exception>> _handleDeleteDocument(Document doc) async {
+    try {
+      final result = await _documentRepository.moveToTrash(doc.uuid);
+      if (result.isError()) {
+        _logger.severe('Error deleting document: ${result.tryGetError()}');
+        return Result.error(Exception("Não foi possível excluir o documento."));
+      }
+
+      return Result.success(null);
+    } catch (e) {
+      _logger.severe('Error deleting document', e);
+      return Result.error(Exception("Não foi possível excluir o documento."));
+    }
+  }
+
+  void triggerDocumentDelete() {
+    if (loadDocument.value != null && loadDocument.value!.isSuccess()) {
+      final doc = loadDocument.value!.getOrThrow().document;
+      deleteDocument.execute(doc);
     }
   }
 }

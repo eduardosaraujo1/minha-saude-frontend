@@ -11,7 +11,7 @@
 
 ## Para fazer
 
--   [ ] URGENT: compile-time type safety for get_it (riverpod?)
+-   [ ] Ver porque o upload de documento não tá resistindo um restart
 -   [ ] Implementar upload de documentos
 -   [ ] Corrigir widget de loginDecorator para funcionar em telas Wide
 -   [ ] PdfPinchController: não suportado no Windows (ferramenta de teste), se possível verificar com Platform.\* API

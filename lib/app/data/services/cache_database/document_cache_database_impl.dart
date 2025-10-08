@@ -1,4 +1,5 @@
 import 'package:multiple_result/multiple_result.dart';
+import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'models/document_db_model.dart';
@@ -20,10 +21,14 @@ class DocumentCacheDatabaseImpl implements DocumentCacheDatabase {
 
   @override
   Future<void> init() async {
+    // Get the application documents directory for persistent storage
+    final databasesPath = await getDatabasesPath();
+    final path = join(databasesPath, 'minha_saude.db');
+
     // openDatabase only creates the database if it doesn't exist
     // onCreate is only called once when the database is first created
     _database = await openDatabase(
-      'minha_saude.db',
+      path,
       version: 1,
       onCreate: (db, version) async {
         await db.execute('''

@@ -24,23 +24,21 @@ class _DocumentListViewState extends State<DocumentListView> {
     super.initState();
 
     viewModel.load.addListener(_onLoadUpdate);
-    viewModel.addListener(_onUpdate);
   }
 
   @override
   void dispose() {
     viewModel.load.removeListener(_onLoadUpdate);
-    viewModel.removeListener(_onUpdate);
 
     super.dispose();
   }
 
   void _onLoadUpdate() {
     if (!mounted) return;
-    if (viewModel.load.isExecuting) return;
+    if (viewModel.load.isExecuting.value) return;
 
-    if (viewModel.load.isError) {
-      final error = viewModel.load.result?.tryGetError();
+    if (viewModel.load.value.isError()) {
+      final error = viewModel.load.value.tryGetError();
 
       if (error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -53,10 +51,6 @@ class _DocumentListViewState extends State<DocumentListView> {
     }
   }
 
-  void _onUpdate() {
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,18 +61,17 @@ class _DocumentListViewState extends State<DocumentListView> {
           icon: _SortMenu(onSelected: viewModel.setSelectedAlgorithm),
         ),
       ),
-      body: ListenableBuilder(
-        listenable: viewModel.load,
-        builder: (context, child) {
-          if (viewModel.load.isExecuting) {
+      body: ValueListenableBuilder(
+        valueListenable: viewModel.load.results,
+        builder: (context, val, child) {
+          if (val.isExecuting || !val.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (viewModel.load.isError) {
+          if (val.data!.isError()) {
             return Center(
               child: Text(
-                viewModel.load.result?.tryGetError().toString() ??
-                    'Erro ao carregar documentos.',
+                val.data!.tryGetError().toString(),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             );
@@ -86,7 +79,7 @@ class _DocumentListViewState extends State<DocumentListView> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              viewModel.load.execute(true);
+              viewModel.refresh();
             },
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -103,14 +96,19 @@ class _DocumentListViewState extends State<DocumentListView> {
                       ),
                     ),
                   if (viewModel.documents.isNotEmpty)
-                    SortedDocumentList(
-                      documents: viewModel.documents,
-                      groupingAlgorithm: viewModel.selectedAlgorithm,
-                      onDocumentTap: (document) {
-                        var documentosWithId = Routes.documentosWithId(
-                          document.uuid,
+                    ValueListenableBuilder(
+                      valueListenable: viewModel.selectedAlgorithm,
+                      builder: (context, value, child) {
+                        return SortedDocumentList(
+                          documents: viewModel.documents,
+                          groupingAlgorithm: value,
+                          onDocumentTap: (document) {
+                            var documentosWithId = Routes.documentosWithId(
+                              document.uuid,
+                            );
+                            context.go(documentosWithId);
+                          },
                         );
-                        context.go(documentosWithId);
                       },
                     ),
                   SizedBox(height: 60),

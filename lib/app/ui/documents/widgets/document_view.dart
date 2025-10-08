@@ -17,17 +17,18 @@ class DocumentView extends StatelessWidget {
         title: const Text('Visualizar Documento'),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       ),
-      body: ListenableBuilder(
-        listenable: viewModel.loadDocument,
-        builder: (context, child) {
-          if (viewModel.loadDocument.isExecuting) {
+      body: ValueListenableBuilder(
+        valueListenable: viewModel.loadDocument.results,
+        builder: (context, val, child) {
+          if (val.isExecuting || !val.hasData || val.data == null) {
             return const Center(
               child: CircularProgressIndicator(), //
             );
           }
 
-          if (viewModel.loadDocument.isError) {
-            final error = viewModel.loadDocument.result!.tryGetError()!;
+          if (val.data!.isError()) {
+            final error = val.data!.tryGetError()!;
+
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -54,12 +55,10 @@ class DocumentView extends StatelessWidget {
             );
           }
 
-          final document = viewModel.loadDocument.result!.getOrThrow();
+          final document = val.data!.tryGetSuccess()!;
 
-          return SingleChildScrollView(
-            child: _DocumentPdfViewer(
-              document: PdfDocument.openFile(document.file.path),
-            ),
+          return _DocumentPdfViewer(
+            document: PdfDocument.openFile(document.file.path),
           );
         },
       ),
@@ -67,26 +66,45 @@ class DocumentView extends StatelessWidget {
   }
 }
 
-class _DocumentPdfViewer extends StatelessWidget {
+class _DocumentPdfViewer extends StatefulWidget {
   const _DocumentPdfViewer({required this.document});
 
   final Future<PdfDocument> document;
 
+  @override
+  State<_DocumentPdfViewer> createState() => _DocumentPdfViewerState();
+}
+
+class _DocumentPdfViewerState extends State<_DocumentPdfViewer> {
   static bool supportsPinchView = Platform.isAndroid || Platform.isIOS;
+  late final dynamic _pdfController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pdfController = supportsPinchView
+        ? PdfControllerPinch(document: widget.document)
+        : PdfController(document: widget.document);
+  }
+
+  @override
+  void dispose() {
+    _pdfController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final pdfController = supportsPinchView
-        ? PdfControllerPinch(document: document)
-        : PdfController(document: document);
-
-    if (pdfController is PdfControllerPinch) {
+    if (_pdfController is PdfControllerPinch) {
       return PdfViewPinch(
-        controller: pdfController,
+        controller: _pdfController,
         scrollDirection: Axis.vertical,
       );
-    } else if (pdfController is PdfController) {
-      return PdfView(controller: pdfController, scrollDirection: Axis.vertical);
+    } else if (_pdfController is PdfController) {
+      return PdfView(
+        controller: _pdfController,
+        scrollDirection: Axis.vertical,
+      );
     } else {
       return Center(
         child: Text(

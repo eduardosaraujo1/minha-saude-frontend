@@ -1,3 +1,4 @@
+import 'package:command_it/command_it.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logging/logging.dart';
@@ -12,6 +13,10 @@ void main() async {
     WidgetsFlutterBinding.ensureInitialized();
 
     Logger.root.level = Level.ALL;
+
+    Command.globalExceptionHandler = (error, stackTrace) {
+      throw error;
+    };
 
     if (Environment.appEnv.isDev) {
       await registerDependenciesDev(

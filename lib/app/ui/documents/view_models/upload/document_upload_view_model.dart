@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import 'package:command_it/command_it.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:minha_saude_frontend/app/utils/command.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../../../data/repositories/document/document_repository.dart';
@@ -11,8 +11,15 @@ import 'document_info_form_model.dart';
 
 class DocumentUploadViewModel {
   DocumentUploadViewModel(this._type, this._documentRepository) {
-    loadDocument = Command0(_loadDocument);
-    uploadDocument = Command0(_uploadDocument);
+    loadDocument = Command.createAsyncNoParam<Result<File?, Exception>>(
+      _loadDocument,
+      initialValue: Success(null),
+    );
+    uploadDocument =
+        Command.createAsync<DocumentFormData, Result<Document?, Exception>>(
+          _uploadDocument,
+          initialValue: Success(null),
+        );
     loadDocument.execute();
   }
 
@@ -20,14 +27,13 @@ class DocumentUploadViewModel {
   final DocumentUploadMethod _type;
   final Logger _logger = Logger('DocumentUploadViewModel');
 
-  File? uploadedFile;
-  DocumentFormData? _formData;
   final currentStep = ValueNotifier<UploadStep>(UploadStep.preview);
 
-  late final Command0<void, Exception> loadDocument;
-  late final Command0<Document, Exception> uploadDocument;
+  late final Command<void, Result<File?, Exception>> loadDocument;
+  late final Command<DocumentFormData, Result<Document?, Exception>>
+  uploadDocument;
 
-  Future<Result<void, Exception>> _loadDocument() async {
+  Future<Result<File, Exception>> _loadDocument() async {
     try {
       final result = switch (_type) {
         DocumentUploadMethod.scan =>
@@ -43,9 +49,7 @@ class DocumentUploadViewModel {
         );
       }
 
-      uploadedFile = result.getOrThrow();
-
-      return Result.success(null);
+      return Result.success(result.getOrThrow());
     } catch (e, s) {
       _logger.severe('Exception loading document:', e, s);
       return Result.error(
@@ -54,27 +58,24 @@ class DocumentUploadViewModel {
     }
   }
 
-  Future<Result<Document, Exception>> _uploadDocument() async {
-    if (uploadedFile == null) {
+  Future<Result<Document, Exception>> _uploadDocument(
+    DocumentFormData formData,
+  ) async {
+    final document = loadDocument.value;
+
+    if (document.isError() || document.getOrThrow() == null) {
       _logger.severe('No file uploaded when trying to upload document.');
       return Result.error(Exception("Nenhum arquivo foi carregado."));
     }
 
-    if (_formData == null) {
-      _logger.severe('No form data provided when trying to upload document.');
-      return Result.error(
-        Exception("Nenhum dado do formulário foi fornecido."),
-      );
-    }
-
     try {
       final result = await _documentRepository.uploadDocument(
-        uploadedFile!,
-        paciente: _formData!.nomePaciente ?? '',
-        titulo: _formData!.titulo,
-        tipo: _formData!.tipoDocumento,
-        medico: _formData!.nomeMedico,
-        dataDocumento: _formData!.dataDocumento,
+        document.getOrThrow()!,
+        paciente: formData.nomePaciente ?? '',
+        titulo: formData.titulo,
+        tipo: formData.tipoDocumento,
+        medico: formData.nomeMedico,
+        dataDocumento: formData.dataDocumento,
       );
 
       if (result.isError()) {
@@ -102,8 +103,7 @@ class DocumentUploadViewModel {
   }
 
   void handleFormSubmit(DocumentFormData formData) {
-    _formData = formData;
-    uploadDocument.execute();
+    uploadDocument.execute(formData);
   }
 
   void dispose() {

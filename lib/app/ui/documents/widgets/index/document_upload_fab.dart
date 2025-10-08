@@ -117,10 +117,15 @@ class _DocumentUploadFabState extends State<DocumentUploadFab>
             opacity: _optionsFadeAnimation.value,
             child: FloatingActionButton.extended(
               elevation: 1,
-              label: Text(label, style: theme.textTheme.bodyMedium),
-              icon: Icon(icon, color: colorScheme.onPrimaryContainer),
+              label: Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSecondaryContainer,
+                ),
+              ),
+              icon: Icon(icon, color: colorScheme.onSecondaryContainer),
               onPressed: onPressed,
-              backgroundColor: colorScheme.primaryContainer,
+              backgroundColor: colorScheme.secondaryContainer,
               heroTag: heroTag,
               // style: FilledButton.styleFrom(
               //   backgroundColor: colorScheme.primaryContainer,
@@ -139,8 +144,8 @@ class _DocumentUploadFabState extends State<DocumentUploadFab>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    // final theme = Theme.of(context);
+    // final colorScheme = theme.colorScheme;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -179,8 +184,6 @@ class _DocumentUploadFabState extends State<DocumentUploadFab>
             return RotationTransition(
               turns: _iconRotationAnimation,
               child: FloatingActionButton(
-                backgroundColor: colorScheme.tertiaryContainer,
-                foregroundColor: colorScheme.onTertiaryContainer,
                 onPressed: _toggleMenu,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

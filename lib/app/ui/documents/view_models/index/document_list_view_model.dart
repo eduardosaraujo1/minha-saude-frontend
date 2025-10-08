@@ -1,32 +1,37 @@
+import 'package:command_it/command_it.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:minha_saude_frontend/app/utils/command.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../../../domain/models/document/document.dart';
 import '../../../../data/repositories/document/document_repository.dart';
 import '../../widgets/index/sorted_document_list.dart' show GroupingAlgorithm;
 
-class DocumentListViewModel extends ChangeNotifier {
+class DocumentListViewModel {
   // 1. Use CommandPattern (Command1) for handling loading
   // 2. Move the logic for FAB and SortMenu to a comment (In the future, move the FAB and SortMenu to its own dedicated ViewModel)
   // 3. Remove ValueNotifier from everything except the load command (which is a Notifier itself, in other words, no more ValueNotifier in this file)
   final DocumentRepository documentRepository;
 
   DocumentListViewModel(this.documentRepository) {
-    load = Command1<void, Exception, bool>(_loadDocuments);
+    load = Command.createAsync<bool, Result<void, Exception>>(
+      _loadDocuments,
+      initialValue: Success(null),
+    );
     load.execute(false);
   }
 
   final List<Document> documents = <Document>[];
   final _log = Logger('document_list_view_model');
 
-  GroupingAlgorithm selectedAlgorithm = GroupingAlgorithm.paciente;
+  final ValueNotifier<GroupingAlgorithm> selectedAlgorithm = ValueNotifier(
+    GroupingAlgorithm.paciente,
+  );
 
-  late final Command1<void, Exception, bool> load;
+  late final Command<bool, Result<void, Exception>> load;
 
   Future<void> refresh() async {
-    await load.execute(false);
+    load.execute(true);
   }
 
   Future<Result<void, Exception>> _loadDocuments(bool forceReload) async {
@@ -55,7 +60,6 @@ class DocumentListViewModel extends ChangeNotifier {
       return;
     }
 
-    selectedAlgorithm = algorithm;
-    notifyListeners();
+    selectedAlgorithm.value = algorithm;
   }
 }

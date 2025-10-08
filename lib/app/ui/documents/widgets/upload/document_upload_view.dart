@@ -23,102 +23,86 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
   DocumentUploadViewModel get viewModel => widget.viewModel;
 
   @override
-  void initState() {
-    super.initState();
-    viewModel.loadDocument.addListener(_onLoadCommandChanged);
-    viewModel.uploadDocument.addListener(_onUploadCommandChanged);
-  }
-
-  @override
   void dispose() {
-    viewModel.loadDocument.removeListener(_onLoadCommandChanged);
-    viewModel.uploadDocument.removeListener(_onUploadCommandChanged);
     viewModel.dispose();
     super.dispose();
   }
 
-  void _onLoadCommandChanged() {
-    if (!mounted) return;
-
-    final loadCommand = viewModel.loadDocument;
-
-    // If load fails (e.g., scan cancelled), show message and go home
-    if (loadCommand.isError) {
-      _logger.info(
-        'Document load cancelled or failed',
-        loadCommand.result?.tryGetError(),
-      );
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Operação cancelada.")));
-      loadCommand.clearResult();
-      context.go(Routes.home);
-    }
+  void _handleLoadError() {
+    _logger.info('Document load cancelled or failed');
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Operação cancelada.")));
+    context.go(Routes.home);
   }
 
-  void _onUploadCommandChanged() {
-    if (!mounted) return;
+  void _handleUploadError() {
+    _logger.severe('Error uploading document');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text("Ocorreu um erro ao fazer upload"),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ),
+    );
+    context.go(Routes.home);
+  }
 
-    final uploadCommand = viewModel.uploadDocument;
-    if (uploadCommand.isExecuting) return;
-
-    if (uploadCommand.isError) {
-      // Show error message and go home
-      final error = uploadCommand.result?.tryGetError();
-      _logger.severe('Error uploading document: $error');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text("Ocorreu um erro ao fazer upload"),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
-      uploadCommand.clearResult();
-      context.go(Routes.home);
-    } else if (uploadCommand.isSuccess) {
-      // Upload successful, go home
-      _logger.info('Document uploaded successfully');
-      uploadCommand.clearResult();
-      context.go(Routes.home);
-    }
+  void _handleUploadSuccess() {
+    _logger.info('Document uploaded successfully');
+    context.go(Routes.home);
   }
 
   @override
   Widget build(BuildContext context) {
-    // Outer ListenableBuilder: Listen to commands for loading/error states
     return ListenableBuilder(
       listenable: Listenable.merge([
-        viewModel.loadDocument,
-        viewModel.uploadDocument,
+        viewModel.loadDocument.results,
+        viewModel.uploadDocument.results,
       ]),
       builder: (context, _) {
-        // Show loading while loading document or uploading
-        if (viewModel.loadDocument.isExecuting ||
-            viewModel.uploadDocument.isExecuting) {
+        final loadCommand = viewModel.loadDocument;
+        final uploadCommand = viewModel.uploadDocument;
+
+        // If is loading or no document loaded yet, show loading buffer
+        final anyIsExecuting =
+            loadCommand.isExecuting.value || uploadCommand.isExecuting.value;
+        final hasLoadedDocument = loadCommand.value.tryGetSuccess() != null;
+        if (anyIsExecuting || !hasLoadedDocument) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        if (viewModel.uploadedFile == null) {
+        // Handle potential errors after frame is built
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (loadCommand.value.isError()) {
+            _handleLoadError();
+          } else if (uploadCommand.value.isError()) {
+            _handleUploadError();
+          } else if (uploadCommand.value.isSuccess() &&
+              uploadCommand.value.getOrThrow() != null) {
+            _handleUploadSuccess();
+          }
+        });
+        if (loadCommand.value.isError() || uploadCommand.value.isError()) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Adicionar Documento')),
             body: Center(
-              child: Text(
-                'Nenhum documento carregado.',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
+              child: CircularProgressIndicator(), //
             ),
           );
         }
 
+        // Happy path: document loaded successfully and upload not in error
+        final file = loadCommand.value.getOrThrow()!;
+
         // Inner ListenableBuilder: Listen to currentStep for navigation
-        return ListenableBuilder(
-          listenable: viewModel.currentStep,
-          builder: (context, _) {
+        return ValueListenableBuilder(
+          valueListenable: viewModel.currentStep,
+          builder: (context, val, _) {
             // Show preview or form based on current step
-            return switch (viewModel.currentStep.value) {
+            return switch (val) {
               UploadStep.preview => DocumentUploadPreview(
-                document: PdfDocument.openFile(viewModel.uploadedFile!.path),
+                document: PdfDocument.openFile(file.path),
                 onCancel: () => context.go(Routes.home),
                 onConfirm: viewModel.goToForm,
               ),

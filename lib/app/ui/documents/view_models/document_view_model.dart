@@ -1,11 +1,11 @@
 import 'dart:io';
 
+import 'package:command_it/command_it.dart';
 import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../../data/repositories/document/document_repository.dart';
 import '../../../domain/models/document/document.dart';
-import '../../../utils/command.dart';
 
 class DocumentViewModel {
   DocumentViewModel({
@@ -13,7 +13,11 @@ class DocumentViewModel {
     required DocumentRepository documentRepository,
   }) : _documentUuid = documentUuid,
        _documentRepository = documentRepository {
-    loadDocument = Command0<DocumentWithFile, Exception>(_loadDocument);
+    loadDocument =
+        Command.createAsyncNoParam<Result<DocumentWithFile?, Exception>>(
+          _loadDocument,
+          initialValue: Success(null),
+        );
     loadDocument.execute();
   }
 
@@ -21,7 +25,7 @@ class DocumentViewModel {
   final DocumentRepository _documentRepository;
   final Logger _logger = Logger('DocumentViewModel');
 
-  late final Command0<DocumentWithFile, Exception> loadDocument;
+  late final Command<void, Result<DocumentWithFile?, Exception>> loadDocument;
 
   Future<Result<DocumentWithFile, Exception>> _loadDocument() async {
     try {

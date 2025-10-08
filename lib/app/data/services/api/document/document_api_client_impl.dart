@@ -9,6 +9,7 @@ import '../http_client.dart';
 class DocumentApiClientImpl implements DocumentApiClient {
   DocumentApiClientImpl(this._httpClient);
 
+  // ignore: unused_field
   final HttpClient _httpClient;
 
   @override

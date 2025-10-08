@@ -23,8 +23,6 @@ class DocumentListViewModel extends ChangeNotifier {
 
   GroupingAlgorithm selectedAlgorithm = GroupingAlgorithm.paciente;
 
-  // TODO: Move FAB and SortMenu related state into a dedicated ViewModel.
-
   late final Command1<void, Exception, bool> load;
 
   Future<void> refresh() async {

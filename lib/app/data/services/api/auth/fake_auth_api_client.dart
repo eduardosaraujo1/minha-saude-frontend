@@ -9,7 +9,7 @@ import 'auth_api_client.dart';
 class FakeAuthApiClient implements AuthApiClient {
   FakeAuthApiClient();
 
-  _FakeAuthPersistentStorage _store = _FakeAuthPersistentStorage();
+  final _FakeAuthPersistentStorage _store = _FakeAuthPersistentStorage();
 
   @override
   Future<Result<LoginApiResponse, Exception>> authLoginGoogle(
@@ -86,7 +86,7 @@ class _FakeAuthPersistentStorage {
 
   final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
-  late bool _isRegistered;
+  bool? _isRegistered;
 
   Future<void> setRegistered(bool value) async {
     _isRegistered = value;
@@ -96,10 +96,10 @@ class _FakeAuthPersistentStorage {
   }
 
   Future<bool> getRegistered({bool forceRefresh = false}) async {
-    if (forceRefresh) {
+    if (forceRefresh || _isRegistered == null) {
       await _init();
     }
-    return _isRegistered;
+    return _isRegistered ?? false;
   }
 
   Future<void> _init() async {

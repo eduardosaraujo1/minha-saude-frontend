@@ -12,8 +12,16 @@ class FakeDocumentScanner implements DocumentScanner {
     final blob = await rootBundle.load(Asset.fakeDocumentPdf);
     final tempDir = await getTemporaryDirectory();
 
-    final file = File("${tempDir.path}/fake/document.pdf");
-    file.writeAsBytes(
+    // Create the subdirectory if it doesn't exist
+    final fakeDir = Directory("${tempDir.path}/fake");
+    if (!await fakeDir.exists()) {
+      await fakeDir.create(recursive: true);
+    }
+
+    final file = File("${fakeDir.path}/document.pdf");
+
+    // Await the write operation to ensure the file is written before returning
+    await file.writeAsBytes(
       blob.buffer.asUint8List(blob.offsetInBytes, blob.lengthInBytes),
       flush: true,
     );

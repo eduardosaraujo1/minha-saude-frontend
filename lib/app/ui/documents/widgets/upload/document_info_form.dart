@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:watch_it/watch_it.dart';
 
 import '../../view_models/upload/document_info_form_model.dart';
 
 class DocumentInfoFormView extends WatchingStatefulWidget {
   final DocumentInfoFormViewModel viewModel;
+  final VoidCallback onBack;
 
-  const DocumentInfoFormView(this.viewModel, {super.key});
+  const DocumentInfoFormView(this.viewModel, {required this.onBack, super.key});
 
   @override
   State<DocumentInfoFormView> createState() => _DocumentCreateViewState();
@@ -30,6 +30,10 @@ class _DocumentCreateViewState extends State<DocumentInfoFormView> {
       appBar: AppBar(
         title: const Text('Adicionar Documento'),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: widget.onBack,
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -99,7 +103,10 @@ class _DocumentCreateViewState extends State<DocumentInfoFormView> {
                   Expanded(
                     child: FilledButton.tonal(
                       onPressed: () {
-                        context.go('/');
+                        // Skip form and submit with only required fields
+                        viewModel.onFormSubmit(
+                          DocumentFormData(titulo: 'Documento sem título'),
+                        );
                       },
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -109,11 +116,7 @@ class _DocumentCreateViewState extends State<DocumentInfoFormView> {
                   ),
                   Expanded(
                     child: FilledButton(
-                      onPressed: () {
-                        if (form.validate()) {
-                          context.go('/');
-                        }
-                      },
+                      onPressed: viewModel.submitForm,
                       style: FilledButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Theme.of(

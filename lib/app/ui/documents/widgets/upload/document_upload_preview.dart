@@ -45,19 +45,21 @@ class _DocumentUploadPreviewState extends State<DocumentUploadPreview> {
         ),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       ),
-      body: Padding(
-        padding: EdgeInsetsGeometry.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Scanned PDF carousel with pdfx
-            _PdfCarousel(pdfController: _pdfController),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Scanned PDF carousel with pdfx
+              _PdfCarousel(pdfController: _pdfController),
 
-            // Text "Está correto?"
-            // IconButtons "X Cancelar" and "[checkmark] Confirmar"
-            _buildBottomCard(context),
-          ],
+              // Text "Está correto?"
+              // IconButtons "X Cancelar" and "[checkmark] Confirmar"
+              _buildBottomCard(context),
+            ],
+          ),
         ),
       ),
     );

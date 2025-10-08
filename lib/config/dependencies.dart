@@ -60,7 +60,10 @@ Future<void> registerDependenciesDev({
         ? FakeDocumentApiClient()
         : DocumentApiClientImpl(_getIt<HttpClient>()),
   );
-  _getIt.registerSingleton<CacheDatabase>(CacheDatabaseImpl());
+
+  final cacheDb = CacheDatabaseImpl();
+  await cacheDb.init();
+  _getIt.registerSingleton<CacheDatabase>(cacheDb);
   _getIt.registerSingleton<FileSystemService>(FileSystemServiceImpl());
 
   // Repositories

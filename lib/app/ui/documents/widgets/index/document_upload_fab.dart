@@ -139,6 +139,9 @@ class _DocumentUploadFabState extends State<DocumentUploadFab>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -176,6 +179,8 @@ class _DocumentUploadFabState extends State<DocumentUploadFab>
             return RotationTransition(
               turns: _iconRotationAnimation,
               child: FloatingActionButton(
+                backgroundColor: colorScheme.tertiaryContainer,
+                foregroundColor: colorScheme.onTertiaryContainer,
                 onPressed: _toggleMenu,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

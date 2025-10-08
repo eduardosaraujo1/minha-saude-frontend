@@ -17,8 +17,10 @@ import '../ui/auth/widgets/login_view.dart';
 import '../ui/auth/widgets/register_view.dart';
 import '../ui/auth/widgets/tos_view.dart';
 import '../ui/core/widgets/not_found.dart';
+import '../ui/documents/view_models/document_view_model.dart';
 import '../ui/documents/view_models/index/document_list_view_model.dart';
 import '../ui/documents/view_models/upload/document_upload_view_model.dart';
+import '../ui/documents/widgets/document_view.dart';
 import '../ui/documents/widgets/index/document_list_view.dart';
 import '../ui/documents/widgets/upload/document_upload_view.dart';
 import 'routes.dart';
@@ -121,24 +123,17 @@ GoRouter router() {
                       );
                     },
                     routes: [
-                      // GoRoute(
-                      //   path: '${Routes.documentosRelative}/:id',
-                      //   builder: (BuildContext context, GoRouterState state) {
-                      //     return DocumentView(
-                      //       DocumentViewModel(
-                      //         state.pathParameters['id'] ?? '',
-                      //         _getIt<DocumentRepository>(),
-                      //       ),
-                      //     );
-                      //   },
-                      // ),
-                      // Likely Deprecated:
-                      // GoRoute(
-                      //   path: Routes.documentosCreateRelative,
-                      //   builder: (BuildContext context, GoRouterState state) {
-                      //     return DocumentCreateView(DocumentCreateViewModel());
-                      //   },
-                      // ),
+                      GoRoute(
+                        path: ':id',
+                        builder: (BuildContext context, GoRouterState state) {
+                          return DocumentView(
+                            DocumentViewModel(
+                              documentUuid: state.pathParameters['id'] ?? '',
+                              documentRepository: _getIt<DocumentRepository>(),
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ],

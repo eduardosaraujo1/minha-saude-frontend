@@ -7,7 +7,6 @@ import '../../../core/widgets/brand_app_bar.dart';
 import '../../view_models/index/document_list_view_model.dart';
 import 'sorted_document_list.dart';
 
-// TODO: show empty state when there are no documents
 class DocumentListView extends StatefulWidget {
   final DocumentListViewModel viewModel;
 
@@ -103,13 +102,17 @@ class _DocumentListViewState extends State<DocumentListView> {
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ),
-                  SortedDocumentList(
-                    documents: viewModel.documents,
-                    groupingAlgorithm: viewModel.selectedAlgorithm,
-                    onDocumentTap: (document) {
-                      context.go('/documentos/${document.uuid}');
-                    },
-                  ),
+                  if (viewModel.documents.isNotEmpty)
+                    SortedDocumentList(
+                      documents: viewModel.documents,
+                      groupingAlgorithm: viewModel.selectedAlgorithm,
+                      onDocumentTap: (document) {
+                        var documentosWithId = Routes.documentosWithId(
+                          document.uuid,
+                        );
+                        context.go(documentosWithId);
+                      },
+                    ),
                   SizedBox(height: 60),
                 ],
               ),

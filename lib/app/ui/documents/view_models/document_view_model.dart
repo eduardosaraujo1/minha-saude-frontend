@@ -14,6 +14,7 @@ class DocumentViewModel {
   }) : _documentUuid = documentUuid,
        _documentRepository = documentRepository {
     loadDocument = Command0<DocumentWithFile, Exception>(_loadDocument);
+    loadDocument.execute();
   }
 
   final String _documentUuid;

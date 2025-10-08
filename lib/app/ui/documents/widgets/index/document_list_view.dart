@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/ui/documents/widgets/index/document_upload_fab.dart';
-import 'package:minha_saude_frontend/app/ui/documents/widgets/index/sorted_document_list.dart';
 
+import '../../../../routing/routes.dart';
 import '../../../core/widgets/brand_app_bar.dart';
 import '../../view_models/index/document_list_view_model.dart';
-// import 'package:minha_saude_frontend/app/ui/view_models/document/document_list_view_model.dart';
-// import 'package:minha_saude_frontend/app/ui/widgets/document/document_fab.dart';
-// import 'package:minha_saude_frontend/app/ui/widgets/app/brand_app_bar.dart';
-// import 'package:minha_saude_frontend/app/ui/widgets/document/grouped_document_grid.dart';
+import 'sorted_document_list.dart';
 
+// TODO: show empty state when there are no documents
 class DocumentListView extends StatefulWidget {
   final DocumentListViewModel viewModel;
 
@@ -106,10 +104,10 @@ class _DocumentListViewState extends State<DocumentListView> {
       ),
       floatingActionButton: DocumentUploadFab(
         onScanTap: () {
-          context.go("/documentos/scan");
+          context.go(Routes.documentosScan);
         },
         onUploadTap: () {
-          context.go("/documentos/upload");
+          context.go(Routes.documentosUpload);
         },
       ),
     );

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class DocumentUploadFab extends StatefulWidget {
   const DocumentUploadFab({
-    super.key,
     required this.onScanTap,
     required this.onUploadTap,
+    super.key,
   });
 
   final VoidCallback onScanTap;
@@ -16,6 +16,17 @@ class DocumentUploadFab extends StatefulWidget {
 
 class _DocumentUploadFabState extends State<DocumentUploadFab>
     with SingleTickerProviderStateMixin {
+  /* 
+      I want to change this animation to a more complex one which I do not know how to do
+      I hope you can help me with that
+      ---
+      The animation should be like this:
+      - By default the FAB is an extended FAB with a '+' icon and the label 'Documento'
+      - When tapped, the FAB should be replaced with a non-extended FAB with a 'x' icon
+      - Two smaller FABs should appear above the main FAB with a push-up effect, one with a 'document_scanner' icon and the label 'Escanear', and another with an 'upload_file' icon and the label 'Carregar arquivo'
+      - Note that the push effect should be animated, and the smaller FABs should not be visible before they were pushed out of the non-extended FAB (like, the non-extended FAB has a pure white background and the smaller FABs are hidden behind it)
+      - The reverse effect is a push-down effect followed by the main FAB turning back into an extended FAB with a '+' icon and the label 'Documento'
+      */
   late AnimationController _animationController;
   late Animation<double> _rotationAnimation;
   late Animation<double> _scaleAnimation;

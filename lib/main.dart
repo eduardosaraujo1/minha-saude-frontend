@@ -19,7 +19,7 @@ void main() async {
         // mockGoogle: !(Platform.isAndroid || Platform.isIOS),
         mockGoogle: true,
         mockScanner: true,
-        mockSecureStorage: true,
+        mockSecureStorage: false,
       );
     } else {
       await registerDependenciesProd();

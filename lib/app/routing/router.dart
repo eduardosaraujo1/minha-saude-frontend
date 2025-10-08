@@ -18,7 +18,9 @@ import '../ui/auth/widgets/register_view.dart';
 import '../ui/auth/widgets/tos_view.dart';
 import '../ui/core/widgets/not_found.dart';
 import '../ui/documents/view_models/index/document_list_view_model.dart';
+import '../ui/documents/view_models/upload/document_upload_view_model.dart';
 import '../ui/documents/widgets/index/document_list_view.dart';
+import '../ui/documents/widgets/upload/document_upload_view.dart';
 import 'routes.dart';
 
 final _getIt = GetIt.I;
@@ -37,181 +39,197 @@ GoRouter router() {
       return _redirectHandler(context, state, sessionRepository);
     },
     routes: [
-      // Auth Routes (without bottom navigation)
       GoRoute(
-        path: Routes.login,
-        builder: (BuildContext context, GoRouterState state) {
-          return LoginView(
-            LoginViewModel(_getIt<AuthRepository>(), _getIt<LoginWithGoogle>()),
-          );
-        },
-      ),
-      GoRoute(
-        path: Routes.tos,
-        builder: (BuildContext context, GoRouterState state) {
-          return TosView(TosViewModel());
+        path: Routes.home,
+        redirect: (context, state) {
+          if (state.fullPath == Routes.home) {
+            return Routes.documentos;
+          }
+          return null;
         },
         routes: [
+          // Auth Routes (without bottom navigation)
           GoRoute(
-            path: Routes.registerRelative,
+            path: Routes.login,
             builder: (BuildContext context, GoRouterState state) {
-              return RegisterView(
-                RegisterViewModel(registerAction: _getIt<RegisterAction>()),
+              return LoginView(
+                LoginViewModel(
+                  _getIt<AuthRepository>(),
+                  _getIt<LoginWithGoogle>(),
+                ),
               );
             },
           ),
-        ],
-      ),
-      StatefulShellRoute.indexedStack(
-        builder:
-            (
-              BuildContext context,
-              GoRouterState state,
-              StatefulNavigationShell navigationShell,
-            ) {
-              return ScaffoldWithNavbar(navigationShell: navigationShell);
+          GoRoute(
+            path: Routes.tos,
+            builder: (BuildContext context, GoRouterState state) {
+              return TosView(TosViewModel());
             },
-        branches: [
-          // Documents branch
-          StatefulShellBranch(
-            navigatorKey: _documentNavigatorKey,
             routes: [
               GoRoute(
-                path: Routes.home,
+                path: Routes.registerRelative,
                 builder: (BuildContext context, GoRouterState state) {
-                  return DocumentListView(
-                    DocumentListViewModel(_getIt<DocumentRepository>()),
+                  return RegisterView(
+                    RegisterViewModel(registerAction: _getIt<RegisterAction>()),
                   );
                 },
-                routes: [
-                  // GoRoute(
-                  //   path: Routes.documentosUploadRelative,
-                  //   builder: (BuildContext context, GoRouterState state) {
-                  //     return DocumentScanView(
-                  //       DocumentScanViewModel(
-                  //         DocumentCreateType.upload,
-                  //         _getIt<DocumentUploadRepository>(),
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
-                  // GoRoute(
-                  //   path: Routes.documentosScanRelative,
-                  //   builder: (BuildContext context, GoRouterState state) {
-                  //     return DocumentScanView(
-                  //       DocumentScanViewModel(
-                  //         DocumentCreateType.scan,
-                  //         _getIt<DocumentUploadRepository>(),
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
-                  // GoRoute(
-                  //   path: Routes.documentosCreateRelative,
-                  //   builder: (BuildContext context, GoRouterState state) {
-                  //     return DocumentCreateView(DocumentCreateViewModel());
-                  //   },
-                  // ),
-                  // GoRoute(
-                  //   path: '${Routes.documentosRelative}/:id',
-                  //   builder: (BuildContext context, GoRouterState state) {
-                  //     return DocumentView(
-                  //       DocumentViewModel(
-                  //         state.pathParameters['id'] ?? '',
-                  //         _getIt<DocumentRepository>(),
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
-                ],
               ),
             ],
           ),
-          // Share branch
-          // StatefulShellBranch(
-          //   routes: [
-          //     GoRoute(
-          //       path: Routes.compartilhar,
-          //       builder: (BuildContext context, GoRouterState state) {
-          //         // return const CompartilharView();
-          //         return CodigosCompartilhamento();
-          //       },
-          //       routes: [
-          //         // GoRoute(
-          //         //   path: 'create',
-          //         //   builder: (context, state) {
-          //         //     return const SelecionarDocumentos();
-          //         //   },
-          //         // ),
-          //         // GoRoute(
-          //         //   path: ':codigo',
-          //         //   builder: (context, state) {
-          //         //     return const SelecionarDocumentos();
-          //         //   },
-          //         // ),
-          //       ],
-          //     ),
-          //   ],
-          // ),
-          // // Trash branch
-          // StatefulShellBranch(
-          //   routes: [
-          //     GoRoute(
-          //       path: Routes.lixeira,
-          //       builder: (BuildContext context, GoRouterState state) =>
-          //           LixeiraView(LixeiraViewModel(_getIt<DocumentRepository>())),
-          //       routes: [
-          //         GoRoute(
-          //           path: ':id',
-          //           builder: (context, state) {
-          //             return DeletedDocumentView(
-          //               DeletedDocumentViewModel(
-          //                 state.pathParameters['id'] ?? '',
-          //                 _getIt<DocumentRepository>(),
-          //               ),
-          //             );
-          //           },
-          //         ),
-          //       ],
-          //     ),
-          //   ],
-          // ),
-          // // Settings branch
-          // StatefulShellBranch(
-          //   routes: [
-          //     GoRoute(
-          //       path: Routes.configuracoes,
-          //       builder: (BuildContext context, GoRouterState state) =>
-          //           const ConfiguracoesView(),
-          //       routes: [
-          //         GoRoute(
-          //           path: Routes.editNomeRelative,
-          //           builder: (context, state) {
-          //             return EditNomeView(
-          //               EditNomeViewModel(_getIt<ProfileRepository>()),
-          //             );
-          //           },
-          //         ),
-          //         GoRoute(
-          //           path: Routes.editTelefoneRelative,
-          //           builder: (context, state) {
-          //             return EditTelefoneView(
-          //               EditTelefoneViewModel(_getIt<ProfileRepository>()),
-          //             );
-          //           },
-          //         ),
-          //         GoRoute(
-          //           path: Routes.editBirthdateRelative,
-          //           builder: (context, state) {
-          //             return EditBirthdayView(
-          //               EditBirthdayViewModel(_getIt<ProfileRepository>()),
-          //             );
-          //           },
-          //         ),
-          //       ],
-          //     ),
-          //   ],
-          // ),
+          // Document Upload routes (no bottom navigation)
+          GoRoute(
+            path: Routes.documentosUpload,
+            builder: (BuildContext context, GoRouterState state) {
+              return DocumentUploadView(
+                DocumentUploadViewModel(
+                  DocumentUploadMethod.upload,
+                  _getIt<DocumentRepository>(),
+                ),
+              );
+            },
+          ),
+          GoRoute(
+            path: Routes.documentosScan,
+            builder: (BuildContext context, GoRouterState state) {
+              return DocumentUploadView(
+                DocumentUploadViewModel(
+                  DocumentUploadMethod.scan,
+                  _getIt<DocumentRepository>(),
+                ),
+              );
+            },
+          ),
+          StatefulShellRoute.indexedStack(
+            builder:
+                (
+                  BuildContext context,
+                  GoRouterState state,
+                  StatefulNavigationShell navigationShell,
+                ) {
+                  return ScaffoldWithNavbar(navigationShell: navigationShell);
+                },
+            branches: [
+              // Documents branch
+              StatefulShellBranch(
+                navigatorKey: _documentNavigatorKey,
+                routes: [
+                  GoRoute(
+                    path: Routes.documentosRelative,
+                    builder: (context, state) {
+                      return DocumentListView(
+                        DocumentListViewModel(_getIt<DocumentRepository>()),
+                      );
+                    },
+                    routes: [
+                      // GoRoute(
+                      //   path: '${Routes.documentosRelative}/:id',
+                      //   builder: (BuildContext context, GoRouterState state) {
+                      //     return DocumentView(
+                      //       DocumentViewModel(
+                      //         state.pathParameters['id'] ?? '',
+                      //         _getIt<DocumentRepository>(),
+                      //       ),
+                      //     );
+                      //   },
+                      // ),
+                      // Likely Deprecated:
+                      // GoRoute(
+                      //   path: Routes.documentosCreateRelative,
+                      //   builder: (BuildContext context, GoRouterState state) {
+                      //     return DocumentCreateView(DocumentCreateViewModel());
+                      //   },
+                      // ),
+                    ],
+                  ),
+                ],
+              ),
+              // Share branch
+              // StatefulShellBranch(
+              //   routes: [
+              //     GoRoute(
+              //       path: Routes.compartilhar,
+              //       builder: (BuildContext context, GoRouterState state) {
+              //         // return const CompartilharView();
+              //         return CodigosCompartilhamento();
+              //       },
+              //       routes: [
+              //         // GoRoute(
+              //         //   path: 'create',
+              //         //   builder: (context, state) {
+              //         //     return const SelecionarDocumentos();
+              //         //   },
+              //         // ),
+              //         // GoRoute(
+              //         //   path: ':codigo',
+              //         //   builder: (context, state) {
+              //         //     return const SelecionarDocumentos();
+              //         //   },
+              //         // ),
+              //       ],
+              //     ),
+              //   ],
+              // ),
+              // // Trash branch
+              // StatefulShellBranch(
+              //   routes: [
+              //     GoRoute(
+              //       path: Routes.lixeira,
+              //       builder: (BuildContext context, GoRouterState state) =>
+              //           LixeiraView(LixeiraViewModel(_getIt<DocumentRepository>())),
+              //       routes: [
+              //         GoRoute(
+              //           path: ':id',
+              //           builder: (context, state) {
+              //             return DeletedDocumentView(
+              //               DeletedDocumentViewModel(
+              //                 state.pathParameters['id'] ?? '',
+              //                 _getIt<DocumentRepository>(),
+              //               ),
+              //             );
+              //           },
+              //         ),
+              //       ],
+              //     ),
+              //   ],
+              // ),
+              // // Settings branch
+              // StatefulShellBranch(
+              //   routes: [
+              //     GoRoute(
+              //       path: Routes.configuracoes,
+              //       builder: (BuildContext context, GoRouterState state) =>
+              //           const ConfiguracoesView(),
+              //       routes: [
+              //         GoRoute(
+              //           path: Routes.editNomeRelative,
+              //           builder: (context, state) {
+              //             return EditNomeView(
+              //               EditNomeViewModel(_getIt<ProfileRepository>()),
+              //             );
+              //           },
+              //         ),
+              //         GoRoute(
+              //           path: Routes.editTelefoneRelative,
+              //           builder: (context, state) {
+              //             return EditTelefoneView(
+              //               EditTelefoneViewModel(_getIt<ProfileRepository>()),
+              //             );
+              //           },
+              //         ),
+              //         GoRoute(
+              //           path: Routes.editBirthdateRelative,
+              //           builder: (context, state) {
+              //             return EditBirthdayView(
+              //               EditBirthdayViewModel(_getIt<ProfileRepository>()),
+              //             );
+              //           },
+              //         ),
+              //       ],
+              //     ),
+              //   ],
+              // ),
+            ],
+          ),
         ],
       ),
     ],

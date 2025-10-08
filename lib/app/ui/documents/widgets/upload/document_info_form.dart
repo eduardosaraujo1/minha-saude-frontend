@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:watch_it/watch_it.dart';
 
-import '../../view_models/upload/document_info_form_view_model.dart';
+import '../../view_models/upload/document_info_form_model.dart';
 
 class DocumentInfoFormView extends WatchingStatefulWidget {
   final DocumentInfoFormViewModel viewModel;
@@ -28,7 +28,7 @@ class _DocumentCreateViewState extends State<DocumentInfoFormView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Criar Documento'),
+        title: const Text('Adicionar Documento'),
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       ),
       body: Padding(

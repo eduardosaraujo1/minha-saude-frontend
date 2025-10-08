@@ -16,8 +16,6 @@ abstract final class Routes {
   static const documentosUploadRelative = 'upload';
   static const documentosScan = '$documentos/$documentosScanRelative';
   static const documentosScanRelative = 'scan';
-  static const documentosCreate = '$documentos/$documentosCreateRelative';
-  static const documentosCreateRelative = 'create';
   static String documentosWithId(String id) => '$documentos/$id';
 
   // Compartilhar routes

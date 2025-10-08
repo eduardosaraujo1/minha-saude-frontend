@@ -17,7 +17,6 @@ class DocumentUploadFab extends StatefulWidget {
 class _DocumentUploadFabState extends State<DocumentUploadFab>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
-  late Animation<double> _fabExtensionAnimation;
   late Animation<double> _iconRotationAnimation;
   late Animation<double> _uploadSlideAnimation;
   late Animation<double> _scanSlideAnimation;
@@ -30,14 +29,6 @@ class _DocumentUploadFabState extends State<DocumentUploadFab>
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
-    );
-
-    // Animation for the main FAB transitioning from extended to normal
-    _fabExtensionAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.0, 0.3, curve: Curves.easeInOut),
-      ),
     );
 
     // Icon rotation (+ to x)
@@ -124,30 +115,21 @@ class _DocumentUploadFabState extends State<DocumentUploadFab>
           offset: offset,
           child: Opacity(
             opacity: _optionsFadeAnimation.value,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Material(
-                  color: colorScheme.surface,
-                  elevation: 2,
-                  borderRadius: BorderRadius.circular(8),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12.0,
-                      vertical: 6.0,
-                    ),
-                    child: Text(label, style: theme.textTheme.bodyMedium),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                FloatingActionButton.small(
-                  heroTag: heroTag,
-                  onPressed: onPressed,
-                  backgroundColor: colorScheme.secondaryContainer,
-                  foregroundColor: colorScheme.onSecondaryContainer,
-                  child: Icon(icon),
-                ),
-              ],
+            child: FloatingActionButton.extended(
+              elevation: 1,
+              label: Text(label, style: theme.textTheme.bodyMedium),
+              icon: Icon(icon, color: colorScheme.onPrimaryContainer),
+              onPressed: onPressed,
+              backgroundColor: colorScheme.primaryContainer,
+              heroTag: heroTag,
+              // style: FilledButton.styleFrom(
+              //   backgroundColor: colorScheme.primaryContainer,
+              //   foregroundColor: colorScheme.onPrimaryContainer,
+              //   // padding: const EdgeInsets.symmetric(
+              //   //   horizontal: 12.0,
+              //   //   vertical: 6.0,
+              //   // ),
+              // ),
             ),
           ),
         );
@@ -164,7 +146,7 @@ class _DocumentUploadFabState extends State<DocumentUploadFab>
         // Scan option (appears first, at the top)
         if (_isExpanded || _animationController.isAnimating)
           Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
+            padding: const EdgeInsets.only(bottom: 8.0),
             child: _buildOptionButton(
               label: 'Escanear',
               icon: Icons.document_scanner,
@@ -177,7 +159,7 @@ class _DocumentUploadFabState extends State<DocumentUploadFab>
         // Upload option (appears second, in the middle)
         if (_isExpanded || _animationController.isAnimating)
           Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
+            padding: const EdgeInsets.only(bottom: 12.0),
             child: _buildOptionButton(
               label: 'Carregar arquivo',
               icon: Icons.upload_file,
@@ -187,28 +169,17 @@ class _DocumentUploadFabState extends State<DocumentUploadFab>
             ),
           ),
 
-        // Main FAB with smooth transition between extended and normal
+        // Main FAB
         AnimatedBuilder(
           animation: _animationController,
           builder: (context, child) {
-            final isExtended = _fabExtensionAnimation.value > 0.5;
-
             return RotationTransition(
               turns: _iconRotationAnimation,
               child: FloatingActionButton(
                 onPressed: _toggleMenu,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(_isExpanded ? Icons.close : Icons.add),
-                    if (isExtended) ...[
-                      SizedBox(width: 8 * _fabExtensionAnimation.value),
-                      Opacity(
-                        opacity: _fabExtensionAnimation.value,
-                        child: const Text('Documento'),
-                      ),
-                    ],
-                  ],
+                  children: [Icon(Icons.add)],
                 ),
               ),
             );

@@ -1,3 +1,103 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:pdfx/pdfx.dart';
+
+import '../view_models/document_view_model.dart';
+
+class DocumentView extends StatelessWidget {
+  const DocumentView(this.viewModel, {super.key});
+
+  final DocumentViewModel viewModel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Visualizar Documento'),
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+      ),
+      body: ListenableBuilder(
+        listenable: viewModel.loadDocument,
+        builder: (context, child) {
+          if (viewModel.loadDocument.isExecuting) {
+            return const Center(
+              child: CircularProgressIndicator(), //
+            );
+          }
+
+          if (viewModel.loadDocument.isError) {
+            final error = viewModel.loadDocument.result!.tryGetError()!;
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Erro ao carregar documento',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    error.toString(),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => viewModel.loadDocument.execute(),
+                    child: const Text('Tentar novamente'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          final document = viewModel.loadDocument.result!.getOrThrow();
+
+          return SingleChildScrollView(
+            child: _DocumentPdfViewer(
+              document: PdfDocument.openFile(document.file.path),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _DocumentPdfViewer extends StatelessWidget {
+  const _DocumentPdfViewer({required this.document});
+
+  final Future<PdfDocument> document;
+
+  static bool supportsPinchView = Platform.isAndroid || Platform.isIOS;
+
+  @override
+  Widget build(BuildContext context) {
+    final pdfController = supportsPinchView
+        ? PdfControllerPinch(document: document)
+        : PdfController(document: document);
+
+    if (pdfController is PdfControllerPinch) {
+      return PdfViewPinch(
+        controller: pdfController,
+        scrollDirection: Axis.vertical,
+      );
+    } else if (pdfController is PdfController) {
+      return PdfView(controller: pdfController, scrollDirection: Axis.vertical);
+    } else {
+      return Center(
+        child: Text(
+          'Visualização de PDF não suportada nesta plataforma.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      );
+    }
+  }
+}
+
 /*
 import 'package:flutter/material.dart';
 import 'package:pdfx/pdfx.dart';

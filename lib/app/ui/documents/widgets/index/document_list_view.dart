@@ -38,6 +38,7 @@ class _DocumentListViewState extends State<DocumentListView> {
 
   void _onLoadUpdate() {
     if (!mounted) return;
+    if (viewModel.load.isExecuting) return;
 
     if (viewModel.load.isError) {
       final error = viewModel.load.result?.tryGetError();

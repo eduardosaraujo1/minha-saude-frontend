@@ -1,63 +1,78 @@
-import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/data/repositories/document/document_repository.dart';
-import 'package:pdfx/pdfx.dart';
+import 'dart:io';
 
-import '../../../../config/asset.dart';
+import 'package:logging/logging.dart';
+import 'package:multiple_result/multiple_result.dart';
+
+import '../../../data/repositories/document/document_repository.dart';
 import '../../../domain/models/document/document.dart';
+import '../../../utils/command.dart';
 
 class DocumentViewModel {
-  DocumentViewModel(this.documentUuid, this.documentRepository) {
-    _loadDocument();
+  DocumentViewModel({
+    required String documentUuid,
+    required DocumentRepository documentRepository,
+  }) : _documentUuid = documentUuid,
+       _documentRepository = documentRepository {
+    loadDocument = Command0<DocumentWithFile, Exception>(_loadDocument);
   }
 
-  final String documentUuid;
-  final DocumentRepository documentRepository;
+  final String _documentUuid;
+  final DocumentRepository _documentRepository;
+  final Logger _logger = Logger('DocumentViewModel');
 
-  final errorMessage = ValueNotifier<String?>(null);
-  final document = ValueNotifier<Document?>(null);
-  final redirectTo = ValueNotifier<String?>(null);
+  late final Command0<DocumentWithFile, Exception> loadDocument;
 
-  final documentLoadingStatus = ValueNotifier<DocumentLoadStatus>(
-    DocumentLoadStatus.loading,
-  );
+  Future<Result<DocumentWithFile, Exception>> _loadDocument() async {
+    try {
+      // Load metadata
+      final documentMetadata = await _documentRepository.getDocumentMeta(
+        _documentUuid,
+      );
+      if (documentMetadata.isError()) {
+        final error = documentMetadata.tryGetError();
+        _logger.severe('Error loading document metadata', error);
+        return Result.error(
+          Exception("Não foi possível carregar o documento."),
+        );
+      }
 
-  PdfControllerPinch? pdfController;
+      // Load file
+      final documentFile = await _documentRepository.getDocumentFile(
+        _documentUuid,
+      );
+      if (documentFile.isError()) {
+        final error = documentFile.tryGetError();
+        _logger.severe('Error loading document file', error);
+        return Result.error(
+          Exception("Não foi possível carregar o documento."),
+        );
+      }
 
-  Future<void> _loadDocument() async {
-    documentLoadingStatus.value = DocumentLoadStatus.loading;
-    // Load metadata
-    final documentQuery = await documentRepository.getDocumentMeta(
-      documentUuid,
-    );
+      final document = DocumentWithFile(
+        document: documentMetadata.getOrThrow(),
+        file: documentFile.getOrThrow(),
+      );
 
-    if (documentQuery.isError()) {
-      errorMessage.value = documentQuery.tryGetError()!.toString();
-      documentLoadingStatus.value = DocumentLoadStatus.error;
-      return;
+      return Result.success(document);
+    } catch (e) {
+      _logger.severe('Exception loading document:', e);
+      return Result.error(
+        Exception("Ocorreu um erro desconhecido ao carregar o documento."),
+      );
     }
-
-    // TODO: I have no idea what's going on
-    // document.value = documentQuery.getOrThrow();
-
-    // Load PDF
-    pdfController = PdfControllerPinch(
-      document: PdfDocument.openAsset(Asset.fakeDocumentPdf),
-    );
-
-    documentLoadingStatus.value = DocumentLoadStatus.loaded;
   }
+}
 
-  void deleteDocument(String documentId) {
-    // In a real implementation, you would call the repository to delete the document
-    // await documentRepository.deleteDocument(documentId);
+class DocumentWithFile {
+  const DocumentWithFile({required Document document, required File file})
+    : _document = document,
+      _file = file;
 
-    // For now, just trigger navigation back to home
-    redirectTo.value = '/';
-  }
+  final Document _document;
+  final File _file;
 
-  void dispose() {
-    pdfController?.dispose();
-  }
+  Document get document => _document;
+  File get file => _file;
 }
 
 enum DocumentAction { view, edit, delete }

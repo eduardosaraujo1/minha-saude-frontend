@@ -60,6 +60,7 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
     if (!mounted) return;
 
     final uploadCommand = viewModel.uploadDocument;
+    if (uploadCommand.isExecuting) return;
 
     if (uploadCommand.isError) {
       // Show error message and go home

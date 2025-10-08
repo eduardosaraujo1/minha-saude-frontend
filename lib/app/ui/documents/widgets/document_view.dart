@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -13,78 +14,102 @@ class DocumentView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Visualizar Documento'),
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-      ),
-      body: ValueListenableBuilder(
-        valueListenable: viewModel.loadDocument.results,
-        builder: (context, val, child) {
-          if (val.isExecuting || !val.hasData || val.data == null) {
-            return const Center(
-              child: CircularProgressIndicator(), //
-            );
-          }
+    return ValueListenableBuilder(
+      valueListenable: viewModel.loadDocument.results,
+      builder: (context, loadDocResult, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Visualizar Documento'),
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+            actions: [
+              if (loadDocResult.hasData && loadDocResult.data != null) ...[
+                _DocumentActionsMenu((DocumentAction action) {
+                  if (action == DocumentAction.view) {
+                    // Show info
+                  } else if (action == DocumentAction.edit) {
+                    // Edit document
+                  } else if (action == DocumentAction.delete) {
+                    // Delete document
+                    log('Delete action selected');
+                  }
+                }),
+              ],
+            ],
+          ),
+          body: Builder(
+            builder: (context) {
+              if (loadDocResult.isExecuting ||
+                  !loadDocResult.hasData ||
+                  loadDocResult.data == null) {
+                return const Center(
+                  child: CircularProgressIndicator(), //
+                );
+              }
 
-          if (val.data!.isError()) {
-            final error = val.data!.tryGetError()!;
+              if (loadDocResult.data!.isError()) {
+                final error = loadDocResult.data!.tryGetError()!;
 
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Erro ao carregar documento',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        error.toString(),
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => viewModel.loadDocument.execute(),
+                        child: const Text('Tentar novamente'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              final documentFile = loadDocResult.data!.tryGetSuccess()!;
+
+              return Stack(
                 children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Erro ao carregar documento',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                  _DocumentPdfViewer(
+                    document: PdfDocument.openFile(documentFile.file.path),
+                    onPageChanged: (page) {
+                      viewModel.currentPage.value = page;
+                    },
+                    onDocumentLoaded: (documentFile) {
+                      viewModel.totalPages.value = documentFile.pagesCount;
+                      viewModel.currentPage.value = 1;
+                    },
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    error.toString(),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => viewModel.loadDocument.execute(),
-                    child: const Text('Tentar novamente'),
+                  Positioned(
+                    bottom: 16,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: _PageCounter(
+                        currentPage: viewModel.currentPage,
+                        totalPages: viewModel.totalPages,
+                      ),
+                    ),
                   ),
                 ],
-              ),
-            );
-          }
-
-          final documentFile = val.data!.tryGetSuccess()!;
-
-          return Stack(
-            children: [
-              _DocumentPdfViewer(
-                document: PdfDocument.openFile(documentFile.file.path),
-                onPageChanged: (page) {
-                  viewModel.currentPage.value = page;
-                },
-                onDocumentLoaded: (documentFile) {
-                  viewModel.totalPages.value = documentFile.pagesCount;
-                  viewModel.currentPage.value = 1;
-                },
-              ),
-              Positioned(
-                bottom: 16,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: _PageCounter(
-                    currentPage: viewModel.currentPage,
-                    totalPages: viewModel.totalPages,
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
@@ -253,6 +278,70 @@ class _DocumentPdfViewerState extends State<_DocumentPdfViewer> {
         ),
       );
     }
+  }
+}
+
+class _DocumentActionsMenu extends StatelessWidget {
+  final void Function(DocumentAction selectedAction) onSelected;
+
+  const _DocumentActionsMenu(this.onSelected);
+
+  @override
+  Widget build(BuildContext context) {
+    var theme = Theme.of(context);
+    var colorScheme = theme.colorScheme;
+    return MenuAnchor(
+      menuChildren: [
+        MenuItemButton(
+          onPressed: () => onSelected(DocumentAction.view),
+          child: Row(
+            children: [
+              Icon(Icons.info_outline, color: colorScheme.onSurfaceVariant),
+              const SizedBox(width: 8),
+              Text(
+                'Informações',
+                style: TextStyle(color: colorScheme.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ),
+        MenuItemButton(
+          onPressed: () => onSelected(DocumentAction.edit),
+          child: Row(
+            children: [
+              Icon(Icons.edit_outlined, color: colorScheme.onSurfaceVariant),
+              const SizedBox(width: 8),
+              Text(
+                'Editar',
+                style: TextStyle(color: colorScheme.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ),
+        MenuItemButton(
+          onPressed: () => onSelected(DocumentAction.delete),
+          child: Row(
+            children: [
+              Icon(Icons.delete_outline, color: colorScheme.error),
+              const SizedBox(width: 8),
+              Text('Excluir', style: TextStyle(color: colorScheme.error)),
+            ],
+          ),
+        ),
+      ],
+      builder: (context, controller, child) {
+        return IconButton(
+          icon: const Icon(Icons.more_vert),
+          onPressed: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
+          },
+        );
+      },
+    );
   }
 }
 
@@ -535,65 +624,7 @@ class _DocumentInfoBottomSheet extends StatelessWidget {
   }
 }
 
-class _DocumentActionsMenu extends StatelessWidget {
-  final void Function(DocumentAction) onSelected;
 
-  const _DocumentActionsMenu(this.onSelected);
-
-  @override
-  Widget build(BuildContext context) {
-    return MenuAnchor(
-      menuChildren: [
-        MenuItemButton(
-          onPressed: () => onSelected(DocumentAction.view),
-          child: Row(
-            children: [
-              Icon(
-                Icons.info_outline,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Informações',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-        MenuItemButton(
-          onPressed: () => onSelected(DocumentAction.delete),
-          child: Row(
-            children: [
-              Icon(
-                Icons.delete_outline,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Excluir',
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-            ],
-          ),
-        ),
-      ],
-      builder: (context, controller, child) {
-        return IconButton(
-          icon: const Icon(Icons.more_vert),
-          onPressed: () {
-            if (controller.isOpen) {
-              controller.close();
-            } else {
-              controller.open();
-            }
-          },
-        );
-      },
-    );
-  }
-}
 
 class _DocumentInfoCard extends StatelessWidget {
   const _DocumentInfoCard({required this.label, required this.value});

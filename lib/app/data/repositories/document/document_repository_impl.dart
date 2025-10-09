@@ -30,6 +30,7 @@ class DocumentRepositoryImpl extends DocumentRepository {
   final _log = Logger("DocumentRepositoryImpl");
 
   final _documentListCache = _DocumentListCache();
+  final _documentFileCache = _DocumentFileCache();
 
   @override
   Future<Result<File, Exception>> pickDocumentFile() async {
@@ -135,19 +136,26 @@ class DocumentRepositoryImpl extends DocumentRepository {
   @override
   Future<Result<File, Exception>> getDocumentFile(String uuid) async {
     try {
+      // Check if the file is already cached
+      final cachedFile = _documentFileCache.get(uuid);
+      if (cachedFile != null) {
+        return Result.success(cachedFile);
+      }
+
       final localResult = await _fileSystemService.getDocument(uuid);
 
-      if (localResult.isError()) {
+      if (localResult.isSuccess()) {
+        // If file exists locally, cache and return it
+        final localFile = localResult.tryGetSuccess();
+        if (localFile != null) {
+          _documentFileCache.set(uuid, localFile);
+          return Result.success(localFile);
+        }
+      } else {
         _log.warning(
           "Failed to retrieve document from local storage",
           localResult.tryGetError()!,
         );
-      }
-
-      // If file exists locally, return it
-      final localFile = localResult.tryGetSuccess();
-      if (localFile != null) {
-        return Result.success(localFile);
       }
 
       // Get file from remote and store locally ASAP
@@ -169,12 +177,14 @@ class DocumentRepositoryImpl extends DocumentRepository {
           storeResult.tryGetError()!,
         );
         final file = await _writeBytesToTempFile(uuid, bytes);
+        _documentFileCache.set(uuid, file);
 
         return Result.success(file);
       }
 
       // Return the stored file
       final storedFile = storeResult.tryGetSuccess()!;
+      _documentFileCache.set(uuid, storedFile);
 
       return Result.success(storedFile);
     } on Exception catch (e, stackTrace) {
@@ -509,5 +519,30 @@ class _DocumentListCache {
     }
 
     return null;
+  }
+}
+
+class _DocumentFileCache {
+  String? _cachedUuid;
+  File? _cachedFile;
+
+  /// Returns the cached file if the UUID matches, otherwise null
+  File? get(String uuid) {
+    if (_cachedUuid == uuid && _cachedFile != null) {
+      return _cachedFile;
+    }
+    return null;
+  }
+
+  /// Stores a file and its UUID in the cache
+  void set(String uuid, File file) {
+    _cachedUuid = uuid;
+    _cachedFile = file;
+  }
+
+  /// Clears the cache
+  void clear() {
+    _cachedUuid = null;
+    _cachedFile = null;
   }
 }

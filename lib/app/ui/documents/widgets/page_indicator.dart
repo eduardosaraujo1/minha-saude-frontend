@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-class PageCounter extends StatefulWidget {
-  const PageCounter({
+class PageIndicator extends StatefulWidget {
+  const PageIndicator({
     required this.currentPage,
     required this.totalPages,
     super.key,
@@ -13,10 +13,10 @@ class PageCounter extends StatefulWidget {
   final ValueNotifier<int> totalPages;
 
   @override
-  State<PageCounter> createState() => _PageCounterState();
+  State<PageIndicator> createState() => _PageIndicatorState();
 }
 
-class _PageCounterState extends State<PageCounter>
+class _PageIndicatorState extends State<PageIndicator>
     with SingleTickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;

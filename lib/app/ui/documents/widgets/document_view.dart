@@ -4,8 +4,8 @@ import 'package:pdfx/pdfx.dart';
 
 import '../../../routing/routes.dart';
 import '../view_models/document_view_model.dart';
-import 'document_pdf_viewer.dart';
-import 'page_counter.dart';
+import '../../core/widgets/document_pdf_viewer.dart';
+import 'page_indicator.dart';
 
 class DocumentView extends StatefulWidget {
   const DocumentView(this.viewModel, {super.key});
@@ -155,7 +155,7 @@ class _DocumentViewState extends State<DocumentView> {
                 left: 0,
                 right: 0,
                 child: Center(
-                  child: PageCounter(
+                  child: PageIndicator(
                     currentPage: widget.viewModel.currentPage,
                     totalPages: widget.viewModel.totalPages,
                   ),

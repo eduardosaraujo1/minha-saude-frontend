@@ -7,16 +7,16 @@ import '../../view_models/index/document_list_view_model.dart';
 import 'document_upload_fab.dart';
 import 'sorted_document_list.dart';
 
-class DocumentListView extends StatefulWidget {
+class DocumentListScreen extends StatefulWidget {
   final DocumentListViewModel viewModel;
 
-  const DocumentListView(this.viewModel, {super.key});
+  const DocumentListScreen(this.viewModel, {super.key});
 
   @override
-  State<DocumentListView> createState() => _DocumentListViewState();
+  State<DocumentListScreen> createState() => _DocumentListScreenState();
 }
 
-class _DocumentListViewState extends State<DocumentListView> {
+class _DocumentListScreenState extends State<DocumentListScreen> {
   DocumentListViewModel get viewModel => widget.viewModel;
 
   @override

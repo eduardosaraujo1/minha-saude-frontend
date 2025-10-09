@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:watch_it/watch_it.dart';
 
 import '../../view_models/upload/document_info_form_model.dart';
 
-class DocumentInfoFormView extends WatchingStatefulWidget {
+class DocumentInfoFormView extends StatefulWidget {
   final DocumentInfoFormViewModel viewModel;
   final VoidCallback onBack;
 

@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/repositories/session/session_repository.dart';
 import 'package:minha_saude_frontend/app/domain/actions/auth/register_action.dart';
 import 'package:minha_saude_frontend/app/ui/core/widgets/scaffold_with_navbar.dart';
+import 'package:minha_saude_frontend/app/ui/documents/view_models/metadata/document_edit_view_model.dart';
+import 'package:minha_saude_frontend/app/ui/documents/view_models/metadata/document_metadata_view_model.dart';
+import 'package:minha_saude_frontend/app/ui/documents/widgets/metadata/document_metadata_screen.dart';
 
 import '../data/repositories/auth/auth_repository.dart';
 import '../data/repositories/document/document_repository.dart';
@@ -21,7 +24,8 @@ import '../ui/documents/view_models/document_view_model.dart';
 import '../ui/documents/view_models/index/document_list_view_model.dart';
 import '../ui/documents/view_models/upload/document_upload_view_model.dart';
 import '../ui/documents/widgets/document_view.dart';
-import '../ui/documents/widgets/index/document_list_view.dart';
+import '../ui/documents/widgets/index/document_list_screen.dart';
+import '../ui/documents/widgets/metadata/document_edit_screen.dart';
 import '../ui/documents/widgets/upload/document_upload_view.dart';
 import 'routes.dart';
 
@@ -118,7 +122,7 @@ GoRouter router() {
                   GoRoute(
                     path: Routes.documentosRelative,
                     builder: (context, state) {
-                      return DocumentListView(
+                      return DocumentListScreen(
                         DocumentListViewModel(_getIt<DocumentRepository>()),
                       );
                     },
@@ -133,6 +137,34 @@ GoRouter router() {
                             ),
                           );
                         },
+                        routes: [
+                          GoRoute(
+                            path: Routes.documentosInfoRelative,
+                            builder: (context, state) {
+                              return DocumentMetadataView(
+                                viewModel: DocumentMetadataViewModel(
+                                  documentUuid:
+                                      state.pathParameters['id'] ?? '',
+                                  documentRepository:
+                                      _getIt<DocumentRepository>(),
+                                ),
+                              );
+                            },
+                          ),
+                          GoRoute(
+                            path: Routes.documentosEditRelative,
+                            builder: (context, state) {
+                              return DocumentEditScreen(
+                                DocumentEditViewModel(
+                                  documentUuid:
+                                      state.pathParameters['id'] ?? '',
+                                  documentRepository:
+                                      _getIt<DocumentRepository>(),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),

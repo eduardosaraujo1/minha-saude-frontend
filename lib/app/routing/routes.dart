@@ -17,6 +17,12 @@ abstract final class Routes {
   static const documentosScan = '$documentos/$documentosScanRelative';
   static const documentosScanRelative = 'scan';
   static String documentosWithId(String id) => '$documentos/$id';
+  static const documentosInfoRelative = 'info';
+  static String documentosInfo(String id) =>
+      '${documentosWithId(id)}/$documentosInfoRelative';
+  static const documentosEditRelative = 'edit';
+  static String documentosEdit(String id) =>
+      '${documentosWithId(id)}/$documentosEditRelative';
 
   // Compartilhar routes
   static const compartilhar = '/compartilhar';

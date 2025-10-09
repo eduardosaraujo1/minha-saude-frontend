@@ -8,41 +8,36 @@ import '../../core/widgets/document_pdf_viewer.dart';
 import 'page_indicator.dart';
 
 class DocumentView extends StatefulWidget {
-  const DocumentView(this.viewModel, {super.key});
+  const DocumentView(this._viewModel, {super.key});
 
-  final DocumentViewModel viewModel;
+  final DocumentViewModel _viewModel;
 
   @override
   State<DocumentView> createState() => _DocumentViewState();
 }
 
 class _DocumentViewState extends State<DocumentView> {
-  DocumentViewModel get viewModel => widget.viewModel;
+  late final DocumentViewModel viewModel;
 
   @override
   void initState() {
     super.initState();
 
-    viewModel.loadDocument.addListener(_rebuild);
+    viewModel = widget._viewModel;
     viewModel.deleteDocument.addListener(_handleDeleteDocument);
   }
 
   @override
   void dispose() {
-    viewModel.loadDocument.removeListener(_rebuild);
     viewModel.deleteDocument.removeListener(_handleDeleteDocument);
     super.dispose();
-  }
-
-  void _rebuild() {
-    setState(() {});
   }
 
   void _handleDeleteDocument() {
     final command = viewModel.deleteDocument;
 
     if (command.isExecuting.value || command.value == null) {
-      return; // Still executing or no result yet
+      return;
     }
 
     // Show snackbar with success or error message
@@ -65,108 +60,117 @@ class _DocumentViewState extends State<DocumentView> {
 
   @override
   Widget build(BuildContext context) {
-    final loadDocResult = viewModel.loadDocument.results.value;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Visualizar Documento'),
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-        actions: [
-          if (loadDocResult.hasData && loadDocResult.data != null) ...[
-            _DocumentActionsMenu((DocumentAction action) {
-              if (action == DocumentAction.view) {
-                // Show info
-                context.go(Routes.documentosInfo(viewModel.documentUuid));
-              } else if (action == DocumentAction.edit) {
-                // Edit document
-                context.go(Routes.documentosEdit(viewModel.documentUuid));
-              } else if (action == DocumentAction.delete) {
-                // Delete document
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return _DeleteDocumentDialog(
-                      document: loadDocResult.data!.tryGetSuccess()!,
-                      onConfirm: () {
-                        // Call delete command
-                        viewModel.triggerDocumentDelete();
-                      },
-                    );
-                  },
+    return ValueListenableBuilder(
+      valueListenable: viewModel.loadDocument.results,
+      builder: (context, loadDocState, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Visualizar Documento'),
+            backgroundColor: colorScheme.surfaceContainer,
+            actions: [
+              _DocumentActionsMenu((DocumentAction action) {
+                if (action == DocumentAction.view) {
+                  final infoRoute = Routes.documentosInfo(
+                    viewModel.documentUuid,
+                  );
+                  context.go(infoRoute);
+                } else if (action == DocumentAction.edit) {
+                  final documentosEdit = Routes.documentosEdit(
+                    viewModel.documentUuid,
+                  );
+                  context.go(documentosEdit);
+                } else if (action == DocumentAction.delete) {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return _DeleteDocumentDialog(
+                        document: loadDocState.data!.tryGetSuccess()!,
+                        onConfirm: () {
+                          viewModel.triggerDocumentDelete();
+                        },
+                      );
+                    },
+                  );
+                }
+              }),
+            ],
+          ),
+          body: Builder(
+            builder: (context) {
+              if (loadDocState.isExecuting || !loadDocState.hasData) {
+                return const Center(
+                  child: CircularProgressIndicator(), //
                 );
               }
-            }),
-          ],
-        ],
-      ),
-      body: Builder(
-        builder: (context) {
-          if (loadDocResult.isExecuting ||
-              !loadDocResult.hasData ||
-              loadDocResult.data == null) {
-            return const Center(
-              child: CircularProgressIndicator(), //
-            );
-          }
 
-          if (loadDocResult.data!.isError()) {
-            final error = loadDocResult.data!.tryGetError()!;
+              if (loadDocState.data!.isError()) {
+                final error = loadDocState.data!.tryGetError()!;
 
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Erro ao carregar documento',
+                        style: theme.textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        error.toString(),
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => viewModel.loadDocument.execute(),
+                        child: const Text('Tentar novamente'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              final documentFile = loadDocState.data!.tryGetSuccess()!;
+
+              return Stack(
                 children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Erro ao carregar documento',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                  DocumentPdfViewer(
+                    document: PdfDocument.openFile(documentFile.file.path),
+                    onPageChanged: (page) {
+                      viewModel.currentPage.value = page;
+                    },
+                    onDocumentLoaded: (documentFile) {
+                      // Store page state for use in PageIndicator
+                      viewModel.totalPages.value = documentFile.pagesCount;
+                      viewModel.currentPage.value = 1;
+                    },
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    error.toString(),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => widget.viewModel.loadDocument.execute(),
-                    child: const Text('Tentar novamente'),
+                  Positioned(
+                    bottom: 16,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: PageIndicator(
+                        currentPage: viewModel.currentPage,
+                        totalPages: viewModel.totalPages,
+                      ),
+                    ),
                   ),
                 ],
-              ),
-            );
-          }
-
-          final documentFile = loadDocResult.data!.tryGetSuccess()!;
-
-          return Stack(
-            children: [
-              DocumentPdfViewer(
-                document: PdfDocument.openFile(documentFile.file.path),
-                onPageChanged: (page) {
-                  widget.viewModel.currentPage.value = page;
-                },
-                onDocumentLoaded: (documentFile) {
-                  widget.viewModel.totalPages.value = documentFile.pagesCount;
-                  widget.viewModel.currentPage.value = 1;
-                },
-              ),
-              Positioned(
-                bottom: 16,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: PageIndicator(
-                    currentPage: widget.viewModel.currentPage,
-                    totalPages: widget.viewModel.totalPages,
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

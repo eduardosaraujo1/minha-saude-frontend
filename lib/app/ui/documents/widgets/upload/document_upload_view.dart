@@ -10,8 +10,8 @@ import '../../view_models/upload/document_upload_view_model.dart';
 import 'document_info_form.dart';
 
 class DocumentUploadView extends StatefulWidget {
-  final DocumentUploadViewModel viewModel;
-  const DocumentUploadView(this.viewModel, {super.key});
+  final DocumentUploadViewModel _viewModel;
+  const DocumentUploadView(this._viewModel, {super.key});
 
   @override
   State<DocumentUploadView> createState() => _DocumentUploadViewState();
@@ -20,7 +20,14 @@ class DocumentUploadView extends StatefulWidget {
 class _DocumentUploadViewState extends State<DocumentUploadView> {
   final Logger _logger = Logger('DocumentUploadView');
 
-  DocumentUploadViewModel get viewModel => widget.viewModel;
+  late final DocumentUploadViewModel viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+
+    viewModel = widget._viewModel;
+  }
 
   @override
   void dispose() {

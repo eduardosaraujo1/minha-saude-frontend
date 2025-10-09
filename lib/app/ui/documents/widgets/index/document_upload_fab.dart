@@ -17,7 +17,6 @@ class DocumentUploadFab extends StatefulWidget {
 class _DocumentUploadFabState extends State<DocumentUploadFab>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
-  late Animation<double> _iconRotationAnimation;
   late Animation<double> _uploadSlideAnimation;
   late Animation<double> _scanSlideAnimation;
   late Animation<double> _optionsFadeAnimation;
@@ -30,18 +29,6 @@ class _DocumentUploadFabState extends State<DocumentUploadFab>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-
-    // Icon rotation (+ to x)
-    _iconRotationAnimation =
-        Tween<double>(
-          begin: 0.0,
-          end: 0.125, // 45 degrees (1/8 turn)
-        ).animate(
-          CurvedAnimation(
-            parent: _animationController,
-            curve: const Interval(0.0, 0.4, curve: Curves.easeInOut),
-          ),
-        );
 
     // Upload option (appears second, closer to main FAB)
     _uploadSlideAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -127,14 +114,6 @@ class _DocumentUploadFabState extends State<DocumentUploadFab>
               onPressed: onPressed,
               backgroundColor: colorScheme.secondaryContainer,
               heroTag: heroTag,
-              // style: FilledButton.styleFrom(
-              //   backgroundColor: colorScheme.primaryContainer,
-              //   foregroundColor: colorScheme.onPrimaryContainer,
-              //   // padding: const EdgeInsets.symmetric(
-              //   //   horizontal: 12.0,
-              //   //   vertical: 6.0,
-              //   // ),
-              // ),
             ),
           ),
         );
@@ -181,14 +160,11 @@ class _DocumentUploadFabState extends State<DocumentUploadFab>
         AnimatedBuilder(
           animation: _animationController,
           builder: (context, child) {
-            return RotationTransition(
-              turns: _iconRotationAnimation,
-              child: FloatingActionButton(
-                onPressed: _toggleMenu,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [Icon(Icons.add)],
-                ),
+            return FloatingActionButton(
+              onPressed: _toggleMenu,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [Icon(Icons.add)],
               ),
             );
           },

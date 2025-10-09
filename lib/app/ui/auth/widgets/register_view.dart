@@ -191,19 +191,6 @@ class _RegisterViewState extends State<RegisterView> {
                     onPressed: isExecuting
                         ? null
                         : () => viewModel.registerCommand.execute(),
-                    // style: FilledButton.styleFrom(
-                    // TODO: ver se remover isso mudou algo
-                    //   backgroundColor: isExecuting
-                    //       ? Theme.of(
-                    //           context,
-                    //         ).colorScheme.onSurface.withValues(alpha: 0.12)
-                    //       : Theme.of(context).primaryColor,
-                    //   foregroundColor: isExecuting
-                    //       ? Theme.of(
-                    //           context,
-                    //         ).colorScheme.onSurface.withValues(alpha: 0.38)
-                    //       : Theme.of(context).colorScheme.onPrimary,
-                    // ),
                     child: isExecuting
                         ? SizedBox(
                             height: 20,

@@ -16,13 +16,13 @@ void main() {
   late AuthRepository authRepository;
   late DocumentRepository documentRepository;
   late SessionRepository sessionRepository;
-  late Logout logout;
+  late LogoutAction logout;
 
   setUp(() {
     authRepository = MockAuthRepository();
     documentRepository = MockDocumentRepository();
     sessionRepository = MockSessionRepository();
-    logout = Logout(
+    logout = LogoutAction(
       documentRepository: documentRepository,
       authRepository: authRepository,
       sessionRepository: sessionRepository,

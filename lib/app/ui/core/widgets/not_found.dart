@@ -12,9 +12,8 @@ class NotFoundView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final authRepository = GetIt.I<AuthRepository>();
     final sessionRepository = GetIt.I<SessionRepository>();
-    final logoutAction = GetIt.I<Logout>();
+    final logoutAction = GetIt.I<LogoutAction>();
 
     return Scaffold(
       body: Center(

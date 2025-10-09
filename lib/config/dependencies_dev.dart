@@ -89,8 +89,8 @@ Future<void> setup({
       sessionRepository: _getIt<SessionRepository>(),
     ),
   );
-  _getIt.registerSingleton<Logout>(
-    Logout(
+  _getIt.registerSingleton<LogoutAction>(
+    LogoutAction(
       authRepository: _getIt<AuthRepository>(),
       sessionRepository: _getIt<SessionRepository>(),
       documentRepository: _getIt<DocumentRepository>(),

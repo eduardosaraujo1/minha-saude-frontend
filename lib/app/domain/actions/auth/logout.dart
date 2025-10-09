@@ -4,8 +4,8 @@ import 'package:multiple_result/multiple_result.dart';
 import '../../../data/repositories/session/session_repository.dart';
 import '../../../data/repositories/auth/auth_repository.dart';
 
-class Logout {
-  Logout({
+class LogoutAction {
+  LogoutAction({
     required AuthRepository authRepository,
     required SessionRepository sessionRepository,
     required DocumentRepository documentRepository,

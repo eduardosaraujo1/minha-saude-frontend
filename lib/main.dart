@@ -5,7 +5,8 @@ import 'package:logging/logging.dart';
 
 import 'app/routing/router.dart';
 import 'app/ui/core/theme_provider.dart';
-import 'config/dependencies.dart';
+import 'config/dependencies_dev.dart' as dev;
+import 'config/dependencies_prod.dart' as prod;
 import 'config/environment.dart';
 
 void main() async {
@@ -19,7 +20,7 @@ void main() async {
     };
 
     if (Environment.appEnv.isDev) {
-      await registerDependenciesDev(
+      await dev.setup(
         mockApiClient: true,
         // mockGoogle: !(Platform.isAndroid || Platform.isIOS),
         mockGoogle: true,
@@ -27,7 +28,7 @@ void main() async {
         mockSecureStorage: false,
       );
     } else {
-      await registerDependenciesProd();
+      await prod.setup();
     }
 
     runApp(const MyApp());

@@ -27,17 +27,13 @@ import 'environment.dart';
 
 final _getIt = GetIt.instance;
 
-Future<void> _registerDependenciesShared() async {
-  _getIt.registerSingleton<ThemeProvider>(ThemeProvider());
-}
-
-Future<void> registerDependenciesDev({
+Future<void> setup({
   bool mockGoogle = false,
   bool mockApiClient = false,
   bool mockScanner = false,
   bool mockSecureStorage = false,
 }) async {
-  await _registerDependenciesShared();
+  _getIt.registerSingleton<ThemeProvider>(ThemeProvider());
 
   // Services
   _getIt.registerSingleton<SecureStorage>(
@@ -50,21 +46,20 @@ Future<void> registerDependenciesDev({
     mockGoogle ? GoogleServiceFake() : GoogleServiceImpl(GoogleSignIn.instance),
   );
   _getIt.registerSingleton<HttpClient>(HttpClient(baseUrl: Environment.apiUrl));
-  _getIt.registerSingleton<AuthApiClient>(
-    mockApiClient
-        ? FakeAuthApiClient()
-        : AuthApiClientImpl(_getIt<HttpClient>()),
-  );
-  _getIt.registerSingleton<DocumentApiClient>(
-    mockApiClient
-        ? FakeDocumentApiClient()
-        : DocumentApiClientImpl(_getIt<HttpClient>()),
-  );
-
-  final cacheDb = DocumentCacheDatabaseImpl();
-  await cacheDb.init();
-  _getIt.registerSingleton<DocumentCacheDatabase>(cacheDb);
+  _getIt.registerSingleton<DocumentCacheDatabase>(DocumentCacheDatabaseImpl());
   _getIt.registerSingleton<FileSystemService>(FileSystemServiceImpl());
+
+  if (mockApiClient) {
+    _getIt.registerSingleton<AuthApiClient>(FakeAuthApiClient());
+    _getIt.registerSingleton<DocumentApiClient>(FakeDocumentApiClient());
+  } else {
+    _getIt.registerSingleton<AuthApiClient>(
+      AuthApiClientImpl(_getIt<HttpClient>()),
+    );
+    _getIt.registerSingleton<DocumentApiClient>(
+      DocumentApiClientImpl(_getIt<HttpClient>()),
+    );
+  }
 
   // Repositories
   _getIt.registerSingleton<AuthRepository>(
@@ -108,7 +103,16 @@ Future<void> registerDependenciesDev({
     ),
   );
 
-  // Binds
+  // Post-register configuration
+  await _getIt<DocumentCacheDatabase>().init();
+
+  final docApiClient = _getIt<DocumentApiClient>();
+  if (docApiClient is FakeDocumentApiClient) {
+    await docApiClient.populateLocalArrayWithDatabaseData(
+      _getIt<DocumentCacheDatabase>(),
+    );
+  }
+
   _getIt<HttpClient>().authHeaderProvider = () async {
     final token = await _getIt<SessionRepository>().getAuthToken();
     final t = token.tryGetSuccess();
@@ -119,8 +123,4 @@ Future<void> registerDependenciesDev({
 
     return t;
   };
-}
-
-Future<void> registerDependenciesProd() async {
-  // WIP
 }

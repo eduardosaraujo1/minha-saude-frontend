@@ -196,15 +196,15 @@ class DocumentRepositoryImpl extends DocumentRepository {
           return Result.success(memoryDocument);
         }
 
-        final cacheResult = await _localDatabase.getDocument(uuid);
-        if (cacheResult.isError()) {
+        final dbReadResult = await _localDatabase.getDocument(uuid);
+        if (dbReadResult.isError()) {
           _log.warning(
             "Unexpected error fetching document metadata from cache",
-            cacheResult.tryGetError()!,
+            dbReadResult.tryGetError()!,
           );
         } else {
           // Reading from CacheDatabase was successful
-          cachedModel = cacheResult.tryGetSuccess();
+          cachedModel = dbReadResult.tryGetSuccess();
           if (cachedModel != null &&
               !cachedModel.isStale(ttl: Duration(hours: 1))) {
             return Result.success(_mapDbModelToDocument(cachedModel));

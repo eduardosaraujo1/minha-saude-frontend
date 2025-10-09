@@ -93,6 +93,19 @@ class DocumentCacheDatabaseImpl implements DocumentCacheDatabase {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
+      // DEBUG
+      // TODO: remove this print
+      print('Upserted document: ${document.toJson()}');
+      // Run the list query to show current state of the table
+      final allDocs = await listDocuments();
+      if (allDocs.isSuccess()) {
+        print(
+          'Current documents in DB: ${allDocs.getOrThrow().map((d) => d.toJson()).toList()}',
+        );
+      } else {
+        print('Error listing documents: ${allDocs.tryGetError()}');
+      }
+
       return Success(document);
     } catch (e) {
       return Error(Exception('Failed to upsert document: $e'));

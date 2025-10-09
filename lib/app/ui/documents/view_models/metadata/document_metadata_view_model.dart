@@ -15,6 +15,7 @@ class DocumentMetadataViewModel {
       _loadDocument,
       initialValue: null,
     );
+    loadDocument.execute();
   }
 
   final DocumentRepository _documentRepository;

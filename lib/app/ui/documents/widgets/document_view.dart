@@ -23,14 +23,14 @@ class _DocumentViewState extends State<DocumentView> {
   void initState() {
     super.initState();
 
-    viewModel.loadDocument.results.addListener(_rebuild);
+    viewModel.loadDocument.addListener(_rebuild);
     viewModel.deleteDocument.addListener(_handleDeleteDocument);
   }
 
   @override
   void dispose() {
-    viewModel.loadDocument.results.removeListener(_rebuild);
-
+    viewModel.loadDocument.removeListener(_rebuild);
+    viewModel.deleteDocument.removeListener(_handleDeleteDocument);
     super.dispose();
   }
 
@@ -76,8 +76,10 @@ class _DocumentViewState extends State<DocumentView> {
             _DocumentActionsMenu((DocumentAction action) {
               if (action == DocumentAction.view) {
                 // Show info
+                context.go(Routes.documentosInfo(viewModel.documentUuid));
               } else if (action == DocumentAction.edit) {
                 // Edit document
+                context.go(Routes.documentosEdit(viewModel.documentUuid));
               } else if (action == DocumentAction.delete) {
                 // Delete document
                 showDialog(

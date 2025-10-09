@@ -30,6 +30,8 @@ class DocumentViewModel {
   final DocumentRepository _documentRepository;
   final Logger _logger = Logger('DocumentViewModel');
 
+  String get documentUuid => _documentUuid;
+
   late final Command<void, Result<DocumentWithFile, Exception>?> loadDocument;
   late final Command<Document, Result<void, Exception>?> deleteDocument;
 

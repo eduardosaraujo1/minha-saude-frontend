@@ -26,11 +26,6 @@ class RegisterViewModel {
   /// Register user with current form data
   Future<Result<RegisterResult, Exception>?> _registerUser() async {
     try {
-      // Validar form antes de executar qualquer lógica
-      if (!form.validate()) {
-        return null;
-      }
-
       // Iniciar registro
       final result = await _registerAction.execute(
         nome: form.nomeController.text.trim(),
@@ -62,6 +57,12 @@ class RegisterViewModel {
   /// Dispose form controllers
   void dispose() {
     form.dispose();
+  }
+
+  void triggerRegisterIfValid() {
+    if (form.validate()) {
+      registerCommand.execute();
+    }
   }
 
   /// Parse date from DD/MM/YYYY format

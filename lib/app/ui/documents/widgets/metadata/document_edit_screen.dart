@@ -8,6 +8,39 @@ class DocumentEditScreen extends StatelessWidget {
 
   final DocumentEditViewModel viewModel;
 
+  void triggerUpdateIfValid() {
+    if (viewModel.form.validate()) {
+      viewModel.updateDocument.execute();
+    }
+  }
+
+  void _onUpdateCommand(BuildContext context) {
+    if (!context.mounted) return;
+    if (viewModel.updateDocument.value == null) {
+      // Initial state
+      return;
+    }
+
+    if (viewModel.updateDocument.value!.isError()) {
+      final error = viewModel.updateDocument.value!.tryGetError()!;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.toString()),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    } else {
+      // Success - go back
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Documento atualizado com sucesso!')),
+      );
+      if (context.canPop()) {
+        context.pop();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -16,6 +49,7 @@ class DocumentEditScreen extends StatelessWidget {
     // Warning: the below command should NOT be inside a ListenableBuilder. If you make
     // this a stateful widget, you should move this to initState.
     viewModel.loadDocument.execute();
+    viewModel.updateDocument.addListener(() => _onUpdateCommand(context));
 
     return Scaffold(
       appBar: AppBar(
@@ -111,9 +145,7 @@ class DocumentEditScreen extends StatelessWidget {
                                 key: const ValueKey("saveButton"),
                                 onPressed: updatingDoc
                                     ? null
-                                    : () {
-                                        viewModel.updateDocument.execute();
-                                      },
+                                    : triggerUpdateIfValid,
                                 child: const Text('Salvar'),
                               ),
                             ),

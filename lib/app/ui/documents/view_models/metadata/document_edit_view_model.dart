@@ -58,11 +58,39 @@ class DocumentEditViewModel {
       return Result.error(Exception("Erro ao carregar documento."));
     }
   }
-}
 
-Future<Result<Document, Exception>> _updateDocument() async {
-  // To be implemented when update functionality is added
-  throw UnimplementedError();
+  Future<Result<Document, Exception>> _updateDocument() async {
+    try {
+      // Get form values
+      final titulo = _form.titulo.text;
+      final dataDocumento = DateFormat(
+        'dd/MM/yyyy',
+      ).tryParse(_form.dataDocumento.text);
+      final medico = _form.medico.text;
+      final paciente = _form.paciente.text;
+      final tipo = _form.tipo.text;
+
+      final result = await documentRepository.updateDocument(
+        documentUuid,
+        titulo: titulo,
+        dataDocumento: dataDocumento,
+        medico: medico,
+        paciente: paciente,
+        tipo: tipo,
+      );
+
+      if (result.isError()) {
+        final error = result.tryGetError()!;
+        _log.severe("Error updating document: $error");
+        return Result.error(Exception("Erro ao atualizar documento."));
+      }
+
+      return Result.success(result.tryGetSuccess()!);
+    } catch (e, s) {
+      _log.severe("Failed to update document", e, s);
+      return Result.error(Exception("Erro ao atualizar documento."));
+    }
+  }
 }
 
 class DocumentEditForm {
@@ -72,6 +100,10 @@ class DocumentEditForm {
   final TextEditingController medico = TextEditingController();
   final TextEditingController tipo = TextEditingController();
   final TextEditingController dataDocumento = TextEditingController();
+
+  bool validate() {
+    return formKey.currentState?.validate() ?? false;
+  }
 
   String? validateTitulo(String? value) {
     if (value != null && value.length > 100) {

@@ -175,7 +175,7 @@ class _RegisterViewState extends State<RegisterView> {
                   return FilledButton(
                     onPressed: isExecuting
                         ? null
-                        : () => viewModel.registerCommand.execute(),
+                        : viewModel.triggerRegisterIfValid,
                     child: isExecuting
                         ? SizedBox(
                             height: 20,

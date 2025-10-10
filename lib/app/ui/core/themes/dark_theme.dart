@@ -10,6 +10,9 @@ class _DarkTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: scheme,
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(), //
+      ),
       scaffoldBackgroundColor: scheme.surfaceBright,
       snackBarTheme: snackBarTheme(),
     );

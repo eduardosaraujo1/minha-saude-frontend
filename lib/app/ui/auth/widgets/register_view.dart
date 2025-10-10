@@ -100,6 +100,8 @@ class _RegisterViewState extends State<RegisterView> {
   @override
   Widget build(BuildContext context) {
     final form = viewModel.form;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return LoginFormLayout(
       child: Padding(
@@ -112,34 +114,24 @@ class _RegisterViewState extends State<RegisterView> {
             children: [
               Text(
                 'Vamos concluir seu cadastro',
-                style: Theme.of(context).textTheme.titleLarge,
+                style: theme.textTheme.titleLarge,
               ),
               Text(
                 'Por favor, preencha os campos abaixo',
-                style: Theme.of(context).textTheme.bodyLarge,
+                style: theme.textTheme.bodyLarge,
               ),
               TextFormField(
                 controller: form.nomeController,
                 validator: form.validateNome,
-                decoration: const InputDecoration(
-                  labelText: 'Nome',
-                  border: OutlineInputBorder(),
-                ),
+                decoration: const InputDecoration(labelText: 'Nome'),
+                maxLength: 100,
               ),
               TextFormField(
                 controller: form.cpfController,
                 validator: form.validateCpf,
                 decoration: InputDecoration(
-                  hint: Text(
-                    "123.456.789-10",
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
+                  hint: Text("123.456.789-10"),
                   labelText: 'CPF',
-                  border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [
@@ -155,7 +147,6 @@ class _RegisterViewState extends State<RegisterView> {
                 validator: form.validateDtNascimento,
                 decoration: const InputDecoration(
                   labelText: 'Data de Nascimento',
-                  border: OutlineInputBorder(),
                   suffixIcon: Icon(Icons.calendar_today),
                 ),
                 keyboardType: TextInputType.datetime,
@@ -166,16 +157,8 @@ class _RegisterViewState extends State<RegisterView> {
                 controller: form.telefoneController,
                 validator: form.validateTelefone,
                 decoration: InputDecoration(
-                  hint: Text(
-                    "+55 11 98765-4321",
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                    ),
-                  ),
+                  hint: Text("+55 11 98765-4321"),
                   labelText: 'Telefone',
-                  border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.phone,
                 inputFormatters: [
@@ -200,9 +183,7 @@ class _RegisterViewState extends State<RegisterView> {
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.38),
+                                colorScheme.onSurface.withValues(alpha: 0.38),
                               ),
                             ),
                           )

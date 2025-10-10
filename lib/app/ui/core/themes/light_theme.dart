@@ -11,6 +11,9 @@ class _LightTheme {
       brightness: Brightness.light,
       colorScheme: scheme,
       scaffoldBackgroundColor: scheme.surfaceBright,
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(), //
+      ),
       snackBarTheme: snackBarTheme(),
     );
   }

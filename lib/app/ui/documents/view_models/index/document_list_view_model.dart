@@ -14,6 +14,11 @@ class DocumentListViewModel {
           _loadDocuments,
           initialValue: null,
         );
+
+    // When the repository notifies of changes, reload documents
+    documentRepository.addListener(() {
+      loadDocuments.execute(false);
+    });
   }
 
   final DocumentRepository documentRepository;

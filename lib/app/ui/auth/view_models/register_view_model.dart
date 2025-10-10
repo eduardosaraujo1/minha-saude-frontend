@@ -104,6 +104,7 @@ class RegisterForm {
     if (value == null || value.isEmpty) {
       return 'Por favor, insira seu nome';
     }
+
     return null;
   }
 

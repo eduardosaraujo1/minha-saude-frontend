@@ -11,6 +11,7 @@
 
 ## Para fazer
 
+-   [ ] Ao excluir documento, atualizar lista de documents (invalidar cache do repositório)
 -   [ ] Ver porque o GoRouter rebuilda todos os widgets abaixo da navegação, e quando voltamos um nível (via seta) esse widget sofre rebuild novamente
     -   [ ] Navigation precisa de um overhaul
 -   [ ] Corrigir widget de loginDecorator para funcionar em telas Wide

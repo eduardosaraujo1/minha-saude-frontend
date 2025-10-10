@@ -13,7 +13,13 @@ class DocumentInfoFormView extends StatefulWidget {
 }
 
 class _DocumentCreateViewState extends State<DocumentInfoFormView> {
-  DocumentInfoFormViewModel get viewModel => widget.viewModel;
+  late final DocumentInfoFormViewModel viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    viewModel = widget.viewModel;
+  }
 
   @override
   void dispose() {

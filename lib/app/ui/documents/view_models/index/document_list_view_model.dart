@@ -8,37 +8,35 @@ import '../../../../data/repositories/document/document_repository.dart';
 import '../../widgets/index/sorted_document_list.dart' show GroupingAlgorithm;
 
 class DocumentListViewModel {
-  // 1. Use CommandPattern (Command1) for handling loading
-  // 2. Move the logic for FAB and SortMenu to a comment (In the future, move the FAB and SortMenu to its own dedicated ViewModel)
-  // 3. Remove ValueNotifier from everything except the load command (which is a Notifier itself, in other words, no more ValueNotifier in this file)
-  final DocumentRepository documentRepository;
-
   DocumentListViewModel(this.documentRepository) {
-    load = Command.createAsync<bool, Result<void, Exception>>(
-      _loadDocuments,
-      initialValue: Success(null),
-    );
-    load.execute(false);
+    loadDocuments =
+        Command.createAsync<bool, Result<List<Document>, Exception>?>(
+          _loadDocuments,
+          initialValue: null,
+        );
   }
 
-  final List<Document> documents = <Document>[];
+  final DocumentRepository documentRepository;
   final _log = Logger('document_list_view_model');
 
-  final ValueNotifier<GroupingAlgorithm> selectedAlgorithm = ValueNotifier(
+  late final Command<bool, Result<List<Document>, Exception>?> loadDocuments;
+  final ValueNotifier selectedAlgorithm = ValueNotifier<GroupingAlgorithm>(
     GroupingAlgorithm.paciente,
   );
 
-  late final Command<bool, Result<void, Exception>> load;
-
   Future<void> refresh() async {
-    load.execute(true);
+    loadDocuments.execute(true);
   }
 
-  Future<Result<void, Exception>> _loadDocuments(bool forceReload) async {
+  Future<Result<List<Document>, Exception>> _loadDocuments(
+    bool forceReload,
+  ) async {
     final defaultException = Exception(
       "Não foi possível carregar os documentos. Tente novamente mais tarde.",
     );
-    final documentsQuery = await documentRepository.listDocuments();
+    final documentsQuery = await documentRepository.listDocuments(
+      forceRefresh: forceReload,
+    );
 
     if (documentsQuery.isError()) {
       final exception = documentsQuery.tryGetError()!;
@@ -48,18 +46,10 @@ class DocumentListViewModel {
     }
 
     final fetchedDocuments = documentsQuery.getOrThrow();
-    documents
-      ..clear()
-      ..addAll(fetchedDocuments as Iterable<Document>);
-
-    return Result.success(null);
+    return Result.success(fetchedDocuments);
   }
 
-  void setSelectedAlgorithm(GroupingAlgorithm algorithm) {
-    if (selectedAlgorithm == algorithm) {
-      return;
-    }
-
-    selectedAlgorithm.value = algorithm;
+  GroupingAlgorithm selectAlgorithm(GroupingAlgorithm algorithm) {
+    return algorithm;
   }
 }

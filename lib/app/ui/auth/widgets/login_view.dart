@@ -18,11 +18,12 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
-  LoginViewModel get viewModel => widget.viewModel;
+  late final LoginViewModel viewModel;
 
   @override
   void initState() {
     super.initState();
+    viewModel = widget.viewModel;
     viewModel.loginWithGoogle.addListener(_onUpdate);
   }
 
@@ -34,14 +35,15 @@ class _LoginViewState extends State<LoginView> {
 
   void _onUpdate() {
     try {
+      if (!mounted) return;
       final loginCommand = viewModel.loginWithGoogle;
       final result = loginCommand.value;
 
       if (result == null) return;
 
       if (result.isSuccess()) {
-        final redirectPath = result.getOrThrow();
-        if (mounted) context.go(redirectPath);
+        final redirectPath = result.tryGetSuccess()!;
+        context.go(redirectPath);
 
         return;
       }
@@ -52,7 +54,7 @@ class _LoginViewState extends State<LoginView> {
         return;
       }
 
-      setState(() {});
+      // setState(() {});
     } catch (e) {
       Logger("LoginView").severe("Ocorreu um erro desconhecido: $e");
       _showErrorSnack("Ocorreu um erro desconhecido.");
@@ -81,11 +83,9 @@ class _LoginViewState extends State<LoginView> {
               horizontal: 16.0,
               vertical: 16.0,
             ),
-            child: ListenableBuilder(
-              listenable: Listenable.merge([
-                loginWithGoogle.isExecuting, //
-              ]),
-              builder: (context, child) {
+            child: ValueListenableBuilder(
+              valueListenable: loginWithGoogle.isExecuting,
+              builder: (context, googleLoginLoading, child) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -97,12 +97,12 @@ class _LoginViewState extends State<LoginView> {
                     ButtonSignIn(
                       icon: SvgPicture.asset(Asset.googleLogo, width: 24),
                       label: "Entrar com Google",
-                      onPressed: loginWithGoogle.isExecuting.value
+                      onPressed: googleLoginLoading
                           ? null
                           : () => loginWithGoogle.execute(),
                     ),
                     SizedBox(height: 8),
-                    if (loginWithGoogle.isExecuting.value)
+                    if (googleLoginLoading)
                       SizedBox(
                         width: double.infinity,
                         child: Center(child: CircularProgressIndicator()),

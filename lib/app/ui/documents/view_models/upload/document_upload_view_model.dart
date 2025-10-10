@@ -11,16 +11,15 @@ import 'document_info_form_model.dart';
 
 class DocumentUploadViewModel {
   DocumentUploadViewModel(this._type, this._documentRepository) {
-    loadDocument = Command.createAsyncNoParam<Result<File?, Exception>>(
+    loadDocument = Command.createAsyncNoParam<Result<File, Exception>?>(
       _loadDocument,
-      initialValue: Success(null),
+      initialValue: null,
     );
     uploadDocument =
-        Command.createAsync<DocumentFormData, Result<Document?, Exception>>(
+        Command.createAsync<DocumentFormData, Result<Document, Exception>?>(
           _uploadDocument,
-          initialValue: Success(null),
+          initialValue: null,
         );
-    loadDocument.execute();
   }
 
   final DocumentRepository _documentRepository;
@@ -29,8 +28,8 @@ class DocumentUploadViewModel {
 
   final currentStep = ValueNotifier<UploadStep>(UploadStep.preview);
 
-  late final Command<void, Result<File?, Exception>> loadDocument;
-  late final Command<DocumentFormData, Result<Document?, Exception>>
+  late final Command<void, Result<File, Exception>?> loadDocument;
+  late final Command<DocumentFormData, Result<Document?, Exception>?>
   uploadDocument;
 
   Future<Result<File, Exception>> _loadDocument() async {
@@ -63,14 +62,14 @@ class DocumentUploadViewModel {
   ) async {
     final document = loadDocument.value;
 
-    if (document.isError() || document.getOrThrow() == null) {
+    if (document == null || document.isError()) {
       _logger.severe('No file uploaded when trying to upload document.');
       return Result.error(Exception("Nenhum arquivo foi carregado."));
     }
 
     try {
       final result = await _documentRepository.uploadDocument(
-        document.getOrThrow()!,
+        document.getOrThrow(),
         paciente: formData.nomePaciente ?? '',
         titulo: formData.titulo,
         tipo: formData.tipoDocumento,

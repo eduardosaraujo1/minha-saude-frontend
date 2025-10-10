@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -17,65 +19,80 @@ class DocumentListScreen extends StatefulWidget {
 }
 
 class _DocumentListScreenState extends State<DocumentListScreen> {
-  DocumentListViewModel get viewModel => widget.viewModel;
+  late final DocumentListViewModel viewModel;
 
   @override
   void initState() {
     super.initState();
 
-    viewModel.load.addListener(_onLoadUpdate);
+    viewModel = widget.viewModel;
+    viewModel.loadDocuments.addListener(_onLoadUpdate);
+    viewModel.loadDocuments.execute(false);
   }
 
   @override
   void dispose() {
-    viewModel.load.removeListener(_onLoadUpdate);
+    viewModel.loadDocuments.removeListener(_onLoadUpdate);
 
     super.dispose();
   }
 
   void _onLoadUpdate() {
     if (!mounted) return;
-    if (viewModel.load.isExecuting.value) return;
 
-    if (viewModel.load.value.isError()) {
-      final error = viewModel.load.value.tryGetError();
+    if (viewModel.loadDocuments.value == null) {
+      // Initial state
+      return;
+    }
 
-      if (error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error.toString()),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
+    if (viewModel.loadDocuments.value!.isError()) {
+      final error = viewModel.loadDocuments.value!.tryGetError()!;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.toString()),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       appBar: BrandAppBar(
         title: const Text('Documentos'),
         action: IconButton(
           onPressed: () {},
-          icon: _SortMenu(onSelected: viewModel.setSelectedAlgorithm),
+          icon: _SortMenu(
+            onSelected: (GroupingAlgorithm algorithm) {
+              viewModel.selectedAlgorithm.value = algorithm;
+            },
+          ),
         ),
       ),
       body: ValueListenableBuilder(
-        valueListenable: viewModel.load.results,
-        builder: (context, val, child) {
-          if (val.isExecuting || !val.hasData) {
+        valueListenable: viewModel.loadDocuments.results,
+        builder: (context, documentState, child) {
+          if (documentState.isExecuting || !documentState.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (val.data!.isError()) {
+          if (documentState.data!.isError()) {
             return Center(
               child: Text(
-                val.data!.tryGetError().toString(),
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
+                "Não foi possível carregar os documentos. Tente novamente mais tarde.",
+                style: TextStyle(color: colorScheme.error),
               ),
             );
           }
+
+          final documents = UnmodifiableListView(
+            documentState.data!.tryGetSuccess()!,
+          );
 
           return RefreshIndicator(
             onRefresh: () async {
@@ -87,20 +104,20 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (viewModel.documents.isEmpty)
+                  if (documents.isEmpty)
                     Center(
                       child: Text(
                         'Nenhum documento encontrado.\nClique no botão abaixo para adicionar.',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyLarge,
+                        style: theme.textTheme.bodyLarge,
                       ),
                     ),
-                  if (viewModel.documents.isNotEmpty)
+                  if (documents.isNotEmpty)
                     ValueListenableBuilder(
                       valueListenable: viewModel.selectedAlgorithm,
                       builder: (context, value, child) {
                         return SortedDocumentList(
-                          documents: viewModel.documents,
+                          documents: documents,
                           groupingAlgorithm: value,
                           onDocumentTap: (document) {
                             var documentosWithId = Routes.documentosWithId(
@@ -133,7 +150,7 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
 class _SortMenu extends StatelessWidget {
   const _SortMenu({required this.onSelected});
 
-  final void Function(GroupingAlgorithm) onSelected;
+  final void Function(GroupingAlgorithm algorithm) onSelected;
 
   @override
   Widget build(BuildContext context) {

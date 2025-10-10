@@ -27,99 +27,114 @@ class _DocumentUploadViewState extends State<DocumentUploadView> {
     super.initState();
 
     viewModel = widget._viewModel;
+    viewModel.loadDocument.execute();
+
+    viewModel.loadDocument.addListener(_onLoadUpdate);
+    viewModel.uploadDocument.addListener(_onUploadUpdate);
   }
 
   @override
   void dispose() {
     viewModel.dispose();
+    viewModel.loadDocument.removeListener(_onLoadUpdate);
+    viewModel.uploadDocument.removeListener(_onUploadUpdate);
     super.dispose();
   }
 
-  void _handleLoadError() {
-    _logger.info('Document load cancelled or failed');
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Operação cancelada.")));
-    context.go(Routes.home);
+  void _onLoadUpdate() {
+    final result = viewModel.loadDocument.value;
+
+    if (result == null) {
+      // Initial state, do nothing
+      return;
+    }
+
+    if (result.isError()) {
+      _logger.warning('Document load cancelled or failed');
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Operação cancelada.")));
+      context.go(Routes.home);
+      return;
+    }
   }
 
-  void _handleUploadError() {
-    _logger.severe('Error uploading document');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text("Ocorreu um erro ao fazer upload"),
-        backgroundColor: Theme.of(context).colorScheme.error,
-      ),
-    );
-    context.go(Routes.home);
-  }
+  void _onUploadUpdate() {
+    final result = viewModel.uploadDocument.value;
 
-  void _handleUploadSuccess() {
-    _logger.info('Document uploaded successfully');
-    context.go(Routes.home);
+    if (result == null) {
+      // Initial state, do nothing
+      return;
+    }
+
+    if (result.isError()) {
+      final error = result.tryGetError();
+      _logger.severe('Error uploading document: $error', error);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text("Ocorreu um erro ao fazer upload"),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      context.go(Routes.home);
+      return;
+    }
+    if (result.isSuccess() && result.getOrThrow() != null) {
+      _logger.info('Document uploaded successfully');
+      context.go(Routes.home);
+      return;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: Listenable.merge([
-        viewModel.loadDocument.results,
-        viewModel.uploadDocument.results,
-      ]),
-      builder: (context, _) {
-        final loadCommand = viewModel.loadDocument;
-        final uploadCommand = viewModel.uploadDocument;
-
-        // If is loading or no document loaded yet, show loading buffer
-        final anyIsExecuting =
-            loadCommand.isExecuting.value || uploadCommand.isExecuting.value;
-        final hasLoadedDocument = loadCommand.value.tryGetSuccess() != null;
-        if (anyIsExecuting || !hasLoadedDocument) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        // Handle potential errors after frame is built
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (loadCommand.value.isError()) {
-            _handleLoadError();
-          } else if (uploadCommand.value.isError()) {
-            _handleUploadError();
-          } else if (uploadCommand.value.isSuccess() &&
-              uploadCommand.value.getOrThrow() != null) {
-            _handleUploadSuccess();
-          }
-        });
-        if (loadCommand.value.isError() || uploadCommand.value.isError()) {
-          return Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(), //
-            ),
-          );
-        }
-
-        // Happy path: document loaded successfully and upload not in error
-        final file = loadCommand.value.getOrThrow()!;
-
-        // Inner ListenableBuilder: Listen to currentStep for navigation
+    return ValueListenableBuilder(
+      valueListenable: viewModel.loadDocument.isExecuting,
+      builder: (context, bool isLoadExecuting, _) {
         return ValueListenableBuilder(
-          valueListenable: viewModel.currentStep,
-          builder: (context, val, _) {
-            // Show preview or form based on current step
-            return switch (val) {
-              UploadStep.preview => DocumentUploadPreview(
-                document: PdfDocument.openFile(file.path),
-                onCancel: () => context.go(Routes.home),
-                onConfirm: viewModel.goToForm,
-              ),
-              UploadStep.form => DocumentInfoFormView(
-                DocumentInfoFormViewModel(
-                  onFormSubmit: viewModel.handleFormSubmit,
-                ),
-                onBack: viewModel.goBackToPreview,
-              ),
-            };
+          valueListenable: viewModel.uploadDocument.isExecuting,
+          builder: (context, bool isUploadExecuting, _) {
+            final loadCommand = viewModel.loadDocument;
+            final uploadCommand = viewModel.uploadDocument;
+
+            // Show loading indicator if is loading, uploading, initial state or error
+            final isInitialState = loadCommand.value == null;
+            final isLoadingError = loadCommand.value?.isError() ?? false;
+            final isUploadError = uploadCommand.value?.isError() ?? false;
+            if (isInitialState ||
+                isLoadExecuting ||
+                isUploadExecuting ||
+                isLoadingError ||
+                isUploadError) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            // At this point, we have a successfully loaded file
+            final file = loadCommand.value!.getOrThrow();
+
+            // Inner ListenableBuilder: Listen to currentStep for navigation
+            return ValueListenableBuilder(
+              valueListenable: viewModel.currentStep,
+              builder: (context, val, _) {
+                // Show preview or form based on current step
+                return switch (val) {
+                  UploadStep.preview => DocumentUploadPreview(
+                    document: PdfDocument.openFile(file.path),
+                    onCancel: () => context.go(Routes.home),
+                    onConfirm: viewModel.goToForm,
+                  ),
+                  UploadStep.form => DocumentInfoFormView(
+                    DocumentInfoFormViewModel(
+                      onFormSubmit: viewModel.handleFormSubmit,
+                    ),
+                    onBack: viewModel.goBackToPreview,
+                  ),
+                };
+              },
+            );
           },
         );
       },

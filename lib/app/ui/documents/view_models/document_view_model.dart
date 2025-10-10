@@ -23,7 +23,6 @@ class DocumentViewModel {
       _handleDeleteDocument,
       initialValue: null,
     );
-    loadDocument.execute();
   }
 
   final String _documentUuid;

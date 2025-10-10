@@ -24,6 +24,7 @@ class _DocumentViewState extends State<DocumentView> {
     super.initState();
 
     viewModel = widget._viewModel;
+    viewModel.loadDocument.execute();
     viewModel.deleteDocument.addListener(_handleDeleteDocument);
   }
 

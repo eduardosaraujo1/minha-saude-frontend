@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:minha_saude_frontend/app/routing/routes.dart';
 
+import '../../../routing/routes.dart';
 import '../view_models/register_view_model.dart';
 import 'layouts/login_form_layout.dart';
 
@@ -17,12 +17,13 @@ class RegisterView extends StatefulWidget {
 }
 
 class _RegisterViewState extends State<RegisterView> {
-  RegisterViewModel get viewModel => widget.viewModel;
+  late final RegisterViewModel viewModel;
 
   @override
   void initState() {
     super.initState();
 
+    viewModel = widget.viewModel;
     viewModel.registerCommand.addListener(_onUpdate);
   }
 
@@ -40,6 +41,7 @@ class _RegisterViewState extends State<RegisterView> {
       final registerResult = registerCommand.value;
 
       if (registerResult == null) {
+        // Initial state
         return;
       }
 
@@ -178,7 +180,7 @@ class _RegisterViewState extends State<RegisterView> {
                 keyboardType: TextInputType.phone,
                 inputFormatters: [
                   MaskTextInputFormatter(
-                    mask: '+## (##) #####-####',
+                    mask: '(##) #####-####',
                     filter: {"#": RegExp(r'[0-9]')},
                     type: MaskAutoCompletionType.lazy,
                   ),

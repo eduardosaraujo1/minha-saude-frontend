@@ -6,11 +6,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:test/test.dart';
 
-class MockAuthRepository extends Mock implements AuthRepository {}
-
-class MockSessionRepository extends Mock implements SessionRepository {}
-
-class MockDocumentRepository extends Mock implements DocumentRepository {}
+import '../../mocks/mock_auth_repository.dart';
+import '../../mocks/mock_document_repository.dart';
+import '../../mocks/mock_session_repository.dart';
 
 void main() {
   late AuthRepository authRepository;

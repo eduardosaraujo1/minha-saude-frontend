@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/domain/models/document/document.dart';
 import 'package:pdfx/pdfx.dart';
 
 import '../../../routing/routes.dart';
@@ -59,117 +60,114 @@ class _DocumentViewState extends State<DocumentView> {
     context.go(Routes.home);
   }
 
+  void _handleActionMenuClick(DocumentAction action) {
+    if (action == DocumentAction.view) {
+      final infoRoute = Routes.documentosInfo(viewModel.documentUuid);
+      context.go(infoRoute);
+    } else if (action == DocumentAction.edit) {
+      final documentosEdit = Routes.documentosEdit(viewModel.documentUuid);
+      context.go(documentosEdit);
+    } else if (action == DocumentAction.delete) {
+      _showDeleteDocumentDialog(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return ValueListenableBuilder(
-      valueListenable: viewModel.loadDocument.results,
-      builder: (context, loadDocState, child) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Visualizar Documento'),
-            backgroundColor: colorScheme.surfaceContainer,
-            actions: [
-              _DocumentActionsMenu((DocumentAction action) {
-                if (action == DocumentAction.view) {
-                  final infoRoute = Routes.documentosInfo(
-                    viewModel.documentUuid,
-                  );
-                  context.go(infoRoute);
-                } else if (action == DocumentAction.edit) {
-                  final documentosEdit = Routes.documentosEdit(
-                    viewModel.documentUuid,
-                  );
-                  context.go(documentosEdit);
-                } else if (action == DocumentAction.delete) {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return _DeleteDocumentDialog(
-                        document: loadDocState.data!.tryGetSuccess()!,
-                        onConfirm: () {
-                          viewModel.triggerDocumentDelete();
-                        },
-                      );
-                    },
-                  );
-                }
-              }),
-            ],
-          ),
-          body: Builder(
-            builder: (context) {
-              if (loadDocState.isExecuting || !loadDocState.hasData) {
-                return const Center(
-                  child: CircularProgressIndicator(), //
-                );
-              }
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Visualizar Documento'),
+        backgroundColor: colorScheme.surfaceContainer,
+        actions: [_DocumentActionsMenu(_handleActionMenuClick)],
+      ),
+      body: ValueListenableBuilder(
+        valueListenable: viewModel.loadDocument,
+        builder: (context, docResult, child) {
+          if (docResult == null) {
+            return const Center(
+              child: CircularProgressIndicator(), //
+            );
+          }
 
-              if (loadDocState.data!.isError()) {
-                final error = loadDocState.data!.tryGetError()!;
+          if (docResult.isError()) {
+            final error = docResult.tryGetError()!;
 
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Erro ao carregar documento',
-                        style: theme.textTheme.headlineSmall,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        error.toString(),
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => viewModel.loadDocument.execute(),
-                        child: const Text('Tentar novamente'),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              final documentFile = loadDocState.data!.tryGetSuccess()!;
-
-              return Stack(
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  DocumentPdfViewer(
-                    document: PdfDocument.openFile(documentFile.file.path),
-                    onPageChanged: (page) {
-                      viewModel.currentPage.value = page;
-                    },
-                    onDocumentLoaded: (documentFile) {
-                      // Store page state for use in PageIndicator
-                      viewModel.totalPages.value = documentFile.pagesCount;
-                      viewModel.currentPage.value = 1;
-                    },
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Erro ao carregar documento',
+                    style: theme.textTheme.headlineSmall,
                   ),
-                  Positioned(
-                    bottom: 16,
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: PageIndicator(
-                        currentPage: viewModel.currentPage,
-                        totalPages: viewModel.totalPages,
-                      ),
-                    ),
+                  const SizedBox(height: 8),
+                  Text(
+                    error.toString(),
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => viewModel.loadDocument.execute(),
+                    child: const Text('Tentar novamente'),
                   ),
                 ],
-              );
-            },
-          ),
+              ),
+            );
+          }
+
+          final document = docResult.tryGetSuccess()!;
+
+          return Stack(
+            children: [
+              DocumentPdfViewer(
+                document: PdfDocument.openFile(document.file.path),
+                onPageChanged: (page) {
+                  viewModel.currentPage.value = page;
+                },
+                onDocumentLoaded: (documentFile) {
+                  // Store page state for use in PageIndicator
+                  viewModel.totalPages.value = documentFile.pagesCount;
+                  viewModel.currentPage.value = 1;
+                },
+              ),
+              Positioned(
+                bottom: 16,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: PageIndicator(
+                    currentPage: viewModel.currentPage,
+                    totalPages: viewModel.totalPages,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _showDeleteDocumentDialog(BuildContext context) {
+    final document = viewModel.loadDocument.value?.tryGetSuccess()?.document;
+    if (document == null) {
+      return; // Document info unavailable, cannot delete
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return _DeleteDocumentDialog(
+          document: document,
+          onConfirm: () {
+            viewModel.triggerDocumentDelete();
+          },
         );
       },
     );
@@ -179,7 +177,7 @@ class _DocumentViewState extends State<DocumentView> {
 class _DeleteDocumentDialog extends StatelessWidget {
   const _DeleteDocumentDialog({required this.document, this.onConfirm});
 
-  final DocumentWithFile document;
+  final Document document;
   final VoidCallback? onConfirm;
 
   @override
@@ -190,7 +188,7 @@ class _DeleteDocumentDialog extends StatelessWidget {
     return AlertDialog(
       title: const Text('Excluir Documento'),
       content: Text('''
-Tem certeza que deseja excluir "${document.document.titulo}"?
+Tem certeza que deseja excluir "${document.titulo}"?
 Ele permanecerá disponível na lixeira e será apagado permanentemente em 30 dias.
 '''),
       actions: [

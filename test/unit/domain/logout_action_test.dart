@@ -14,13 +14,13 @@ void main() {
   late AuthRepository authRepository;
   late DocumentRepository documentRepository;
   late SessionRepository sessionRepository;
-  late LogoutAction logout;
+  late LogoutAction logoutAction;
 
   setUp(() {
     authRepository = MockAuthRepository();
     documentRepository = MockDocumentRepository();
     sessionRepository = MockSessionRepository();
-    logout = LogoutAction(
+    logoutAction = LogoutAction(
       documentRepository: documentRepository,
       authRepository: authRepository,
       sessionRepository: sessionRepository,
@@ -42,7 +42,7 @@ void main() {
       when(() => documentRepository.resetCache()).thenAnswer((_) async {});
 
       // Execute action
-      final result = await logout.execute();
+      final result = await logoutAction.execute();
 
       // Assert result is Success
       expect(result.isSuccess(), true);
@@ -67,7 +67,7 @@ void main() {
       when(() => documentRepository.resetCache()).thenAnswer((_) async {});
 
       // Execute action
-      final result = await logout.execute();
+      final result = await logoutAction.execute();
 
       // Assert result is Error
       expect(result.isError(), true);
@@ -100,7 +100,7 @@ void main() {
       when(() => documentRepository.resetCache()).thenAnswer((_) async {});
 
       // Execute action
-      final result = await logout.execute();
+      final result = await logoutAction.execute();
 
       // Assert result is Error
       expect(result.isError(), true);
@@ -135,7 +135,7 @@ void main() {
       ).thenThrow(Exception("Database error"));
 
       // Execute action
-      final result = await logout.execute();
+      final result = await logoutAction.execute();
 
       // Assert result is Error
       expect(result.isError(), true);

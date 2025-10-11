@@ -20,14 +20,18 @@ void main() {
     "when click on edit phone button, navigates to edit phone page",
     (tester) async {},
   );
-
   testWidgets(
-    "if on account tab can see signout and delete account buttons",
+    "when click on export documents button, calls export documents action",
     (tester) async {},
   );
 
   testWidgets(
-    "when click on export documents button, calls export documents action",
+    "when click on dark theme toggle, switch to dark theme",
+    (tester) async {},
+  );
+
+  testWidgets(
+    "if on account tab can see signout and delete account buttons",
     (tester) async {},
   );
 

@@ -1,7 +1,12 @@
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../app/data/repositories/profile/profile_repository.dart';
+import '../app/data/repositories/profile/profile_repository_impl.dart';
 import '../app/data/repositories/session/session_repository.dart';
+import '../app/data/services/api/profile/fake_profile_api_client_impl.dart';
+import '../app/data/services/api/profile/profile_api_client.dart';
+import '../app/data/services/api/profile/profile_api_client_impl.dart';
 import '../app/domain/actions/auth/logout_action.dart';
 import '../app/domain/actions/auth/register_action.dart';
 import '../app/data/services/file_system_service/file_system_service_impl.dart';
@@ -13,6 +18,7 @@ import '../app/data/services/cache_database/cache_database_impl.dart';
 import '../app/data/services/api/document/document_api_client_impl.dart';
 import '../app/data/services/api/document/fake_document_api_client.dart';
 import '../app/data/services/file_system_service/file_system_service.dart';
+import '../app/domain/actions/settings/delete_user_action.dart';
 import '../app/ui/core/theme_provider.dart';
 import '../app/domain/actions/auth/login_with_google.dart';
 import '../app/data/repositories/document/document_repository_impl.dart';
@@ -53,12 +59,16 @@ Future<void> setup({
   if (mockApiClient) {
     _getIt.registerSingleton<AuthApiClient>(FakeAuthApiClient());
     _getIt.registerSingleton<DocumentApiClient>(FakeDocumentApiClient());
+    _getIt.registerSingleton<ProfileApiClient>(FakeProfileApiClient());
   } else {
     _getIt.registerSingleton<AuthApiClient>(
       AuthApiClientImpl(_getIt<HttpClient>()),
     );
     _getIt.registerSingleton<DocumentApiClient>(
       DocumentApiClientImpl(_getIt<HttpClient>()),
+    );
+    _getIt.registerSingleton<ProfileApiClient>(
+      ProfileApiClientImpl(_getIt<HttpClient>()),
     );
   }
 
@@ -82,6 +92,11 @@ Future<void> setup({
       _getIt<FileSystemService>(),
     ),
   );
+  _getIt.registerSingleton<ProfileRepository>(
+    ProfileRepositoryImpl(
+      profileApiClient: _getIt<ProfileApiClient>(), //
+    ),
+  );
 
   // Actions
   _getIt.registerSingleton<LoginWithGoogle>(
@@ -102,6 +117,9 @@ Future<void> setup({
       sessionRepository: _getIt<SessionRepository>(),
       authRepository: _getIt<AuthRepository>(),
     ),
+  );
+  _getIt.registerSingleton<DeleteUserAction>(
+    DeleteUserAction(profileRepository: _getIt<ProfileRepository>()),
   );
 
   // Post-register configuration

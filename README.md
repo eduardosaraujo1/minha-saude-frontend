@@ -12,6 +12,7 @@
 ## Para fazer
 
 -   [ ] Unir telas feitas pelo Davi aqui
+
 -   [ ] Criar inicial de lista de documentos
 -   [ ] Fazer lógica de login com Google (criar um mock do componente que se comunica com o backend)
 -   Descobrir pq o register tava crashando

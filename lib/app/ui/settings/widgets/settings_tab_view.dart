@@ -45,7 +45,7 @@ class _SettingsTabViewState extends State<SettingsTabView>
         children: [
           TabBar(
             controller: _tabController,
-            indicatorColor: theme.primaryColor,
+            indicatorColor: colorscheme.primary,
             indicatorWeight: 3,
             labelColor: colorscheme.primary,
             unselectedLabelColor: colorscheme.secondary,

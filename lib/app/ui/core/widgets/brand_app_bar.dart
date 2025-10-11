@@ -32,9 +32,11 @@ class BrandAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final bool canPop = context.canPop();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return AppBar(
-      backgroundColor: const Color(0xFFE9EFF1),
+      backgroundColor: colorScheme.surfaceContainer,
       elevation: 0,
       scrolledUnderElevation: 0,
       leading: canPop ? null : _buildBrandIcon(),

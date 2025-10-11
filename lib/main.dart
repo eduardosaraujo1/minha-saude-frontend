@@ -45,19 +45,17 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final themeProvider = GetIt.I<ThemeProvider>();
+  final themeController = GetIt.I<ThemeController>();
 
   @override
   void initState() {
     super.initState();
-
-    themeProvider.mode.addListener(_onThemeChanged);
+    themeController.mode.addListener(_onThemeChanged);
   }
 
   @override
   void dispose() {
-    themeProvider.mode.removeListener(_onThemeChanged);
-
+    themeController.mode.removeListener(_onThemeChanged);
     super.dispose();
   }
 
@@ -67,15 +65,15 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData darkTheme = themeProvider.darkTheme;
-    final ThemeData lightTheme = themeProvider.lightTheme;
-
-    return MaterialApp.router(
-      title: 'Minha Saúde',
-      theme: lightTheme,
-      darkTheme: darkTheme,
-      themeMode: themeProvider.mode.value,
-      routerConfig: router(),
+    return ThemeProvider(
+      controller: themeController,
+      child: MaterialApp.router(
+        title: 'Minha Saúde',
+        theme: themeController.lightTheme,
+        darkTheme: themeController.darkTheme,
+        themeMode: themeController.mode.value,
+        routerConfig: router(),
+      ),
     );
   }
 }

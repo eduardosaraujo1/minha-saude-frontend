@@ -37,239 +37,235 @@ final _getIt = GetIt.I;
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _documentNavigatorKey = GlobalKey<NavigatorState>();
 
-GoRouter router() {
-  final sessionRepository = _getIt<SessionRepository>();
-
-  return GoRouter(
-    navigatorKey: _rootNavigatorKey,
-    initialLocation: Routes.home,
-    refreshListenable: sessionRepository,
-    redirect: (BuildContext context, GoRouterState state) {
-      return _redirectHandler(context, state, sessionRepository);
-    },
-    routes: [
-      GoRoute(
-        path: Routes.home,
-        redirect: (context, state) {
-          if (state.fullPath == Routes.home) {
-            return Routes.documentos;
-          }
-          return null;
-        },
-        routes: [
-          // Auth Routes (without bottom navigation)
-          GoRoute(
-            path: Routes.login,
-            builder: (BuildContext context, GoRouterState state) {
-              return LoginView(
-                LoginViewModel(
-                  _getIt<AuthRepository>(),
-                  _getIt<LoginWithGoogle>(),
-                ),
-              );
-            },
-          ),
-          GoRoute(
-            path: Routes.tos,
-            builder: (BuildContext context, GoRouterState state) {
-              return TosView(TosViewModel());
-            },
-            routes: [
-              GoRoute(
-                path: Routes.registerRelative,
-                builder: (BuildContext context, GoRouterState state) {
-                  return RegisterView(
-                    RegisterViewModel(registerAction: _getIt<RegisterAction>()),
-                  );
-                },
+// Cache the router instance to preserve navigation state across rebuilds
+final _sessionRepository = _getIt<SessionRepository>();
+final _router = GoRouter(
+  navigatorKey: _rootNavigatorKey,
+  initialLocation: Routes.home,
+  refreshListenable: _sessionRepository,
+  redirect: (BuildContext context, GoRouterState state) {
+    return _redirectHandler(context, state, _sessionRepository);
+  },
+  routes: [
+    GoRoute(
+      path: Routes.home,
+      redirect: (context, state) {
+        if (state.fullPath == Routes.home) {
+          return Routes.documentos;
+        }
+        return null;
+      },
+      routes: [
+        // Auth Routes (without bottom navigation)
+        GoRoute(
+          path: Routes.login,
+          builder: (BuildContext context, GoRouterState state) {
+            return LoginView(
+              LoginViewModel(
+                _getIt<AuthRepository>(),
+                _getIt<LoginWithGoogle>(),
               ),
-            ],
-          ),
-          // Document Upload routes (no bottom navigation)
-          GoRoute(
-            path: Routes.documentosUpload,
-            builder: (BuildContext context, GoRouterState state) {
-              return DocumentUploadView(
-                DocumentUploadViewModel(
-                  DocumentUploadMethod.upload,
-                  _getIt<DocumentRepository>(),
-                ),
-              );
-            },
-          ),
-          GoRoute(
-            path: Routes.documentosScan,
-            builder: (BuildContext context, GoRouterState state) {
-              return DocumentUploadView(
-                DocumentUploadViewModel(
-                  DocumentUploadMethod.scan,
-                  _getIt<DocumentRepository>(),
-                ),
-              );
-            },
-          ),
-          StatefulShellRoute.indexedStack(
-            builder:
-                (
-                  BuildContext context,
-                  GoRouterState state,
-                  StatefulNavigationShell navigationShell,
-                ) {
-                  return ScaffoldWithNavbar(navigationShell: navigationShell);
-                },
-            branches: [
-              // Documents branch
-              StatefulShellBranch(
-                navigatorKey: _documentNavigatorKey,
-                routes: [
-                  GoRoute(
-                    path: Routes.documentosRelative,
-                    builder: (context, state) {
-                      return DocumentListScreen(
-                        DocumentListViewModel(_getIt<DocumentRepository>()),
-                      );
-                    },
-                    routes: [
-                      GoRoute(
-                        path: ':id',
-                        builder: (BuildContext context, GoRouterState state) {
-                          return DocumentView(
-                            DocumentViewModel(
-                              documentUuid: state.pathParameters['id'] ?? '',
-                              documentRepository: _getIt<DocumentRepository>(),
-                            ),
-                          );
-                        },
-                        routes: [
-                          GoRoute(
-                            path: Routes.documentosInfoRelative,
-                            builder: (context, state) {
-                              return DocumentMetadataView(
-                                viewModel: DocumentMetadataViewModel(
-                                  documentUuid:
-                                      state.pathParameters['id'] ?? '',
-                                  documentRepository:
-                                      _getIt<DocumentRepository>(),
-                                ),
-                              );
-                            },
+            );
+          },
+        ),
+        GoRoute(
+          path: Routes.tos,
+          builder: (BuildContext context, GoRouterState state) {
+            return TosView(TosViewModel());
+          },
+          routes: [
+            GoRoute(
+              path: Routes.registerRelative,
+              builder: (BuildContext context, GoRouterState state) {
+                return RegisterView(
+                  RegisterViewModel(registerAction: _getIt<RegisterAction>()),
+                );
+              },
+            ),
+          ],
+        ),
+        // Document Upload routes (no bottom navigation)
+        GoRoute(
+          path: Routes.documentosUpload,
+          builder: (BuildContext context, GoRouterState state) {
+            return DocumentUploadView(
+              DocumentUploadViewModel(
+                DocumentUploadMethod.upload,
+                _getIt<DocumentRepository>(),
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          path: Routes.documentosScan,
+          builder: (BuildContext context, GoRouterState state) {
+            return DocumentUploadView(
+              DocumentUploadViewModel(
+                DocumentUploadMethod.scan,
+                _getIt<DocumentRepository>(),
+              ),
+            );
+          },
+        ),
+        StatefulShellRoute.indexedStack(
+          builder:
+              (
+                BuildContext context,
+                GoRouterState state,
+                StatefulNavigationShell navigationShell,
+              ) {
+                return ScaffoldWithNavbar(navigationShell: navigationShell);
+              },
+          branches: [
+            // Documents branch
+            StatefulShellBranch(
+              navigatorKey: _documentNavigatorKey,
+              routes: [
+                GoRoute(
+                  path: Routes.documentosRelative,
+                  builder: (context, state) {
+                    return DocumentListScreen(
+                      DocumentListViewModel(_getIt<DocumentRepository>()),
+                    );
+                  },
+                  routes: [
+                    GoRoute(
+                      path: ':id',
+                      builder: (BuildContext context, GoRouterState state) {
+                        return DocumentView(
+                          DocumentViewModel(
+                            documentUuid: state.pathParameters['id'] ?? '',
+                            documentRepository: _getIt<DocumentRepository>(),
                           ),
-                          GoRoute(
-                            path: Routes.documentosEditRelative,
-                            builder: (context, state) {
-                              return DocumentEditScreen(
-                                DocumentEditViewModel(
-                                  documentUuid:
-                                      state.pathParameters['id'] ?? '',
-                                  documentRepository:
-                                      _getIt<DocumentRepository>(),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              // Share branch
-              // StatefulShellBranch(
-              //   routes: [
-              //     GoRoute(
-              //       path: Routes.compartilhar,
-              //       builder: (BuildContext context, GoRouterState state) {
-              //         // return const CompartilharView();
-              //         return CodigosCompartilhamento();
-              //       },
-              //       routes: [
-              //         // GoRoute(
-              //         //   path: 'create',
-              //         //   builder: (context, state) {
-              //         //     return const SelecionarDocumentos();
-              //         //   },
-              //         // ),
-              //         // GoRoute(
-              //         //   path: ':codigo',
-              //         //   builder: (context, state) {
-              //         //     return const SelecionarDocumentos();
-              //         //   },
-              //         // ),
-              //       ],
-              //     ),
-              //   ],
-              // ),
-              // // Trash branch
-              // StatefulShellBranch(
-              //   routes: [
-              //     GoRoute(
-              //       path: Routes.lixeira,
-              //       builder: (BuildContext context, GoRouterState state) =>
-              //           LixeiraView(LixeiraViewModel(_getIt<DocumentRepository>())),
-              //       routes: [
-              //         GoRoute(
-              //           path: ':id',
-              //           builder: (context, state) {
-              //             return DeletedDocumentView(
-              //               DeletedDocumentViewModel(
-              //                 state.pathParameters['id'] ?? '',
-              //                 _getIt<DocumentRepository>(),
-              //               ),
-              //             );
-              //           },
-              //         ),
-              //       ],
-              //     ),
-              //   ],
-              // ),
-              // // Settings branch
-              StatefulShellBranch(
-                routes: [
-                  GoRoute(
-                    path: Routes.configuracoes,
-                    builder: (BuildContext context, GoRouterState state) {
-                      return SettingsTabView(
-                        SettingsViewModel(logoutAction: _getIt<LogoutAction>()),
-                      );
-                    },
-                    routes: [
-                      // GoRoute(
-                      //   path: Routes.editNomeRelative,
-                      //   builder: (context, state) {
-                      //     return EditNomeView(
-                      //       EditNomeViewModel(_getIt<ProfileRepository>()),
-                      //     );
-                      //   },
-                      // ),
-                      // GoRoute(
-                      //   path: Routes.editTelefoneRelative,
-                      //   builder: (context, state) {
-                      //     return EditTelefoneView(
-                      //       EditTelefoneViewModel(_getIt<ProfileRepository>()),
-                      //     );
-                      //   },
-                      // ),
-                      // GoRoute(
-                      //   path: Routes.editBirthdateRelative,
-                      //   builder: (context, state) {
-                      //     return EditBirthdayView(
-                      //       EditBirthdayViewModel(_getIt<ProfileRepository>()),
-                      //     );
-                      //   },
-                      // ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    ],
-    errorBuilder: (context, state) => NotFoundView(state.fullPath ?? ''),
-    // Main app routes with bottom navigation
-  );
-}
+                        );
+                      },
+                      routes: [
+                        GoRoute(
+                          path: Routes.documentosInfoRelative,
+                          builder: (context, state) {
+                            return DocumentMetadataView(
+                              viewModel: DocumentMetadataViewModel(
+                                documentUuid: state.pathParameters['id'] ?? '',
+                                documentRepository:
+                                    _getIt<DocumentRepository>(),
+                              ),
+                            );
+                          },
+                        ),
+                        GoRoute(
+                          path: Routes.documentosEditRelative,
+                          builder: (context, state) {
+                            return DocumentEditScreen(
+                              DocumentEditViewModel(
+                                documentUuid: state.pathParameters['id'] ?? '',
+                                documentRepository:
+                                    _getIt<DocumentRepository>(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            // Share branch
+            // StatefulShellBranch(
+            //   routes: [
+            //     GoRoute(
+            //       path: Routes.compartilhar,
+            //       builder: (BuildContext context, GoRouterState state) {
+            //         // return const CompartilharView();
+            //         return CodigosCompartilhamento();
+            //       },
+            //       routes: [
+            //         // GoRoute(
+            //         //   path: 'create',
+            //         //   builder: (context, state) {
+            //         //     return const SelecionarDocumentos();
+            //         //   },
+            //         // ),
+            //         // GoRoute(
+            //         //   path: ':codigo',
+            //         //   builder: (context, state) {
+            //         //     return const SelecionarDocumentos();
+            //         //   },
+            //         // ),
+            //       ],
+            //     ),
+            //   ],
+            // ),
+            // // Trash branch
+            // StatefulShellBranch(
+            //   routes: [
+            //     GoRoute(
+            //       path: Routes.lixeira,
+            //       builder: (BuildContext context, GoRouterState state) =>
+            //           LixeiraView(LixeiraViewModel(_getIt<DocumentRepository>())),
+            //       routes: [
+            //         GoRoute(
+            //           path: ':id',
+            //           builder: (context, state) {
+            //             return DeletedDocumentView(
+            //               DeletedDocumentViewModel(
+            //                 state.pathParameters['id'] ?? '',
+            //                 _getIt<DocumentRepository>(),
+            //               ),
+            //             );
+            //           },
+            //         ),
+            //       ],
+            //     ),
+            //   ],
+            // ),
+            // // Settings branch
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: Routes.configuracoes,
+                  builder: (BuildContext context, GoRouterState state) {
+                    return SettingsTabView(
+                      SettingsViewModel(logoutAction: _getIt<LogoutAction>()),
+                    );
+                  },
+                  routes: [
+                    // GoRoute(
+                    //   path: Routes.editNomeRelative,
+                    //   builder: (context, state) {
+                    //     return EditNomeView(
+                    //       EditNomeViewModel(_getIt<ProfileRepository>()),
+                    //     );
+                    //   },
+                    // ),
+                    // GoRoute(
+                    //   path: Routes.editTelefoneRelative,
+                    //   builder: (context, state) {
+                    //     return EditTelefoneView(
+                    //       EditTelefoneViewModel(_getIt<ProfileRepository>()),
+                    //     );
+                    //   },
+                    // ),
+                    // GoRoute(
+                    //   path: Routes.editBirthdateRelative,
+                    //   builder: (context, state) {
+                    //     return EditBirthdayView(
+                    //       EditBirthdayViewModel(_getIt<ProfileRepository>()),
+                    //     );
+                    //   },
+                    // ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ),
+  ],
+  errorBuilder: (context, state) => NotFoundView(state.fullPath ?? ''),
+  // Main app routes with bottom navigation
+);
 
 Future<String?> _redirectHandler(
   BuildContext context,
@@ -296,3 +292,5 @@ Future<String?> _redirectHandler(
 
   return null;
 }
+
+GoRouter router() => _router;

@@ -34,7 +34,7 @@ class SettingsSupportTab extends StatelessWidget {
                 text: 'tccminhasaude2025@gmail.com',
                 style: textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ],

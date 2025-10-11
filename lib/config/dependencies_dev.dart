@@ -33,7 +33,8 @@ Future<void> setup({
   bool mockScanner = false,
   bool mockSecureStorage = false,
 }) async {
-  _getIt.registerSingleton<ThemeProvider>(ThemeProvider());
+  // Core
+  _getIt.registerSingleton<ThemeController>(ThemeController());
 
   // Services
   _getIt.registerSingleton<SecureStorage>(

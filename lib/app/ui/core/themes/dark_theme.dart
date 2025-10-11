@@ -31,7 +31,10 @@ class _DarkTheme {
   }
 
   ColorScheme colorScheme() {
-    final seededScheme = ColorScheme.fromSeed(seedColor: seedColor);
+    final seededScheme = ColorScheme.fromSeed(
+      seedColor: seedColor,
+      brightness: Brightness.dark,
+    );
 
     return seededScheme.copyWith(
       brightness: Brightness.dark,

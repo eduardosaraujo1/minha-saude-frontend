@@ -34,7 +34,6 @@ class _DocumentCreateViewState extends State<DocumentInfoFormView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Adicionar Documento'),
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: widget.onBack,

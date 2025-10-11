@@ -75,12 +75,11 @@ class _DocumentViewState extends State<DocumentView> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    // final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Visualizar Documento'),
-        backgroundColor: colorScheme.surfaceContainer,
         actions: [_DocumentActionsMenu(_handleActionMenuClick)],
       ),
       body: ValueListenableBuilder(

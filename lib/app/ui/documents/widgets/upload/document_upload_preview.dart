@@ -43,7 +43,6 @@ class _DocumentUploadPreviewState extends State<DocumentUploadPreview> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go(Routes.home),
         ),
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       ),
       body: SafeArea(
         child: Padding(

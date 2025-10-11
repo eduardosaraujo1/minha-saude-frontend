@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/ui/core/widgets/brand_app_bar.dart';
 
 import '../data/repositories/session/session_repository.dart';
 import '../domain/actions/auth/logout_action.dart';
@@ -13,8 +14,6 @@ import '../ui/settings/view_models/settings_view_model.dart';
 import '../ui/settings/widgets/settings_tab_view.dart';
 import '../data/repositories/auth/auth_repository.dart';
 import '../data/repositories/document/document_repository.dart';
-// import '../data/repositories/document_upload_repository.dart';
-// import '../data/repositories/profile_repository.dart';
 import '../domain/actions/auth/login_with_google.dart';
 import '../ui/auth/view_models/login_view_model.dart';
 import '../ui/auth/view_models/register_view_model.dart';
@@ -171,54 +170,60 @@ final _router = GoRouter(
               ],
             ),
             // Share branch
-            // StatefulShellBranch(
-            //   routes: [
-            //     GoRoute(
-            //       path: Routes.compartilhar,
-            //       builder: (BuildContext context, GoRouterState state) {
-            //         // return const CompartilharView();
-            //         return CodigosCompartilhamento();
-            //       },
-            //       routes: [
-            //         // GoRoute(
-            //         //   path: 'create',
-            //         //   builder: (context, state) {
-            //         //     return const SelecionarDocumentos();
-            //         //   },
-            //         // ),
-            //         // GoRoute(
-            //         //   path: ':codigo',
-            //         //   builder: (context, state) {
-            //         //     return const SelecionarDocumentos();
-            //         //   },
-            //         // ),
-            //       ],
-            //     ),
-            //   ],
-            // ),
-            // // Trash branch
-            // StatefulShellBranch(
-            //   routes: [
-            //     GoRoute(
-            //       path: Routes.lixeira,
-            //       builder: (BuildContext context, GoRouterState state) =>
-            //           LixeiraView(LixeiraViewModel(_getIt<DocumentRepository>())),
-            //       routes: [
-            //         GoRoute(
-            //           path: ':id',
-            //           builder: (context, state) {
-            //             return DeletedDocumentView(
-            //               DeletedDocumentViewModel(
-            //                 state.pathParameters['id'] ?? '',
-            //                 _getIt<DocumentRepository>(),
-            //               ),
-            //             );
-            //           },
-            //         ),
-            //       ],
-            //     ),
-            //   ],
-            // ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: Routes.compartilhar,
+                  builder: (BuildContext context, GoRouterState state) {
+                    // return const CompartilharView();
+                    // return CodigosCompartilhamento();
+                    return _UnderConstructionScreen();
+                  },
+                  routes: [
+                    // GoRoute(
+                    //   path: 'create',
+                    //   builder: (context, state) {
+                    //     return const SelecionarDocumentos();
+                    //   },
+                    // ),
+                    // GoRoute(
+                    //   path: ':codigo',
+                    //   builder: (context, state) {
+                    //     return const SelecionarDocumentos();
+                    //   },
+                    // ),
+                  ],
+                ),
+              ],
+            ),
+            // Trash branch
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: Routes.lixeira,
+                  builder: (BuildContext context, GoRouterState state) {
+                    // return LixeiraView(
+                    //     LixeiraViewModel(_getIt<DocumentRepository>()),
+                    //   );
+                    return _UnderConstructionScreen();
+                  },
+                  routes: [
+                    GoRoute(
+                      path: ':id',
+                      builder: (context, state) {
+                        // return DeletedDocumentView(
+                        //   DeletedDocumentViewModel(
+                        //     state.pathParameters['id'] ?? '',
+                        //     _getIt<DocumentRepository>(),
+                        //   ),
+                        // );
+                        return _UnderConstructionScreen();
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
             // // Settings branch
             StatefulShellBranch(
               routes: [
@@ -266,6 +271,33 @@ final _router = GoRouter(
   errorBuilder: (context, state) => NotFoundView(state.fullPath ?? ''),
   // Main app routes with bottom navigation
 );
+
+class _UnderConstructionScreen extends StatelessWidget {
+  const _UnderConstructionScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Scaffold(
+      appBar: BrandAppBar(title: const Text('Em desenvolvmento')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Icon(Icons.construction, size: 100, color: colorScheme.secondary),
+            Text(
+              'Estamos trabalhando para trazer essa funcionalidade em breve!',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyLarge,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 Future<String?> _redirectHandler(
   BuildContext context,

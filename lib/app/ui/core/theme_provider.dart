@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'themes/shared.dart' as shared;
 part 'themes/light_theme.dart';
 part 'themes/dark_theme.dart';
 

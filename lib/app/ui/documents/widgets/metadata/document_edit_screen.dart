@@ -43,8 +43,8 @@ class DocumentEditScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    // final theme = Theme.of(context);
+    // final colorScheme = theme.colorScheme;
 
     // Warning: the below command should NOT be inside a ListenableBuilder. If you make
     // this a stateful widget, you should move this to initState.
@@ -52,10 +52,7 @@ class DocumentEditScreen extends StatelessWidget {
     viewModel.updateDocument.addListener(() => _onUpdateCommand(context));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Editar Documento'),
-        backgroundColor: colorScheme.surfaceContainer,
-      ),
+      appBar: AppBar(title: const Text('Editar Documento')),
       body: ValueListenableBuilder(
         valueListenable: viewModel.loadDocument.isExecuting,
         builder: (context, isLoading, child) {

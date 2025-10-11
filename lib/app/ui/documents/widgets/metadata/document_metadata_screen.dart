@@ -20,7 +20,6 @@ class DocumentMetadataView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Informações do documento"), //
-        backgroundColor: colorScheme.surfaceContainer,
       ),
       body: ValueListenableBuilder(
         valueListenable: viewModel.loadDocument.results,

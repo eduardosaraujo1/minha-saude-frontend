@@ -15,7 +15,7 @@ class FakeAuthApiClient implements AuthApiClient {
   Future<Result<LoginApiResponse, Exception>> authLoginGoogle(
     String tokenOauth,
   ) async {
-    if (!await _store.getRegistered()) {
+    if (await _store.getRegistered()) {
       return Result.success(
         LoginApiResponse(
           isRegistered: true,

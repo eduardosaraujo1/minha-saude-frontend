@@ -24,18 +24,18 @@ class _RegisterViewState extends State<RegisterView> {
     super.initState();
 
     viewModel = widget.viewModel;
-    viewModel.registerCommand.addListener(_onUpdate);
+    viewModel.registerCommand.addListener(_onRegisterUpdate);
   }
 
   @override
   void dispose() {
-    viewModel.registerCommand.removeListener(_onUpdate);
+    viewModel.registerCommand.removeListener(_onRegisterUpdate);
     viewModel.dispose();
 
     super.dispose();
   }
 
-  void _onUpdate() {
+  void _onRegisterUpdate() {
     try {
       final registerCommand = viewModel.registerCommand;
       final registerResult = registerCommand.value;
@@ -50,6 +50,7 @@ class _RegisterViewState extends State<RegisterView> {
         if (mounted) {
           switch (registerStatus) {
             case RegisterResult.success:
+              _showSnack("Cadastro realizado com sucesso!");
               context.go(Routes.home);
               break;
             case RegisterResult.tokenExpired:
@@ -85,7 +86,7 @@ class _RegisterViewState extends State<RegisterView> {
 
     DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: DateTime(DateTime.now().year, 1, 1),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
@@ -123,14 +124,17 @@ class _RegisterViewState extends State<RegisterView> {
               TextFormField(
                 controller: form.nomeController,
                 validator: form.validateNome,
-                decoration: const InputDecoration(labelText: 'Nome'),
+                decoration: const InputDecoration(
+                  labelText: 'Nome',
+                  counterText: "",
+                ),
                 maxLength: 100,
               ),
               TextFormField(
                 controller: form.cpfController,
                 validator: form.validateCpf,
                 decoration: InputDecoration(
-                  hint: Text("123.456.789-10"),
+                  hintText: "123.456.789-10",
                   labelText: 'CPF',
                 ),
                 keyboardType: TextInputType.number,
@@ -157,7 +161,7 @@ class _RegisterViewState extends State<RegisterView> {
                 controller: form.telefoneController,
                 validator: form.validateTelefone,
                 decoration: InputDecoration(
-                  hint: Text("+55 11 98765-4321"),
+                  hintText: "11 98765-4321",
                   labelText: 'Telefone',
                 ),
                 keyboardType: TextInputType.phone,

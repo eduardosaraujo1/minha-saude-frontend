@@ -3,7 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../data/repositories/session/session_repository.dart';
-import '../../../domain/actions/auth/logout.dart';
+import '../../../domain/actions/auth/logout_action.dart';
 
 class NotFoundView extends StatelessWidget {
   final String fullPath;

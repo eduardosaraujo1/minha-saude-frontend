@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/repositories/session/session_repository.dart';
+import 'package:minha_saude_frontend/app/domain/actions/auth/logout_action.dart';
 import 'package:minha_saude_frontend/app/domain/actions/auth/register_action.dart';
+import 'package:minha_saude_frontend/app/ui/core/widgets/brand_app_bar.dart';
 import 'package:minha_saude_frontend/app/ui/core/widgets/scaffold_with_navbar.dart';
 import 'package:minha_saude_frontend/app/ui/documents/view_models/metadata/document_edit_view_model.dart';
 import 'package:minha_saude_frontend/app/ui/documents/view_models/metadata/document_metadata_view_model.dart';
@@ -220,41 +222,75 @@ GoRouter router() {
               //   ],
               // ),
               // // Settings branch
-              // StatefulShellBranch(
-              //   routes: [
-              //     GoRoute(
-              //       path: Routes.configuracoes,
-              //       builder: (BuildContext context, GoRouterState state) =>
-              //           const ConfiguracoesView(),
-              //       routes: [
-              //         GoRoute(
-              //           path: Routes.editNomeRelative,
-              //           builder: (context, state) {
-              //             return EditNomeView(
-              //               EditNomeViewModel(_getIt<ProfileRepository>()),
-              //             );
-              //           },
-              //         ),
-              //         GoRoute(
-              //           path: Routes.editTelefoneRelative,
-              //           builder: (context, state) {
-              //             return EditTelefoneView(
-              //               EditTelefoneViewModel(_getIt<ProfileRepository>()),
-              //             );
-              //           },
-              //         ),
-              //         GoRoute(
-              //           path: Routes.editBirthdateRelative,
-              //           builder: (context, state) {
-              //             return EditBirthdayView(
-              //               EditBirthdayViewModel(_getIt<ProfileRepository>()),
-              //             );
-              //           },
-              //         ),
-              //       ],
-              //     ),
-              //   ],
-              // ),
+              StatefulShellBranch(
+                routes: [
+                  GoRoute(
+                    path: Routes.configuracoes,
+                    builder: (BuildContext context, GoRouterState state) {
+                      return Scaffold(
+                        appBar: BrandAppBar(title: const Text('Configurações')),
+                        body: SizedBox(
+                          height: double.infinity,
+                          child: SingleChildScrollView(
+                            physics: AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Configurações',
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.headlineSmall,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Aqui você pode ajustar as configurações do aplicativo.',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                                const SizedBox(height: 16),
+                                ListTile(
+                                  leading: const Icon(Icons.logout),
+                                  title: const Text('Sair'),
+                                  onTap: () async {
+                                    await GetIt.I<LogoutAction>().execute();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    routes: [
+                      // GoRoute(
+                      //   path: Routes.editNomeRelative,
+                      //   builder: (context, state) {
+                      //     return EditNomeView(
+                      //       EditNomeViewModel(_getIt<ProfileRepository>()),
+                      //     );
+                      //   },
+                      // ),
+                      // GoRoute(
+                      //   path: Routes.editTelefoneRelative,
+                      //   builder: (context, state) {
+                      //     return EditTelefoneView(
+                      //       EditTelefoneViewModel(_getIt<ProfileRepository>()),
+                      //     );
+                      //   },
+                      // ),
+                      // GoRoute(
+                      //   path: Routes.editBirthdateRelative,
+                      //   builder: (context, state) {
+                      //     return EditBirthdayView(
+                      //       EditBirthdayViewModel(_getIt<ProfileRepository>()),
+                      //     );
+                      //   },
+                      // ),
+                    ],
+                  ),
+                ],
+              ),
             ],
           ),
         ],

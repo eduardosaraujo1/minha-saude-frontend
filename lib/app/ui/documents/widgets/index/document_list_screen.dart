@@ -98,38 +98,41 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
             onRefresh: () async {
               viewModel.refresh();
             },
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (documents.isEmpty)
-                    Center(
-                      child: Text(
-                        'Nenhum documento encontrado.\nClique no botão abaixo para adicionar.',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyLarge,
+            child: SizedBox(
+              height: double.infinity,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (documents.isEmpty)
+                      Center(
+                        child: Text(
+                          'Nenhum documento encontrado.\nClique no botão abaixo para adicionar.',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyLarge,
+                        ),
                       ),
-                    ),
-                  if (documents.isNotEmpty)
-                    ValueListenableBuilder(
-                      valueListenable: viewModel.selectedAlgorithm,
-                      builder: (context, value, child) {
-                        return SortedDocumentList(
-                          documents: documents,
-                          groupingAlgorithm: value,
-                          onDocumentTap: (document) {
-                            var documentosWithId = Routes.documentosWithId(
-                              document.uuid,
-                            );
-                            context.go(documentosWithId);
-                          },
-                        );
-                      },
-                    ),
-                  SizedBox(height: 60),
-                ],
+                    if (documents.isNotEmpty)
+                      ValueListenableBuilder(
+                        valueListenable: viewModel.selectedAlgorithm,
+                        builder: (context, value, child) {
+                          return SortedDocumentList(
+                            documents: documents,
+                            groupingAlgorithm: value,
+                            onDocumentTap: (document) {
+                              var documentosWithId = Routes.documentosWithId(
+                                document.uuid,
+                              );
+                              context.go(documentosWithId);
+                            },
+                          );
+                        },
+                      ),
+                    SizedBox(height: 60),
+                  ],
+                ),
               ),
             ),
           );

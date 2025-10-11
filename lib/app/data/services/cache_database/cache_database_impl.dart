@@ -1,6 +1,7 @@
 import 'package:multiple_result/multiple_result.dart';
 import 'package:path/path.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 import 'models/document_db_model.dart';
 import 'cache_database.dart';
@@ -21,21 +22,17 @@ class CacheDatabaseImpl implements CacheDatabase {
 
   @override
   Future<void> init() async {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
-
     // Get the application documents directory for persistent storage
-    final databasesPath = await getDatabasesPath();
-    final path = join(databasesPath, 'minha_saude.db');
+    final databasesPath = await getApplicationDocumentsDirectory();
+    final path = join(databasesPath.path, 'minha_saude.db');
 
     // openDatabase only creates the database if it doesn't exist
     // onCreate is only called once when the database is first created
-    _database = await databaseFactory.openDatabase(
+    _database = await openDatabase(
       path,
-      options: OpenDatabaseOptions(
-        version: 1,
-        onCreate: (db, version) async {
-          await db.execute('''
+      version: 1,
+      onCreate: (db, version) async {
+        await db.execute('''
           CREATE TABLE documents (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             uuid TEXT NOT NULL UNIQUE,
@@ -49,8 +46,7 @@ class CacheDatabaseImpl implements CacheDatabase {
             cached_at TEXT NOT NULL
           )
         ''');
-        },
-      ),
+      },
     );
   }
 

@@ -160,9 +160,9 @@ class RegisterForm {
     }
 
     // Verifica se o telefone segue o formato brasileiro
-    final regex = RegExp(r'^\+55 \(\d{2}\) \d{5}-\d{4}$');
+    final regex = RegExp(r'^\(\d{2}\) \d{5}-\d{4}$');
     if (!regex.hasMatch(value ?? '')) {
-      return 'Telefone deve estar no formato +55 (XX) XXXXX-XXXX';
+      return 'Telefone deve estar no formato (XX) XXXXX-XXXX';
     }
 
     return null;

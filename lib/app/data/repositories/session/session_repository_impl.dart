@@ -14,7 +14,9 @@ class SessionRepositoryImpl extends SessionRepository {
   @override
   Future<Result<void, Exception>> setAuthToken(String value) async {
     _authTokenCache = value;
-    return await _secureStorage.setAuthToken(value);
+    await _secureStorage.setAuthToken(value);
+    notifyListeners();
+    return Success(null);
   }
 
   @override
@@ -39,12 +41,13 @@ class SessionRepositoryImpl extends SessionRepository {
 
       // Limpar cache
       _authTokenCache = null;
+      notifyListeners();
 
       return Result.success(null);
     } catch (e) {
       return Result.error(
         Exception(
-          "Ocorreu um eror crítico ao tentar remover o token de autenticação",
+          "Ocorreu um erro crítico ao tentar remover o token de autenticação",
         ),
       );
     }
@@ -53,6 +56,7 @@ class SessionRepositoryImpl extends SessionRepository {
   @override
   void clearRegisterToken() {
     _registerToken = null;
+    notifyListeners();
   }
 
   @override

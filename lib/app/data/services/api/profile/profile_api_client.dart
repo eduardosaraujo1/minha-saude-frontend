@@ -3,6 +3,9 @@ import 'package:multiple_result/multiple_result.dart';
 import 'models/profile_api_model.dart';
 
 abstract class ProfileApiClient {
+  /// Obtém o perfil do usuário.
+  ///
+  /// Retorna um [Result] contendo o [ProfileApiModel] em caso de sucesso ou [Exception] em caso de erro.
   Future<Result<ProfileApiModel, Exception>> getProfile();
 
   /// Atualiza o nome do usuário no perfil.

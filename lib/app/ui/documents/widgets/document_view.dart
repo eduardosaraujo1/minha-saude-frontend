@@ -185,11 +185,28 @@ class _DeleteDocumentDialog extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return AlertDialog(
-      title: const Text('Excluir Documento'),
-      content: Text('''
-Tem certeza que deseja excluir "${document.titulo}"?
-Ele permanecerá disponível na lixeira e será apagado permanentemente em 30 dias.
-'''),
+      title: const Text('Tem certeza que deseja excluir esse documento?'),
+      content: RichText(
+        text: TextSpan(
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurface,
+          ),
+          children: [
+            TextSpan(text: 'O documento ', style: theme.textTheme.bodyMedium),
+            TextSpan(
+              text: '«${document.titulo}»',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextSpan(
+              text:
+                  ' será movido para a lixeira. Você pode restaurá-lo ou excluí-lo permanentemente mais tarde.',
+              style: theme.textTheme.bodyMedium,
+            ),
+          ],
+        ),
+      ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),

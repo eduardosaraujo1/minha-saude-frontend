@@ -95,7 +95,7 @@ class SettingsGeneralTab extends StatelessWidget {
     return Column(
       children: [
         SizedBox(height: padTop),
-        Divider(thickness: 2.0),
+        Divider(thickness: 1.5),
         SizedBox(height: padBottom),
       ],
     );

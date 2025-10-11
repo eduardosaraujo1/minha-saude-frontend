@@ -22,7 +22,7 @@ class SettingsAccountTab extends StatelessWidget {
           tiles: [
             ListTile(
               leading: const Icon(Icons.logout),
-              title: const Text('Sair'),
+              title: const Text('Encerrar sessão'),
               onTap: () {
                 dialogController.showLogoutDialog(() {
                   viewModel.logout();
@@ -33,7 +33,7 @@ class SettingsAccountTab extends StatelessWidget {
               leading: const Icon(Icons.delete_forever),
               iconColor: colorScheme.error,
               textColor: colorScheme.error,
-              title: const Text('Apagar Conta'),
+              title: const Text('Apagar conta'),
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -64,7 +64,7 @@ class _DialogController {
         final theme = Theme.of(context);
 
         return AlertDialog(
-          title: const Text('Confirmação de Logout'),
+          title: const Text('Encerrar sessão'),
           content: const Text('Tem certeza que deseja sair?'),
           actions: [
             TextButton(

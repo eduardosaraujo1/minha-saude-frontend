@@ -14,7 +14,12 @@ class LoginDecorator extends StatelessWidget {
         color: theme.colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.only(bottomRight: Radius.circular(128)),
       ),
-      child: SafeArea(child: SvgPicture.asset(Asset.minhaSaudeLogo)),
+      child: SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 400),
+          child: SvgPicture.asset(Asset.minhaSaudeLogo),
+        ),
+      ),
     );
   }
 }

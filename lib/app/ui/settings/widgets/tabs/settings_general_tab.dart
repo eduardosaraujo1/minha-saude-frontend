@@ -70,6 +70,7 @@ class SettingsGeneralTab extends StatelessWidget {
       _UserInfoTile(
         label: 'Nome completo',
         value: "Lorem",
+        editKey: ValueKey('btnEditName'),
         onEdit: () {
           // context.go('/configuracoes/edit/nome');
         },
@@ -77,6 +78,7 @@ class SettingsGeneralTab extends StatelessWidget {
       _UserInfoTile(
         label: 'Data de nascimento',
         value: "Lorem",
+        editKey: ValueKey('btnEditBirthdate'),
         onEdit: () {
           // context.go('/configuracoes/edit/birthdate');
         },
@@ -84,6 +86,7 @@ class SettingsGeneralTab extends StatelessWidget {
       _UserInfoTile(
         label: 'Telefone',
         value: "Lorem",
+        editKey: ValueKey('btnEditPhone'),
         onEdit: () {
           // context.go('/configuracoes/edit/telefone');
         },
@@ -106,8 +109,14 @@ class _UserInfoTile extends StatelessWidget {
   final String label;
   final String value;
   final VoidCallback? onEdit;
+  final Key? editKey;
 
-  const _UserInfoTile({required this.label, required this.value, this.onEdit});
+  const _UserInfoTile({
+    required this.label,
+    required this.value,
+    this.onEdit,
+    this.editKey,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -133,6 +142,7 @@ class _UserInfoTile extends StatelessWidget {
       ),
       trailing: (onEdit != null)
           ? InkWell(
+              key: editKey,
               onTap: onEdit,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -150,7 +160,6 @@ class _UserInfoTile extends StatelessWidget {
               ),
             )
           : null,
-      // onEdit != null ? _buildEditButton(context) : null,
     );
   }
 }

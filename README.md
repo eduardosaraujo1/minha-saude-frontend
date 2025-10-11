@@ -11,6 +11,7 @@
 
 ## Para fazer
 
+-   [ ] Fazer estado de "login gera registro" depender de um valor no secureStorage
 -   [ ] Ao excluir documento, atualizar lista de documents (invalidar cache do repositório)
 -   [ ] Ver porque o GoRouter rebuilda todos os widgets abaixo da navegação, e quando voltamos um nível (via seta) esse widget sofre rebuild novamente
     -   [ ] Navigation precisa de um overhaul

@@ -1,5 +1,3 @@
-// TODO: hide field "id" from the client
-// Use only UUID for external references
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'document.freezed.dart';

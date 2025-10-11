@@ -7,9 +7,9 @@ import '../app/domain/actions/auth/register_action.dart';
 import '../app/data/services/file_system_service/file_system_service_impl.dart';
 import '../app/data/services/api/auth/auth_api_client_impl.dart';
 import '../app/data/services/api/document/document_api_client.dart';
-import '../app/data/services/cache_database/document_cache_database.dart';
+import '../app/data/services/cache_database/cache_database.dart';
 import '../app/data/services/api/http_client.dart';
-import '../app/data/services/cache_database/document_cache_database_impl.dart';
+import '../app/data/services/cache_database/cache_database_impl.dart';
 import '../app/data/services/api/document/document_api_client_impl.dart';
 import '../app/data/services/api/document/fake_document_api_client.dart';
 import '../app/data/services/file_system_service/file_system_service.dart';
@@ -46,7 +46,7 @@ Future<void> setup({
     mockGoogle ? GoogleServiceFake() : GoogleServiceImpl(GoogleSignIn.instance),
   );
   _getIt.registerSingleton<HttpClient>(HttpClient(baseUrl: Environment.apiUrl));
-  _getIt.registerSingleton<DocumentCacheDatabase>(DocumentCacheDatabaseImpl());
+  _getIt.registerSingleton<CacheDatabase>(CacheDatabaseImpl());
   _getIt.registerSingleton<FileSystemService>(FileSystemServiceImpl());
 
   if (mockApiClient) {
@@ -76,7 +76,7 @@ Future<void> setup({
   _getIt.registerSingleton<DocumentRepository>(
     DocumentRepositoryImpl(
       _getIt<DocumentApiClient>(),
-      _getIt<DocumentCacheDatabase>(),
+      _getIt<CacheDatabase>(),
       _getIt<DocumentScanner>(),
       _getIt<FileSystemService>(),
     ),
@@ -104,12 +104,12 @@ Future<void> setup({
   );
 
   // Post-register configuration
-  await _getIt<DocumentCacheDatabase>().init();
+  await _getIt<CacheDatabase>().init();
 
   final docApiClient = _getIt<DocumentApiClient>();
   if (docApiClient is FakeDocumentApiClient) {
     await docApiClient.populateLocalArrayWithDatabaseData(
-      _getIt<DocumentCacheDatabase>(),
+      _getIt<CacheDatabase>(),
     );
   }
 

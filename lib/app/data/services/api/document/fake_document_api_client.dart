@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:minha_saude_frontend/app/data/services/cache_database/document_cache_database.dart';
+import 'package:minha_saude_frontend/app/data/services/cache_database/cache_database.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
@@ -18,9 +18,7 @@ class FakeDocumentApiClient implements DocumentApiClient {
   // UUID generator (simulates server-side UUID generation)
   final _uuid = const Uuid();
 
-  Future<void> populateLocalArrayWithDatabaseData(
-    DocumentCacheDatabase db,
-  ) async {
+  Future<void> populateLocalArrayWithDatabaseData(CacheDatabase db) async {
     final dbDocs = await db.listDocuments();
 
     if (dbDocs.isError()) return;

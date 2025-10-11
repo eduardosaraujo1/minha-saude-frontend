@@ -40,101 +40,106 @@ class _DocumentCreateViewState extends State<DocumentInfoFormView> {
           onPressed: widget.onBack,
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: form.formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 8,
-            children: [
-              Text(
-                "Vamos organizar o seu documento",
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              Text(
-                "Informe os dados abaixo para facilitar a localização do arquivo",
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: form.tituloController,
-                validator: form.validateTitulo,
-                decoration: const InputDecoration(
-                  labelText: 'Título',
-                  border: OutlineInputBorder(),
+      body: SingleChildScrollView(
+        physics: AlwaysScrollableScrollPhysics(),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: form.formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 8,
+              children: [
+                Text(
+                  "Vamos organizar o seu documento",
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-              ),
-              TextFormField(
-                controller: form.nomePacienteController,
-                validator: form.validateNomePaciente,
-                decoration: const InputDecoration(
-                  labelText: 'Nome do(a) paciente',
-                  border: OutlineInputBorder(),
+                Text(
+                  "Informe os dados abaixo para facilitar a localização do arquivo",
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
-              ),
-              TextFormField(
-                controller: form.nomeMedicoController,
-                validator: form.validateNomeMedico,
-                decoration: const InputDecoration(
-                  labelText: 'Nome do(a) médico(a)',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              TextFormField(
-                controller: form.tipoDocumentoController,
-                validator: form.validateTipoDocumento,
-                decoration: const InputDecoration(
-                  labelText: 'Tipo do documento',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              TextFormField(
-                controller: form.dataDocumentoController,
-                validator: form.validateDataDocumento,
-                decoration: const InputDecoration(
-                  labelText: 'Data do documento',
-                  border: OutlineInputBorder(),
-                  suffixIcon: Icon(Icons.calendar_today),
-                ),
-                keyboardType: TextInputType.datetime,
-                readOnly: true,
-                onTap: () => _triggerDocumentDatePicker(context),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                spacing: 8,
-                children: [
-                  Expanded(
-                    child: FilledButton.tonal(
-                      onPressed: () {
-                        // Skip form and submit with only required fields
-                        viewModel.onFormSubmit(
-                          DocumentFormData(titulo: 'Documento sem título'),
-                        );
-                      },
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: const Text('Pular essa etapa'),
-                    ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: form.tituloController,
+                  validator: form.validateTitulo,
+                  decoration: const InputDecoration(
+                    labelText: 'Título',
+                    border: OutlineInputBorder(),
                   ),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: viewModel.submitForm,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(
-                          context,
-                        ).colorScheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: const Text('Salvar e Continuar'),
-                    ),
+                ),
+                TextFormField(
+                  controller: form.nomePacienteController,
+                  validator: form.validateNomePaciente,
+                  decoration: const InputDecoration(
+                    labelText: 'Nome do(a) paciente',
+                    border: OutlineInputBorder(),
                   ),
-                ],
-              ),
-            ],
+                ),
+                TextFormField(
+                  controller: form.nomeMedicoController,
+                  validator: form.validateNomeMedico,
+                  decoration: const InputDecoration(
+                    labelText: 'Nome do(a) médico(a)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                TextFormField(
+                  controller: form.tipoDocumentoController,
+                  validator: form.validateTipoDocumento,
+                  decoration: const InputDecoration(
+                    labelText: 'Tipo do documento',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                TextFormField(
+                  controller: form.dataDocumentoController,
+                  validator: form.validateDataDocumento,
+                  decoration: const InputDecoration(
+                    labelText: 'Data do documento',
+                    border: OutlineInputBorder(),
+                    suffixIcon: Icon(Icons.calendar_today),
+                  ),
+                  keyboardType: TextInputType.datetime,
+                  readOnly: true,
+                  onTap: () => _triggerDocumentDatePicker(context),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  spacing: 8,
+                  children: [
+                    Expanded(
+                      child: FilledButton.tonal(
+                        onPressed: () {
+                          // Skip form and submit with only required fields
+                          viewModel.onFormSubmit(
+                            DocumentFormData(titulo: 'Documento sem título'),
+                          );
+                        },
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: const Text('Pular essa etapa'),
+                      ),
+                    ),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: viewModel.submitForm,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
+                          foregroundColor: Theme.of(
+                            context,
+                          ).colorScheme.onPrimary,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: const Text('Salvar e Continuar'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

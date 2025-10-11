@@ -1,13 +1,13 @@
 import 'package:multiple_result/multiple_result.dart';
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'models/document_db_model.dart';
-import 'document_cache_database.dart';
+import 'cache_database.dart';
 
 /// Implementation of CacheDatabase using SQLite via sqflite package.
 /// Uses DocumentDbModel for database operations with snake_case field mapping.
-class DocumentCacheDatabaseImpl implements DocumentCacheDatabase {
+class CacheDatabaseImpl implements CacheDatabase {
   Database? _database;
 
   Database get database {
@@ -21,17 +21,21 @@ class DocumentCacheDatabaseImpl implements DocumentCacheDatabase {
 
   @override
   Future<void> init() async {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+
     // Get the application documents directory for persistent storage
     final databasesPath = await getDatabasesPath();
     final path = join(databasesPath, 'minha_saude.db');
 
     // openDatabase only creates the database if it doesn't exist
     // onCreate is only called once when the database is first created
-    _database = await openDatabase(
+    _database = await databaseFactory.openDatabase(
       path,
-      version: 1,
-      onCreate: (db, version) async {
-        await db.execute('''
+      options: OpenDatabaseOptions(
+        version: 1,
+        onCreate: (db, version) async {
+          await db.execute('''
           CREATE TABLE documents (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             uuid TEXT NOT NULL UNIQUE,
@@ -45,7 +49,8 @@ class DocumentCacheDatabaseImpl implements DocumentCacheDatabase {
             cached_at TEXT NOT NULL
           )
         ''');
-      },
+        },
+      ),
     );
   }
 

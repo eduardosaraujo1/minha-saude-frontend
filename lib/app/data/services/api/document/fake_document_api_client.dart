@@ -44,6 +44,9 @@ class FakeDocumentApiClient implements DocumentApiClient {
   @override
   Future<Result<void, Exception>> trashDocument(String uuid) async {
     try {
+      // Simulate network delay
+      await Future.delayed(const Duration(milliseconds: 500));
+
       // Find the document by ID
       final index = _documents.indexWhere((doc) => doc.uuid == uuid);
 
@@ -78,6 +81,9 @@ class FakeDocumentApiClient implements DocumentApiClient {
     DateTime? dataDocumento,
   }) async {
     try {
+      // Simulate network delay (longer for file upload)
+      await Future.delayed(const Duration(milliseconds: 1200));
+
       // Generate new UUID (simulates server-side generation)
       final uuid = _uuid.v4();
 
@@ -113,6 +119,9 @@ class FakeDocumentApiClient implements DocumentApiClient {
   @override
   Future<Result<List<DocumentApiModel>, Exception>> listDocuments() async {
     try {
+      // Simulate network delay
+      await Future.delayed(const Duration(milliseconds: 600));
+
       // Filter out soft-deleted documents
       final activeDocuments = _documents
           .where((doc) => doc.deletedAt == null)
@@ -127,6 +136,9 @@ class FakeDocumentApiClient implements DocumentApiClient {
   @override
   Future<Result<Uint8List, Exception>> downloadDocument(String uuid) async {
     try {
+      // Simulate network delay (longer for file download)
+      await Future.delayed(const Duration(milliseconds: 1000));
+
       // Find the document by UUID
       final document = _documents.firstWhere(
         (doc) => doc.uuid == uuid,
@@ -156,6 +168,9 @@ class FakeDocumentApiClient implements DocumentApiClient {
   @override
   Future<Result<DocumentApiModel, Exception>> getDocument(String uuid) async {
     try {
+      // Simulate network delay
+      await Future.delayed(const Duration(milliseconds: 400));
+
       // Find the document by UUID
       final document = _documents.firstWhere(
         (doc) => doc.uuid == uuid,
@@ -179,6 +194,9 @@ class FakeDocumentApiClient implements DocumentApiClient {
     DateTime? dataDocumento,
   }) async {
     try {
+      // Simulate network delay
+      await Future.delayed(const Duration(milliseconds: 700));
+
       // Find the document by UUID
       final index = _documents.indexWhere((doc) => doc.uuid == uuid);
 

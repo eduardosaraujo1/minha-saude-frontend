@@ -14,6 +14,9 @@ class FakeAuthApiClient implements AuthApiClient {
   Future<Result<LoginApiResponse, Exception>> authLoginGoogle(
     String tokenOauth,
   ) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 800));
+
     if (await fakePersistentStorage.getRegistered()) {
       return Result.success(
         LoginApiResponse(
@@ -41,6 +44,9 @@ class FakeAuthApiClient implements AuthApiClient {
     required String telefone,
     required String registerToken,
   }) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 1000));
+
     // Create a new user with the registration data
     final newUser = FakeRegisterModel(
       id: 'fake_user_id_${DateTime.now().millisecondsSinceEpoch}',
@@ -63,11 +69,17 @@ class FakeAuthApiClient implements AuthApiClient {
 
   @override
   Future<Result<void, Exception>> authLogout() async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 500));
+
     return Result.success(null);
   }
 
   @override
   Future<Result<String, Exception>> authSendEmail(String email) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 800));
+
     return Result.success("success");
   }
 
@@ -76,6 +88,9 @@ class FakeAuthApiClient implements AuthApiClient {
     String email,
     String code,
   ) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 800));
+
     if (await fakePersistentStorage.getRegistered()) {
       return Result.success(
         LoginApiResponse(

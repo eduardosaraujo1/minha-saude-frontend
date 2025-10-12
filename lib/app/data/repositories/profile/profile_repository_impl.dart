@@ -1,8 +1,8 @@
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
-import 'package:minha_saude_frontend/app/domain/models/profile/profile.dart';
-
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../../domain/models/profile/profile.dart';
 import '../../services/api/profile/profile_api_client.dart';
 import 'profile_repository.dart';
 
@@ -73,44 +73,145 @@ class ProfileRepositoryImpl extends ProfileRepository {
 
   @override
   Future<Result<void, Exception>> linkGoogleAccount(String tokenOauth) {
-    // TODO: implement linkGoogleAccount
-    throw UnimplementedError();
+    return _wrapException(() async {
+      final apiResult = await profileApiClient.linkGoogleAccount(tokenOauth);
+
+      if (apiResult.isError()) {
+        _logger.warning(
+          "Link Google Account API Error: ",
+          apiResult.tryGetError()!,
+        );
+        return Error(Exception("Failed to link Google account"));
+      }
+
+      // Update local cache if exists
+      _cache.updateAuthMethod(AuthMethod.google);
+
+      return Success(null);
+    });
   }
 
   @override
   Future<Result<void, Exception>> requestPhoneVerificationCode(String phone) {
-    // TODO: implement requestPhoneVerificationCode
-    throw UnimplementedError();
+    return _wrapException(() async {
+      final apiResult = await profileApiClient.requestPhoneVerificationCode(
+        phone,
+      );
+
+      if (apiResult.isError()) {
+        _logger.warning(
+          "Request Phone Verification Code API Error: ",
+          apiResult.tryGetError()!,
+        );
+        return Error(Exception("Failed to request phone verification code"));
+      }
+
+      return Success(null);
+    });
   }
 
   @override
   Future<Result<void, Exception>> updateBirthdate(DateTime birthDate) {
-    // TODO: implement updateBirthdate
-    throw UnimplementedError();
+    return _wrapException(() async {
+      final apiResult = await profileApiClient.updateBirthdate(birthDate);
+
+      if (apiResult.isError()) {
+        _logger.warning(
+          "Update Birthdate API Error: ",
+          apiResult.tryGetError()!,
+        );
+        return Error(Exception("Failed to update birthdate"));
+      }
+
+      final updatedBirthdateStr = apiResult.tryGetSuccess()!;
+      final updatedBirthdate = DateFormat(
+        "yyyy-MM-dd",
+      ).tryParse(updatedBirthdateStr);
+
+      if (updatedBirthdate == null) {
+        _logger.warning(
+          "Failed to parse updated birthdate: $updatedBirthdateStr - falling back to cache invalidation",
+        );
+        _cache.clear();
+        return Success(null);
+      }
+
+      // Update local cache if exists
+      _cache.updateBirthdate(updatedBirthdate);
+
+      return Success(null);
+    });
   }
 
   @override
   Future<Result<void, Exception>> updateName(String name) {
-    // TODO: implement updateName
-    throw UnimplementedError();
+    return _wrapException(() async {
+      final apiResult = await profileApiClient.updateName(name);
+
+      if (apiResult.isError()) {
+        _logger.warning("Update Name API Error: ", apiResult.tryGetError()!);
+        return Error(Exception("Failed to update name"));
+      }
+
+      final updatedName = apiResult.tryGetSuccess()!;
+
+      // Update local cache if exists
+      _cache.updateName(updatedName);
+
+      return Success(null);
+    });
   }
 
   @override
   Future<Result<void, Exception>> updatePhone(String phone) {
-    // TODO: implement updatePhone
-    throw UnimplementedError();
+    return _wrapException(() async {
+      final apiResult = await profileApiClient.updatePhone(phone);
+
+      if (apiResult.isError()) {
+        _logger.warning("Update Phone API Error: ", apiResult.tryGetError()!);
+        return Error(Exception("Failed to update phone"));
+      }
+
+      final updatedPhone = apiResult.tryGetSuccess()!;
+
+      // Update local cache if exists
+      _cache.updatePhone(updatedPhone);
+
+      return Success(null);
+    });
   }
 
   @override
   Future<Result<void, Exception>> verifyPhoneCode(String code) {
-    // TODO: implement verifyPhoneCode
-    throw UnimplementedError();
+    return _wrapException(() async {
+      final apiResult = await profileApiClient.verifyPhoneCode(code);
+
+      if (apiResult.isError()) {
+        // TODO: desenvolver arquitetura para diferenciar erros tecnicos
+        //(404, 500, timeout) de erros de negocio (codigo invalido, codigo expirado)
+        _logger.fine("Verify Phone Code API error: ", apiResult.tryGetError()!);
+        return Error(Exception("Failed to verify phone code"));
+      }
+
+      return Success(null);
+    });
   }
 
   @override
   Future<Result<void, Exception>> requestDataExport() {
-    // TODO: implement requestDataExport
-    throw UnimplementedError();
+    return _wrapException(() async {
+      final apiResult = await profileApiClient.requestDataExport();
+
+      if (apiResult.isError()) {
+        _logger.warning(
+          "Request Data Export API Error: ",
+          apiResult.tryGetError()!,
+        );
+        return Error(Exception("Failed to request data export"));
+      }
+
+      return Success(null);
+    });
   }
 
   Future<Result<T, Exception>> _wrapException<T>(
@@ -151,6 +252,12 @@ class _InMemoryProfileCache {
   void updateBirthdate(DateTime birthDate) {
     if (profile != null) {
       profile = profile!.copyWith(dataNascimento: birthDate);
+    }
+  }
+
+  void updateAuthMethod(AuthMethod method) {
+    if (profile != null) {
+      profile = profile!.copyWith(metodoAutenticacao: method);
     }
   }
 }

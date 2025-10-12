@@ -39,8 +39,6 @@ class DocumentListViewModel {
     final defaultException = Exception(
       "Não foi possível carregar os documentos. Tente novamente mais tarde.",
     );
-    // TODO: remove artificial time
-    await Future.delayed(const Duration(milliseconds: 500));
     final documentsQuery = await documentRepository.listDocuments(
       forceRefresh: forceReload,
     );

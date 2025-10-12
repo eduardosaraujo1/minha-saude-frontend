@@ -56,8 +56,6 @@ class SettingsViewModel {
 
   Future<Result<Profile, Exception>?> _loadProfile() async {
     try {
-      // TODO: remove artificial time
-      await Future.delayed(const Duration(milliseconds: 500));
       final result = await profileRepository.getProfile();
       if (result.isError()) {
         return Error(

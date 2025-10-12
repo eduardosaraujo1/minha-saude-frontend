@@ -1,7 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/app/domain/models/profile/profile.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-abstract class ProfileRepository {
+abstract class ProfileRepository extends ChangeNotifier {
   /// Obtém o perfil do usuário.
   ///
   /// Retorna um [Result] contendo o [Profile] em caso de sucesso ou [Exception] em caso de erro.
@@ -61,4 +62,10 @@ abstract class ProfileRepository {
   ///
   /// Retorna um [Result] contendo void em caso de sucesso ou [Exception] em caso de erro.
   Future<Result<void, Exception>> linkGoogleAccount(String tokenOauth);
+
+  /// Solicita a exportação dos dados do usuário.
+  /// Dados são enviados via e-mail dentro de 24 horas.
+  ///
+  /// Retorna um [Result] contendo void em caso de sucesso ou [Exception] em caso de erro.
+  Future<Result<void, Exception>> requestDataExport();
 }

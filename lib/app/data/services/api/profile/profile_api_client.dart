@@ -62,4 +62,9 @@ abstract class ProfileApiClient {
   ///
   /// Retorna um [Result] contendo void em caso de sucesso ou [Exception] em caso de erro.
   Future<Result<void, Exception>> deleteAccount();
+
+  /// Solicita a exportação dos dados do usuário.
+  ///
+  /// Retorna um [Result] contendo void em caso de sucesso ou [Exception] em caso de erro
+  Future<Result<void, Exception>> requestDataExport();
 }

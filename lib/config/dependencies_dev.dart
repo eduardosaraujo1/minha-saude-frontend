@@ -19,6 +19,7 @@ import '../app/data/services/api/document/document_api_client_impl.dart';
 import '../app/data/services/api/document/fake_document_api_client.dart';
 import '../app/data/services/file_system_service/file_system_service.dart';
 import '../app/domain/actions/settings/delete_user_action.dart';
+import '../app/domain/actions/settings/request_export_action.dart';
 import '../app/ui/core/theme_provider.dart';
 import '../app/domain/actions/auth/login_with_google.dart';
 import '../app/data/repositories/document/document_repository_impl.dart';
@@ -120,6 +121,9 @@ Future<void> setup({
   );
   _getIt.registerSingleton<DeleteUserAction>(
     DeleteUserAction(profileRepository: _getIt<ProfileRepository>()),
+  );
+  _getIt.registerSingleton<RequestExportAction>(
+    RequestExportAction(profileRepository: _getIt<ProfileRepository>()),
   );
 
   // Post-register configuration

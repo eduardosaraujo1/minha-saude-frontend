@@ -59,4 +59,10 @@ class ProfileRepositoryImpl extends ProfileRepository {
     // TODO: implement verifyPhoneCode
     throw UnimplementedError();
   }
+
+  @override
+  Future<Result<void, Exception>> requestDataExport() {
+    // TODO: implement requestDataExport
+    throw UnimplementedError();
+  }
 }

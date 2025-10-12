@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/data/repositories/profile/profile_repository.dart';
 import 'package:minha_saude_frontend/app/ui/core/widgets/brand_app_bar.dart';
+import 'package:minha_saude_frontend/app/ui/settings/view_models/settings_edit_view_model.dart';
+import 'package:minha_saude_frontend/app/ui/settings/widgets/edit/settings_edit_birthdate.dart';
+import 'package:minha_saude_frontend/app/ui/settings/widgets/edit/settings_edit_name.dart';
+import 'package:minha_saude_frontend/app/ui/settings/widgets/edit/settings_edit_phone.dart';
 
 import '../data/repositories/session/session_repository.dart';
 import '../domain/actions/auth/logout_action.dart';
@@ -239,30 +244,39 @@ final _router = GoRouter(
                     );
                   },
                   routes: [
-                    // GoRoute(
-                    //   path: Routes.editNomeRelative,
-                    //   builder: (context, state) {
-                    //     return EditNomeView(
-                    //       EditNomeViewModel(_getIt<ProfileRepository>()),
-                    //     );
-                    //   },
-                    // ),
-                    // GoRoute(
-                    //   path: Routes.editTelefoneRelative,
-                    //   builder: (context, state) {
-                    //     return EditTelefoneView(
-                    //       EditTelefoneViewModel(_getIt<ProfileRepository>()),
-                    //     );
-                    //   },
-                    // ),
-                    // GoRoute(
-                    //   path: Routes.editBirthdateRelative,
-                    //   builder: (context, state) {
-                    //     return EditBirthdayView(
-                    //       EditBirthdayViewModel(_getIt<ProfileRepository>()),
-                    //     );
-                    //   },
-                    // ),
+                    GoRoute(
+                      path: Routes.editNomeRelative,
+                      builder: (context, state) {
+                        return SettingsEditName(
+                          viewModel: SettingsEditViewModel(
+                            fieldType: SettingsEditField.name,
+                            profileRepository: _getIt<ProfileRepository>(),
+                          ),
+                        );
+                      },
+                    ),
+                    GoRoute(
+                      path: Routes.editTelefoneRelative,
+                      builder: (context, state) {
+                        return SettingsEditPhone(
+                          viewModel: SettingsEditViewModel(
+                            fieldType: SettingsEditField.phone,
+                            profileRepository: _getIt<ProfileRepository>(),
+                          ),
+                        );
+                      },
+                    ),
+                    GoRoute(
+                      path: Routes.editBirthdateRelative,
+                      builder: (context, state) {
+                        return SettingsEditBirthdate(
+                          viewModel: SettingsEditViewModel(
+                            fieldType: SettingsEditField.birthdate,
+                            profileRepository: _getIt<ProfileRepository>(),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ],

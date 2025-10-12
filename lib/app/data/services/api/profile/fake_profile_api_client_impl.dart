@@ -53,4 +53,10 @@ class FakeProfileApiClient extends ProfileApiClient {
     // TODO: implement verifyPhoneCode
     throw UnimplementedError();
   }
+
+  @override
+  Future<Result<void, Exception>> requestDataExport() {
+    // TODO: implement requestDataExport
+    throw UnimplementedError();
+  }
 }

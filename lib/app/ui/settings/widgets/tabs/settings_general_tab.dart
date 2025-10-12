@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/routing/routes.dart';
 import 'package:minha_saude_frontend/app/ui/core/theme_provider.dart';
 import 'package:minha_saude_frontend/app/ui/settings/view_models/settings_view_model.dart';
 
@@ -18,6 +20,7 @@ class SettingsGeneralTab extends StatelessWidget {
     final editFields = _getUserInfoFields(context);
 
     return Column(
+      key: ValueKey("scrollableColumn"),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Informações', style: theme.textTheme.titleMedium),
@@ -52,6 +55,7 @@ class SettingsGeneralTab extends StatelessWidget {
         Text('Aparência', style: theme.textTheme.titleMedium),
         // Dark theme toggle (text on left, switch on right)
         SwitchListTile(
+          key: ValueKey("darkThemeSwitch"),
           contentPadding: EdgeInsets.zero,
           title: const Text('Tema escuro'),
           value: theme.brightness == Brightness.dark,
@@ -72,7 +76,7 @@ class SettingsGeneralTab extends StatelessWidget {
         value: "Lorem",
         editKey: ValueKey('btnEditName'),
         onEdit: () {
-          // context.go('/configuracoes/edit/nome');
+          context.go(Routes.editNome);
         },
       ),
       _UserInfoTile(
@@ -80,7 +84,7 @@ class SettingsGeneralTab extends StatelessWidget {
         value: "Lorem",
         editKey: ValueKey('btnEditBirthdate'),
         onEdit: () {
-          // context.go('/configuracoes/edit/birthdate');
+          context.go(Routes.editBirthdate);
         },
       ),
       _UserInfoTile(
@@ -88,7 +92,7 @@ class SettingsGeneralTab extends StatelessWidget {
         value: "Lorem",
         editKey: ValueKey('btnEditPhone'),
         onEdit: () {
-          // context.go('/configuracoes/edit/telefone');
+          context.go(Routes.editTelefone);
         },
       ),
     ];

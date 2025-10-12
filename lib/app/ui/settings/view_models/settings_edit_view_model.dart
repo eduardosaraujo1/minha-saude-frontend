@@ -74,7 +74,7 @@ class SettingsEditViewModel {
       return switch (fieldType) {
         SettingsEditField.name => Success(profile.nome),
         SettingsEditField.birthdate => Success(
-          DateFormat("yyyy-MM-dd").format(profile.dataNascimento),
+          DateFormat("dd/MM/yyyy").format(profile.dataNascimento),
         ),
         SettingsEditField.phone => Success(profile.telefone),
       };

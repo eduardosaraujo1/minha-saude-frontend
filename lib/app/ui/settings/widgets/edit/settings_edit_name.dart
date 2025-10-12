@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/ui/settings/view_models/settings_edit_view_model.dart';
+
+import '../../view_models/settings_edit_view_model.dart';
 
 class SettingsEditName extends StatefulWidget {
   const SettingsEditName({required this.viewModel, super.key});
@@ -57,8 +58,9 @@ class _SettingsEditNameState extends State<SettingsEditName> {
         ),
       );
 
-      if (context.canPop()) {}
-      context.pop();
+      if (context.canPop()) {
+        context.pop();
+      }
     }
 
     if (result.isSuccess()) {
@@ -66,7 +68,9 @@ class _SettingsEditNameState extends State<SettingsEditName> {
         const SnackBar(content: Text("Nome atualizado com sucesso!")),
       );
 
-      context.pop();
+      if (context.canPop()) {
+        context.pop();
+      }
     }
   }
 

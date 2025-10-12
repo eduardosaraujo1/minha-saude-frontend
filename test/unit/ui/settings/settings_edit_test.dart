@@ -204,7 +204,7 @@ void main() {
       expect(birthdateField, findsOneWidget);
 
       var textFormField = tester.widget<TextFormField>(birthdateField);
-      expect(textFormField.controller?.text, "initialValue");
+      expect(textFormField.controller?.text, "01/01/2020");
     });
 
     testWidgets(
@@ -230,7 +230,7 @@ void main() {
         // Will override the controller directly
         final formFinder = find.byKey(ValueKey('inputBirthdate'));
         var form = tester.widget(formFinder) as TextFormField;
-        form.controller?.text = "2025-01-01";
+        form.controller?.text = "01/01/2025";
         await tester.pumpAndSettle();
 
         await tester.tap(btnSave);
@@ -271,7 +271,7 @@ void main() {
   group("Phone Edit Tests", () {
     setUp(() {
       viewModel = SettingsEditViewModel(
-        fieldType: SettingsEditField.birthdate,
+        fieldType: SettingsEditField.phone,
         profileRepository: profileRepository,
       );
     });

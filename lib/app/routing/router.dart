@@ -12,6 +12,7 @@ import '../data/repositories/session/session_repository.dart';
 import '../domain/actions/auth/logout_action.dart';
 import '../domain/actions/auth/register_action.dart';
 import '../domain/actions/settings/delete_user_action.dart';
+import '../domain/actions/settings/request_export_action.dart';
 import '../ui/core/widgets/scaffold_with_navbar.dart';
 import '../ui/documents/view_models/metadata/document_edit_view_model.dart';
 import '../ui/documents/view_models/metadata/document_metadata_view_model.dart';
@@ -238,7 +239,9 @@ final _router = GoRouter(
                   builder: (BuildContext context, GoRouterState state) {
                     return SettingsTabView(
                       SettingsViewModel(
+                        profileRepository: _getIt<ProfileRepository>(),
                         deleteUserAction: _getIt<DeleteUserAction>(),
+                        requestExportAction: _getIt<RequestExportAction>(),
                         logoutAction: _getIt<LogoutAction>(),
                       ),
                     );

@@ -14,6 +14,7 @@ ThemeData applyOverrides(ThemeData themeData) {
       contentTextStyle: TextStyle(color: colorScheme.onInverseSurface),
       actionTextColor: colorScheme.inversePrimary,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      showCloseIcon: true,
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: colorScheme.surfaceContainer, //

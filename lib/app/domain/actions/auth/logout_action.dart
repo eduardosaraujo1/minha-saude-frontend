@@ -1,3 +1,4 @@
+import 'package:logging/logging.dart';
 import 'package:minha_saude_frontend/app/data/repositories/document/document_repository.dart';
 import 'package:multiple_result/multiple_result.dart';
 
@@ -16,6 +17,7 @@ class LogoutAction {
   final AuthRepository _authRepository;
   final SessionRepository _sessionRepository;
   final DocumentRepository _documentRepository;
+  final Logger _log = Logger("LogoutAction");
 
   Future<Result<void, Exception>> execute() async {
     try {
@@ -27,7 +29,8 @@ class LogoutAction {
       await _documentRepository.resetCache();
 
       return Result.success(null);
-    } catch (e) {
+    } catch (e, s) {
+      _log.severe("Error during logout", e, s);
       return Result.error(
         Exception("Ocorreu um erro desconhecido ao tentar fazer logout."),
       );

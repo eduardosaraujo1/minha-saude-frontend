@@ -1,37 +1,105 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:minha_saude_frontend/app/routing/routes.dart';
 import 'package:minha_saude_frontend/app/ui/core/theme_provider.dart';
 import 'package:minha_saude_frontend/app/ui/settings/view_models/settings_view_model.dart';
 
-class SettingsGeneralTab extends StatelessWidget {
+class SettingsGeneralTab extends StatefulWidget {
   const SettingsGeneralTab({super.key, required this.viewModel});
 
   final SettingsViewModel viewModel;
 
-  void triggerExportData() {
-    // viewModel.exportData();
+  @override
+  State<SettingsGeneralTab> createState() => _SettingsGeneralTabState();
+}
+
+class _SettingsGeneralTabState extends State<SettingsGeneralTab> {
+  late final SettingsViewModel viewModel;
+  @override
+  void initState() {
+    super.initState();
+    viewModel = widget.viewModel;
+    viewModel.loadProfile.addListener(_handleLoadUpdate);
+    viewModel.requestExportCommand.addListener(_handleExportRequest);
+
+    viewModel.loadProfile.execute();
+  }
+
+  @override
+  void dispose() {
+    viewModel.loadProfile.removeListener(_handleLoadUpdate);
+    viewModel.requestExportCommand.removeListener(_handleExportRequest);
+    super.dispose();
+  }
+
+  void _handleLoadUpdate() {
+    var result = viewModel.loadProfile.value;
+    if (result == null) return;
+
+    if (result.isError()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Ocorreu um erro ao carregar dados do perfil.")),
+      );
+    }
+  }
+
+  void _handleExportRequest() {
+    final result = viewModel.requestExportCommand.value;
+    if (result == null) return;
+
+    if (result.isError()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Ocorreu um erro ao solicitar a exportação dos dados. Contate-nos via suporte!",
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Solicitação de exportação enviada! Você receberá um e-mail com os dados em breve.",
+          ),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final editFields = _getUserInfoFields(context);
 
     return Column(
       key: ValueKey("scrollableColumn"),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Informações', style: theme.textTheme.titleMedium),
-        ListView.separated(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: editFields.length,
-          itemBuilder: (context, index) {
-            return editFields[index];
+        ValueListenableBuilder(
+          valueListenable: viewModel.loadProfile.results,
+          builder: (context, value, child) {
+            if (value.isExecuting || value.data == null) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: CircularProgressIndicator(color: colorScheme.primary),
+                ),
+              );
+            }
+
+            final editFields = _getUserInfoFields(context);
+            return ListView.separated(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: editFields.length,
+              itemBuilder: (context, index) {
+                return editFields[index];
+              },
+              separatorBuilder: (context, index) => const Divider(),
+            );
           },
-          separatorBuilder: (context, index) => const Divider(),
         ),
         _pageDivider(padTop: 4, padBottom: 6),
         Text('Dados e Privacidade', style: theme.textTheme.titleMedium),
@@ -39,14 +107,16 @@ class SettingsGeneralTab extends StatelessWidget {
           context: context,
           tiles: [
             ListTile(
+              key: ValueKey("btnExportData"),
+              visualDensity: VisualDensity.compact,
               leading: Icon(Icons.mail_outlined),
-              title: const Text('Exportar dados'),
+              title: const Text('Exportar meus dados'),
               trailing: Icon(
                 Icons.chevron_right,
                 color: colorScheme.onSurfaceVariant,
               ),
               onTap: () {
-                triggerExportData();
+                widget.viewModel.requestExportCommand.execute();
               },
             ),
           ],
@@ -68,12 +138,15 @@ class SettingsGeneralTab extends StatelessWidget {
   }
 
   List<_UserInfoTile> _getUserInfoFields(BuildContext context) {
+    final source = viewModel.loadProfile.value;
+    final profile = source?.tryGetSuccess();
+
     return [
-      _UserInfoTile(label: 'CPF', value: "Lorem"),
-      _UserInfoTile(label: 'E-mail', value: "Lorem"),
+      _UserInfoTile(label: 'CPF', value: profile?.cpf),
+      _UserInfoTile(label: 'E-mail', value: profile?.email),
       _UserInfoTile(
-        label: 'Nome completo',
-        value: "Lorem",
+        label: 'Nome',
+        value: profile?.nome,
         editKey: ValueKey('btnEditName'),
         onEdit: () {
           context.go(Routes.editNome);
@@ -81,7 +154,9 @@ class SettingsGeneralTab extends StatelessWidget {
       ),
       _UserInfoTile(
         label: 'Data de nascimento',
-        value: "Lorem",
+        value: profile?.dataNascimento == null
+            ? null
+            : DateFormat("dd/MM/yyyy").format(profile!.dataNascimento),
         editKey: ValueKey('btnEditBirthdate'),
         onEdit: () {
           context.go(Routes.editBirthdate);
@@ -89,7 +164,7 @@ class SettingsGeneralTab extends StatelessWidget {
       ),
       _UserInfoTile(
         label: 'Telefone',
-        value: "Lorem",
+        value: profile?.telefone,
         editKey: ValueKey('btnEditPhone'),
         onEdit: () {
           context.go(Routes.editTelefone);
@@ -111,7 +186,7 @@ class SettingsGeneralTab extends StatelessWidget {
 
 class _UserInfoTile extends StatelessWidget {
   final String label;
-  final String value;
+  final String? value;
   final VoidCallback? onEdit;
   final Key? editKey;
 
@@ -126,7 +201,7 @@ class _UserInfoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isEmpty = value.isEmpty;
+    final isInvalid = value == null || (value?.isEmpty ?? true);
 
     return ListTile(
       contentPadding: EdgeInsets.zero,
@@ -139,9 +214,9 @@ class _UserInfoTile extends StatelessWidget {
         ),
       ),
       subtitle: Text(
-        isEmpty ? 'Não encontrado' : value,
+        isInvalid ? 'Não encontrado' : value!,
         style: theme.textTheme.bodyMedium?.copyWith(
-          color: isEmpty ? colorScheme.error : colorScheme.onSurface,
+          color: isInvalid ? colorScheme.error : colorScheme.onSurface,
         ),
       ),
       trailing: (onEdit != null)

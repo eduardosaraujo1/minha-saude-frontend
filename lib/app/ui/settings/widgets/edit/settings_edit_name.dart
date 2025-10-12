@@ -34,9 +34,7 @@ class _SettingsEditNameState extends State<SettingsEditName> {
   void _triggerSave() {
     // If form is valid
     if (_formController.validate()) {
-      widget.viewModel.updateNameCommand.execute(
-        _formController.nameController.text,
-      );
+      viewModel.updateNameCommand.execute(_formController.nameController.text);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Nome atualizado com sucesso!")),

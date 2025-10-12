@@ -1,10 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:minha_saude_frontend/app/ui/settings/view_models/settings_view_model.dart';
 
-class SettingsAccountTab extends StatelessWidget {
+class SettingsAccountTab extends StatefulWidget {
   const SettingsAccountTab({super.key, required this.viewModel});
 
   final SettingsViewModel viewModel;
+
+  @override
+  State<SettingsAccountTab> createState() => _SettingsAccountTabState();
+}
+
+class _SettingsAccountTabState extends State<SettingsAccountTab> {
+  late final SettingsViewModel viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    viewModel = widget.viewModel;
+    viewModel.requestDeletionCommand.addListener(_handleDeleteRequestResult);
+  }
+
+  @override
+  void dispose() {
+    viewModel.requestDeletionCommand.removeListener(_handleDeleteRequestResult);
+    super.dispose();
+  }
+
+  void _handleDeleteRequestResult() {
+    final result = viewModel.requestDeletionCommand.value;
+    if (result == null) return;
+
+    if (result.isError()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Ocorreu um erro ao solicitar exclusão da conta. Contate-nos via suporte!",
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Solicitação de exclusão enviada! Sua conta será excluída em até 30 dias.",
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,27 +64,24 @@ class SettingsAccountTab extends StatelessWidget {
           context: context,
           tiles: [
             ListTile(
+              key: ValueKey("btnLogout"),
               leading: const Icon(Icons.logout),
               title: const Text('Encerrar sessão'),
               onTap: () {
                 dialogController.showLogoutDialog(() {
-                  viewModel.logout();
+                  widget.viewModel.logout();
                 });
               },
             ),
             ListTile(
+              key: ValueKey("btnDeleteAccount"),
               leading: const Icon(Icons.delete_forever),
               iconColor: colorScheme.error,
               textColor: colorScheme.error,
               title: const Text('Apagar conta'),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text("Conta apagada com sucesso!"),
-                  ), //
-                );
                 dialogController.showDeleteAccountDialog(() {
-                  viewModel.requestDeletion();
+                  widget.viewModel.requestDeletionCommand.execute();
                 });
               },
             ),
@@ -75,6 +115,7 @@ class _DialogController {
               child: const Text('Cancelar'),
             ),
             TextButton(
+              key: ValueKey("btnConfirmLogout"),
               onPressed: () {
                 Navigator.of(context).pop();
                 onConfirm.call();
@@ -126,6 +167,7 @@ class _DialogController {
               ),
             ),
             TextButton(
+              key: ValueKey("btnConfirmDeleteAccount"),
               onPressed: () {
                 Navigator.pop(context);
                 onConfirm.call();

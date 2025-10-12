@@ -216,7 +216,7 @@ class _EditBirthdateFormController {
     // Basic date format validation (DD/MM/YYYY)
     final dateRegex = RegExp(r'^\d{2}/\d{2}/\d{4}$');
     if (!dateRegex.hasMatch(value)) {
-      return 'Use o formato DD/MM/AAAA.';
+      return 'Data de nascimento inválida. Formato correto: DD/MM/AAAA.';
     }
     return null;
   }

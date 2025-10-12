@@ -247,7 +247,12 @@ void main() {
       "when invalid birthdate is typed and confirm is pressed, then birthdate edit is not triggered",
       (tester) async {
         await tester.pumpWidget(
-          MaterialApp(home: (SettingsEditBirthdate(viewModel: viewModel))),
+          MaterialApp(
+            home: (MockGoRouterProvider(
+              goRouter: mockGoRouter,
+              child: SettingsEditBirthdate(viewModel: viewModel),
+            )),
+          ),
         );
         await tester.pump(
           Duration(milliseconds: 100),
@@ -258,7 +263,8 @@ void main() {
         expect(birthdateField, findsOneWidget);
 
         // Empty the existing content of the field
-        await tester.enterText(birthdateField, "");
+        final formField = tester.widget<TextFormField>(birthdateField);
+        formField.controller?.text = "";
         await tester.pumpAndSettle();
 
         await tester.tap(btnSave);

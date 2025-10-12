@@ -53,14 +53,18 @@ class SettingsEditViewModel {
     }
   }
 
-  Future<Result<void, Exception>> updateName(String name) async =>
-      _runUpdateCommand(() => profileRepository.updateName(name));
+  Future<Result<void, Exception>> updateName(String name) async {
+    final sanitized = name.trim().substring(0, name.length.clamp(0, 100));
+    return _runUpdateCommand(() => profileRepository.updateName(sanitized));
+  }
 
   Future<Result<void, Exception>> updateBirthdate(DateTime time) async =>
       _runUpdateCommand(() => profileRepository.updateBirthdate(time));
 
-  Future<Result<void, Exception>> updatePhone(String phone) async =>
-      _runUpdateCommand(() => profileRepository.updatePhone(phone));
+  Future<Result<void, Exception>> updatePhone(String phone) async {
+    final sanitized = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    return _runUpdateCommand(() => profileRepository.updatePhone(sanitized));
+  }
 
   Future<Result<String, Exception>?> _loadCurrentValue() async {
     try {

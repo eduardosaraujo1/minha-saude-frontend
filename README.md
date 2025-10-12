@@ -13,6 +13,7 @@
 
 -   [ ] Tela de lixeira de documentos
 -   [ ] Ao excluir documento, atualizar lista de documents (invalidar cache do repositório)
+-   [ ] Fazer o form de adicionar documento ter opções padrão (algumas pré-existentes, outras podendo o usuário escolher). API envia a lista de categorias para o cliente e o app usa essas categorias num dropdown, podendo esse ser substituido por um text field normal
 -   [ ] Refatorar ShareRepository para usar interface e consumir ApiClient
 -   [ ] Refatorar tela de compartilhamento
 -   [ ] Tratativa de erro caso o backend se torne não-responsivo

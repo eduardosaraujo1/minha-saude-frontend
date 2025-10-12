@@ -149,7 +149,9 @@ class ProfileRepositoryImpl extends ProfileRepository {
   @override
   Future<Result<void, Exception>> updateName(String name) {
     return _wrapException(() async {
-      final apiResult = await profileApiClient.updateName(name);
+      // Truncate to 100 characters and remove leading/trailing whitespace
+      final sanitized = name.trim().substring(0, name.length.clamp(0, 100));
+      final apiResult = await profileApiClient.updateName(sanitized);
 
       if (apiResult.isError()) {
         _logger.warning("Update Name API Error: ", apiResult.tryGetError()!);
@@ -169,6 +171,9 @@ class ProfileRepositoryImpl extends ProfileRepository {
   @override
   Future<Result<void, Exception>> updatePhone(String phone) {
     return _wrapException(() async {
+      // Clean phone number to only digits
+      phone = phone.replaceAll(RegExp(r'[^0-9]'), '');
+
       final apiResult = await profileApiClient.updatePhone(phone);
 
       if (apiResult.isError()) {

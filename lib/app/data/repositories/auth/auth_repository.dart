@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:minha_saude_frontend/app/domain/models/auth/login_response/login_result.dart';
-import 'package:minha_saude_frontend/app/domain/models/auth/user_register_model/user_register_model.dart';
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../../domain/models/auth/login_response/login_result.dart';
 export 'auth_repository_impl.dart';
 
 abstract class AuthRepository extends ChangeNotifier {
@@ -24,7 +23,13 @@ abstract class AuthRepository extends ChangeNotifier {
   /// Register a new user through token from login attempt
   ///
   /// Returns [String] which is the auth session token if registration succeeds
-  Future<Result<String, Exception>> register(UserRegisterModel registerModel);
+  Future<Result<String, Exception>> register({
+    required String nome,
+    required String cpf,
+    required DateTime dataNascimento,
+    required String telefone,
+    required String registerToken,
+  });
 
   /// Sign out the current user, both through server and clearing local data
   /// Clears the CacheDatabase as well as the auth token stored in SecureStorage

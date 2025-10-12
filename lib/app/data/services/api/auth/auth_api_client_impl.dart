@@ -4,7 +4,6 @@ import 'package:minha_saude_frontend/app/data/services/api/auth/models/login_res
 import 'package:minha_saude_frontend/app/data/services/api/auth/models/register_response/register_response.dart';
 import 'package:minha_saude_frontend/app/data/services/api/exceptions/bad_response_exception.dart';
 import 'package:minha_saude_frontend/app/data/services/api/http_client.dart';
-import 'package:minha_saude_frontend/app/domain/models/auth/user_register_model/user_register_model.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 class AuthApiClientImpl implements AuthApiClient {
@@ -78,13 +77,6 @@ class AuthApiClientImpl implements AuthApiClient {
   }
 
   @override
-  Future<Result<RegisterResponse, Exception>> authRegister(
-    UserRegisterModel data,
-  ) async {
-    throw UnimplementedError();
-  }
-
-  @override
   Future<Result<String, Exception>> authSendEmail(String email) async {
     throw UnimplementedError();
   }
@@ -95,6 +87,18 @@ class AuthApiClientImpl implements AuthApiClient {
     String code,
   ) async {
     // TODO: implement authLoginEmail
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Result<RegisterResponse, Exception>> authRegister({
+    required String nome,
+    required String cpf,
+    required DateTime dataNascimento,
+    required String telefone,
+    required String registerToken,
+  }) {
+    // TODO: implement authRegister
     throw UnimplementedError();
   }
 }

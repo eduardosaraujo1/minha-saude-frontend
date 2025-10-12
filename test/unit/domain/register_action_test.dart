@@ -1,7 +1,6 @@
 import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/session/session_repository.dart';
 import 'package:minha_saude_frontend/app/domain/actions/auth/register_action.dart';
-import 'package:minha_saude_frontend/app/domain/models/auth/user_register_model/user_register_model.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:test/test.dart';
@@ -14,19 +13,6 @@ void main() {
   late AuthRepository authRepository;
   late SessionRepository sessionRepository;
   late RegisterAction registerAction;
-
-  setUpAll(() {
-    // Register fallback values for mocktail
-    registerFallbackValue(
-      UserRegisterModel(
-        registerToken: '',
-        nome: '',
-        cpf: '',
-        telefone: '',
-        dataNascimento: DateTime(1990),
-      ),
-    );
-  });
 
   setUp(() {
     authRepository = MockAuthRepository();
@@ -47,7 +33,13 @@ void main() {
 
       // Hook AuthRepository.register to return Success with session token
       when(
-        () => authRepository.register(any()),
+        () => authRepository.register(
+          cpf: any(named: "cpf"),
+          dataNascimento: any(named: "dataNascimento"),
+          nome: any(named: "nome"),
+          telefone: any(named: "telefone"),
+          registerToken: any(named: "registerToken"),
+        ),
       ).thenAnswer((_) async => const Result.success("test-session-token-456"));
 
       // Hook SessionRepository.clearRegisterToken to detect it was called
@@ -74,15 +66,20 @@ void main() {
 
       // Assert AuthRepository.register was called with correct parameters
       final captured = verify(
-        () => authRepository.register(captureAny()),
+        () => authRepository.register(
+          cpf: captureAny(named: "cpf"),
+          dataNascimento: captureAny(named: "dataNascimento"),
+          nome: captureAny(named: "nome"),
+          telefone: captureAny(named: "telefone"),
+          registerToken: captureAny(named: "registerToken"),
+        ),
       ).captured;
-      expect(captured.length, 1);
-      final registerModel = captured.first as UserRegisterModel;
-      expect(registerModel.nome, "John Doe");
-      expect(registerModel.cpf, "12345678900");
-      expect(registerModel.dataNascimento, DateTime(1990, 1, 15));
-      expect(registerModel.telefone, "11999999999");
-      expect(registerModel.registerToken, "test-register-token-123");
+      expect(captured.length, 5);
+      expect(captured[0], "John Doe");
+      expect(captured[1], "12345678900");
+      expect(captured[2], DateTime(1990, 1, 15));
+      expect(captured[3], "11999999999");
+      expect(captured[4], "test-register-token-123");
 
       // Assert SessionRepository.clearRegisterToken was called
       verify(() => sessionRepository.clearRegisterToken()).called(1);
@@ -102,7 +99,13 @@ void main() {
 
       // Hook AuthRepository.register to detect if it's called
       when(
-        () => authRepository.register(any()),
+        () => authRepository.register(
+          cpf: any(named: "cpf"),
+          dataNascimento: any(named: "dataNascimento"),
+          nome: any(named: "nome"),
+          telefone: any(named: "telefone"),
+          registerToken: any(named: "registerToken"),
+        ),
       ).thenAnswer((_) async => const Result.success("test-session-token"));
 
       // Execute action
@@ -124,7 +127,15 @@ void main() {
       verify(() => sessionRepository.getRegisterToken()).called(1);
 
       // Assert AuthRepository.register was never called
-      verifyNever(() => authRepository.register(any()));
+      verifyNever(
+        () => authRepository.register(
+          cpf: any(named: "cpf"),
+          dataNascimento: any(named: "dataNascimento"),
+          nome: any(named: "nome"),
+          telefone: any(named: "telefone"),
+          registerToken: any(named: "registerToken"),
+        ),
+      );
     },
   );
 
@@ -139,7 +150,13 @@ void main() {
       // Hook AuthRepository.register to return Error
       final testError = Exception("Registration failed on server");
       when(
-        () => authRepository.register(any()),
+        () => authRepository.register(
+          cpf: any(named: "cpf"),
+          dataNascimento: any(named: "dataNascimento"),
+          nome: any(named: "nome"),
+          telefone: any(named: "telefone"),
+          registerToken: any(named: "registerToken"),
+        ),
       ).thenAnswer((_) async => Result.error(testError));
 
       // Hook SessionRepository methods to detect if they're called
@@ -167,7 +184,15 @@ void main() {
       verify(() => sessionRepository.getRegisterToken()).called(1);
 
       // Assert AuthRepository.register was called
-      verify(() => authRepository.register(any())).called(1);
+      verify(
+        () => authRepository.register(
+          cpf: any(named: "cpf"),
+          dataNascimento: any(named: "dataNascimento"),
+          nome: any(named: "nome"),
+          telefone: any(named: "telefone"),
+          registerToken: any(named: "registerToken"),
+        ),
+      ).called(1);
 
       // Assert token clearing methods were never called
       verifyNever(() => sessionRepository.clearRegisterToken());
@@ -185,7 +210,13 @@ void main() {
 
       // Hook AuthRepository.register to return Success with session token
       when(
-        () => authRepository.register(any()),
+        () => authRepository.register(
+          cpf: any(named: "cpf"),
+          dataNascimento: any(named: "dataNascimento"),
+          nome: any(named: "nome"),
+          telefone: any(named: "telefone"),
+          registerToken: any(named: "registerToken"),
+        ),
       ).thenAnswer((_) async => const Result.success("test-session-token-456"));
 
       // Hook SessionRepository.clearRegisterToken
@@ -213,7 +244,15 @@ void main() {
 
       // Assert methods were called in order until exception
       verify(() => sessionRepository.getRegisterToken()).called(1);
-      verify(() => authRepository.register(any())).called(1);
+      verify(
+        () => authRepository.register(
+          cpf: any(named: "cpf"),
+          dataNascimento: any(named: "dataNascimento"),
+          nome: any(named: "nome"),
+          telefone: any(named: "telefone"),
+          registerToken: any(named: "registerToken"),
+        ),
+      ).called(1);
       verify(() => sessionRepository.clearRegisterToken()).called(1);
       verify(() => sessionRepository.setAuthToken(any())).called(1);
     },
@@ -229,7 +268,13 @@ void main() {
 
       // Hook AuthRepository.register to return Success with session token
       when(
-        () => authRepository.register(any()),
+        () => authRepository.register(
+          cpf: any(named: "cpf"),
+          dataNascimento: any(named: "dataNascimento"),
+          nome: any(named: "nome"),
+          telefone: any(named: "telefone"),
+          registerToken: any(named: "registerToken"),
+        ),
       ).thenAnswer((_) async => const Result.success("test-session-token-456"));
 
       // Hook SessionRepository.clearRegisterToken to throw exception
@@ -259,7 +304,15 @@ void main() {
 
       // Assert methods were called in order until exception
       verify(() => sessionRepository.getRegisterToken()).called(1);
-      verify(() => authRepository.register(any())).called(1);
+      verify(
+        () => authRepository.register(
+          cpf: any(named: "cpf"),
+          dataNascimento: any(named: "dataNascimento"),
+          nome: any(named: "nome"),
+          telefone: any(named: "telefone"),
+          registerToken: any(named: "registerToken"),
+        ),
+      ).called(1);
       verify(() => sessionRepository.clearRegisterToken()).called(1);
 
       // Assert setAuthToken was never called due to exception
@@ -277,7 +330,13 @@ void main() {
 
       // Hook AuthRepository.register to throw exception
       when(
-        () => authRepository.register(any()),
+        () => authRepository.register(
+          cpf: any(named: "cpf"),
+          dataNascimento: any(named: "dataNascimento"),
+          nome: any(named: "nome"),
+          telefone: any(named: "telefone"),
+          registerToken: any(named: "registerToken"),
+        ),
       ).thenThrow(Exception("Network error"));
 
       // Hook SessionRepository methods to detect if they're called
@@ -305,7 +364,15 @@ void main() {
       verify(() => sessionRepository.getRegisterToken()).called(1);
 
       // Assert AuthRepository.register was called
-      verify(() => authRepository.register(any())).called(1);
+      verify(
+        () => authRepository.register(
+          cpf: any(named: "cpf"),
+          dataNascimento: any(named: "dataNascimento"),
+          nome: any(named: "nome"),
+          telefone: any(named: "telefone"),
+          registerToken: any(named: "registerToken"),
+        ),
+      ).called(1);
 
       // Assert token management methods were never called
       verifyNever(() => sessionRepository.clearRegisterToken());

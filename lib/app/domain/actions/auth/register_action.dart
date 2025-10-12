@@ -2,7 +2,6 @@ import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 import '../../../data/repositories/auth/auth_repository.dart';
 import '../../../data/repositories/session/session_repository.dart';
-import '../../models/auth/user_register_model/user_register_model.dart';
 
 class RegisterAction {
   RegisterAction({
@@ -33,13 +32,11 @@ class RegisterAction {
       }
 
       final result = await _authRepository.register(
-        UserRegisterModel(
-          nome: nome,
-          cpf: cpf,
-          dataNascimento: dataNascimento,
-          telefone: telefone,
-          registerToken: registerToken,
-        ),
+        nome: nome,
+        cpf: cpf,
+        dataNascimento: dataNascimento,
+        telefone: telefone,
+        registerToken: registerToken,
       );
 
       if (result.isError()) {

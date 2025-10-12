@@ -1,21 +1,20 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:minha_saude_frontend/app/data/services/api/fake_server_persistent_storage.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-import '../../../../domain/models/auth/user_register_model/user_register_model.dart';
 import 'models/login_response/login_api_response.dart';
 import 'models/register_response/register_response.dart';
 import 'auth_api_client.dart';
 
 class FakeAuthApiClient implements AuthApiClient {
-  FakeAuthApiClient();
+  FakeAuthApiClient({required this.fakePersistentStorage});
 
-  final _FakeAuthPersistentStorage _store = _FakeAuthPersistentStorage();
+  final FakeServerPersistentStorage fakePersistentStorage;
 
   @override
   Future<Result<LoginApiResponse, Exception>> authLoginGoogle(
     String tokenOauth,
   ) async {
-    if (await _store.getRegistered()) {
+    if (await fakePersistentStorage.getRegistered()) {
       return Result.success(
         LoginApiResponse(
           isRegistered: true,
@@ -35,10 +34,14 @@ class FakeAuthApiClient implements AuthApiClient {
   }
 
   @override
-  Future<Result<RegisterResponse, Exception>> authRegister(
-    UserRegisterModel data,
-  ) async {
-    await _store.setRegistered(true);
+  Future<Result<RegisterResponse, Exception>> authRegister({
+    required String nome,
+    required String cpf,
+    required DateTime dataNascimento,
+    required String telefone,
+    required String registerToken,
+  }) async {
+    await fakePersistentStorage.setRegistered(true);
 
     return Result.success(
       RegisterResponse(status: 'success', sessionToken: 'fake_session_token'),
@@ -60,7 +63,7 @@ class FakeAuthApiClient implements AuthApiClient {
     String email,
     String code,
   ) async {
-    if (await _store.getRegistered()) {
+    if (await fakePersistentStorage.getRegistered()) {
       return Result.success(
         LoginApiResponse(
           isRegistered: true,
@@ -76,34 +79,5 @@ class FakeAuthApiClient implements AuthApiClient {
         ),
       );
     }
-  }
-}
-
-class _FakeAuthPersistentStorage {
-  _FakeAuthPersistentStorage() {
-    _init();
-  }
-
-  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
-
-  bool? _isRegistered;
-
-  Future<void> setRegistered(bool value) async {
-    _isRegistered = value;
-
-    // Update SecureStorage
-    _secureStorage.write(key: 'is_registered', value: value ? 'true' : 'false');
-  }
-
-  Future<bool> getRegistered({bool forceRefresh = false}) async {
-    if (forceRefresh || _isRegistered == null) {
-      await _init();
-    }
-    return _isRegistered ?? false;
-  }
-
-  Future<void> _init() async {
-    final val = await _secureStorage.read(key: 'is_registered');
-    _isRegistered = (val == 'true');
   }
 }

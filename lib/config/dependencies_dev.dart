@@ -4,6 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../app/data/repositories/profile/profile_repository.dart';
 import '../app/data/repositories/profile/profile_repository_impl.dart';
 import '../app/data/repositories/session/session_repository.dart';
+import '../app/data/services/api/fake_server_persistent_storage.dart';
 import '../app/data/services/api/profile/fake_profile_api_client_impl.dart';
 import '../app/data/services/api/profile/profile_api_client.dart';
 import '../app/data/services/api/profile/profile_api_client_impl.dart';
@@ -40,6 +41,10 @@ Future<void> setup({
   bool mockScanner = false,
   bool mockSecureStorage = false,
 }) async {
+  // TODO: remove this when real API is created
+  _getIt.registerSingleton<FakeServerPersistentStorage>(
+    FakeServerPersistentStorage(),
+  );
   // Core
   _getIt.registerSingleton<ThemeController>(ThemeController());
 
@@ -58,9 +63,17 @@ Future<void> setup({
   _getIt.registerSingleton<FileSystemService>(FileSystemServiceImpl());
 
   if (mockApiClient) {
-    _getIt.registerSingleton<AuthApiClient>(FakeAuthApiClient());
+    _getIt.registerSingleton<AuthApiClient>(
+      FakeAuthApiClient(
+        fakePersistentStorage: _getIt<FakeServerPersistentStorage>(),
+      ),
+    );
     _getIt.registerSingleton<DocumentApiClient>(FakeDocumentApiClient());
-    _getIt.registerSingleton<ProfileApiClient>(FakeProfileApiClient());
+    _getIt.registerSingleton<ProfileApiClient>(
+      FakeProfileApiClient(
+        fakePersistentStorage: _getIt<FakeServerPersistentStorage>(),
+      ),
+    );
   } else {
     _getIt.registerSingleton<AuthApiClient>(
       AuthApiClientImpl(_getIt<HttpClient>()),

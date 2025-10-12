@@ -4,7 +4,6 @@ import 'package:minha_saude_frontend/app/data/services/api/auth/models/login_res
 import 'package:minha_saude_frontend/app/data/services/api/auth/models/register_response/register_response.dart';
 import 'package:minha_saude_frontend/app/data/services/google/google_service.dart';
 import 'package:minha_saude_frontend/app/domain/models/auth/login_response/login_result.dart';
-import 'package:minha_saude_frontend/app/domain/models/auth/user_register_model/user_register_model.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:test/test.dart';
@@ -17,19 +16,6 @@ void main() {
   late AuthApiClient authApiClient;
   late GoogleService googleService;
   late AuthRepository authRepository;
-
-  setUpAll(() {
-    // Register fallback values for mocktail
-    registerFallbackValue(
-      UserRegisterModel(
-        registerToken: '',
-        nome: '',
-        cpf: '',
-        telefone: '',
-        dataNascimento: DateTime(1990),
-      ),
-    );
-  });
 
   setUp(() {
     authApiClient = MockAuthApiClient();
@@ -405,11 +391,17 @@ void main() {
         );
 
         when(
-          () => authApiClient.authRegister(any()),
+          () => authApiClient.authRegister(
+            cpf: any(named: "cpf"),
+            dataNascimento: any(named: "dataNascimento"),
+            nome: any(named: "nome"),
+            telefone: any(named: "telefone"),
+            registerToken: any(named: "registerToken"),
+          ),
         ).thenAnswer((_) async => const Result.success(mockRegisterResponse));
 
-        // Create test register model
-        final registerModel = UserRegisterModel(
+        // Call register
+        final result = await authRepository.register(
           registerToken: "test-register-token",
           nome: "John Doe",
           cpf: "12345678900",
@@ -417,15 +409,20 @@ void main() {
           dataNascimento: DateTime(1990, 1, 1),
         );
 
-        // Call register
-        final result = await authRepository.register(registerModel);
-
         // Assert method returned Success with session token
         expect(result.isSuccess(), true);
         expect(result.tryGetSuccess(), "test-session-token-123");
 
         // Assert ApiClient authRegister was called once with correct model
-        verify(() => authApiClient.authRegister(registerModel)).called(1);
+        verify(
+          () => authApiClient.authRegister(
+            registerToken: "test-register-token",
+            nome: "John Doe",
+            cpf: "12345678900",
+            telefone: "11999999999",
+            dataNascimento: DateTime(1990, 1, 1),
+          ),
+        ).called(1);
       },
     );
 
@@ -439,20 +436,23 @@ void main() {
         );
 
         when(
-          () => authApiClient.authRegister(any()),
+          () => authApiClient.authRegister(
+            cpf: any(named: "cpf"),
+            dataNascimento: any(named: "dataNascimento"),
+            nome: any(named: "nome"),
+            telefone: any(named: "telefone"),
+            registerToken: any(named: "registerToken"),
+          ),
         ).thenAnswer((_) async => const Result.success(mockRegisterResponse));
 
-        // Create test register model
-        final registerModel = UserRegisterModel(
+        // Call register
+        final result = await authRepository.register(
           registerToken: "test-register-token",
           nome: "John Doe",
           cpf: "12345678900",
           telefone: "11999999999",
           dataNascimento: DateTime(1990, 1, 1),
         );
-
-        // Call register
-        final result = await authRepository.register(registerModel);
 
         // Assert method returned Error
         expect(result.isError(), true);
@@ -473,20 +473,23 @@ void main() {
         );
 
         when(
-          () => authApiClient.authRegister(any()),
+          () => authApiClient.authRegister(
+            cpf: any(named: "cpf"),
+            dataNascimento: any(named: "dataNascimento"),
+            nome: any(named: "nome"),
+            telefone: any(named: "telefone"),
+            registerToken: any(named: "registerToken"),
+          ),
         ).thenAnswer((_) async => const Result.success(mockRegisterResponse));
 
-        // Create test register model
-        final registerModel = UserRegisterModel(
+        // Call register
+        final result = await authRepository.register(
           registerToken: "test-register-token",
           nome: "John Doe",
           cpf: "12345678900",
           telefone: "11999999999",
           dataNascimento: DateTime(1990, 1, 1),
         );
-
-        // Call register
-        final result = await authRepository.register(registerModel);
 
         // Assert method returned Error
         expect(result.isError(), true);
@@ -501,20 +504,23 @@ void main() {
       // Hook ApiClient to return Error
       final testError = Exception("Registration failed");
       when(
-        () => authApiClient.authRegister(any()),
+        () => authApiClient.authRegister(
+          cpf: any(named: "cpf"),
+          dataNascimento: any(named: "dataNascimento"),
+          nome: any(named: "nome"),
+          telefone: any(named: "telefone"),
+          registerToken: any(named: "registerToken"),
+        ),
       ).thenAnswer((_) async => Result.error(testError));
 
-      // Create test register model
-      final registerModel = UserRegisterModel(
+      // Call register
+      final result = await authRepository.register(
         registerToken: "test-register-token",
         nome: "John Doe",
         cpf: "12345678900",
         telefone: "11999999999",
         dataNascimento: DateTime(1990, 1, 1),
       );
-
-      // Call register
-      final result = await authRepository.register(registerModel);
 
       // Assert method returned Error
       expect(result.isError(), true);

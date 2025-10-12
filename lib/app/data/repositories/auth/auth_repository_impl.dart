@@ -5,7 +5,6 @@ import '../../services/api/auth/auth_api_client.dart';
 import '../../services/api/auth/models/login_response/login_api_response.dart';
 import '../../services/google/google_service.dart';
 import '../../../domain/models/auth/login_response/login_result.dart';
-import '../../../domain/models/auth/user_register_model/user_register_model.dart';
 import 'auth_repository.dart';
 
 class AuthRepositoryImpl extends AuthRepository {
@@ -113,10 +112,20 @@ class AuthRepositoryImpl extends AuthRepository {
   }
 
   @override
-  Future<Result<String, Exception>> register(
-    UserRegisterModel registerModel,
-  ) async {
-    final result = await _apiClient.authRegister(registerModel);
+  Future<Result<String, Exception>> register({
+    required String nome,
+    required String cpf,
+    required DateTime dataNascimento,
+    required String telefone,
+    required String registerToken,
+  }) async {
+    final result = await _apiClient.authRegister(
+      nome: nome,
+      cpf: cpf,
+      dataNascimento: dataNascimento,
+      telefone: telefone,
+      registerToken: registerToken,
+    );
 
     if (result.isError()) {
       return Result.error(result.tryGetError()!);

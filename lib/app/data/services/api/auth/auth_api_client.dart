@@ -2,7 +2,6 @@ import 'package:multiple_result/multiple_result.dart';
 
 import 'models/login_response/login_api_response.dart';
 import 'models/register_response/register_response.dart';
-import '../../../../domain/models/auth/user_register_model/user_register_model.dart';
 
 abstract class AuthApiClient {
   /// Login with Google server code
@@ -20,9 +19,13 @@ abstract class AuthApiClient {
   Future<Result<String, Exception>> authSendEmail(String email);
 
   /// Register new user
-  Future<Result<RegisterResponse, Exception>> authRegister(
-    UserRegisterModel data,
-  );
+  Future<Result<RegisterResponse, Exception>> authRegister({
+    required String nome,
+    required String cpf,
+    required DateTime dataNascimento,
+    required String telefone,
+    required String registerToken,
+  });
 
   /// Signout
   Future<Result<void, Exception>> authLogout();

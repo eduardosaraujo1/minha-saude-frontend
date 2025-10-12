@@ -1,10 +1,13 @@
 import 'package:multiple_result/multiple_result.dart';
 
+import '../fake_server_persistent_storage.dart';
 import 'models/profile_api_model.dart';
 import 'profile_api_client.dart';
 
 class FakeProfileApiClient extends ProfileApiClient {
-  FakeProfileApiClient();
+  FakeProfileApiClient({required this.fakePersistentStorage});
+
+  final FakeServerPersistentStorage fakePersistentStorage;
 
   @override
   Future<Result<void, Exception>> deleteAccount() {
@@ -55,8 +58,11 @@ class FakeProfileApiClient extends ProfileApiClient {
   }
 
   @override
-  Future<Result<void, Exception>> requestDataExport() {
-    // TODO: implement requestDataExport
-    throw UnimplementedError();
+  Future<Result<void, Exception>> requestDataExport() async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 1));
+
+    // Simulate successful data export request
+    return Success(null);
   }
 }

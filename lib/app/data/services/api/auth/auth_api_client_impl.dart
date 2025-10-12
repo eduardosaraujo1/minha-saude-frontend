@@ -21,6 +21,7 @@ class AuthApiClientImpl implements AuthApiClient {
         '/auth/login/google',
         data: {'tokenOauth': tokenOauth},
       );
+      // TODO: answer the question: What is returned if the server is down?
 
       // Early return for non-200 status codes
       if (response.statusCode != 200) {

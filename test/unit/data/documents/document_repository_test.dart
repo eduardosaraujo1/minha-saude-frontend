@@ -3,15 +3,15 @@ import 'dart:typed_data';
 
 import 'package:minha_saude_frontend/app/data/repositories/document/document_repository_impl.dart';
 import 'package:minha_saude_frontend/app/data/services/api/document/models/document_api_model.dart';
-import 'package:minha_saude_frontend/app/data/services/cache_database/models/document_db_model.dart';
+import 'package:minha_saude_frontend/app/data/services/local/cache_database/models/document_db_model.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:test/test.dart';
 
 import 'package:minha_saude_frontend/app/data/services/api/document/document_api_client.dart';
-import 'package:minha_saude_frontend/app/data/services/cache_database/cache_database.dart';
+import 'package:minha_saude_frontend/app/data/services/local/cache_database/cache_database.dart';
 import 'package:minha_saude_frontend/app/data/services/doc_scanner/document_scanner.dart';
-import 'package:minha_saude_frontend/app/data/services/file_system_service/file_system_service.dart';
+import 'package:minha_saude_frontend/app/data/services/local/file_system_service/file_system_service.dart';
 
 class MockDocumentApiClient extends Mock implements DocumentApiClient {}
 

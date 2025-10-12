@@ -1,5 +1,5 @@
 import 'package:minha_saude_frontend/app/data/repositories/session/session_repository.dart';
-import 'package:minha_saude_frontend/app/data/services/secure_storage/secure_storage.dart';
+import 'package:minha_saude_frontend/app/data/services/local/secure_storage/secure_storage.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 class SessionRepositoryImpl extends SessionRepository {

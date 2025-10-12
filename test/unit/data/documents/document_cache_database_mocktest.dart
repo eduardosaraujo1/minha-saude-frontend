@@ -1,6 +1,6 @@
-import 'package:minha_saude_frontend/app/data/services/cache_database/cache_database.dart';
-import 'package:minha_saude_frontend/app/data/services/cache_database/cache_database_impl.dart';
-import 'package:minha_saude_frontend/app/data/services/cache_database/models/document_db_model.dart';
+import 'package:minha_saude_frontend/app/data/services/local/cache_database/cache_database.dart';
+import 'package:minha_saude_frontend/app/data/services/local/cache_database/cache_database_impl.dart';
+import 'package:minha_saude_frontend/app/data/services/local/cache_database/models/document_db_model.dart';
 import 'package:test/test.dart';
 
 void main() {

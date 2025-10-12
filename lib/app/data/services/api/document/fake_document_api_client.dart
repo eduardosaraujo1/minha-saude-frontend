@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:minha_saude_frontend/app/data/services/cache_database/cache_database.dart';
+import 'package:minha_saude_frontend/app/data/services/local/cache_database/cache_database.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';

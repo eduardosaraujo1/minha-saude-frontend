@@ -8,9 +8,9 @@ import 'package:multiple_result/multiple_result.dart';
 import '../../services/api/document/document_api_client.dart';
 import '../../services/api/document/models/document_api_model.dart';
 import '../../services/doc_scanner/document_scanner.dart';
-import '../../services/file_system_service/file_system_service.dart';
-import '../../services/cache_database/cache_database.dart';
-import '../../services/cache_database/models/document_db_model.dart';
+import '../../services/local/file_system_service/file_system_service.dart';
+import '../../services/local/cache_database/cache_database.dart';
+import '../../services/local/cache_database/models/document_db_model.dart';
 import '../../../domain/models/document/document.dart';
 import 'document_repository.dart';
 

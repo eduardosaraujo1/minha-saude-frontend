@@ -9,21 +9,14 @@ class SettingsEditViewModel {
     required this.fieldType,
     required this.profileRepository,
   }) {
-    updateNameCommand = Command.createAsync<String, Result<void, Exception>?>(
-      updateName,
+    updateNameCommand = Command.createAsync(updateName, initialValue: null);
+    updateBirthdateCommand = Command.createAsync(
+      updateBirthdate,
       initialValue: null,
     );
-    updateBirthdateCommand =
-        Command.createAsync<DateTime, Result<void, Exception>?>(
-          updateBirthdate,
-          initialValue: null,
-        );
-    updatePhoneCommand = Command.createAsync<String, Result<void, Exception>?>(
-      updatePhone,
-      initialValue: null,
-    );
+    updatePhoneCommand = Command.createAsync(updatePhone, initialValue: null);
 
-    loadCurrentValue = Command.createAsyncNoParam<Result<String?, Exception>?>(
+    loadCurrentValue = Command.createAsyncNoParam(
       _loadCurrentValue,
       initialValue: null,
     );

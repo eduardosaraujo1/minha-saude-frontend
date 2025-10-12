@@ -1,45 +1,23 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:minha_saude_frontend/app/data/services/local/cache_database/cache_database.dart';
+import 'package:minha_saude_frontend/app/data/services/api/fakes/fake_document_server_storage.dart';
 import 'package:multiple_result/multiple_result.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import 'models/document_api_model.dart';
 import 'document_api_client.dart';
 
 /// Fake implementation of DocumentApiClient for testing/development
-/// Simulates backend API behavior using in-memory storage and temporary files
+/// Simulates backend API behavior using FakeDocumentServerStorage
 class FakeDocumentApiClient implements DocumentApiClient {
-  // In-memory storage for document metadata (simulates database)
-  final List<DocumentApiModel> _documents = [];
+  FakeDocumentApiClient({required this.serverStorage});
+
+  // Server-side storage (simulates backend)
+  final FakeDocumentServerStorage serverStorage;
 
   // UUID generator (simulates server-side UUID generation)
   final _uuid = const Uuid();
-
-  Future<void> populateLocalArrayWithDatabaseData(CacheDatabase db) async {
-    final dbDocs = await db.listDocuments();
-
-    if (dbDocs.isError()) return;
-
-    final docs = dbDocs.tryGetSuccess()!.map((d) {
-      return DocumentApiModel(
-        uuid: d.uuid,
-        titulo: d.titulo,
-        nomePaciente: d.paciente,
-        nomeMedico: d.medico,
-        tipoDocumento: d.tipo,
-        dataDocumento: d.dataDocumento,
-        createdAt: d.createdAt,
-        deletedAt: d.deletedAt,
-      );
-    });
-
-    // push new stuff
-    _documents.clear();
-    _documents.addAll(docs);
-  }
 
   @override
   Future<Result<void, Exception>> trashDocument(String uuid) async {
@@ -47,25 +25,7 @@ class FakeDocumentApiClient implements DocumentApiClient {
       // Simulate network delay
       await Future.delayed(const Duration(milliseconds: 500));
 
-      // Find the document by ID
-      final index = _documents.indexWhere((doc) => doc.uuid == uuid);
-
-      if (index == -1) {
-        return Error(Exception('Document not found'));
-      }
-
-      // Soft delete: update the document with deletedAt timestamp
-      final document = _documents[index];
-      _documents[index] = document.copyWith(deletedAt: DateTime.now());
-
-      // Delete the physical file from temporary directory
-      final tempDir = await getTemporaryDirectory();
-      final file = File('${tempDir.path}/fake_docs/${document.uuid}');
-      if (await file.exists()) {
-        await file.delete();
-      }
-
-      return const Success(null);
+      return await serverStorage.softDeleteDocument(uuid);
     } catch (e) {
       return Error(Exception('Failed to delete document: $e'));
     }
@@ -87,16 +47,6 @@ class FakeDocumentApiClient implements DocumentApiClient {
       // Generate new UUID (simulates server-side generation)
       final uuid = _uuid.v4();
 
-      // Copy file to temporary directory (simulates Storage::Laravel facade)
-      final tempDir = await getTemporaryDirectory();
-      final fakeDocsDir = Directory('${tempDir.path}/fake_docs');
-      if (!await fakeDocsDir.exists()) {
-        await fakeDocsDir.create(recursive: true);
-      }
-
-      final destinationPath = '${fakeDocsDir.path}/$uuid';
-      await file.copy(destinationPath);
-
       // Create document metadata
       final document = DocumentApiModel(
         uuid: uuid,
@@ -108,7 +58,19 @@ class FakeDocumentApiClient implements DocumentApiClient {
         createdAt: DateTime.now(),
       );
 
-      _documents.add(document);
+      // Store file in server storage
+      final fileResult = await serverStorage.storeDocumentFile(uuid, file);
+      if (fileResult.isError()) {
+        return Error(fileResult.tryGetError()!);
+      }
+
+      // Store metadata in server storage
+      final metadataResult = await serverStorage.storeDocumentMetadata(
+        document,
+      );
+      if (metadataResult.isError()) {
+        return Error(metadataResult.tryGetError()!);
+      }
 
       return Success(document);
     } catch (e) {
@@ -122,12 +84,7 @@ class FakeDocumentApiClient implements DocumentApiClient {
       // Simulate network delay
       await Future.delayed(const Duration(milliseconds: 600));
 
-      // Filter out soft-deleted documents
-      final activeDocuments = _documents
-          .where((doc) => doc.deletedAt == null)
-          .toList();
-
-      return Success(activeDocuments);
+      return await serverStorage.queryDocumentList();
     } catch (e) {
       return Error(Exception('Failed to list documents: $e'));
     }
@@ -139,27 +96,14 @@ class FakeDocumentApiClient implements DocumentApiClient {
       // Simulate network delay (longer for file download)
       await Future.delayed(const Duration(milliseconds: 1000));
 
-      // Find the document by UUID
-      final document = _documents.firstWhere(
-        (doc) => doc.uuid == uuid,
-        orElse: () => throw Exception('Document not found'),
-      );
-
-      // Check if document is soft-deleted
-      if (document.deletedAt != null) {
-        return Error(Exception('Document has been deleted'));
+      // Verify document exists and is not deleted
+      final metadataResult = await serverStorage.queryDocumentMetadata(uuid);
+      if (metadataResult.isError()) {
+        return Error(metadataResult.tryGetError()!);
       }
 
-      // Read file from temporary directory (simulates Storage::Laravel facade)
-      final tempDir = await getTemporaryDirectory();
-      final file = File('${tempDir.path}/fake_docs/${document.uuid}');
-
-      if (!await file.exists()) {
-        return Error(Exception('Document file not found'));
-      }
-
-      final bytes = await file.readAsBytes();
-      return Success(bytes);
+      // Query file from server storage
+      return await serverStorage.queryDocumentFile(uuid);
     } catch (e) {
       return Error(Exception('Failed to download document: $e'));
     }
@@ -171,14 +115,9 @@ class FakeDocumentApiClient implements DocumentApiClient {
       // Simulate network delay
       await Future.delayed(const Duration(milliseconds: 400));
 
-      // Find the document by UUID
-      final document = _documents.firstWhere(
-        (doc) => doc.uuid == uuid,
-        orElse: () => throw Exception('Document not found'),
-      );
-
-      // Return document with all metadata (including deletedAt if present)
-      return Success(document);
+      // Query document metadata from server storage
+      // This endpoint returns metadata even if document is deleted (matches API spec)
+      return await serverStorage.queryDocumentMetadata(uuid);
     } catch (e) {
       return Error(Exception('Failed to get document metadata: $e'));
     }
@@ -197,32 +136,15 @@ class FakeDocumentApiClient implements DocumentApiClient {
       // Simulate network delay
       await Future.delayed(const Duration(milliseconds: 700));
 
-      // Find the document by UUID
-      final index = _documents.indexWhere((doc) => doc.uuid == uuid);
-
-      if (index == -1) {
-        return Error(Exception('Document not found'));
-      }
-
-      final document = _documents[index];
-
-      // Check if document is soft-deleted
-      if (document.deletedAt != null) {
-        return Error(Exception('Cannot update deleted document'));
-      }
-
-      // Update the document with new metadata (only update provided fields)
-      final updatedDocument = document.copyWith(
-        titulo: titulo ?? document.titulo,
-        nomePaciente: nomePaciente ?? document.nomePaciente,
-        nomeMedico: nomeMedico ?? document.nomeMedico,
-        tipoDocumento: tipoDocumento ?? document.tipoDocumento,
-        dataDocumento: dataDocumento ?? document.dataDocumento,
+      // Update metadata in server storage
+      return await serverStorage.updateDocumentMetadata(
+        uuid,
+        titulo: titulo,
+        nomePaciente: nomePaciente,
+        nomeMedico: nomeMedico,
+        tipoDocumento: tipoDocumento,
+        dataDocumento: dataDocumento,
       );
-
-      _documents[index] = updatedDocument;
-
-      return Success(updatedDocument);
     } catch (e) {
       return Error(Exception('Failed to update document: $e'));
     }

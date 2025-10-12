@@ -10,17 +10,20 @@ class HttpClient {
     Duration receiveTimeout = const Duration(seconds: 10),
     Map<String, dynamic>? defaultHeaders,
   }) : _dio = dio ?? Dio() {
+    // Configure Dio instance
     _dio.options
       ..baseUrl = baseUrl
       ..connectTimeout = connectTimeout
       ..receiveTimeout = receiveTimeout;
 
+    // Set default headers
     final headers = <String, dynamic>{'Accept': 'application/json'};
     if (defaultHeaders != null && defaultHeaders.isNotEmpty) {
       headers.addAll(defaultHeaders);
     }
     _dio.options.headers = headers;
 
+    // Add interceptor to handle auth header
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {

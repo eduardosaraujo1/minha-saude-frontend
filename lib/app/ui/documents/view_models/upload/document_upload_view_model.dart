@@ -11,15 +11,11 @@ import 'document_info_form_model.dart';
 
 class DocumentUploadViewModel {
   DocumentUploadViewModel(this._type, this._documentRepository) {
-    loadDocument = Command.createAsyncNoParam<Result<File, Exception>?>(
+    loadDocument = Command.createAsyncNoParam(
       _loadDocument,
       initialValue: null,
     );
-    uploadDocument =
-        Command.createAsync<DocumentFormData, Result<Document, Exception>?>(
-          _uploadDocument,
-          initialValue: null,
-        );
+    uploadDocument = Command.createAsync(_uploadDocument, initialValue: null);
   }
 
   final DocumentRepository _documentRepository;

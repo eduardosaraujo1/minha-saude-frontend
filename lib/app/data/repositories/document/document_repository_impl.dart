@@ -2,9 +2,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:logging/logging.dart';
-import 'package:minha_saude_frontend/app/utils/cached_element/cached_element.dart';
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../../utils/cached_element/cached_element.dart';
 import '../../services/api/document/document_api_client.dart';
 import '../../services/api/document/models/document_api_model.dart';
 import '../../services/doc_scanner/document_scanner.dart';

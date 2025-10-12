@@ -11,7 +11,7 @@ class DocumentMetadataViewModel {
     required DocumentRepository documentRepository,
   }) : _documentRepository = documentRepository,
        _documentUuid = documentUuid {
-    loadDocument = Command.createAsyncNoParam<Result<Document, Exception>?>(
+    loadDocument = Command.createAsyncNoParam(
       _loadDocument,
       initialValue: null,
     );

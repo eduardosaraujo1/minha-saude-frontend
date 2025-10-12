@@ -15,16 +15,12 @@ class SettingsViewModel {
     required this.deleteUserAction,
     required this.requestExportAction,
   }) {
-    loadProfile = Command.createAsyncNoParam<Result<Profile, Exception>?>(
-      _loadProfile,
+    loadProfile = Command.createAsyncNoParam(_loadProfile, initialValue: null);
+    requestDeletionCommand = Command.createAsyncNoParam(
+      _requestDeletion,
       initialValue: null,
     );
-    requestDeletionCommand =
-        Command.createAsyncNoParam<Result<void, Exception>?>(
-          _requestDeletion,
-          initialValue: null,
-        );
-    requestExportCommand = Command.createAsyncNoParam<Result<void, Exception>?>(
+    requestExportCommand = Command.createAsyncNoParam(
       _requestExport,
       initialValue: null,
     );

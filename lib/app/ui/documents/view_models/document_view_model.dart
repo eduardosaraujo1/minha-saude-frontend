@@ -14,12 +14,11 @@ class DocumentViewModel {
     required DocumentRepository documentRepository,
   }) : _documentUuid = documentUuid,
        _documentRepository = documentRepository {
-    loadDocument =
-        Command.createAsyncNoParam<Result<DocumentWithFile, Exception>?>(
-          _loadDocument,
-          initialValue: null,
-        );
-    deleteDocument = Command.createAsync<Document, Result<void, Exception>?>(
+    loadDocument = Command.createAsyncNoParam(
+      _loadDocument,
+      initialValue: null,
+    );
+    deleteDocument = Command.createAsync(
       _handleDeleteDocument,
       initialValue: null,
     );

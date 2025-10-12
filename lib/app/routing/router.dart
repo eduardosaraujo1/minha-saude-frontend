@@ -1,27 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/data/repositories/profile/profile_repository.dart';
-import 'package:minha_saude_frontend/app/ui/core/widgets/brand_app_bar.dart';
-import 'package:minha_saude_frontend/app/ui/settings/view_models/settings_edit_view_model.dart';
-import 'package:minha_saude_frontend/app/ui/settings/widgets/edit/settings_edit_birthdate.dart';
-import 'package:minha_saude_frontend/app/ui/settings/widgets/edit/settings_edit_name.dart';
-import 'package:minha_saude_frontend/app/ui/settings/widgets/edit/settings_edit_phone.dart';
 
+import '../data/repositories/auth/auth_repository.dart';
+import '../data/repositories/document/document_repository.dart';
+import '../data/repositories/profile/profile_repository.dart';
 import '../data/repositories/session/session_repository.dart';
+import '../data/repositories/trash/trash_repository.dart';
+import '../domain/actions/auth/login_with_google.dart';
 import '../domain/actions/auth/logout_action.dart';
 import '../domain/actions/auth/register_action.dart';
 import '../domain/actions/settings/delete_user_action.dart';
 import '../domain/actions/settings/request_export_action.dart';
-import '../ui/core/widgets/scaffold_with_navbar.dart';
-import '../ui/documents/view_models/metadata/document_edit_view_model.dart';
-import '../ui/documents/view_models/metadata/document_metadata_view_model.dart';
-import '../ui/documents/widgets/metadata/document_metadata_screen.dart';
-import '../ui/settings/view_models/settings_view_model.dart';
-import '../ui/settings/widgets/settings_tab_view.dart';
-import '../data/repositories/auth/auth_repository.dart';
-import '../data/repositories/document/document_repository.dart';
-import '../domain/actions/auth/login_with_google.dart';
 import '../ui/auth/view_models/login_view_model.dart';
 import '../ui/auth/view_models/register_view_model.dart';
 import '../ui/auth/view_models/tos_view_model.dart';
@@ -29,22 +19,37 @@ import '../ui/auth/widgets/login_view.dart';
 import '../ui/auth/widgets/register_view.dart';
 import '../ui/auth/widgets/tos_view.dart';
 import '../ui/core/widgets/not_found.dart';
+import '../ui/core/widgets/scaffold_with_navbar.dart';
+// Alt + Shift + O -> organize imports
+import '../ui/core/widgets/under_construction_screen.dart';
 import '../ui/documents/view_models/document_view_model.dart';
 import '../ui/documents/view_models/index/document_list_view_model.dart';
+import '../ui/documents/view_models/metadata/document_edit_view_model.dart';
+import '../ui/documents/view_models/metadata/document_metadata_view_model.dart';
 import '../ui/documents/view_models/upload/document_upload_view_model.dart';
 import '../ui/documents/widgets/document_view.dart';
 import '../ui/documents/widgets/index/document_list_screen.dart';
 import '../ui/documents/widgets/metadata/document_edit_screen.dart';
+import '../ui/documents/widgets/metadata/document_metadata_screen.dart';
 import '../ui/documents/widgets/upload/document_upload_view.dart';
+import '../ui/settings/view_models/settings_edit_view_model.dart';
+import '../ui/settings/view_models/settings_view_model.dart';
+import '../ui/settings/widgets/edit/settings_edit_birthdate.dart';
+import '../ui/settings/widgets/edit/settings_edit_name.dart';
+import '../ui/settings/widgets/edit/settings_edit_phone.dart';
+import '../ui/settings/widgets/settings_tab_view.dart';
+import '../ui/trash/view_models/deleted_document_view_model.dart';
+import '../ui/trash/view_models/trash_index_view_model.dart';
+import '../ui/trash/widgets/deleted_document_view.dart';
+import '../ui/trash/widgets/trash_index_view.dart';
 import 'routes.dart';
 
-final _getIt = GetIt.I;
-
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _documentNavigatorKey = GlobalKey<NavigatorState>();
 
-// Cache the router instance to preserve navigation state across rebuilds
+final _getIt = GetIt.I;
 final _sessionRepository = _getIt<SessionRepository>();
+final _rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final _router = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: Routes.home,
@@ -184,7 +189,7 @@ final _router = GoRouter(
                   builder: (BuildContext context, GoRouterState state) {
                     // return const CompartilharView();
                     // return CodigosCompartilhamento();
-                    return _UnderConstructionScreen();
+                    return UnderConstructionScreen();
                   },
                   routes: [
                     // GoRoute(
@@ -209,22 +214,33 @@ final _router = GoRouter(
                 GoRoute(
                   path: Routes.lixeira,
                   builder: (BuildContext context, GoRouterState state) {
-                    // return LixeiraView(
-                    //     LixeiraViewModel(_getIt<DocumentRepository>()),
-                    //   );
-                    return _UnderConstructionScreen();
+                    return TrashIndexView(
+                      viewModel: TrashIndexViewModel(
+                        trashRepository: _getIt<TrashRepository>(),
+                      ),
+                    );
                   },
                   routes: [
                     GoRoute(
                       path: ':id',
+                      redirect: (context, state) {
+                        if (state.pathParameters['id'] == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Documento não encontrado'),
+                            ),
+                          );
+                          return Routes.lixeira;
+                        }
+                        return null;
+                      },
                       builder: (context, state) {
-                        // return DeletedDocumentView(
-                        //   DeletedDocumentViewModel(
-                        //     state.pathParameters['id'] ?? '',
-                        //     _getIt<DocumentRepository>(),
-                        //   ),
-                        // );
-                        return _UnderConstructionScreen();
+                        return DeletedDocumentView(
+                          viewModel: DeletedDocumentViewModel(
+                            documentUuid: state.pathParameters['id']!,
+                            trashRepository: _getIt<TrashRepository>(),
+                          ),
+                        );
                       },
                     ),
                   ],
@@ -293,32 +309,9 @@ final _router = GoRouter(
   // Main app routes with bottom navigation
 );
 
-class _UnderConstructionScreen extends StatelessWidget {
-  const _UnderConstructionScreen();
+// Cache the router instance to preserve navigation state across rebuilds
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Scaffold(
-      appBar: BrandAppBar(title: const Text('Em desenvolvmento')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Icon(Icons.construction, size: 100, color: colorScheme.secondary),
-            Text(
-              'Estamos trabalhando para trazer essa funcionalidade em breve!',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+GoRouter router() => _router;
 
 Future<String?> _redirectHandler(
   BuildContext context,
@@ -345,5 +338,3 @@ Future<String?> _redirectHandler(
 
   return null;
 }
-
-GoRouter router() => _router;

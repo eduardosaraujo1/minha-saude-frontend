@@ -1,10 +1,16 @@
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../app/data/repositories/trash/trash_repository.dart';
+import '../app/data/repositories/trash/trash_repository_impl.dart';
+import '../app/data/services/api/trash/fake_trash_api_client.dart';
+import '../app/data/services/api/trash/trash_api_client.dart';
+import '../app/data/services/api/trash/trash_api_client_impl.dart';
+import '../app/data/services/api/fakes/fake_document_server_storage.dart';
 import '../app/data/repositories/profile/profile_repository.dart';
 import '../app/data/repositories/profile/profile_repository_impl.dart';
 import '../app/data/repositories/session/session_repository.dart';
-import '../app/data/services/api/fake_server_persistent_storage.dart';
+import '../app/data/services/api/fakes/fake_server_persistent_storage.dart';
 import '../app/data/services/api/profile/fake_profile_api_client.dart';
 import '../app/data/services/api/profile/profile_api_client.dart';
 import '../app/data/services/api/profile/profile_api_client_impl.dart';
@@ -41,10 +47,6 @@ Future<void> setup({
   bool mockScanner = false,
   bool mockSecureStorage = false,
 }) async {
-  // TODO: remove this when real API is created
-  _getIt.registerSingleton<FakeServerPersistentStorage>(
-    FakeServerPersistentStorage(),
-  );
   // Core
   _getIt.registerSingleton<ThemeController>(ThemeController());
 
@@ -58,23 +60,37 @@ Future<void> setup({
   _getIt.registerSingleton<GoogleService>(
     mockGoogle ? GoogleServiceFake() : GoogleServiceImpl(GoogleSignIn.instance),
   );
-  _getIt.registerSingleton<HttpClient>(HttpClient(baseUrl: Environment.apiUrl));
   _getIt.registerSingleton<CacheDatabase>(CacheDatabaseImpl());
   _getIt.registerSingleton<FileSystemService>(FileSystemServiceImpl());
 
   if (mockApiClient) {
+    _getIt.registerSingleton<FakeServerPersistentStorage>(
+      FakeServerPersistentStorage(),
+    );
+    _getIt.registerSingleton<FakeDocumentServerStorage>(
+      FakeDocumentServerStorage(cacheDatabase: _getIt<CacheDatabase>()),
+    );
     _getIt.registerSingleton<AuthApiClient>(
       FakeAuthApiClient(
         fakePersistentStorage: _getIt<FakeServerPersistentStorage>(),
       ),
     );
-    _getIt.registerSingleton<DocumentApiClient>(FakeDocumentApiClient());
+    _getIt.registerSingleton<DocumentApiClient>(
+      FakeDocumentApiClient(serverStorage: _getIt<FakeDocumentServerStorage>()),
+    );
+    _getIt.registerSingleton<TrashApiClient>(
+      FakeTrashApiClient(serverStorage: _getIt<FakeDocumentServerStorage>()),
+    );
     _getIt.registerSingleton<ProfileApiClient>(
       FakeProfileApiClient(
         fakePersistentStorage: _getIt<FakeServerPersistentStorage>(),
       ),
     );
   } else {
+    // Register real implementation
+    _getIt.registerSingleton<HttpClient>(
+      HttpClient(baseUrl: Environment.apiUrl),
+    );
     _getIt.registerSingleton<AuthApiClient>(
       AuthApiClientImpl(_getIt<HttpClient>()),
     );
@@ -83,6 +99,9 @@ Future<void> setup({
     );
     _getIt.registerSingleton<ProfileApiClient>(
       ProfileApiClientImpl(_getIt<HttpClient>()),
+    );
+    _getIt.registerSingleton<TrashApiClient>(
+      TrashApiClientImpl(httpClient: _getIt<HttpClient>()),
     );
   }
 
@@ -110,6 +129,9 @@ Future<void> setup({
     ProfileRepositoryImpl(
       profileApiClient: _getIt<ProfileApiClient>(), //
     ),
+  );
+  _getIt.registerSingleton<TrashRepository>(
+    TrashRepositoryImpl(trashApiClient: _getIt<TrashApiClient>()),
   );
 
   // Actions
@@ -145,11 +167,9 @@ Future<void> setup({
   // Post-register configuration
   await _getIt<CacheDatabase>().init();
 
-  final docApiClient = _getIt<DocumentApiClient>();
-  if (docApiClient is FakeDocumentApiClient) {
-    await docApiClient.populateLocalArrayWithDatabaseData(
-      _getIt<CacheDatabase>(),
-    );
+  if (mockApiClient) {
+    // Initialize fake server storage with data from cache database
+    await _getIt<FakeDocumentServerStorage>().initialize();
   }
 
   _getIt<HttpClient>().authHeaderProvider = () async {

@@ -12,11 +12,11 @@ class DocumentEditViewModel {
     required this.documentUuid,
     required this.documentRepository,
   }) {
-    loadDocument = Command.createAsyncNoParam<Result<Document, Exception>?>(
+    loadDocument = Command.createAsyncNoParam(
       _loadDocument,
       initialValue: null,
     );
-    updateDocument = Command.createAsyncNoParam<Result<Document, Exception>?>(
+    updateDocument = Command.createAsyncNoParam(
       _updateDocument,
       initialValue: null,
     );

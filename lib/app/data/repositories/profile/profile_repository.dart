@@ -35,6 +35,7 @@ abstract class ProfileRepository extends ChangeNotifier {
   Future<Result<void, Exception>> updatePhone(String phone);
 
   /// Agenda a exclusão permanente da conta do usuário.
+  /// É recomendado que o chamador da função faça logout após chamar este método.
   ///
   /// Retorna um [Result] contendo void em caso de sucesso ou [Exception] em caso de erro.
   Future<Result<void, Exception>> deleteAccount();

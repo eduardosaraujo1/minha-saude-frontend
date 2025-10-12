@@ -29,8 +29,8 @@ class DocumentRepositoryImpl extends DocumentRepository {
 
   final _log = Logger("DocumentRepositoryImpl");
 
-  final _documentListCache = _DocumentListCache();
-  final _documentFileCache = _DocumentFileCache();
+  final _documentListCache = _InMemoryDocumentListCache();
+  final _documentFileCache = _InMemoryDocumentFileCache();
 
   @override
   Future<Result<File, Exception>> pickDocumentFile() async {
@@ -471,7 +471,7 @@ class DocumentRepositoryImpl extends DocumentRepository {
   }
 }
 
-class _DocumentListCache {
+class _InMemoryDocumentListCache {
   CachedElement<List<Document>>? _cache;
 
   /// Returns true if the cache exists and is not stale
@@ -522,7 +522,7 @@ class _DocumentListCache {
   }
 }
 
-class _DocumentFileCache {
+class _InMemoryDocumentFileCache {
   String? _cachedUuid;
   File? _cachedFile;
 

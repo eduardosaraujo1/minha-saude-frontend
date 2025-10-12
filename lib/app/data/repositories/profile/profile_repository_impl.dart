@@ -19,7 +19,7 @@ class ProfileRepositoryImpl extends ProfileRepository {
   }
 
   @override
-  Future<Result<Profile, Exception>> getProfile() {
+  Future<Result<Profile, Exception>> getProfile({forceRefresh = false}) {
     // TODO: implement getProfile
     throw UnimplementedError();
   }

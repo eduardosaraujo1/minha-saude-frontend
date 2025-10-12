@@ -41,7 +41,20 @@ class FakeAuthApiClient implements AuthApiClient {
     required String telefone,
     required String registerToken,
   }) async {
-    await fakePersistentStorage.setRegistered(true);
+    // Create a new user with the registration data
+    final newUser = FakeRegisterModel(
+      id: 'fake_user_id_${DateTime.now().millisecondsSinceEpoch}',
+      email:
+          'user@example.com', // In a real scenario, this would come from the token
+      cpf: cpf,
+      nome: nome,
+      telefone: telefone,
+      dataNascimento: dataNascimento,
+      metodoAutenticacao: InternalAuthMethod
+          .email, // Default to email, could be determined from token
+    );
+
+    await fakePersistentStorage.setUser(newUser);
 
     return Result.success(
       RegisterResponse(status: 'success', sessionToken: 'fake_session_token'),

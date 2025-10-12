@@ -5,7 +5,7 @@ import '../app/data/repositories/profile/profile_repository.dart';
 import '../app/data/repositories/profile/profile_repository_impl.dart';
 import '../app/data/repositories/session/session_repository.dart';
 import '../app/data/services/api/fake_server_persistent_storage.dart';
-import '../app/data/services/api/profile/fake_profile_api_client_impl.dart';
+import '../app/data/services/api/profile/fake_profile_api_client.dart';
 import '../app/data/services/api/profile/profile_api_client.dart';
 import '../app/data/services/api/profile/profile_api_client_impl.dart';
 import '../app/domain/actions/auth/logout_action.dart';

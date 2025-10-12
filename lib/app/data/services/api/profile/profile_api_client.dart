@@ -14,15 +14,15 @@ abstract class ProfileApiClient {
   /// - [name]: O novo nome a ser atualizado.
   ///
   /// Retorna um [Result] contendo void em caso de sucesso ou [Exception] em caso de erro.
-  Future<Result<void, Exception>> updateName(String name);
+  Future<Result<String, Exception>> updateName(String name);
 
   /// Atualiza a data de nascimento do usuário no perfil.
   ///
   /// Parâmetros:
   /// - [birthDate]: A nova data de nascimento a ser atualizada.
   ///
-  /// Retorna um [Result] contendo void em caso de sucesso ou [Exception] em caso de erro.
-  Future<Result<void, Exception>> updateBirthdate(DateTime birthDate);
+  /// Retorna um [Result] contendo data em yyyy-MM-dd em caso de sucesso ou [Exception] em caso de erro.
+  Future<Result<String, Exception>> updateBirthdate(DateTime birthDate);
 
   /// Atualiza o número de telefone do usuário no perfil.
   /// Este método envia um código SMS para verificação.
@@ -31,7 +31,7 @@ abstract class ProfileApiClient {
   /// - [phone]: O novo número de telefone a ser atualizado.
   ///
   /// Retorna um [Result] contendo void em caso de sucesso ou [Exception] em caso de erro.
-  Future<Result<void, Exception>> updatePhone(String phone);
+  Future<Result<String, Exception>> updatePhone(String phone);
 
   /// Verifica o código SMS enviado para o telefone do usuário.
   ///

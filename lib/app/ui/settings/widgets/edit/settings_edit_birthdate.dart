@@ -51,14 +51,6 @@ class _SettingsEditBirthdateState extends State<SettingsEditBirthdate> {
       }
 
       viewModel.updateBirthdateCommand.execute(date);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Data de nascimento atualizada com sucesso!"),
-        ),
-      );
-
-      context.pop();
     }
   }
 
@@ -135,6 +127,10 @@ class _SettingsEditBirthdateState extends State<SettingsEditBirthdate> {
                             controller: _formController.birthdateController,
                             validator: _formController.validateBirthdate,
                             keyboardType: TextInputType.datetime,
+                            readOnly: true,
+                            onTap: () {
+                              _triggerDatePicker();
+                            },
                             decoration: InputDecoration(
                               icon: Icon(Icons.calendar_today),
                               hintText: 'DD/MM/AAAA',
@@ -180,6 +176,26 @@ class _SettingsEditBirthdateState extends State<SettingsEditBirthdate> {
         ),
       ),
     );
+  }
+
+  void _triggerDatePicker() async {
+    final dtNascimentoController = _formController.birthdateController;
+
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: dtNascimentoController.text.isNotEmpty
+          ? DateFormat("dd/MM/yyyy").parse(dtNascimentoController.text)
+          : DateTime(DateTime.now().year, 1, 1),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+
+    if (pickedDate != null) {
+      dtNascimentoController.value = TextEditingValue(
+        text:
+            "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year.toString().padLeft(4, '0')}",
+      );
+    }
   }
 }
 

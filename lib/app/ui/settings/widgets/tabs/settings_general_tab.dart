@@ -30,6 +30,7 @@ class _SettingsGeneralTabState extends State<SettingsGeneralTab> {
   void dispose() {
     viewModel.loadProfile.removeListener(_handleLoadUpdate);
     viewModel.requestExportCommand.removeListener(_handleExportRequest);
+    viewModel.dispose();
     super.dispose();
   }
 
@@ -106,17 +107,27 @@ class _SettingsGeneralTabState extends State<SettingsGeneralTab> {
         ...ListTile.divideTiles(
           context: context,
           tiles: [
-            ListTile(
-              key: ValueKey("btnExportData"),
-              visualDensity: VisualDensity.compact,
-              leading: Icon(Icons.mail_outlined),
-              title: const Text('Exportar meus dados'),
-              trailing: Icon(
-                Icons.chevron_right,
-                color: colorScheme.onSurfaceVariant,
-              ),
-              onTap: () {
-                widget.viewModel.requestExportCommand.execute();
+            ValueListenableBuilder(
+              valueListenable: viewModel.requestExportCommand.isExecuting,
+              builder: (context, isLoadingExport, child) {
+                return Opacity(
+                  opacity: isLoadingExport ? 0.6 : 1.0,
+                  child: ListTile(
+                    key: ValueKey("btnExportData"),
+                    visualDensity: VisualDensity.compact,
+                    leading: Icon(Icons.mail_outlined),
+                    title: const Text('Exportar meus dados'),
+                    trailing: Icon(
+                      Icons.chevron_right,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    onTap: isLoadingExport
+                        ? null
+                        : () {
+                            _showExportDataDialog(context);
+                          },
+                  ),
+                );
               },
             ),
           ],
@@ -142,7 +153,7 @@ class _SettingsGeneralTabState extends State<SettingsGeneralTab> {
     final profile = source?.tryGetSuccess();
 
     return [
-      _UserInfoTile(label: 'CPF', value: profile?.cpf),
+      _UserInfoTile(label: 'CPF', value: _applyCpfMask(profile?.cpf)),
       _UserInfoTile(label: 'E-mail', value: profile?.email),
       _UserInfoTile(
         label: 'Nome',
@@ -182,6 +193,49 @@ class _SettingsGeneralTabState extends State<SettingsGeneralTab> {
       ],
     );
   }
+
+  void _showExportDataDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final theme = Theme.of(context);
+
+        return AlertDialog(
+          title: const Text('Exportar meus dados'),
+          content: const Text(
+            'Deseja solicitar a exportação dos seus dados? '
+            'Você receberá um e-mail com todas as suas informações em breve.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                foregroundColor: theme.colorScheme.secondary,
+              ),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              key: ValueKey("btnConfirmExport"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                viewModel.requestExportCommand.execute();
+              },
+              child: const Text('Exportar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String? _applyCpfMask(String? cpf) {
+    if (cpf == null) return null;
+    if (cpf.isEmpty) return null;
+    if (cpf.length < 11) return cpf;
+
+    // Apply format ###.###.###-##
+    return '${cpf.substring(0, 3)}.${cpf.substring(3, 6)}.${cpf.substring(6, 9)}-${cpf.substring(9, 11)}';
+  }
 }
 
 class _UserInfoTile extends StatelessWidget {
@@ -209,13 +263,13 @@ class _UserInfoTile extends StatelessWidget {
       visualDensity: VisualDensity.compact,
       title: Text(
         label,
-        style: theme.textTheme.labelMedium?.copyWith(
+        style: theme.textTheme.labelLarge?.copyWith(
           color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
         ),
       ),
       subtitle: Text(
         isInvalid ? 'Não encontrado' : value!,
-        style: theme.textTheme.bodyMedium?.copyWith(
+        style: theme.textTheme.bodyLarge?.copyWith(
           color: isInvalid ? colorScheme.error : colorScheme.onSurface,
         ),
       ),

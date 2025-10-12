@@ -11,16 +11,12 @@
 
 ## Para fazer
 
--   [ ] Fazer estado de "login gera registro" depender de um valor no secureStorage
+-   [ ] Tela de lixeira de documentos
 -   [ ] Ao excluir documento, atualizar lista de documents (invalidar cache do repositório)
--   [ ] Ver porque o GoRouter rebuilda todos os widgets abaixo da navegação, e quando voltamos um nível (via seta) esse widget sofre rebuild novamente
-    -   [ ] Navigation precisa de um overhaul
--   [ ] Corrigir widget de loginDecorator para funcionar em telas Wide
--   [ ] Upload pdf via arquivo seletor
--   [ ] Refatorar ProfileRepository para usar interface e consumir ApiClient
 -   [ ] Refatorar ShareRepository para usar interface e consumir ApiClient
 -   [ ] Refatorar tela de compartilhamento
 -   [ ] Tratativa de erro caso o backend se torne não-responsivo
 -   [ ] Deletar conta requisitar login novamente (ver se consegue fazer isso a nivel API)
 -   [ ] Realizar teste exploratório para tela de lado ou areas em que se esqueceu do SafeArea
 -   [ ] SE tiver tempo, considerar fazer a organização dos documentos ocorrer no backend via API para evitar um array com todos os documentos na memoria RAM (permitirá paginação). Requer repensar a arquitetura dos documentos
+-   [ ] Trazer opções prontas para tipos de exame (ainda permitir usuário escolher customizado)

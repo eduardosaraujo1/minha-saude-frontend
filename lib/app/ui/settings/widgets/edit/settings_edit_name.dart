@@ -36,12 +36,6 @@ class _SettingsEditNameState extends State<SettingsEditName> {
     // If form is valid
     if (_formController.validate()) {
       viewModel.updateNameCommand.execute(_formController.nameController.text);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Nome atualizado com sucesso!")),
-      );
-
-      context.pop();
     }
   }
 

@@ -28,6 +28,11 @@ class SettingsViewModel {
       _requestExport,
       initialValue: null,
     );
+    profileRepository.addListener(_reload);
+  }
+
+  void _reload() {
+    loadProfile.execute(); // reload profile on repository changes
   }
 
   final LogoutAction logoutAction;
@@ -67,5 +72,9 @@ class SettingsViewModel {
       _log.severe("Error loading profile", e, s);
       return Error(Exception("Não foi possível carregar os dados do perfil."));
     }
+  }
+
+  void dispose() {
+    profileRepository.removeListener(_reload);
   }
 }

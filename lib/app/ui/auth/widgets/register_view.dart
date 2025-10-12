@@ -161,7 +161,7 @@ class _RegisterViewState extends State<RegisterView> {
                 controller: form.telefoneController,
                 validator: form.validateTelefone,
                 decoration: InputDecoration(
-                  hintText: "11 98765-4321",
+                  hintText: "(11) 98765-4321",
                   labelText: 'Telefone',
                 ),
                 keyboardType: TextInputType.phone,

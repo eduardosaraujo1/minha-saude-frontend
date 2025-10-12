@@ -133,7 +133,10 @@ Future<void> setup({
     ),
   );
   _getIt.registerSingleton<DeleteUserAction>(
-    DeleteUserAction(profileRepository: _getIt<ProfileRepository>()),
+    DeleteUserAction(
+      profileRepository: _getIt<ProfileRepository>(),
+      sessionRepository: _getIt<SessionRepository>(),
+    ),
   );
   _getIt.registerSingleton<RequestExportAction>(
     RequestExportAction(profileRepository: _getIt<ProfileRepository>()),

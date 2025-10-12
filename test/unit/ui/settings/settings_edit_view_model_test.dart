@@ -116,7 +116,7 @@ void main() {
         expect(viewModel.loadCurrentValue.value!.isSuccess(), isTrue);
         expect(
           viewModel.loadCurrentValue.value!.tryGetSuccess()!,
-          DateFormat("yyyy-MM-dd").format(mockDay),
+          DateFormat("dd/MM/yyyy").format(mockDay),
         );
       },
     );

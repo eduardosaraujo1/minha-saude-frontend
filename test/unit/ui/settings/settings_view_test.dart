@@ -150,11 +150,19 @@ void main() {
       );
       await tester.pump(Duration(milliseconds: 500));
 
+      // Tap export data button
       await tester.tap(find.byKey(ValueKey('btnExportData')));
       await tester.pumpAndSettle();
 
-      // Since we can't easily verify command execution in test without mocking,
-      // we'll verify the mock action was called instead
+      // Should show confirmation dialog
+      var confirmExport = find.byKey(ValueKey("btnConfirmExport"));
+      expect(confirmExport, findsOneWidget);
+
+      // Tap confirm in dialog
+      await tester.tap(confirmExport);
+      await tester.pumpAndSettle();
+
+      // Verify the action was called
       verify(() => mockRequestExportAction.execute()).called(1);
     },
   );
@@ -327,7 +335,7 @@ void main() {
     // Find text widgets with profile data
     expect(find.text("João Silva"), findsOneWidget);
     expect(find.text("example@gmail.com"), findsOneWidget);
-    expect(find.text("12345678909"), findsOneWidget);
+    expect(find.text("123.456.789-09"), findsOneWidget);
     expect(find.text("11987654321"), findsOneWidget);
 
     // For date, we need to check the formatted version that would appear in the UI

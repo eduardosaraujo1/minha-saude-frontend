@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 import '../../view_models/settings_edit_view_model.dart';
 
@@ -28,6 +29,7 @@ class _SettingsEditPhoneState extends State<SettingsEditPhone> {
   @override
   void dispose() {
     viewModel.loadCurrentValue.removeListener(_onDataLoad);
+    viewModel.loadCurrentValue.removeListener(_onUpdate);
     _formController.phoneController.dispose();
     super.dispose();
   }
@@ -38,12 +40,6 @@ class _SettingsEditPhoneState extends State<SettingsEditPhone> {
       viewModel.updatePhoneCommand.execute(
         _formController.phoneController.text,
       );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Telefone atualizado com sucesso!")),
-      );
-
-      context.pop();
     }
   }
 
@@ -62,6 +58,7 @@ class _SettingsEditPhoneState extends State<SettingsEditPhone> {
 
       if (context.canPop()) {
         context.pop();
+        return;
       }
     }
 
@@ -118,6 +115,13 @@ class _SettingsEditPhoneState extends State<SettingsEditPhone> {
                             controller: _formController.phoneController,
                             validator: _formController.validatePhone,
                             keyboardType: TextInputType.phone,
+                            inputFormatters: [
+                              MaskTextInputFormatter(
+                                mask: '(##) #####-####',
+                                filter: {"#": RegExp(r'[0-9]')},
+                                type: MaskAutoCompletionType.lazy,
+                              ),
+                            ],
                             decoration: InputDecoration(
                               icon: Icon(Icons.phone),
                             ),

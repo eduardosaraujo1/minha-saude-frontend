@@ -27,6 +27,7 @@ class ProfileRepositoryImpl extends ProfileRepository {
       }
 
       _cache.clear();
+      notifyListeners();
 
       return Success(null);
     });
@@ -86,6 +87,7 @@ class ProfileRepositoryImpl extends ProfileRepository {
 
       // Update local cache if exists
       _cache.updateAuthMethod(AuthMethod.google);
+      notifyListeners();
 
       return Success(null);
     });
@@ -138,6 +140,7 @@ class ProfileRepositoryImpl extends ProfileRepository {
 
       // Update local cache if exists
       _cache.updateBirthdate(updatedBirthdate);
+      notifyListeners();
 
       return Success(null);
     });
@@ -157,6 +160,7 @@ class ProfileRepositoryImpl extends ProfileRepository {
 
       // Update local cache if exists
       _cache.updateName(updatedName);
+      notifyListeners();
 
       return Success(null);
     });
@@ -176,6 +180,7 @@ class ProfileRepositoryImpl extends ProfileRepository {
 
       // Update local cache if exists
       _cache.updatePhone(updatedPhone);
+      notifyListeners();
 
       return Success(null);
     });

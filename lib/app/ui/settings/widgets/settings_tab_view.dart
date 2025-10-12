@@ -67,10 +67,15 @@ class _SettingsTabViewState extends State<SettingsTabView>
                         SettingsSupportTab(viewModel: viewModel),
                       ]
                       .map(
-                        (e) => SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.all(16.0),
-                          child: e,
+                        (e) => RefreshIndicator(
+                          onRefresh: () async {
+                            viewModel.loadProfile.execute();
+                          },
+                          child: SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.all(16.0),
+                            child: e,
+                          ),
                         ),
                       )
                       .toList(),

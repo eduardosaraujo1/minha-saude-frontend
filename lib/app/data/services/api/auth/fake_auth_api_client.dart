@@ -51,7 +51,7 @@ class FakeAuthApiClient implements AuthApiClient {
     final newUser = FakeRegisterModel(
       id: 'fake_user_id_${DateTime.now().millisecondsSinceEpoch}',
       email:
-          'user@example.com', // In a real scenario, this would come from the token
+          'eduardosaraujo100@gmail.com', // In a real scenario, this would come from the token
       cpf: cpf,
       nome: nome,
       telefone: telefone,

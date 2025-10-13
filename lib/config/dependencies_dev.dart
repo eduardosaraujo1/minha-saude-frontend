@@ -57,9 +57,13 @@ Future<void> setup({
   _getIt.registerSingleton<DocumentScanner>(
     mockScanner ? FakeDocumentScanner() : DocumentScannerImpl(),
   );
-  _getIt.registerSingleton<GoogleService>(
-    mockGoogle ? GoogleServiceFake() : GoogleServiceImpl(GoogleSignIn.instance),
-  );
+  if (mockGoogle) {
+    _getIt.registerSingleton<GoogleService>(GoogleServiceFake());
+  } else {
+    _getIt.registerSingleton<GoogleService>(
+      GoogleServiceImpl(GoogleSignIn.instance),
+    );
+  }
   _getIt.registerSingleton<CacheDatabase>(CacheDatabaseImpl());
   _getIt.registerSingleton<FileSystemService>(FileSystemServiceImpl());
 

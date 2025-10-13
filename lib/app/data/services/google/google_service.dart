@@ -18,6 +18,12 @@ class GoogleServiceImpl implements GoogleService {
   ];
 
   GoogleServiceImpl(this._signIn) {
+    if (Environment.googleClientId.isEmpty ||
+        Environment.googleServerClientId.isEmpty) {
+      throw Exception(
+        'Google Client ID and Server Client ID must be set in environment variables.',
+      );
+    }
     _signIn.initialize(
       clientId: Environment.googleClientId,
       serverClientId: Environment.googleServerClientId,

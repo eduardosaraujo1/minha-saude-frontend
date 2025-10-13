@@ -40,18 +40,12 @@ class TrashRepositoryImpl extends TrashRepository {
       }
 
       // Remove from file system
-      // Note: We don't have a direct delete method, but we can ignore errors
-      // as the file might not exist locally
-      final fileResult = await fileSystemService.getDocument(id);
-      if (fileResult.isSuccess()) {
-        final file = fileResult.tryGetSuccess();
-        if (file != null) {
-          try {
-            await file.delete();
-          } catch (e) {
-            _log.warning("Failed to delete document file from file system", e);
-          }
-        }
+      final fileResult = await fileSystemService.deleteDocument(id);
+      if (fileResult.isError()) {
+        _log.warning(
+          "Failed to delete document file from file system",
+          fileResult.tryGetError()!,
+        );
       }
 
       // Remove from cache

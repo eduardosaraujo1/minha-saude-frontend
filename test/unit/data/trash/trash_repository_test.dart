@@ -271,7 +271,7 @@ void main() {
       ).thenAnswer((_) async => Result.success(null));
 
       when(
-        () => fileSystemService.getDocument("test-uuid"),
+        () => fileSystemService.deleteDocument("test-uuid"),
       ).thenAnswer((_) async => Result.success(null));
 
       // Act
@@ -280,7 +280,7 @@ void main() {
       // Assert
       verify(() => trashApiClient.destroyTrashDocument("test-uuid")).called(1);
       verify(() => localDatabase.removeDocument("test-uuid")).called(1);
-      verify(() => fileSystemService.getDocument("test-uuid")).called(1);
+      verify(() => fileSystemService.deleteDocument("test-uuid")).called(1);
       expect(result, isA<Result<void, Exception>>());
       expect(result.isError(), false);
     });
@@ -299,7 +299,7 @@ void main() {
         fail("Expected error, but got success");
       }, (error) {});
       verifyNever(() => localDatabase.removeDocument(any()));
-      verifyNever(() => fileSystemService.getDocument(any()));
+      verifyNever(() => fileSystemService.deleteDocument(any()));
     });
 
     test("should succeed even if database or file removal fails", () async {
@@ -313,7 +313,7 @@ void main() {
       ).thenAnswer((_) async => Result.error(Exception("DB error")));
 
       when(
-        () => fileSystemService.getDocument("test-uuid"),
+        () => fileSystemService.deleteDocument("test-uuid"),
       ).thenAnswer((_) async => Result.error(Exception("FS error")));
 
       // Act
@@ -322,7 +322,7 @@ void main() {
       // Assert
       verify(() => trashApiClient.destroyTrashDocument("test-uuid")).called(1);
       verify(() => localDatabase.removeDocument("test-uuid")).called(1);
-      verify(() => fileSystemService.getDocument("test-uuid")).called(1);
+      verify(() => fileSystemService.deleteDocument("test-uuid")).called(1);
       expect(result, isA<Result<void, Exception>>());
       expect(result.isError(), false);
     });

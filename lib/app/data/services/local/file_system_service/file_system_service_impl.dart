@@ -64,6 +64,30 @@ class FileSystemServiceImpl implements FileSystemService {
   }
 
   @override
+  Future<Result<void, Exception>> deleteDocument(String uuid) async {
+    try {
+      final cacheDir = await getApplicationCacheDirectory();
+      final sanitizedUuid = uuid.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
+      final filePath =
+          '${cacheDir.path}/$documentsPathPrefix$sanitizedUuid.pdf';
+      final file = File(filePath);
+
+      if (await file.exists()) {
+        await file.delete();
+        _log.info('Deleted document with UUID $uuid');
+      } else {
+        _log.warning('Document with UUID $uuid not found, nothing to delete');
+      }
+
+      return const Success(null);
+    } on Exception catch (e) {
+      return Error(e);
+    } catch (e) {
+      return Error(Exception('Failed to delete document: $e'));
+    }
+  }
+
+  @override
   Future<Result<File, Exception>> storeDocument(
     String uuid,
     Uint8List bytes,

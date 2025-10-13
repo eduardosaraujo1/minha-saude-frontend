@@ -19,7 +19,19 @@ class TrashIndexViewModel {
   Future<Result<List<Document>, Exception>?> _loadDocument({
     forceRefresh = false,
   }) async {
-    throw UnimplementedError();
+    try {
+      final result = await trashRepository.listTrashDocuments(
+        forceRefresh: forceRefresh,
+      );
+
+      if (result.isError()) {
+        return Error(Exception("Ocorreu um erro ao carregar os documentos."));
+      }
+
+      return result;
+    } catch (e) {
+      return Error(Exception("Ocorreu um erro ao carregar os documentos."));
+    }
   }
 
   void reloadDocuments() {

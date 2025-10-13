@@ -14,6 +14,7 @@ class FakeTrashApiClient extends TrashApiClient {
   @override
   Future<Result<void, Exception>> destroyTrashDocument(String id) async {
     try {
+      await Future.delayed(const Duration(milliseconds: 500));
       return await serverStorage.permanentlyDeleteDocument(id);
     } catch (e, s) {
       _logger.severe('Failed to permanently delete document: $e', e, s);
@@ -28,6 +29,7 @@ class FakeTrashApiClient extends TrashApiClient {
     String id,
   ) async {
     try {
+      await Future.delayed(const Duration(milliseconds: 500));
       return await serverStorage.queryDeletedDocumentMetadata(id);
     } catch (e, s) {
       _logger.severe('Failed to get document: $e', e, s);
@@ -38,6 +40,7 @@ class FakeTrashApiClient extends TrashApiClient {
   @override
   Future<Result<List<DocumentApiModel>, Exception>> listTrashDocuments() async {
     try {
+      await Future.delayed(const Duration(milliseconds: 500));
       return await serverStorage.queryDeletedDocumentList();
     } catch (e, s) {
       _logger.severe('Failed to list documents: $e', e, s);
@@ -48,6 +51,7 @@ class FakeTrashApiClient extends TrashApiClient {
   @override
   Future<Result<void, Exception>> restoreTrashDocument(String id) async {
     try {
+      await Future.delayed(const Duration(milliseconds: 500));
       return await serverStorage.restoreDocument(id);
     } catch (e, s) {
       _logger.severe('Failed to restore document: $e', e, s);

@@ -37,6 +37,7 @@ void main() {
     () async {
       // Hook AuthRepository.logout to complete successfully
       when(() => authRepository.logout()).thenAnswer((_) async {});
+      when(() => profileRepository.clearCache()).thenAnswer((_) async {});
 
       // Hook SessionRepository.clearAuthToken to return Success
       when(

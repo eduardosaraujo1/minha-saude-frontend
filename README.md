@@ -13,6 +13,7 @@
 
 -   [ ] Tela de lixeira de documentos
 -   [ ] Testes para repositório de documento, assegurando a descrição dada
+-   [ ] Adicionar atualização para a lista da lixeira quando um documento for apagado do DocumentRepository
 -   [ ] Revisar política de cache in-memory do DocumentRepository
 -   [ ] Ao excluir documento, atualizar lista de documents (invalidar cache do repositório)
 -   [ ] Fazer o form de adicionar documento ter opções padrão (algumas pré-existentes, outras podendo o usuário escolher). API envia a lista de categorias para o cliente e o app usa essas categorias num dropdown, podendo esse ser substituido por um text field normal

@@ -171,16 +171,16 @@ Future<void> setup({
   if (mockApiClient) {
     // Initialize fake server storage with data from cache database
     await _getIt<FakeDocumentServerStorage>().initialize();
+  } else {
+    _getIt<HttpClient>().authHeaderProvider = () async {
+      final token = await _getIt<SessionRepository>().getAuthToken();
+      final t = token.tryGetSuccess();
+
+      if (t == null) {
+        return null;
+      }
+
+      return t;
+    };
   }
-
-  _getIt<HttpClient>().authHeaderProvider = () async {
-    final token = await _getIt<SessionRepository>().getAuthToken();
-    final t = token.tryGetSuccess();
-
-    if (t == null) {
-      return null;
-    }
-
-    return t;
-  };
 }

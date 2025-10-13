@@ -131,7 +131,11 @@ Future<void> setup({
     ),
   );
   _getIt.registerSingleton<TrashRepository>(
-    TrashRepositoryImpl(trashApiClient: _getIt<TrashApiClient>()),
+    TrashRepositoryImpl(
+      fileSystemService: _getIt<FileSystemService>(),
+      localDatabase: _getIt<CacheDatabase>(),
+      trashApiClient: _getIt<TrashApiClient>(),
+    ),
   );
 
   // Actions

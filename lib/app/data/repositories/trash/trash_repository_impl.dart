@@ -3,12 +3,20 @@ import 'package:minha_saude_frontend/app/domain/models/document/document.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../services/api/trash/trash_api_client.dart';
+import '../../services/local/cache_database/cache_database.dart';
+import '../../services/local/file_system_service/file_system_service.dart';
 import 'trash_repository.dart';
 
 class TrashRepositoryImpl extends TrashRepository {
-  TrashRepositoryImpl({required this.trashApiClient});
+  TrashRepositoryImpl({
+    required this.trashApiClient,
+    required this.localDatabase,
+    required this.fileSystemService,
+  });
 
   final TrashApiClient trashApiClient;
+  final CacheDatabase localDatabase;
+  final FileSystemService fileSystemService;
   final _TrashCacheStore _cacheStore = _TrashCacheStore();
 
   final Logger _log = Logger("TrashRepositoryImpl");
@@ -22,8 +30,33 @@ class TrashRepositoryImpl extends TrashRepository {
         return Result.error(Exception("Failed to delete document with id $id"));
       }
 
+      // Remove from local database
+      final dbResult = await localDatabase.removeDocument(id);
+      if (dbResult.isError()) {
+        _log.warning(
+          "Failed to remove document from local database",
+          dbResult.tryGetError()!,
+        );
+      }
+
+      // Remove from file system
+      // Note: We don't have a direct delete method, but we can ignore errors
+      // as the file might not exist locally
+      final fileResult = await fileSystemService.getDocument(id);
+      if (fileResult.isSuccess()) {
+        final file = fileResult.tryGetSuccess();
+        if (file != null) {
+          try {
+            await file.delete();
+          } catch (e) {
+            _log.warning("Failed to delete document file from file system", e);
+          }
+        }
+      }
+
       // Remove from cache
       _cacheStore.removeDocument(id);
+      notifyListeners();
 
       return const Success(null);
     });
@@ -57,6 +90,7 @@ class TrashRepositoryImpl extends TrashRepository {
       );
 
       _cacheStore.saveDocuments([document]);
+
       return Success(document);
     });
   }
@@ -114,8 +148,41 @@ class TrashRepositoryImpl extends TrashRepository {
         );
       }
 
+      // Update local database to mark document as not deleted
+      // First, get the document to preserve its metadata
+      final docResult = await localDatabase.getDocument(id);
+      if (docResult.isSuccess()) {
+        final doc = docResult.tryGetSuccess();
+        if (doc != null) {
+          // Update the document with deletedAt set to null
+          final updateResult = await localDatabase.upsertDocument(
+            id,
+            titulo: doc.titulo,
+            paciente: doc.paciente,
+            medico: doc.medico,
+            tipo: doc.tipo,
+            dataDocumento: doc.dataDocumento,
+            createdAt: doc.createdAt,
+            deletedAt: null, // Restore the document
+            cachedAt: DateTime.now(),
+          );
+          if (updateResult.isError()) {
+            _log.warning(
+              "Failed to update document in local database after restore",
+              updateResult.tryGetError()!,
+            );
+          }
+        }
+      } else {
+        _log.warning(
+          "Document not found in local database when trying to restore",
+          docResult.tryGetError()!,
+        );
+      }
+
       // Remove from cache (no longer in trash)
       _cacheStore.removeDocument(id);
+      notifyListeners();
 
       return const Success(null);
     });

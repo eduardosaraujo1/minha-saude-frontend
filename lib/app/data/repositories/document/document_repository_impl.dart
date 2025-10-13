@@ -321,7 +321,7 @@ class DocumentRepositoryImpl extends DocumentRepository {
     List<Document> documents,
   ) {
     _documentListCache.set(documents);
-    notifyListeners();
+    // notifyListeners();
     return Result.success(List.unmodifiable(documents));
   }
 

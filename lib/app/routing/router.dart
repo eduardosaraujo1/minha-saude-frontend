@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
+// Alt + Shift + O -> organize imports
 import '../data/repositories/auth/auth_repository.dart';
 import '../data/repositories/document/document_repository.dart';
 import '../data/repositories/profile/profile_repository.dart';
@@ -20,7 +21,6 @@ import '../ui/auth/widgets/register_view.dart';
 import '../ui/auth/widgets/tos_view.dart';
 import '../ui/core/widgets/not_found.dart';
 import '../ui/core/widgets/scaffold_with_navbar.dart';
-// Alt + Shift + O -> organize imports
 import '../ui/core/widgets/under_construction_screen.dart';
 import '../ui/documents/view_models/document_view_model.dart';
 import '../ui/documents/view_models/index/document_list_view_model.dart';
@@ -53,7 +53,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _router = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: Routes.home,
-  refreshListenable: _sessionRepository,
+  refreshListenable: Listenable.merge([_sessionRepository]),
   redirect: (BuildContext context, GoRouterState state) {
     return _redirectHandler(context, state, _sessionRepository);
   },
@@ -136,7 +136,9 @@ final _router = GoRouter(
                   path: Routes.documentosRelative,
                   builder: (context, state) {
                     return DocumentListScreen(
-                      DocumentListViewModel(_getIt<DocumentRepository>()),
+                      DocumentListViewModel(
+                        documentRepository: _getIt<DocumentRepository>(),
+                      ),
                     );
                   },
                   routes: [

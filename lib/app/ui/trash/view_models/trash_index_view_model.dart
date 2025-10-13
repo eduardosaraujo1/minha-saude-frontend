@@ -10,6 +10,10 @@ class TrashIndexViewModel {
       (p) => _loadDocument(forceRefresh: p),
       initialValue: null,
     );
+
+    trashRepository.addListener(() {
+      loadDocuments.execute(false);
+    });
   }
 
   final TrashRepository trashRepository;

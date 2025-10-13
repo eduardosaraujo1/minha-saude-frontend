@@ -2,6 +2,9 @@ import 'package:minha_saude_frontend/app/data/repositories/trash/trash_repositor
 import 'package:minha_saude_frontend/app/data/repositories/trash/trash_repository_impl.dart';
 import 'package:minha_saude_frontend/app/data/services/api/document/models/document_api_model.dart';
 import 'package:minha_saude_frontend/app/data/services/api/trash/trash_api_client.dart';
+import 'package:minha_saude_frontend/app/data/services/local/cache_database/cache_database.dart';
+import 'package:minha_saude_frontend/app/data/services/local/cache_database/models/document_db_model.dart';
+import 'package:minha_saude_frontend/app/data/services/local/file_system_service/file_system_service.dart';
 import 'package:minha_saude_frontend/app/domain/models/document/document.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
@@ -9,12 +12,24 @@ import 'package:test/test.dart';
 
 class MockTrashApiClient extends Mock implements TrashApiClient {}
 
+class MockCacheDatabase extends Mock implements CacheDatabase {}
+
+class MockFileSystemService extends Mock implements FileSystemService {}
+
 void main() {
   late TrashApiClient trashApiClient;
+  late CacheDatabase localDatabase;
+  late FileSystemService fileSystemService;
   late TrashRepository trashRepository;
   setUp(() {
     trashApiClient = MockTrashApiClient();
-    trashRepository = TrashRepositoryImpl(trashApiClient: trashApiClient);
+    localDatabase = MockCacheDatabase();
+    fileSystemService = MockFileSystemService();
+    trashRepository = TrashRepositoryImpl(
+      trashApiClient: trashApiClient,
+      localDatabase: localDatabase,
+      fileSystemService: fileSystemService,
+    );
   });
 
   group("List documents in trash", () {
@@ -134,11 +149,69 @@ void main() {
         () => trashApiClient.restoreTrashDocument("test-uuid"),
       ).thenAnswer((_) async => Result.success(null));
 
+      when(() => localDatabase.getDocument("test-uuid")).thenAnswer(
+        (_) async => Result.success(
+          DocumentDbModel(
+            uuid: "test-uuid",
+            titulo: "Test Document",
+            paciente: "John Doe",
+            medico: "Dr. Smith",
+            tipo: "Prescription",
+            dataDocumento: DateTime(2023, 1, 1),
+            createdAt: DateTime(2023, 1, 2),
+            deletedAt: DateTime(2023, 1, 3),
+            cachedAt: DateTime(2023, 1, 2),
+          ),
+        ),
+      );
+
+      when(
+        () => localDatabase.upsertDocument(
+          "test-uuid",
+          titulo: any(named: 'titulo'),
+          paciente: any(named: 'paciente'),
+          medico: any(named: 'medico'),
+          tipo: any(named: 'tipo'),
+          dataDocumento: any(named: 'dataDocumento'),
+          createdAt: any(named: 'createdAt'),
+          deletedAt: any(named: 'deletedAt'),
+          cachedAt: any(named: 'cachedAt'),
+        ),
+      ).thenAnswer(
+        (_) async => Result.success(
+          DocumentDbModel(
+            uuid: "test-uuid",
+            titulo: "Test Document",
+            paciente: "John Doe",
+            medico: "Dr. Smith",
+            tipo: "Prescription",
+            dataDocumento: DateTime(2023, 1, 1),
+            createdAt: DateTime(2023, 1, 2),
+            deletedAt: null,
+            cachedAt: DateTime.now(),
+          ),
+        ),
+      );
+
       // Act
       final result = await trashRepository.restoreTrashDocument("test-uuid");
 
       // Assert
       verify(() => trashApiClient.restoreTrashDocument("test-uuid")).called(1);
+      verify(() => localDatabase.getDocument("test-uuid")).called(1);
+      verify(
+        () => localDatabase.upsertDocument(
+          "test-uuid",
+          titulo: any(named: 'titulo'),
+          paciente: any(named: 'paciente'),
+          medico: any(named: 'medico'),
+          tipo: any(named: 'tipo'),
+          dataDocumento: any(named: 'dataDocumento'),
+          createdAt: any(named: 'createdAt'),
+          deletedAt: null,
+          cachedAt: any(named: 'cachedAt'),
+        ),
+      ).called(1);
       expect(result, isA<Result<void, Exception>>());
       expect(result.isError(), false);
     });
@@ -156,6 +229,33 @@ void main() {
       result.when((data) {
         fail("Expected error, but got success");
       }, (error) {});
+      verifyNever(() => localDatabase.getDocument(any()));
+      verifyNever(
+        () => localDatabase.upsertDocument(
+          any(),
+          createdAt: any(named: 'createdAt'),
+        ),
+      );
+    });
+
+    test("should succeed even if database update fails", () async {
+      // Arrange
+      when(
+        () => trashApiClient.restoreTrashDocument("test-uuid"),
+      ).thenAnswer((_) async => Result.success(null));
+
+      when(
+        () => localDatabase.getDocument("test-uuid"),
+      ).thenAnswer((_) async => Result.error(Exception("DB error")));
+
+      // Act
+      final result = await trashRepository.restoreTrashDocument("test-uuid");
+
+      // Assert
+      verify(() => trashApiClient.restoreTrashDocument("test-uuid")).called(1);
+      verify(() => localDatabase.getDocument("test-uuid")).called(1);
+      expect(result, isA<Result<void, Exception>>());
+      expect(result.isError(), false);
     });
   });
 
@@ -166,11 +266,21 @@ void main() {
         () => trashApiClient.destroyTrashDocument("test-uuid"),
       ).thenAnswer((_) async => Result.success(null));
 
+      when(
+        () => localDatabase.removeDocument("test-uuid"),
+      ).thenAnswer((_) async => Result.success(null));
+
+      when(
+        () => fileSystemService.getDocument("test-uuid"),
+      ).thenAnswer((_) async => Result.success(null));
+
       // Act
       final result = await trashRepository.destroyTrashDocument("test-uuid");
 
       // Assert
       verify(() => trashApiClient.destroyTrashDocument("test-uuid")).called(1);
+      verify(() => localDatabase.removeDocument("test-uuid")).called(1);
+      verify(() => fileSystemService.getDocument("test-uuid")).called(1);
       expect(result, isA<Result<void, Exception>>());
       expect(result.isError(), false);
     });
@@ -188,6 +298,33 @@ void main() {
       result.when((data) {
         fail("Expected error, but got success");
       }, (error) {});
+      verifyNever(() => localDatabase.removeDocument(any()));
+      verifyNever(() => fileSystemService.getDocument(any()));
+    });
+
+    test("should succeed even if database or file removal fails", () async {
+      // Arrange
+      when(
+        () => trashApiClient.destroyTrashDocument("test-uuid"),
+      ).thenAnswer((_) async => Result.success(null));
+
+      when(
+        () => localDatabase.removeDocument("test-uuid"),
+      ).thenAnswer((_) async => Result.error(Exception("DB error")));
+
+      when(
+        () => fileSystemService.getDocument("test-uuid"),
+      ).thenAnswer((_) async => Result.error(Exception("FS error")));
+
+      // Act
+      final result = await trashRepository.destroyTrashDocument("test-uuid");
+
+      // Assert
+      verify(() => trashApiClient.destroyTrashDocument("test-uuid")).called(1);
+      verify(() => localDatabase.removeDocument("test-uuid")).called(1);
+      verify(() => fileSystemService.getDocument("test-uuid")).called(1);
+      expect(result, isA<Result<void, Exception>>());
+      expect(result.isError(), false);
     });
   });
 }

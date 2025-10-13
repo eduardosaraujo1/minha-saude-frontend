@@ -5,7 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:test/test.dart';
 
-class MockTrashRepository extends Mock implements TrashRepository {}
+import '../../../mocks/mock_trash_repository.dart';
 
 void main() {
   late TrashRepository trashRepository;

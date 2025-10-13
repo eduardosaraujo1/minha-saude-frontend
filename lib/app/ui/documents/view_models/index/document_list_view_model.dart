@@ -8,7 +8,7 @@ import '../../../../data/repositories/document/document_repository.dart';
 import '../../widgets/index/sorted_document_list.dart' show GroupingAlgorithm;
 
 class DocumentListViewModel {
-  DocumentListViewModel(this.documentRepository) {
+  DocumentListViewModel({required this.documentRepository}) {
     loadDocuments =
         Command.createAsync<bool, Result<List<Document>, Exception>?>(
           _loadDocuments,

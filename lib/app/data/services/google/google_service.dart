@@ -35,13 +35,13 @@ class GoogleServiceImpl implements GoogleService {
   @override
   Future<Result<String?, Exception>> generateServerAuthCode() async {
     try {
-      // Try silent auth
+      // Try lightweight (silent) authentication first
       var account = await _signIn.attemptLightweightAuthentication();
 
-      // Fallback to interactive auth
+      // If silent auth fails, prompt user for interactive authentication
       account ??= await _signIn.authenticate();
 
-      // Now account is guaranteed non-null
+      // Get authorization client and request server auth code
       final client = account.authorizationClient;
       final serverAuth = await client.authorizeServer(scopes);
 

@@ -17,7 +17,9 @@ class LoginDecorator extends StatelessWidget {
       child: SafeArea(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: 400),
-          child: SvgPicture.asset(Asset.minhaSaudeLogo),
+          child: theme.brightness == Brightness.dark
+              ? SvgPicture.asset(Asset.minhaSaudeLogoDark)
+              : SvgPicture.asset(Asset.minhaSaudeLogo),
         ),
       ),
     );

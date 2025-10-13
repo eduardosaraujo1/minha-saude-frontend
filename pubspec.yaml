@@ -88,6 +88,7 @@ flutter:
     assets:
         - assets/brand/google/logo.svg
         - assets/brand/minha_saude/logo.svg
+        - assets/brand/minha_saude/logo_dark.svg
         - assets/brand/minha_saude/logo_icon.svg
         - assets/icons/document.svg
         - assets/fake/document.pdf

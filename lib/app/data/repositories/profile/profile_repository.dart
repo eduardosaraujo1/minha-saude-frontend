@@ -69,4 +69,6 @@ abstract class ProfileRepository extends ChangeNotifier {
   ///
   /// Retorna um [Result] contendo void em caso de sucesso ou [Exception] em caso de erro.
   Future<Result<void, Exception>> requestDataExport();
+
+  Future<void> clearCache();
 }

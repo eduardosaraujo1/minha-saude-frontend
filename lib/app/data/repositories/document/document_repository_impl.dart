@@ -465,7 +465,7 @@ class DocumentRepositoryImpl extends DocumentRepository {
   }
 
   @override
-  Future<void> resetCache() async {
+  Future<void> clearCache() async {
     _documentListCache.clear();
     await _localDatabase.clear();
   }

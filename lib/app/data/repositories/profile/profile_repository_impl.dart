@@ -234,6 +234,11 @@ class ProfileRepositoryImpl extends ProfileRepository {
       return Error(Exception('Ocorreu um erro inesperado'));
     }
   }
+
+  @override
+  Future<void> clearCache() async {
+    _cache.clear();
+  }
 }
 
 class _InMemoryProfileCache {

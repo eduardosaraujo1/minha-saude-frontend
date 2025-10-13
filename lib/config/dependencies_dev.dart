@@ -146,6 +146,7 @@ Future<void> setup({
       authRepository: _getIt<AuthRepository>(),
       sessionRepository: _getIt<SessionRepository>(),
       documentRepository: _getIt<DocumentRepository>(),
+      profileRepository: _getIt<ProfileRepository>(),
     ),
   );
   _getIt.registerSingleton<RegisterAction>(

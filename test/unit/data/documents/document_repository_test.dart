@@ -34,7 +34,6 @@ void main() {
   late DocumentRepositoryImpl documentRepository;
 
   setUpAll(() {
-    // Register fallback values for mocktail
     registerFallbackValue(File("file.pdf"));
     registerFallbackValue(Uint8List(0));
   });
@@ -52,7 +51,55 @@ void main() {
     );
   });
 
-  group("scanDocumentFile", () {
+  // Helper function to setup successful document upload mocks
+  void setupSuccessfulUploadMocks({
+    required DocumentApiModel apiModel,
+    required MockFile mockFile,
+    required Uint8List fileBytes,
+    required File storedFile,
+  }) {
+    when(
+      () => documentApiClient.uploadDocument(
+        file: any(named: 'file'),
+        titulo: any(named: 'titulo'),
+        nomePaciente: any(named: 'nomePaciente'),
+        nomeMedico: any(named: 'nomeMedico'),
+        tipoDocumento: any(named: 'tipoDocumento'),
+        dataDocumento: any(named: 'dataDocumento'),
+      ),
+    ).thenAnswer((_) async => Result.success(apiModel));
+
+    when(
+      () => localDatabase.upsertDocument(
+        any(),
+        titulo: any(named: 'titulo'),
+        paciente: any(named: 'paciente'),
+        medico: any(named: 'medico'),
+        tipo: any(named: 'tipo'),
+        dataDocumento: any(named: 'dataDocumento'),
+        createdAt: any(named: 'createdAt'),
+        deletedAt: any(named: 'deletedAt'),
+        cachedAt: any(named: 'cachedAt'),
+      ),
+    ).thenAnswer(
+      (_) async => Result.success(
+        DocumentDbModel(
+          uuid: apiModel.uuid,
+          titulo: apiModel.titulo,
+          paciente: apiModel.nomePaciente,
+          createdAt: apiModel.createdAt,
+        ),
+      ),
+    );
+
+    when(() => mockFile.readAsBytes()).thenAnswer((_) async => fileBytes);
+
+    when(
+      () => fileSystemService.storeDocument(any(), any()),
+    ).thenAnswer((_) async => Result.success(storedFile));
+  }
+
+  group("Document Scanner and Picker", () {
     test("calls scanPdf function", () {
       // Hook mockery to track scanPdf function calls but do nothing
       when(
@@ -65,9 +112,7 @@ void main() {
       // Assert scanPdf function was called
       verify(() => documentScanner.scanPdf()).called(1);
     });
-  });
 
-  group("pickDocumentFile ", () {
     test("calls pickPdfFile function", () {
       // Hook mockery to track pickPdfFile function calls but do nothing
       when(
@@ -82,329 +127,271 @@ void main() {
     });
   });
 
-  group("uploadDocument", () {
-    test(
-      "when uploadDocument is called with valid parameters then upload document to backend and store file and metadata locally",
-      () async {
-        // Setup
-        final mockDocumentApiModel = DocumentApiModel(
-          uuid: "test-uuid-123",
+  group("Document Upload", () {
+    late DocumentApiModel mockDocumentApiModel;
+    late MockFile mockFile;
+    late Uint8List fileBytes;
+    late File storedFile;
+
+    setUp(() {
+      mockDocumentApiModel = DocumentApiModel(
+        uuid: "test-uuid-123",
+        titulo: "Test Document",
+        nomePaciente: "John Doe",
+        createdAt: DateTime(2025, 1, 1),
+      );
+
+      mockFile = MockFile();
+      fileBytes = Uint8List.fromList([1, 2, 3]);
+      storedFile = File("/documents/test-uuid-123.pdf");
+    });
+
+    test("uploads document to API client with correct parameters", () async {
+      setupSuccessfulUploadMocks(
+        apiModel: mockDocumentApiModel,
+        mockFile: mockFile,
+        fileBytes: fileBytes,
+        storedFile: storedFile,
+      );
+
+      final result = await documentRepository.uploadDocument(
+        mockFile,
+        paciente: "John Doe",
+        titulo: "Test Document",
+        tipo: null,
+        medico: null,
+        dataDocumento: null,
+      );
+
+      expect(result.isSuccess(), true);
+      verify(
+        () => documentApiClient.uploadDocument(
+          file: mockFile,
           titulo: "Test Document",
           nomePaciente: "John Doe",
-          createdAt: DateTime(2025, 1, 1),
-        );
-
-        when(
-          () => documentApiClient.uploadDocument(
-            file: any(named: 'file'),
-            titulo: any(named: 'titulo'),
-            nomePaciente: any(named: 'nomePaciente'),
-            nomeMedico: any(named: 'nomeMedico'),
-            tipoDocumento: any(named: 'tipoDocumento'),
-            dataDocumento: any(named: 'dataDocumento'),
-          ),
-        ).thenAnswer((_) async => Result.success(mockDocumentApiModel));
-
-        when(
-          () => localDatabase.upsertDocument(
-            any(),
-            titulo: any(named: 'titulo'),
-            paciente: any(named: 'paciente'),
-            medico: any(named: 'medico'),
-            tipo: any(named: 'tipo'),
-            dataDocumento: any(named: 'dataDocumento'),
-            createdAt: any(named: 'createdAt'),
-            deletedAt: any(named: 'deletedAt'),
-            cachedAt: any(named: 'cachedAt'),
-          ),
-        ).thenAnswer(
-          (_) async => Result.success(
-            DocumentDbModel(
-              uuid: "test-uuid-123",
-              titulo: "Test Document",
-              paciente: "John Doe",
-              createdAt: DateTime(2025, 1, 1),
-            ),
-          ),
-        );
-
-        final storedFile = File("/documents/test-uuid-123.pdf");
-        final fileBytes = Uint8List.fromList([1, 2, 3]);
-        final mockFile = MockFile();
-
-        when(() => mockFile.readAsBytes()).thenAnswer((_) async => fileBytes);
-
-        when(
-          () => fileSystemService.storeDocument(any(), any()),
-        ).thenAnswer((_) async => Result.success(storedFile));
-
-        // Call uploadDocument function
-        final result = await documentRepository.uploadDocument(
-          mockFile,
-          paciente: "John Doe",
-          titulo: "Test Document",
-          tipo: null,
-          medico: null,
+          nomeMedico: null,
+          tipoDocumento: null,
           dataDocumento: null,
-        );
+        ),
+      ).called(1);
+    });
 
-        expect(result.isSuccess(), true);
+    test("stores file locally with correct UUID and bytes", () async {
+      setupSuccessfulUploadMocks(
+        apiModel: mockDocumentApiModel,
+        mockFile: mockFile,
+        fileBytes: fileBytes,
+        storedFile: storedFile,
+      );
 
-        // Assert DocumentApiClient uploadDocument, storeDocument and upsertDocument were called
-        verify(
-          () => documentApiClient.uploadDocument(
-            file: mockFile,
-            titulo: "Test Document",
-            nomePaciente: "John Doe",
-            nomeMedico: null,
-            tipoDocumento: null,
-            dataDocumento: null,
-          ),
-        ).called(1);
+      final result = await documentRepository.uploadDocument(
+        mockFile,
+        paciente: "John Doe",
+        titulo: "Test Document",
+        tipo: null,
+        medico: null,
+        dataDocumento: null,
+      );
 
-        verify(
-          () => fileSystemService.storeDocument("test-uuid-123", fileBytes),
-        ).called(1);
+      expect(result.isSuccess(), true);
+      verify(
+        () => fileSystemService.storeDocument("test-uuid-123", fileBytes),
+      ).called(1);
+    });
 
-        verify(
-          () => localDatabase.upsertDocument(
-            "test-uuid-123",
-            titulo: "Test Document",
-            paciente: "John Doe",
-            medico: null,
-            tipo: null,
-            dataDocumento: null,
-            createdAt: DateTime(2025, 1, 1),
-            deletedAt: null,
-            cachedAt: any(named: 'cachedAt'),
-          ),
-        ).called(1);
-      },
-    );
+    test("caches document metadata in database", () async {
+      setupSuccessfulUploadMocks(
+        apiModel: mockDocumentApiModel,
+        mockFile: mockFile,
+        fileBytes: fileBytes,
+        storedFile: storedFile,
+      );
+
+      final result = await documentRepository.uploadDocument(
+        mockFile,
+        paciente: "John Doe",
+        titulo: "Test Document",
+        tipo: null,
+        medico: null,
+        dataDocumento: null,
+      );
+
+      expect(result.isSuccess(), true);
+      verify(
+        () => localDatabase.upsertDocument(
+          "test-uuid-123",
+          titulo: "Test Document",
+          paciente: "John Doe",
+          medico: null,
+          tipo: null,
+          dataDocumento: null,
+          createdAt: DateTime(2025, 1, 1),
+          deletedAt: null,
+          cachedAt: any(named: 'cachedAt'),
+        ),
+      ).called(1);
+    });
   });
 
-  group("listDocuments", () {
-    test(
-      "if ApiClient is available returns a list of documents provided by ApiClient and caches the result on subsequent calls",
-      () async {
-        // Hook DocumentApiClient listDocuments to return a list of documents with Mocktail
-        final mockDocumentList = [
-          DocumentApiModel(
-            uuid: "uuid-1",
-            titulo: "Doc 1",
-            createdAt: DateTime(2025, 1, 1),
-          ),
-          DocumentApiModel(
-            uuid: "uuid-2",
-            titulo: "Doc 2",
-            createdAt: DateTime(2025, 1, 2),
-          ),
-        ];
+  group("Index Documents", () {
+    late List<DocumentApiModel> mockDocumentList;
 
+    setUp(() {
+      mockDocumentList = [
+        DocumentApiModel(
+          uuid: "uuid-1",
+          titulo: "Doc 1",
+          createdAt: DateTime(2025, 1, 1),
+        ),
+        DocumentApiModel(
+          uuid: "uuid-2",
+          titulo: "Doc 2",
+          createdAt: DateTime(2025, 1, 2),
+        ),
+      ];
+
+      when(
+        () => localDatabase.listDocuments(),
+      ).thenAnswer((_) async => const Result.success([]));
+    });
+
+    test("returns documents from ApiClient when available", () async {
+      when(
+        () => documentApiClient.listDocuments(),
+      ).thenAnswer((_) async => Result.success(mockDocumentList));
+
+      final result = await documentRepository.listDocuments();
+
+      expect(result.isSuccess(), true);
+      final documents = result.tryGetSuccess()!;
+      expect(documents.length, 2);
+      expect(documents[0].uuid, "uuid-1");
+      expect(documents[1].uuid, "uuid-2");
+    });
+
+    test(
+      "caches results and doesn't call API again on subsequent calls",
+      () async {
         when(
           () => documentApiClient.listDocuments(),
         ).thenAnswer((_) async => Result.success(mockDocumentList));
 
-        when(
-          () => localDatabase.listDocuments(),
-        ).thenAnswer((_) async => const Result.success([]));
-
-        // Call listDocuments function once
-        final result1 = await documentRepository.listDocuments();
-
-        // Assert return value is the same list of documents as provided by ApiClient
-        expect(result1.isSuccess(), true);
-        final documents1 = result1.tryGetSuccess()!;
-        expect(documents1.length, 2);
-        expect(documents1[0].uuid, "uuid-1");
-        expect(documents1[1].uuid, "uuid-2");
-
-        // Call listDocuments function again
+        await documentRepository.listDocuments();
         final result2 = await documentRepository.listDocuments();
 
-        // Assert DocumentApiClient listDocuments was not called again and the value remains the same
         verify(() => documentApiClient.listDocuments()).called(1);
-        verifyNever(
-          () => localDatabase.upsertDocument(
-            any(),
-            titulo: any(named: 'titulo'),
-            paciente: any(named: 'paciente'),
-            medico: any(named: 'medico'),
-            tipo: any(named: 'tipo'),
-            dataDocumento: any(named: 'dataDocumento'),
-            createdAt: any(named: 'createdAt'),
-            deletedAt: any(named: 'deletedAt'),
-          ),
-        );
         verifyNever(() => localDatabase.listDocuments());
         expect(result2.isSuccess(), true);
-        final documents2 = result2.tryGetSuccess()!;
-        expect(documents2.length, 2);
-        expect(documents2[0].uuid, "uuid-1");
-        expect(documents2[1].uuid, "uuid-2");
+        expect(result2.tryGetSuccess()!.length, 2);
       },
     );
 
-    test(
-      "when forceRefresh parameter is passed ApiClient should be called again",
-      () async {
-        // Hook DocumentApiClient listDocuments to return a list of documents with Mocktail
-        final mockDocumentList = [
-          DocumentApiModel(
-            uuid: "uuid-1",
-            titulo: "Doc 1",
-            createdAt: DateTime(2025, 1, 1),
-          ),
-        ];
+    test("calls ApiClient again when forceRefresh is true", () async {
+      when(
+        () => documentApiClient.listDocuments(),
+      ).thenAnswer((_) async => Result.success(mockDocumentList));
 
-        when(
-          () => documentApiClient.listDocuments(),
-        ).thenAnswer((_) async => Result.success(mockDocumentList));
+      await documentRepository.listDocuments();
+      final result2 = await documentRepository.listDocuments(
+        forceRefresh: true,
+      );
 
-        when(
-          () => localDatabase.listDocuments(),
-        ).thenAnswer((_) async => const Result.success([]));
-
-        // Call listDocuments function once
-        final result1 = await documentRepository.listDocuments();
-
-        // Assert function response is the same as provided to ApiClient
-        expect(result1.isSuccess(), true);
-        expect(result1.tryGetSuccess()!.length, 1);
-
-        // Call listDocuments function once with forceRefresh = true
-        final result2 = await documentRepository.listDocuments(
-          forceRefresh: true,
-        );
-
-        // Assert DocumentApiClient listDocuments was called again and result remains the same
-        verify(() => documentApiClient.listDocuments()).called(2);
-        verifyNever(
-          () => localDatabase.upsertDocument(
-            any(),
-            titulo: any(named: 'titulo'),
-            paciente: any(named: 'paciente'),
-            medico: any(named: 'medico'),
-            tipo: any(named: 'tipo'),
-            dataDocumento: any(named: 'dataDocumento'),
-            createdAt: any(named: 'createdAt'),
-            deletedAt: any(named: 'deletedAt'),
-          ),
-        );
-        verifyNever(() => localDatabase.listDocuments());
-        expect(result2.isSuccess(), true);
-        expect(result2.tryGetSuccess()!.length, 1);
-      },
-    );
+      verify(() => documentApiClient.listDocuments()).called(2);
+      expect(result2.isSuccess(), true);
+      expect(result2.tryGetSuccess()!.length, 2);
+    });
   });
 
   group("getDocumentMeta", () {
-    test(
-      "when called with non-existent document UUID on ApiClient then returns Error",
-      () async {
-        // Hook CacheDatabase getDocument with Mocktail to detect if it was called
-        when(
-          () => localDatabase.getDocument(any()),
-        ).thenAnswer((_) async => const Result.success(null));
-
-        // Hook DocumentApiClient getDocumentMeta to return Error()
-        final testError = Exception("Document not found");
-        when(
-          () => documentApiClient.getDocument(any()),
-        ).thenAnswer((_) async => Result.error(testError));
-
-        // Call repository getDocumentMeta
-        final result = await documentRepository.getDocumentMeta(
-          "non-existent-uuid",
-        );
-
-        // Assert method returned the same error as provided to ApiClient
-        // Assert method returned Error
-        expect(result.isError(), true);
-        expect(result.tryGetError(), testError);
-      },
-    );
-    test(
-      "if document cache is unavailable when getDocumentMeta is called then it should call api, store cache result and return it",
-      () async {
-        // Hook CacheDatabase getDocument to return null (cache unavailable)
-        when(
-          () => localDatabase.getDocument(any()),
-        ).thenAnswer((_) async => const Result.success(null));
-
-        // Hook DocumentApiClient getDocumentMeta to return Success with simple DocumentApiModel
-        final mockDocumentApiModel = DocumentApiModel(
-          uuid: "test-uuid",
-          titulo: "Test Document",
-          nomePaciente: "John Doe",
-          createdAt: DateTime(2025, 1, 1),
-        );
-
-        when(
-          () => documentApiClient.getDocument(any()),
-        ).thenAnswer((_) async => Result.success(mockDocumentApiModel));
-
-        when(
-          () => documentApiClient.listDocuments(),
-        ).thenAnswer((_) async => const Result.success([]));
-
-        // Hook CacheDatabase upsertDocument with Mocktail to detect cache was stored
-        when(
-          () => localDatabase.upsertDocument(
-            any(),
-            titulo: any(named: 'titulo'),
-            paciente: any(named: 'paciente'),
-            medico: any(named: 'medico'),
-            tipo: any(named: 'tipo'),
-            dataDocumento: any(named: 'dataDocumento'),
-            createdAt: any(named: 'createdAt'),
-            deletedAt: any(named: 'deletedAt'),
-            cachedAt: any(named: 'cachedAt'),
-          ),
-        ).thenAnswer(
-          (_) async => Result.success(
-            DocumentDbModel(
-              uuid: "test-uuid",
-              titulo: "Test Document",
-              paciente: "John Doe",
-              createdAt: DateTime(2025, 1, 1),
-            ),
-          ),
-        );
-
-        // Call repository getDocumentMeta
-        final result = await documentRepository.getDocumentMeta("test-uuid");
-
-        // Assert response was same DocumentApiModel as provided in the hook
-        expect(result.isSuccess(), true);
-        final document = result.tryGetSuccess()!;
-        expect(document.uuid, "test-uuid");
-        expect(document.titulo, "Test Document");
-        expect(document.paciente, "John Doe");
-
-        // Assert upsertDocument was called once (cache was stored)
-        verify(
-          () => localDatabase.upsertDocument(
-            "test-uuid",
+    setUp(() {
+      when(
+        () => localDatabase.upsertDocument(
+          any(),
+          titulo: any(named: 'titulo'),
+          paciente: any(named: 'paciente'),
+          medico: any(named: 'medico'),
+          tipo: any(named: 'tipo'),
+          dataDocumento: any(named: 'dataDocumento'),
+          createdAt: any(named: 'createdAt'),
+          deletedAt: any(named: 'deletedAt'),
+          cachedAt: any(named: 'cachedAt'),
+        ),
+      ).thenAnswer(
+        (_) async => Result.success(
+          DocumentDbModel(
+            uuid: "test-uuid",
             titulo: "Test Document",
             paciente: "John Doe",
-            medico: null,
-            tipo: null,
-            dataDocumento: null,
             createdAt: DateTime(2025, 1, 1),
-            deletedAt: null,
-            cachedAt: any(named: 'cachedAt'),
           ),
-        ).called(1);
+        ),
+      );
+    });
 
-        verify(() => documentApiClient.listDocuments()).called(1);
-      },
-    );
+    test("returns Error when document doesn't exist on ApiClient", () async {
+      when(
+        () => localDatabase.getDocument(any()),
+      ).thenAnswer((_) async => const Result.success(null));
+
+      final testError = Exception("Document not found");
+      when(
+        () => documentApiClient.getDocument(any()),
+      ).thenAnswer((_) async => Result.error(testError));
+
+      final result = await documentRepository.getDocumentMeta(
+        "non-existent-uuid",
+      );
+
+      expect(result.isError(), true);
+      expect(result.tryGetError(), testError);
+    });
+
+    test("fetches from API and caches when cache is unavailable", () async {
+      when(
+        () => localDatabase.getDocument(any()),
+      ).thenAnswer((_) async => const Result.success(null));
+
+      final mockDocumentApiModel = DocumentApiModel(
+        uuid: "test-uuid",
+        titulo: "Test Document",
+        nomePaciente: "John Doe",
+        createdAt: DateTime(2025, 1, 1),
+      );
+
+      when(
+        () => documentApiClient.getDocument(any()),
+      ).thenAnswer((_) async => Result.success(mockDocumentApiModel));
+
+      when(
+        () => documentApiClient.listDocuments(),
+      ).thenAnswer((_) async => const Result.success([]));
+
+      final result = await documentRepository.getDocumentMeta("test-uuid");
+
+      expect(result.isSuccess(), true);
+      final document = result.tryGetSuccess()!;
+      expect(document.uuid, "test-uuid");
+      expect(document.titulo, "Test Document");
+      expect(document.paciente, "John Doe");
+
+      verify(
+        () => localDatabase.upsertDocument(
+          "test-uuid",
+          titulo: "Test Document",
+          paciente: "John Doe",
+          medico: null,
+          tipo: null,
+          dataDocumento: null,
+          createdAt: DateTime(2025, 1, 1),
+          deletedAt: null,
+          cachedAt: any(named: 'cachedAt'),
+        ),
+      ).called(1);
+    });
 
     test(
-      "if document cache is available when getDocumentMeta is called then it should return the cache without calling ApiClient",
+      "returns cached document without calling API when cache is available",
       () async {
-        // Hook CacheDatabase getDocument to return a simple DocumentDbModel (cache available)
         final mockDocumentDbModel = DocumentDbModel(
           uuid: "test-uuid",
           titulo: "Cached Document",
@@ -417,95 +404,62 @@ void main() {
           () => localDatabase.getDocument(any()),
         ).thenAnswer((_) async => Result.success(mockDocumentDbModel));
 
-        // Hook DocumentApiClient getDocumentMeta with Mocktail to detect if it was called
-        when(() => documentApiClient.getDocument(any())).thenAnswer(
-          (_) async => Result.success(
-            DocumentApiModel(
-              uuid: "test-uuid",
-              createdAt: DateTime(2025, 1, 1),
-            ),
-          ),
-        );
-
-        when(
-          () => documentApiClient.listDocuments(),
-        ).thenAnswer((_) async => const Result.success([]));
-
-        // Call repository getDocumentMeta
         final result = await documentRepository.getDocumentMeta("test-uuid");
 
-        // Assert response was the same DocumentDbModel as provided in the hook
         expect(result.isSuccess(), true);
         final document = result.tryGetSuccess()!;
         expect(document.uuid, "test-uuid");
         expect(document.titulo, "Cached Document");
         expect(document.paciente, "Jane Doe");
 
-        // Assert DocumentApiClient getDocumentMeta was never called (cache was used)
         verifyNever(() => documentApiClient.getDocument(any()));
         verifyNever(() => documentApiClient.listDocuments());
-
-        // Assert CacheDatabase getDocument was called once (cache was used)
         verify(() => localDatabase.getDocument("test-uuid")).called(1);
       },
     );
   });
   group("getDocumentFile", () {
+    test("returns Error when document doesn't exist on server", () async {
+      when(
+        () => fileSystemService.getDocument(any()),
+      ).thenAnswer((_) async => const Result.success(null));
+
+      final testError = Exception("Document not found on server");
+      when(
+        () => documentApiClient.downloadDocument(any()),
+      ).thenAnswer((_) async => Result.error(testError));
+
+      final result = await documentRepository.getDocumentFile(
+        "non-existent-uuid",
+      );
+
+      expect(result.isError(), true);
+      expect(result.tryGetError(), testError);
+    });
+
     test(
-      "if called with non-existent document UUID on server then returns Error",
+      "downloads from API and stores locally when cache is unavailable",
       () async {
-        // Hook FileSystemService getDocument to return Success(null) (no cache)
-        when(
-          () => fileSystemService.getDocument(any()),
-        ).thenAnswer((_) async => const Result.success(null));
-
-        // Hook ApiClient downloadDocument to return Error
-        final testError = Exception("Document not found on server");
-        when(
-          () => documentApiClient.downloadDocument(any()),
-        ).thenAnswer((_) async => Result.error(testError));
-
-        // Call getDocumentFile
-        final result = await documentRepository.getDocumentFile(
-          "non-existent-uuid",
-        );
-
-        // Assert method returned the same Error as provided to ApiClient
-        expect(result.isError(), true);
-        expect(result.tryGetError(), testError);
-      },
-    );
-    test(
-      "if cache is unavailable when getDocumentFile is called then it should download from ApiClient, store in cache and return the file",
-      () async {
-        // Hook ApiClient downloadDocument to return Success with simple Uint8List
         final mockBytes = Uint8List.fromList([1, 2, 3, 4, 5]);
         when(
           () => documentApiClient.downloadDocument(any()),
         ).thenAnswer((_) async => Result.success(mockBytes));
 
-        // Hook FileSystemService getDocument to return Success(null), indicating no cache
         when(
           () => fileSystemService.getDocument(any()),
         ).thenAnswer((_) async => const Result.success(null));
 
-        // Hook FileSystemService storeDocument to detect if it was run
         final storedFile = MockFile();
         when(
           () => fileSystemService.storeDocument(any(), any()),
         ).thenAnswer((_) async => Result.success(storedFile));
 
-        // Call getDocumentFile
         final result = await documentRepository.getDocumentFile("test-uuid");
 
-        // Assert method returned Success with File
         expect(result.isSuccess(), true);
         expect(result.tryGetSuccess(), same(storedFile));
 
-        // Assert ApiClient.downloadDocument was called once
         verify(() => documentApiClient.downloadDocument("test-uuid")).called(1);
-
-        // Assert FileSystemService.storeDocument was called once with correct parameters
         verify(
           () => fileSystemService.storeDocument("test-uuid", mockBytes),
         ).called(1);
@@ -513,190 +467,145 @@ void main() {
     );
 
     test(
-      "if cache is available when getDocumentFile is called then it should return the file from cache without calling ApiClient",
+      "returns cached file without calling API when cache is available",
       () async {
-        // Hook ApiClient downloadDocument to assert it was never run
-        when(() => documentApiClient.downloadDocument(any())).thenAnswer(
-          (_) async => Result.success(Uint8List.fromList([1, 2, 3])),
-        );
-
-        // Hook FileSystemService getDocument() to return Success(File(path))
         final mockFile = File("/cache/test-uuid.pdf");
         when(
           () => fileSystemService.getDocument(any()),
         ).thenAnswer((_) async => Result.success(mockFile));
 
-        // Call getDocumentFile
         final result = await documentRepository.getDocumentFile("test-uuid");
 
-        // Assert method returned Success with the same file as provided in the hook
         expect(result.isSuccess(), true);
         expect(result.tryGetSuccess(), mockFile);
 
-        // Assert ApiClient.downloadDocument was never called
         verifyNever(() => documentApiClient.downloadDocument(any()));
       },
     );
   });
 
   group("updateDocument", () {
-    test(
-      "when called with non-existent document UUID then it should return Error",
-      () async {
-        // Hook ApiClient updateDocument to return Error
-        final testError = Exception("Document not found");
-        when(
-          () => documentApiClient.updateDocument(
-            any(),
-            titulo: any(named: 'titulo'),
-            nomePaciente: any(named: 'nomePaciente'),
-            nomeMedico: any(named: 'nomeMedico'),
-            tipoDocumento: any(named: 'tipoDocumento'),
-            dataDocumento: any(named: 'dataDocumento'),
+    setUp(() {
+      when(
+        () => localDatabase.upsertDocument(
+          any(),
+          titulo: any(named: 'titulo'),
+          paciente: any(named: 'paciente'),
+          medico: any(named: 'medico'),
+          tipo: any(named: 'tipo'),
+          dataDocumento: any(named: 'dataDocumento'),
+          createdAt: any(named: 'createdAt'),
+          deletedAt: any(named: 'deletedAt'),
+          cachedAt: any(named: 'cachedAt'),
+        ),
+      ).thenAnswer(
+        (_) async => Result.success(
+          DocumentDbModel(
+            uuid: "test-uuid",
+            titulo: "Updated Title",
+            paciente: "John Doe",
+            createdAt: DateTime(2025, 1, 1),
           ),
-        ).thenAnswer((_) async => Result.error(testError));
+        ),
+      );
+    });
 
-        // Call updateDocument
-        final result = await documentRepository.updateDocument(
-          "non-existent-uuid",
-          titulo: "Updated Title",
-        );
+    test("returns Error when document doesn't exist", () async {
+      final testError = Exception("Document not found");
+      when(
+        () => documentApiClient.updateDocument(
+          any(),
+          titulo: any(named: 'titulo'),
+          nomePaciente: any(named: 'nomePaciente'),
+          nomeMedico: any(named: 'nomeMedico'),
+          tipoDocumento: any(named: 'tipoDocumento'),
+          dataDocumento: any(named: 'dataDocumento'),
+        ),
+      ).thenAnswer((_) async => Result.error(testError));
 
-        // Assert method returned Error
-        expect(result.isError(), true);
-        expect(result.tryGetError(), testError);
-      },
-    );
-    test(
-      "when called with existent document UUID on server then it should renew cache and returns Success with Document model",
-      () async {
-        // Hook ApiClient updateDocument to return Success
-        final mockUpdatedDocument = DocumentApiModel(
-          uuid: "test-uuid",
-          titulo: "Updated Title",
-          nomePaciente: "John Doe",
-          createdAt: DateTime(2025, 1, 1),
-        );
+      final result = await documentRepository.updateDocument(
+        "non-existent-uuid",
+        titulo: "Updated Title",
+      );
 
-        when(
-          () => documentApiClient.updateDocument(
-            any(),
-            titulo: any(named: 'titulo'),
-            nomePaciente: any(named: 'nomePaciente'),
-            nomeMedico: any(named: 'nomeMedico'),
-            tipoDocumento: any(named: 'tipoDocumento'),
-            dataDocumento: any(named: 'dataDocumento'),
-          ),
-        ).thenAnswer((_) async => Result.success(mockUpdatedDocument));
+      expect(result.isError(), true);
+      expect(result.tryGetError(), testError);
+    });
 
-        when(
-          () => documentApiClient.listDocuments(),
-        ).thenAnswer((_) async => const Result.success([]));
+    test("updates document on server and renews cache", () async {
+      final mockUpdatedDocument = DocumentApiModel(
+        uuid: "test-uuid",
+        titulo: "Updated Title",
+        nomePaciente: "John Doe",
+        createdAt: DateTime(2025, 1, 1),
+      );
 
-        // Hook CacheDatabase upsertDocument to detect cache update
-        when(
-          () => localDatabase.upsertDocument(
-            any(),
-            titulo: any(named: 'titulo'),
-            paciente: any(named: 'paciente'),
-            medico: any(named: 'medico'),
-            tipo: any(named: 'tipo'),
-            dataDocumento: any(named: 'dataDocumento'),
-            createdAt: any(named: 'createdAt'),
-            deletedAt: any(named: 'deletedAt'),
-            cachedAt: any(named: 'cachedAt'),
-          ),
-        ).thenAnswer(
-          (_) async => Result.success(
-            DocumentDbModel(
-              uuid: "test-uuid",
-              titulo: "Updated Title",
-              paciente: "John Doe",
-              createdAt: DateTime(2025, 1, 1),
-            ),
-          ),
-        );
+      when(
+        () => documentApiClient.updateDocument(
+          any(),
+          titulo: any(named: 'titulo'),
+          nomePaciente: any(named: 'nomePaciente'),
+          nomeMedico: any(named: 'nomeMedico'),
+          tipoDocumento: any(named: 'tipoDocumento'),
+          dataDocumento: any(named: 'dataDocumento'),
+        ),
+      ).thenAnswer((_) async => Result.success(mockUpdatedDocument));
 
-        // Call updateDocument
-        final result = await documentRepository.updateDocument(
+      final result = await documentRepository.updateDocument(
+        "test-uuid",
+        titulo: "Updated Title",
+        paciente: "John Doe",
+      );
+
+      expect(result.isSuccess(), true);
+      final document = result.tryGetSuccess()!;
+      expect(document.uuid, "test-uuid");
+      expect(document.titulo, "Updated Title");
+
+      verify(
+        () => localDatabase.upsertDocument(
           "test-uuid",
           titulo: "Updated Title",
           paciente: "John Doe",
-        );
-
-        // Assert method returned Success with updated Document
-        expect(result.isSuccess(), true);
-        final document = result.tryGetSuccess()!;
-        expect(document.uuid, "test-uuid");
-        expect(document.titulo, "Updated Title");
-
-        // Assert cache was updated
-        verify(
-          () => localDatabase.upsertDocument(
-            "test-uuid",
-            titulo: "Updated Title",
-            paciente: "John Doe",
-            medico: null,
-            tipo: null,
-            dataDocumento: null,
-            createdAt: DateTime(2025, 1, 1),
-            deletedAt: null,
-            cachedAt: any(named: 'cachedAt'),
-          ),
-        ).called(1);
-      },
-    );
+          medico: null,
+          tipo: null,
+          dataDocumento: null,
+          createdAt: DateTime(2025, 1, 1),
+          deletedAt: null,
+          cachedAt: any(named: 'cachedAt'),
+        ),
+      ).called(1);
+    });
   });
 
   group("moveToTrash", () {
-    test(
-      "when called with non-existent document UUID on server then it should return Error",
-      () async {
-        // Hook ApiClient trashDocument to return Error
-        final testError = Exception("Document not found");
-        when(
-          () => documentApiClient.trashDocument(any()),
-        ).thenAnswer((_) async => Result.error(testError));
+    test("returns Error when document doesn't exist on server", () async {
+      final testError = Exception("Document not found");
+      when(
+        () => documentApiClient.trashDocument(any()),
+      ).thenAnswer((_) async => Result.error(testError));
 
-        // Call moveToTrash
-        final result = await documentRepository.moveToTrash(
-          "non-existent-uuid",
-        );
+      final result = await documentRepository.moveToTrash("non-existent-uuid");
 
-        // Assert method returned Error
-        expect(result.isError(), true);
-        expect(result.tryGetError(), testError);
-      },
-    );
-    test(
-      "when called with existent document UUID on server then it should call trashDocument on server and call trashDocument on CacheDatabase",
-      () async {
-        // Hook ApiClient trashDocument to return Success
-        when(
-          () => documentApiClient.trashDocument(any()),
-        ).thenAnswer((_) async => const Result.success(null));
+      expect(result.isError(), true);
+      expect(result.tryGetError(), testError);
+    });
 
-        when(
-          () => documentApiClient.listDocuments(),
-        ).thenAnswer((_) async => const Result.success([]));
+    test("trashes document on server and updates cache", () async {
+      when(
+        () => documentApiClient.trashDocument(any()),
+      ).thenAnswer((_) async => const Result.success(null));
 
-        // Hook CacheDatabase trashDocument to detect it was called
-        when(
-          () => localDatabase.trashDocument(any()),
-        ).thenAnswer((_) async => const Result.success(null));
+      when(
+        () => localDatabase.trashDocument(any()),
+      ).thenAnswer((_) async => const Result.success(null));
 
-        // Call moveToTrash
-        final result = await documentRepository.moveToTrash("test-uuid");
+      final result = await documentRepository.moveToTrash("test-uuid");
 
-        // Assert method returned Success
-        expect(result.isSuccess(), true);
+      expect(result.isSuccess(), true);
 
-        // Assert ApiClient trashDocument was called
-        verify(() => documentApiClient.trashDocument("test-uuid")).called(1);
-
-        // Assert CacheDatabase trashDocument was called
-        verify(() => localDatabase.trashDocument("test-uuid")).called(1);
-      },
-    );
+      verify(() => documentApiClient.trashDocument("test-uuid")).called(1);
+      verify(() => localDatabase.trashDocument("test-uuid")).called(1);
+    });
   });
 }

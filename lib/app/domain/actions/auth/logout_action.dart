@@ -1,5 +1,6 @@
 import 'package:logging/logging.dart';
 import 'package:minha_saude_frontend/app/data/repositories/document/document_repository.dart';
+import 'package:minha_saude_frontend/app/data/repositories/profile/profile_repository.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../../data/repositories/session/session_repository.dart';
@@ -7,26 +8,28 @@ import '../../../data/repositories/auth/auth_repository.dart';
 
 class LogoutAction {
   LogoutAction({
-    required AuthRepository authRepository,
-    required SessionRepository sessionRepository,
-    required DocumentRepository documentRepository,
-  }) : _authRepository = authRepository,
-       _sessionRepository = sessionRepository,
-       _documentRepository = documentRepository;
+    required this.authRepository,
+    required this.sessionRepository,
+    required this.documentRepository,
+    required this.profileRepository,
+  });
 
-  final AuthRepository _authRepository;
-  final SessionRepository _sessionRepository;
-  final DocumentRepository _documentRepository;
+  final AuthRepository authRepository;
+  final SessionRepository sessionRepository;
+  final DocumentRepository documentRepository;
+  final ProfileRepository profileRepository;
   final Logger _log = Logger("LogoutAction");
 
   Future<Result<void, Exception>> execute() async {
     try {
       // Call API to logout
-      await _authRepository.logout();
+      await authRepository.logout();
       // Clear all tokens and state through session repository
-      await _sessionRepository.clearAuthToken();
+      await sessionRepository.clearAuthToken();
       // Reset CacheDatabase through DocumentRepository
-      await _documentRepository.resetCache();
+      await documentRepository.clearCache();
+      // Reset other repositories if needed
+      await profileRepository.clearCache();
 
       return Result.success(null);
     } catch (e, s) {

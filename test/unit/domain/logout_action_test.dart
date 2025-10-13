@@ -1,5 +1,6 @@
 import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/document/document_repository.dart';
+import 'package:minha_saude_frontend/app/data/repositories/profile/profile_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/session/session_repository.dart';
 import 'package:minha_saude_frontend/app/domain/actions/auth/logout_action.dart';
 import 'package:mocktail/mocktail.dart';
@@ -8,22 +9,26 @@ import 'package:test/test.dart';
 
 import '../../mocks/mock_auth_repository.dart';
 import '../../mocks/mock_document_repository.dart';
+import '../../mocks/mock_profile_repository.dart';
 import '../../mocks/mock_session_repository.dart';
 
 void main() {
   late AuthRepository authRepository;
   late DocumentRepository documentRepository;
   late SessionRepository sessionRepository;
+  late ProfileRepository profileRepository;
   late LogoutAction logoutAction;
 
   setUp(() {
     authRepository = MockAuthRepository();
     documentRepository = MockDocumentRepository();
     sessionRepository = MockSessionRepository();
+    profileRepository = MockProfileRepository();
     logoutAction = LogoutAction(
       documentRepository: documentRepository,
       authRepository: authRepository,
       sessionRepository: sessionRepository,
+      profileRepository: profileRepository,
     );
   });
 
@@ -39,7 +44,7 @@ void main() {
       ).thenAnswer((_) async => const Result.success(null));
 
       // Hook DocumentRepository.resetCache to complete successfully
-      when(() => documentRepository.resetCache()).thenAnswer((_) async {});
+      when(() => documentRepository.clearCache()).thenAnswer((_) async {});
 
       // Execute action
       final result = await logoutAction.execute();
@@ -50,7 +55,7 @@ void main() {
       // Assert all repository methods were called in correct order
       verify(() => authRepository.logout()).called(1);
       verify(() => sessionRepository.clearAuthToken()).called(1);
-      verify(() => documentRepository.resetCache()).called(1);
+      verify(() => documentRepository.clearCache()).called(1);
     },
   );
 
@@ -64,7 +69,7 @@ void main() {
       when(
         () => sessionRepository.clearAuthToken(),
       ).thenAnswer((_) async => const Result.success(null));
-      when(() => documentRepository.resetCache()).thenAnswer((_) async {});
+      when(() => documentRepository.clearCache()).thenAnswer((_) async {});
 
       // Execute action
       final result = await logoutAction.execute();
@@ -81,7 +86,7 @@ void main() {
 
       // Assert other methods were not called due to exception
       verifyNever(() => sessionRepository.clearAuthToken());
-      verifyNever(() => documentRepository.resetCache());
+      verifyNever(() => documentRepository.clearCache());
     },
   );
 
@@ -97,7 +102,7 @@ void main() {
       ).thenThrow(Exception("Storage error"));
 
       // Hook DocumentRepository to detect if it's called
-      when(() => documentRepository.resetCache()).thenAnswer((_) async {});
+      when(() => documentRepository.clearCache()).thenAnswer((_) async {});
 
       // Execute action
       final result = await logoutAction.execute();
@@ -114,7 +119,7 @@ void main() {
       verify(() => sessionRepository.clearAuthToken()).called(1);
 
       // Assert resetCache was not called due to exception
-      verifyNever(() => documentRepository.resetCache());
+      verifyNever(() => documentRepository.clearCache());
     },
   );
 
@@ -131,7 +136,7 @@ void main() {
 
       // Hook DocumentRepository.resetCache to throw exception
       when(
-        () => documentRepository.resetCache(),
+        () => documentRepository.clearCache(),
       ).thenThrow(Exception("Database error"));
 
       // Execute action
@@ -147,7 +152,7 @@ void main() {
       // Assert all methods were called
       verify(() => authRepository.logout()).called(1);
       verify(() => sessionRepository.clearAuthToken()).called(1);
-      verify(() => documentRepository.resetCache()).called(1);
+      verify(() => documentRepository.clearCache()).called(1);
     },
   );
 }

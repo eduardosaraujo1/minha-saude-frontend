@@ -72,7 +72,7 @@ final _router = GoRouter(
           path: Routes.login,
           builder: (BuildContext context, GoRouterState state) {
             return LoginView(
-              LoginViewModel(
+              () => LoginViewModel(
                 _getIt<AuthRepository>(),
                 _getIt<LoginWithGoogle>(),
               ),
@@ -82,14 +82,14 @@ final _router = GoRouter(
         GoRoute(
           path: Routes.tos,
           builder: (BuildContext context, GoRouterState state) {
-            return TosView(TosViewModel());
+            return TosView(() => TosViewModel());
           },
           routes: [
             GoRoute(
               path: Routes.registerRelative,
               builder: (BuildContext context, GoRouterState state) {
                 return RegisterView(
-                  RegisterViewModel(registerAction: _getIt<RegisterAction>()),
+                  () => RegisterViewModel(registerAction: _getIt<RegisterAction>()),
                 );
               },
             ),
@@ -100,7 +100,7 @@ final _router = GoRouter(
           path: Routes.documentosUpload,
           builder: (BuildContext context, GoRouterState state) {
             return DocumentUploadView(
-              DocumentUploadViewModel(
+              () => DocumentUploadViewModel(
                 DocumentUploadMethod.upload,
                 _getIt<DocumentRepository>(),
               ),
@@ -111,7 +111,7 @@ final _router = GoRouter(
           path: Routes.documentosScan,
           builder: (BuildContext context, GoRouterState state) {
             return DocumentUploadView(
-              DocumentUploadViewModel(
+              () => DocumentUploadViewModel(
                 DocumentUploadMethod.scan,
                 _getIt<DocumentRepository>(),
               ),
@@ -136,7 +136,7 @@ final _router = GoRouter(
                   path: Routes.documentosRelative,
                   builder: (context, state) {
                     return DocumentListScreen(
-                      DocumentListViewModel(
+                      () => DocumentListViewModel(
                         documentRepository: _getIt<DocumentRepository>(),
                       ),
                     );
@@ -146,7 +146,7 @@ final _router = GoRouter(
                       path: ':id',
                       builder: (BuildContext context, GoRouterState state) {
                         return DocumentView(
-                          DocumentViewModel(
+                          () => DocumentViewModel(
                             documentUuid: state.pathParameters['id'] ?? '',
                             documentRepository: _getIt<DocumentRepository>(),
                           ),
@@ -157,7 +157,7 @@ final _router = GoRouter(
                           path: Routes.documentosInfoRelative,
                           builder: (context, state) {
                             return DocumentMetadataView(
-                              viewModel: DocumentMetadataViewModel(
+                              viewModel: () => DocumentMetadataViewModel(
                                 documentUuid: state.pathParameters['id'] ?? '',
                                 documentRepository:
                                     _getIt<DocumentRepository>(),
@@ -169,7 +169,7 @@ final _router = GoRouter(
                           path: Routes.documentosEditRelative,
                           builder: (context, state) {
                             return DocumentEditScreen(
-                              DocumentEditViewModel(
+                              () => DocumentEditViewModel(
                                 documentUuid: state.pathParameters['id'] ?? '',
                                 documentRepository:
                                     _getIt<DocumentRepository>(),
@@ -217,7 +217,7 @@ final _router = GoRouter(
                   path: Routes.lixeira,
                   builder: (BuildContext context, GoRouterState state) {
                     return TrashIndexView(
-                      viewModel: TrashIndexViewModel(
+                      viewModel: () => TrashIndexViewModel(
                         trashRepository: _getIt<TrashRepository>(),
                       ),
                     );
@@ -238,7 +238,7 @@ final _router = GoRouter(
                       },
                       builder: (context, state) {
                         return DeletedDocumentView(
-                          viewModel: DeletedDocumentViewModel(
+                          viewModel: () => DeletedDocumentViewModel(
                             documentUuid: state.pathParameters['id']!,
                             trashRepository: _getIt<TrashRepository>(),
                           ),
@@ -256,7 +256,7 @@ final _router = GoRouter(
                   path: Routes.configuracoes,
                   builder: (BuildContext context, GoRouterState state) {
                     return SettingsTabView(
-                      SettingsViewModel(
+                      () => SettingsViewModel(
                         profileRepository: _getIt<ProfileRepository>(),
                         deleteUserAction: _getIt<DeleteUserAction>(),
                         requestExportAction: _getIt<RequestExportAction>(),
@@ -269,7 +269,7 @@ final _router = GoRouter(
                       path: Routes.editNomeRelative,
                       builder: (context, state) {
                         return SettingsEditName(
-                          viewModel: SettingsEditViewModel(
+                          viewModel: () => SettingsEditViewModel(
                             fieldType: SettingsEditField.name,
                             profileRepository: _getIt<ProfileRepository>(),
                           ),
@@ -280,7 +280,7 @@ final _router = GoRouter(
                       path: Routes.editTelefoneRelative,
                       builder: (context, state) {
                         return SettingsEditPhone(
-                          viewModel: SettingsEditViewModel(
+                          viewModel: () => SettingsEditViewModel(
                             fieldType: SettingsEditField.phone,
                             profileRepository: _getIt<ProfileRepository>(),
                           ),
@@ -291,7 +291,7 @@ final _router = GoRouter(
                       path: Routes.editBirthdateRelative,
                       builder: (context, state) {
                         return SettingsEditBirthdate(
-                          viewModel: SettingsEditViewModel(
+                          viewModel: () => SettingsEditViewModel(
                             fieldType: SettingsEditField.birthdate,
                             profileRepository: _getIt<ProfileRepository>(),
                           ),

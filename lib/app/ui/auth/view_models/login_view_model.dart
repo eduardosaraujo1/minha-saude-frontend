@@ -2,11 +2,12 @@ import 'package:command_it/command_it.dart';
 import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../view_model.dart';
 import '../../../data/repositories/auth/auth_repository.dart';
 import '../../../domain/actions/auth/login_with_google.dart';
 import '../../../routing/routes.dart';
 
-class LoginViewModel {
+class LoginViewModel implements ViewModel {
   LoginViewModel(this._authRepository, this._loginWithGoogleAction) {
     loginWithGoogle = Command.createAsyncNoParam(
       _loginWithGoogle,
@@ -59,6 +60,11 @@ class LoginViewModel {
     } catch (e) {
       _log.warning("Erro durante logout: $e");
     }
+  }
+
+  @override
+  void dispose() {
+    loginWithGoogle.dispose();
   }
 }
 

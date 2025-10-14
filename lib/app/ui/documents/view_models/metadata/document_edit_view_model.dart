@@ -20,9 +20,6 @@ class DocumentEditViewModel {
       _updateDocument,
       initialValue: null,
     );
-
-    // Auto-load document on initialization
-    loadDocument.execute();
   }
 
   final String documentUuid;

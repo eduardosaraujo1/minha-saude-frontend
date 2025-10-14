@@ -82,14 +82,16 @@ final _router = GoRouter(
         GoRoute(
           path: Routes.tos,
           builder: (BuildContext context, GoRouterState state) {
-            return TosView(() => TosViewModel());
+            return TosView(TosViewModel());
           },
           routes: [
             GoRoute(
               path: Routes.registerRelative,
               builder: (BuildContext context, GoRouterState state) {
                 return RegisterView(
-                  () => RegisterViewModel(registerAction: _getIt<RegisterAction>()),
+                  () => RegisterViewModel(
+                    registerAction: _getIt<RegisterAction>(),
+                  ),
                 );
               },
             ),
@@ -157,7 +159,7 @@ final _router = GoRouter(
                           path: Routes.documentosInfoRelative,
                           builder: (context, state) {
                             return DocumentMetadataView(
-                              viewModel: () => DocumentMetadataViewModel(
+                              viewModel: DocumentMetadataViewModel(
                                 documentUuid: state.pathParameters['id'] ?? '',
                                 documentRepository:
                                     _getIt<DocumentRepository>(),
@@ -217,7 +219,7 @@ final _router = GoRouter(
                   path: Routes.lixeira,
                   builder: (BuildContext context, GoRouterState state) {
                     return TrashIndexView(
-                      viewModel: () => TrashIndexViewModel(
+                      viewModelFactory: () => TrashIndexViewModel(
                         trashRepository: _getIt<TrashRepository>(),
                       ),
                     );
@@ -238,7 +240,7 @@ final _router = GoRouter(
                       },
                       builder: (context, state) {
                         return DeletedDocumentView(
-                          viewModel: () => DeletedDocumentViewModel(
+                          viewModelFactory: () => DeletedDocumentViewModel(
                             documentUuid: state.pathParameters['id']!,
                             trashRepository: _getIt<TrashRepository>(),
                           ),

@@ -1,46 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/domain/models/document/document.dart';
 import 'package:pdfx/pdfx.dart';
 
+import '../../../domain/models/document/document.dart';
 import '../../../routing/routes.dart';
 import '../view_models/document_view_model.dart';
 import '../../core/widgets/document_pdf_viewer.dart';
 import 'page_indicator.dart';
 
 class DocumentView extends StatefulWidget {
-  const DocumentView(this._viewModel, {super.key});
+  const DocumentView(this.viewModelFactory, {super.key});
 
-  final DocumentViewModel _viewModel;
+  final DocumentViewModel Function() viewModelFactory;
 
   @override
   State<DocumentView> createState() => _DocumentViewState();
 }
 
 class _DocumentViewState extends State<DocumentView> {
+  late final DocumentViewModel viewModel = widget.viewModelFactory();
+
   @override
   void initState() {
     super.initState();
-    widget._viewModel.deleteDocument.addListener(_handleDeleteDocument);
-  }
 
-  @override
-  void didUpdateWidget(DocumentView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget._viewModel != widget._viewModel) {
-      oldWidget._viewModel.deleteDocument.removeListener(_handleDeleteDocument);
-      widget._viewModel.deleteDocument.addListener(_handleDeleteDocument);
-    }
+    viewModel.deleteDocument.addListener(_handleDeleteDocument);
+    viewModel.loadDocument.execute();
   }
 
   @override
   void dispose() {
-    widget._viewModel.deleteDocument.removeListener(_handleDeleteDocument);
+    viewModel.deleteDocument.removeListener(_handleDeleteDocument);
     super.dispose();
   }
 
   void _handleDeleteDocument() {
-    final command = widget._viewModel.deleteDocument;
+    final command = viewModel.deleteDocument;
 
     if (command.isExecuting.value || command.value == null) {
       return;
@@ -66,12 +61,10 @@ class _DocumentViewState extends State<DocumentView> {
 
   void _handleActionMenuClick(DocumentAction action) {
     if (action == DocumentAction.view) {
-      final infoRoute = Routes.documentosInfo(widget._viewModel.documentUuid);
+      final infoRoute = Routes.documentosInfo(viewModel.documentUuid);
       context.go(infoRoute);
     } else if (action == DocumentAction.edit) {
-      final documentosEdit = Routes.documentosEdit(
-        widget._viewModel.documentUuid,
-      );
+      final documentosEdit = Routes.documentosEdit(viewModel.documentUuid);
       context.go(documentosEdit);
     } else if (action == DocumentAction.delete) {
       _showDeleteDocumentDialog(context);
@@ -89,7 +82,7 @@ class _DocumentViewState extends State<DocumentView> {
         actions: [_DocumentActionsMenu(_handleActionMenuClick)],
       ),
       body: ValueListenableBuilder(
-        valueListenable: widget._viewModel.loadDocument,
+        valueListenable: viewModel.loadDocument,
         builder: (context, docResult, child) {
           if (docResult == null) {
             return const Center(
@@ -118,7 +111,7 @@ class _DocumentViewState extends State<DocumentView> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => widget._viewModel.loadDocument.execute(),
+                    onPressed: () => viewModel.loadDocument.execute(),
                     child: const Text('Tentar novamente'),
                   ),
                 ],
@@ -133,12 +126,12 @@ class _DocumentViewState extends State<DocumentView> {
               DocumentPdfViewer(
                 document: PdfDocument.openFile(document.file.path),
                 onPageChanged: (page) {
-                  widget._viewModel.currentPage.value = page;
+                  viewModel.currentPage.value = page;
                 },
                 onDocumentLoaded: (documentFile) {
                   // Store page state for use in PageIndicator
-                  widget._viewModel.totalPages.value = documentFile.pagesCount;
-                  widget._viewModel.currentPage.value = 1;
+                  viewModel.totalPages.value = documentFile.pagesCount;
+                  viewModel.currentPage.value = 1;
                 },
               ),
               Positioned(
@@ -147,8 +140,8 @@ class _DocumentViewState extends State<DocumentView> {
                 right: 0,
                 child: Center(
                   child: PageIndicator(
-                    currentPage: widget._viewModel.currentPage,
-                    totalPages: widget._viewModel.totalPages,
+                    currentPage: viewModel.currentPage,
+                    totalPages: viewModel.totalPages,
                   ),
                 ),
               ),
@@ -160,9 +153,7 @@ class _DocumentViewState extends State<DocumentView> {
   }
 
   void _showDeleteDocumentDialog(BuildContext context) {
-    final document = widget._viewModel.loadDocument.value
-        ?.tryGetSuccess()
-        ?.document;
+    final document = viewModel.loadDocument.value?.tryGetSuccess()?.document;
     if (document == null) {
       return; // Document info unavailable, cannot delete
     }
@@ -173,7 +164,7 @@ class _DocumentViewState extends State<DocumentView> {
         return _DeleteDocumentDialog(
           document: document,
           onConfirm: () {
-            widget._viewModel.triggerDocumentDelete();
+            viewModel.triggerDocumentDelete();
           },
         );
       },

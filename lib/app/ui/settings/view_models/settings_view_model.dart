@@ -1,14 +1,15 @@
 import 'package:command_it/command_it.dart';
 import 'package:logging/logging.dart';
-import 'package:minha_saude_frontend/app/data/repositories/profile/profile_repository.dart';
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../../data/repositories/profile/profile_repository.dart';
+import '../../view_model.dart';
 import '../../../domain/actions/settings/request_export_action.dart';
 import '../../../domain/models/profile/profile.dart';
 import '../../../domain/actions/settings/delete_user_action.dart';
 import '../../../domain/actions/auth/logout_action.dart';
 
-class SettingsViewModel {
+class SettingsViewModel implements ViewModel {
   SettingsViewModel({
     required this.profileRepository,
     required this.logoutAction,
@@ -73,7 +74,11 @@ class SettingsViewModel {
     }
   }
 
+  @override
   void dispose() {
     profileRepository.removeListener(_reload);
+    loadProfile.dispose();
+    requestDeletionCommand.dispose();
+    requestExportCommand.dispose();
   }
 }

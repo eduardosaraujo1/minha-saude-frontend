@@ -4,51 +4,45 @@ import 'package:go_router/go_router.dart';
 import '../../view_models/metadata/document_edit_view_model.dart';
 
 class DocumentEditScreen extends StatefulWidget {
-  const DocumentEditScreen(this.viewModel, {super.key});
+  const DocumentEditScreen(this.viewModelFactory, {super.key});
 
-  final DocumentEditViewModel viewModel;
+  final DocumentEditViewModel Function() viewModelFactory;
 
   @override
   State<DocumentEditScreen> createState() => _DocumentEditScreenState();
 }
 
 class _DocumentEditScreenState extends State<DocumentEditScreen> {
+  late final DocumentEditViewModel viewModel = widget.viewModelFactory();
+
   @override
   void initState() {
     super.initState();
-    widget.viewModel.updateDocument.addListener(_onUpdateCommand);
-  }
-
-  @override
-  void didUpdateWidget(DocumentEditScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.viewModel != widget.viewModel) {
-      oldWidget.viewModel.updateDocument.removeListener(_onUpdateCommand);
-      widget.viewModel.updateDocument.addListener(_onUpdateCommand);
-    }
+    viewModel.updateDocument.addListener(_onUpdateCommand);
+    viewModel.loadDocument.execute();
   }
 
   @override
   void dispose() {
-    widget.viewModel.updateDocument.removeListener(_onUpdateCommand);
+    viewModel.updateDocument.removeListener(_onUpdateCommand);
     super.dispose();
   }
 
   void triggerUpdateIfValid() {
-    if (widget.viewModel.form.validate()) {
-      widget.viewModel.updateDocument.execute();
+    if (viewModel.form.validate()) {
+      viewModel.updateDocument.execute();
     }
   }
 
   void _onUpdateCommand() {
     if (!mounted) return;
-    if (widget.viewModel.updateDocument.value == null) {
+    if (viewModel.updateDocument.value == null) {
       // Initial state
       return;
     }
 
-    if (widget.viewModel.updateDocument.value!.isError()) {
-      final error = widget.viewModel.updateDocument.value!.tryGetError()!;
+    if (viewModel.updateDocument.value!.isError()) {
+      final error = viewModel.updateDocument.value!.tryGetError()!;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -72,9 +66,9 @@ class _DocumentEditScreenState extends State<DocumentEditScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Editar Documento')),
       body: ValueListenableBuilder(
-        valueListenable: widget.viewModel.loadDocument.isExecuting,
+        valueListenable: viewModel.loadDocument.isExecuting,
         builder: (context, isLoading, child) {
-          if (isLoading || widget.viewModel.loadDocument.value == null) {
+          if (isLoading || viewModel.loadDocument.value == null) {
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -82,54 +76,54 @@ class _DocumentEditScreenState extends State<DocumentEditScreen> {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Form(
-                key: widget.viewModel.form.formKey,
+                key: viewModel.form.formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   spacing: 8,
                   children: [
                     TextFormField(
                       key: const ValueKey('tituloField'),
-                      controller: widget.viewModel.form.titulo,
+                      controller: viewModel.form.titulo,
                       decoration: const InputDecoration(
                         labelText: 'Título',
                         counterText: '',
                       ),
                       maxLength: 100,
-                      validator: widget.viewModel.form.validateTitulo,
+                      validator: viewModel.form.validateTitulo,
                     ),
                     TextFormField(
                       key: const ValueKey('pacienteField'),
-                      controller: widget.viewModel.form.paciente,
+                      controller: viewModel.form.paciente,
                       decoration: const InputDecoration(
                         labelText: 'Paciente',
                         counterText: '',
                       ),
                       maxLength: 100,
-                      validator: widget.viewModel.form.validatePaciente,
+                      validator: viewModel.form.validatePaciente,
                     ),
                     TextFormField(
                       key: const ValueKey('medicoField'),
-                      controller: widget.viewModel.form.medico,
+                      controller: viewModel.form.medico,
                       decoration: const InputDecoration(
                         labelText: 'Médico',
                         counterText: '',
                       ),
                       maxLength: 100,
-                      validator: widget.viewModel.form.validateMedico,
+                      validator: viewModel.form.validateMedico,
                     ),
                     TextFormField(
                       key: const ValueKey('tipoField'),
-                      controller: widget.viewModel.form.tipo,
+                      controller: viewModel.form.tipo,
                       decoration: const InputDecoration(
                         labelText: 'Tipo de Documento',
                         counterText: '',
                       ),
                       maxLength: 100,
-                      validator: widget.viewModel.form.validateTipo,
+                      validator: viewModel.form.validateTipo,
                     ),
                     TextFormField(
                       key: const ValueKey("dataDocumentoField"),
-                      controller: widget.viewModel.form.dataDocumento,
+                      controller: viewModel.form.dataDocumento,
                       decoration: const InputDecoration(
                         labelText: 'Data do Documento',
                         suffixIcon: Icon(Icons.calendar_today),
@@ -139,8 +133,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen> {
                       onTap: () => _triggerDocDatePicker(context),
                     ),
                     ValueListenableBuilder(
-                      valueListenable:
-                          widget.viewModel.updateDocument.isExecuting,
+                      valueListenable: viewModel.updateDocument.isExecuting,
                       builder: (context, updatingDoc, child) {
                         return Row(
                           spacing: 4,
@@ -180,7 +173,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen> {
   }
 
   void _triggerDocDatePicker(BuildContext context) async {
-    final controller = widget.viewModel.form.dataDocumento;
+    final controller = viewModel.form.dataDocumento;
 
     DateTime? pickedDate = await showDatePicker(
       context: context,

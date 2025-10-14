@@ -10,46 +10,41 @@ import 'document_upload_fab.dart';
 import 'sorted_document_list.dart';
 
 class DocumentListScreen extends StatefulWidget {
-  final DocumentListViewModel viewModel;
+  final DocumentListViewModel Function() viewModelFactory;
 
-  const DocumentListScreen(this.viewModel, {super.key});
+  const DocumentListScreen(this.viewModelFactory, {super.key});
 
   @override
   State<DocumentListScreen> createState() => _DocumentListScreenState();
 }
 
 class _DocumentListScreenState extends State<DocumentListScreen> {
+  late final viewModel = widget.viewModelFactory();
+
   @override
   void initState() {
     super.initState();
-    widget.viewModel.loadDocuments.addListener(_onLoadUpdate);
-  }
 
-  @override
-  void didUpdateWidget(DocumentListScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.viewModel != widget.viewModel) {
-      oldWidget.viewModel.loadDocuments.removeListener(_onLoadUpdate);
-      widget.viewModel.loadDocuments.addListener(_onLoadUpdate);
-    }
+    viewModel.loadDocuments.addListener(_onLoadUpdate);
   }
 
   @override
   void dispose() {
-    widget.viewModel.loadDocuments.removeListener(_onLoadUpdate);
+    viewModel.loadDocuments.removeListener(_onLoadUpdate);
+
     super.dispose();
   }
 
   void _onLoadUpdate() {
     if (!mounted) return;
 
-    if (widget.viewModel.loadDocuments.value == null) {
+    if (viewModel.loadDocuments.value == null) {
       // Initial state
       return;
     }
 
-    if (widget.viewModel.loadDocuments.value!.isError()) {
-      final error = widget.viewModel.loadDocuments.value!.tryGetError()!;
+    if (viewModel.loadDocuments.value!.isError()) {
+      final error = viewModel.loadDocuments.value!.tryGetError()!;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -72,13 +67,13 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
           onPressed: () {},
           icon: _SortMenu(
             onSelected: (GroupingAlgorithm algorithm) {
-              widget.viewModel.selectedAlgorithm.value = algorithm;
+              viewModel.selectedAlgorithm.value = algorithm;
             },
           ),
         ),
       ),
       body: ValueListenableBuilder(
-        valueListenable: widget.viewModel.loadDocuments.results,
+        valueListenable: viewModel.loadDocuments.results,
         builder: (context, documentState, child) {
           if (documentState.isExecuting || !documentState.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -99,7 +94,7 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              widget.viewModel.refresh();
+              viewModel.refresh();
             },
             child: SizedBox(
               height: double.infinity,
@@ -119,7 +114,7 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
                       ),
                     if (documents.isNotEmpty)
                       ValueListenableBuilder(
-                        valueListenable: widget.viewModel.selectedAlgorithm,
+                        valueListenable: viewModel.selectedAlgorithm,
                         builder: (context, value, child) {
                           return SortedDocumentList(
                             documents: documents,

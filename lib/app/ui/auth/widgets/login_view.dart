@@ -9,9 +9,9 @@ import 'button_sign_in.dart';
 import 'login_decorator.dart';
 
 class LoginView extends StatefulWidget {
-  const LoginView(this.viewModel, {super.key});
+  const LoginView(this.viewModelFactory, {super.key});
 
-  final LoginViewModel viewModel;
+  final LoginViewModel Function() viewModelFactory;
 
   @override
   State<LoginView> createState() => _LoginViewState();
@@ -23,13 +23,14 @@ class _LoginViewState extends State<LoginView> {
   @override
   void initState() {
     super.initState();
-    viewModel = widget.viewModel;
+    viewModel = widget.viewModelFactory();
     viewModel.loginWithGoogle.addListener(_onUpdate);
   }
 
   @override
   void dispose() {
     viewModel.loginWithGoogle.removeListener(_onUpdate);
+    viewModel.dispose();
     super.dispose();
   }
 

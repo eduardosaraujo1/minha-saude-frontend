@@ -2,28 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:minha_saude_frontend/app/domain/models/document/document.dart';
-import 'package:minha_saude_frontend/app/routing/routes.dart';
-import 'package:minha_saude_frontend/config/asset.dart';
 
+import '../../../domain/models/document/document.dart';
+import '../../../routing/routes.dart';
+import '../../../../config/asset.dart';
 import '../../core/widgets/brand_app_bar.dart';
 import '../view_models/trash_index_view_model.dart';
 
 class TrashIndexView extends StatefulWidget {
-  const TrashIndexView({required this.viewModel, super.key});
+  const TrashIndexView({required this.viewModelFactory, super.key});
 
-  final TrashIndexViewModel viewModel;
+  final TrashIndexViewModel Function() viewModelFactory;
 
   @override
   State<TrashIndexView> createState() => _TrashIndexViewState();
 }
 
 class _TrashIndexViewState extends State<TrashIndexView> {
-  late final TrashIndexViewModel viewModel;
+  late final TrashIndexViewModel viewModel = widget.viewModelFactory();
+
   @override
   void initState() {
     super.initState();
-    viewModel = widget.viewModel;
+
     viewModel.loadDocuments.addListener(_onLoadUpdate);
     viewModel.loadDocuments.execute(false);
   }
@@ -31,6 +32,8 @@ class _TrashIndexViewState extends State<TrashIndexView> {
   @override
   void dispose() {
     viewModel.loadDocuments.removeListener(_onLoadUpdate);
+    viewModel.dispose();
+
     super.dispose();
   }
 

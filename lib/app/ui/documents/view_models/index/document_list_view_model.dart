@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../../view_model.dart';
 import '../../../../domain/models/document/document.dart';
 import '../../../../data/repositories/document/document_repository.dart';
 import '../../widgets/index/sorted_document_list.dart' show GroupingAlgorithm;
 
-class DocumentListViewModel {
+class DocumentListViewModel implements ViewModel {
   DocumentListViewModel({required this.documentRepository}) {
     loadDocuments =
         Command.createAsync<bool, Result<List<Document>, Exception>?>(
@@ -16,11 +17,10 @@ class DocumentListViewModel {
         );
 
     // When the repository notifies of changes, reload documents
-    documentRepository.addListener(() {
-      loadDocuments.execute(false);
-    });
+    documentRepository.addListener(_softRefresh);
+  }
 
-    // Auto-load documents on initialization
+  void _softRefresh() {
     loadDocuments.execute(false);
   }
 
@@ -59,5 +59,12 @@ class DocumentListViewModel {
 
   GroupingAlgorithm selectAlgorithm(GroupingAlgorithm algorithm) {
     return algorithm;
+  }
+
+  @override
+  void dispose() {
+    documentRepository.removeListener(_softRefresh);
+    loadDocuments.dispose();
+    selectedAlgorithm.dispose();
   }
 }

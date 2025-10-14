@@ -1,10 +1,11 @@
 import 'package:command_it/command_it.dart';
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../view_model.dart';
 import '../../../domain/models/document/document.dart';
 import '../../../data/repositories/trash/trash_repository.dart';
 
-class TrashIndexViewModel {
+class TrashIndexViewModel implements ViewModel {
   TrashIndexViewModel({required this.trashRepository}) {
     loadDocuments = Command.createAsync(
       (p) => _loadDocument(forceRefresh: p),
@@ -14,9 +15,6 @@ class TrashIndexViewModel {
     trashRepository.addListener(() {
       loadDocuments.execute(false);
     });
-
-    // Auto-load documents on initialization
-    loadDocuments.execute(false);
   }
 
   final TrashRepository trashRepository;
@@ -43,5 +41,10 @@ class TrashIndexViewModel {
 
   void reloadDocuments() {
     loadDocuments.execute(true);
+  }
+
+  @override
+  void dispose() {
+    loadDocuments.dispose();
   }
 }

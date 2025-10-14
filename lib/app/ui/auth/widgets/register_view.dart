@@ -8,9 +8,9 @@ import '../view_models/register_view_model.dart';
 import 'layouts/login_form_layout.dart';
 
 class RegisterView extends StatefulWidget {
-  const RegisterView(this.viewModel, {super.key});
+  const RegisterView(this.viewModelFactory, {super.key});
 
-  final RegisterViewModel viewModel;
+  final RegisterViewModel Function() viewModelFactory;
 
   @override
   State<RegisterView> createState() => _RegisterViewState();
@@ -23,7 +23,7 @@ class _RegisterViewState extends State<RegisterView> {
   void initState() {
     super.initState();
 
-    viewModel = widget.viewModel;
+    viewModel = widget.viewModelFactory();
     viewModel.registerCommand.addListener(_onRegisterUpdate);
   }
 

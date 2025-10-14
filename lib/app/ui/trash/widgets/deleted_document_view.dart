@@ -6,20 +6,20 @@ import 'package:minha_saude_frontend/app/domain/models/document/document.dart';
 import '../view_models/deleted_document_view_model.dart';
 
 class DeletedDocumentView extends StatefulWidget {
-  const DeletedDocumentView({required this.viewModel, super.key});
+  const DeletedDocumentView({required this.viewModelFactory, super.key});
 
-  final DeletedDocumentViewModel viewModel;
+  final DeletedDocumentViewModel Function() viewModelFactory;
 
   @override
   State<DeletedDocumentView> createState() => _DeletedDocumentViewState();
 }
 
 class _DeletedDocumentViewState extends State<DeletedDocumentView> {
-  late final DeletedDocumentViewModel viewModel;
+  late final DeletedDocumentViewModel viewModel = widget.viewModelFactory();
   @override
   void initState() {
     super.initState();
-    viewModel = widget.viewModel;
+
     viewModel.loadDocument.addListener(_onLoadUpdate);
     viewModel.deleteDocumentForever.addListener(_onDeleteUpdate);
     viewModel.restoreDocument.addListener(_onRestoreUpdate);
@@ -31,6 +31,8 @@ class _DeletedDocumentViewState extends State<DeletedDocumentView> {
     viewModel.loadDocument.removeListener(_onLoadUpdate);
     viewModel.deleteDocumentForever.removeListener(_onDeleteUpdate);
     viewModel.restoreDocument.removeListener(_onRestoreUpdate);
+    viewModel.dispose();
+
     super.dispose();
   }
 

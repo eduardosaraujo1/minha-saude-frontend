@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../view_model.dart';
 import '../../../domain/actions/auth/register_action.dart';
 
-class RegisterViewModel {
+class RegisterViewModel implements ViewModel {
   RegisterViewModel({required RegisterAction registerAction})
     : _registerAction = registerAction {
     registerCommand = Command.createAsyncNoParam(
@@ -55,6 +56,7 @@ class RegisterViewModel {
   }
 
   /// Dispose form controllers
+  @override
   void dispose() {
     form.dispose();
   }

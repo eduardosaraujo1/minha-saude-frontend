@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../view_model.dart';
 import '../../../data/repositories/document/document_repository.dart';
 import '../../../domain/models/document/document.dart';
 
-class DocumentViewModel {
+class DocumentViewModel implements ViewModel {
   DocumentViewModel({
     required String documentUuid,
     required DocumentRepository documentRepository,
@@ -22,9 +23,6 @@ class DocumentViewModel {
       _handleDeleteDocument,
       initialValue: null,
     );
-
-    // Auto-load document on initialization
-    loadDocument.execute();
   }
 
   final String _documentUuid;
@@ -99,6 +97,14 @@ class DocumentViewModel {
       final doc = loadDocument.value!.getOrThrow().document;
       deleteDocument.execute(doc);
     }
+  }
+
+  @override
+  void dispose() {
+    currentPage.dispose();
+    totalPages.dispose();
+    loadDocument.dispose();
+    deleteDocument.dispose();
   }
 }
 

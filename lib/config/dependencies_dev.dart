@@ -1,42 +1,45 @@
+import 'dart:io';
+
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../app/data/repositories/trash/trash_repository.dart';
-import '../app/data/repositories/trash/trash_repository_impl.dart';
-import '../app/data/services/api/trash/fake_trash_api_client.dart';
-import '../app/data/services/api/trash/trash_api_client.dart';
-import '../app/data/services/api/trash/trash_api_client_impl.dart';
-import '../app/data/services/api/fakes/fake_document_server_storage.dart';
+import '../app/data/repositories/auth/auth_repository.dart';
+import '../app/data/repositories/document/document_repository.dart';
+import '../app/data/repositories/document/document_repository_impl.dart';
 import '../app/data/repositories/profile/profile_repository.dart';
 import '../app/data/repositories/profile/profile_repository_impl.dart';
 import '../app/data/repositories/session/session_repository.dart';
+import '../app/data/repositories/trash/trash_repository.dart';
+import '../app/data/repositories/trash/trash_repository_impl.dart';
+import '../app/data/services/api/auth/auth_api_client.dart';
+import '../app/data/services/api/auth/auth_api_client_impl.dart';
+import '../app/data/services/api/auth/fake_auth_api_client.dart';
+import '../app/data/services/api/document/document_api_client.dart';
+import '../app/data/services/api/document/document_api_client_impl.dart';
+import '../app/data/services/api/document/fake_document_api_client.dart';
+import '../app/data/services/api/fakes/fake_document_server_storage.dart';
 import '../app/data/services/api/fakes/fake_server_persistent_storage.dart';
+import '../app/data/services/api/http_client.dart';
 import '../app/data/services/api/profile/fake_profile_api_client.dart';
 import '../app/data/services/api/profile/profile_api_client.dart';
 import '../app/data/services/api/profile/profile_api_client_impl.dart';
+import '../app/data/services/api/trash/fake_trash_api_client.dart';
+import '../app/data/services/api/trash/trash_api_client.dart';
+import '../app/data/services/api/trash/trash_api_client_impl.dart';
+import '../app/data/services/doc_scanner/document_scanner.dart';
+import '../app/data/services/google/google_service.dart';
+import '../app/data/services/local/cache_database/cache_database.dart';
+import '../app/data/services/local/cache_database/cache_database_impl.dart';
+import '../app/data/services/local/cache_database/fake_cache_database.dart';
+import '../app/data/services/local/file_system_service/file_system_service.dart';
+import '../app/data/services/local/file_system_service/file_system_service_impl.dart';
+import '../app/data/services/local/secure_storage/secure_storage.dart';
+import '../app/domain/actions/auth/login_with_google.dart';
 import '../app/domain/actions/auth/logout_action.dart';
 import '../app/domain/actions/auth/register_action.dart';
-import '../app/data/services/local/file_system_service/file_system_service_impl.dart';
-import '../app/data/services/api/auth/auth_api_client_impl.dart';
-import '../app/data/services/api/document/document_api_client.dart';
-import '../app/data/services/local/cache_database/cache_database.dart';
-import '../app/data/services/api/http_client.dart';
-import '../app/data/services/local/cache_database/cache_database_impl.dart';
-import '../app/data/services/api/document/document_api_client_impl.dart';
-import '../app/data/services/api/document/fake_document_api_client.dart';
-import '../app/data/services/local/file_system_service/file_system_service.dart';
 import '../app/domain/actions/settings/delete_user_action.dart';
 import '../app/domain/actions/settings/request_export_action.dart';
 import '../app/ui/core/theme_provider.dart';
-import '../app/domain/actions/auth/login_with_google.dart';
-import '../app/data/repositories/document/document_repository_impl.dart';
-import '../app/data/repositories/document/document_repository.dart';
-import '../app/data/repositories/auth/auth_repository.dart';
-import '../app/data/services/api/auth/fake_auth_api_client.dart';
-import '../app/data/services/api/auth/auth_api_client.dart';
-import '../app/data/services/doc_scanner/document_scanner.dart';
-import '../app/data/services/google/google_service.dart';
-import '../app/data/services/local/secure_storage/secure_storage.dart';
 import 'environment.dart';
 
 final _getIt = GetIt.instance;
@@ -46,7 +49,11 @@ Future<void> setup({
   bool mockApiClient = false,
   bool mockScanner = false,
   bool mockSecureStorage = false,
+  bool mockCacheDb = false,
 }) async {
+  mockGoogle = mockGoogle || !(Platform.isAndroid || Platform.isIOS);
+  mockCacheDb = mockCacheDb || !(Platform.isAndroid || Platform.isIOS);
+
   // Core
   _getIt.registerSingleton<ThemeController>(ThemeController());
 
@@ -64,7 +71,11 @@ Future<void> setup({
       GoogleServiceImpl(GoogleSignIn.instance),
     );
   }
-  _getIt.registerSingleton<CacheDatabase>(CacheDatabaseImpl());
+  if (mockCacheDb) {
+    _getIt.registerSingleton<CacheDatabase>(FakeCacheDatabase());
+  } else {
+    _getIt.registerSingleton<CacheDatabase>(CacheDatabaseImpl());
+  }
   _getIt.registerSingleton<FileSystemService>(FileSystemServiceImpl());
 
   if (mockApiClient) {

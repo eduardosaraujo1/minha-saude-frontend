@@ -23,8 +23,8 @@ void main() async {
       await dev.setup(
         mockApiClient: true,
         // mockGoogle: !(Platform.isAndroid || Platform.isIOS),
-        mockGoogle: false,
-        mockScanner: false,
+        mockGoogle: true,
+        mockScanner: true,
         mockSecureStorage: false,
       );
     } else {

@@ -19,34 +19,37 @@ class DocumentListScreen extends StatefulWidget {
 }
 
 class _DocumentListScreenState extends State<DocumentListScreen> {
-  late final DocumentListViewModel viewModel;
-
   @override
   void initState() {
     super.initState();
+    widget.viewModel.loadDocuments.addListener(_onLoadUpdate);
+  }
 
-    viewModel = widget.viewModel;
-    viewModel.loadDocuments.addListener(_onLoadUpdate);
-    viewModel.loadDocuments.execute(false);
+  @override
+  void didUpdateWidget(DocumentListScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.viewModel != widget.viewModel) {
+      oldWidget.viewModel.loadDocuments.removeListener(_onLoadUpdate);
+      widget.viewModel.loadDocuments.addListener(_onLoadUpdate);
+    }
   }
 
   @override
   void dispose() {
-    viewModel.loadDocuments.removeListener(_onLoadUpdate);
-
+    widget.viewModel.loadDocuments.removeListener(_onLoadUpdate);
     super.dispose();
   }
 
   void _onLoadUpdate() {
     if (!mounted) return;
 
-    if (viewModel.loadDocuments.value == null) {
+    if (widget.viewModel.loadDocuments.value == null) {
       // Initial state
       return;
     }
 
-    if (viewModel.loadDocuments.value!.isError()) {
-      final error = viewModel.loadDocuments.value!.tryGetError()!;
+    if (widget.viewModel.loadDocuments.value!.isError()) {
+      final error = widget.viewModel.loadDocuments.value!.tryGetError()!;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -69,13 +72,13 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
           onPressed: () {},
           icon: _SortMenu(
             onSelected: (GroupingAlgorithm algorithm) {
-              viewModel.selectedAlgorithm.value = algorithm;
+              widget.viewModel.selectedAlgorithm.value = algorithm;
             },
           ),
         ),
       ),
       body: ValueListenableBuilder(
-        valueListenable: viewModel.loadDocuments.results,
+        valueListenable: widget.viewModel.loadDocuments.results,
         builder: (context, documentState, child) {
           if (documentState.isExecuting || !documentState.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -96,7 +99,7 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              viewModel.refresh();
+              widget.viewModel.refresh();
             },
             child: SizedBox(
               height: double.infinity,
@@ -116,7 +119,7 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
                       ),
                     if (documents.isNotEmpty)
                       ValueListenableBuilder(
-                        valueListenable: viewModel.selectedAlgorithm,
+                        valueListenable: widget.viewModel.selectedAlgorithm,
                         builder: (context, value, child) {
                           return SortedDocumentList(
                             documents: documents,

@@ -20,6 +20,9 @@ class SettingsEditViewModel {
       _loadCurrentValue,
       initialValue: null,
     );
+
+    // Auto-load current value on initialization
+    loadCurrentValue.execute();
   }
 
   final ProfileRepository profileRepository;

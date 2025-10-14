@@ -18,25 +18,29 @@ class DocumentView extends StatefulWidget {
 }
 
 class _DocumentViewState extends State<DocumentView> {
-  late final DocumentViewModel viewModel;
-
   @override
   void initState() {
     super.initState();
+    widget._viewModel.deleteDocument.addListener(_handleDeleteDocument);
+  }
 
-    viewModel = widget._viewModel;
-    viewModel.loadDocument.execute();
-    viewModel.deleteDocument.addListener(_handleDeleteDocument);
+  @override
+  void didUpdateWidget(DocumentView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget._viewModel != widget._viewModel) {
+      oldWidget._viewModel.deleteDocument.removeListener(_handleDeleteDocument);
+      widget._viewModel.deleteDocument.addListener(_handleDeleteDocument);
+    }
   }
 
   @override
   void dispose() {
-    viewModel.deleteDocument.removeListener(_handleDeleteDocument);
+    widget._viewModel.deleteDocument.removeListener(_handleDeleteDocument);
     super.dispose();
   }
 
   void _handleDeleteDocument() {
-    final command = viewModel.deleteDocument;
+    final command = widget._viewModel.deleteDocument;
 
     if (command.isExecuting.value || command.value == null) {
       return;
@@ -62,10 +66,12 @@ class _DocumentViewState extends State<DocumentView> {
 
   void _handleActionMenuClick(DocumentAction action) {
     if (action == DocumentAction.view) {
-      final infoRoute = Routes.documentosInfo(viewModel.documentUuid);
+      final infoRoute = Routes.documentosInfo(widget._viewModel.documentUuid);
       context.go(infoRoute);
     } else if (action == DocumentAction.edit) {
-      final documentosEdit = Routes.documentosEdit(viewModel.documentUuid);
+      final documentosEdit = Routes.documentosEdit(
+        widget._viewModel.documentUuid,
+      );
       context.go(documentosEdit);
     } else if (action == DocumentAction.delete) {
       _showDeleteDocumentDialog(context);
@@ -83,7 +89,7 @@ class _DocumentViewState extends State<DocumentView> {
         actions: [_DocumentActionsMenu(_handleActionMenuClick)],
       ),
       body: ValueListenableBuilder(
-        valueListenable: viewModel.loadDocument,
+        valueListenable: widget._viewModel.loadDocument,
         builder: (context, docResult, child) {
           if (docResult == null) {
             return const Center(
@@ -112,7 +118,7 @@ class _DocumentViewState extends State<DocumentView> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => viewModel.loadDocument.execute(),
+                    onPressed: () => widget._viewModel.loadDocument.execute(),
                     child: const Text('Tentar novamente'),
                   ),
                 ],
@@ -127,12 +133,12 @@ class _DocumentViewState extends State<DocumentView> {
               DocumentPdfViewer(
                 document: PdfDocument.openFile(document.file.path),
                 onPageChanged: (page) {
-                  viewModel.currentPage.value = page;
+                  widget._viewModel.currentPage.value = page;
                 },
                 onDocumentLoaded: (documentFile) {
                   // Store page state for use in PageIndicator
-                  viewModel.totalPages.value = documentFile.pagesCount;
-                  viewModel.currentPage.value = 1;
+                  widget._viewModel.totalPages.value = documentFile.pagesCount;
+                  widget._viewModel.currentPage.value = 1;
                 },
               ),
               Positioned(
@@ -141,8 +147,8 @@ class _DocumentViewState extends State<DocumentView> {
                 right: 0,
                 child: Center(
                   child: PageIndicator(
-                    currentPage: viewModel.currentPage,
-                    totalPages: viewModel.totalPages,
+                    currentPage: widget._viewModel.currentPage,
+                    totalPages: widget._viewModel.totalPages,
                   ),
                 ),
               ),
@@ -154,7 +160,9 @@ class _DocumentViewState extends State<DocumentView> {
   }
 
   void _showDeleteDocumentDialog(BuildContext context) {
-    final document = viewModel.loadDocument.value?.tryGetSuccess()?.document;
+    final document = widget._viewModel.loadDocument.value
+        ?.tryGetSuccess()
+        ?.document;
     if (document == null) {
       return; // Document info unavailable, cannot delete
     }
@@ -165,7 +173,7 @@ class _DocumentViewState extends State<DocumentView> {
         return _DeleteDocumentDialog(
           document: document,
           onConfirm: () {
-            viewModel.triggerDocumentDelete();
+            widget._viewModel.triggerDocumentDelete();
           },
         );
       },

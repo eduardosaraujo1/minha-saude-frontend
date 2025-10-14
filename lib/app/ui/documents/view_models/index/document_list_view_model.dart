@@ -19,6 +19,9 @@ class DocumentListViewModel {
     documentRepository.addListener(() {
       loadDocuments.execute(false);
     });
+
+    // Auto-load documents on initialization
+    loadDocuments.execute(false);
   }
 
   final DocumentRepository documentRepository;

@@ -1,10 +1,10 @@
+import 'dart:collection';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-import '../../../utils/cached_element/cached_element.dart';
 import '../../services/api/document/document_api_client.dart';
 import '../../services/api/document/models/document_api_model.dart';
 import '../../services/doc_scanner/document_scanner.dart';
@@ -472,33 +472,46 @@ class DocumentRepositoryImpl extends DocumentRepository {
 }
 
 class _InMemoryDocumentListCache {
-  CachedElement<List<Document>>? _cache;
+  static const Duration ttl = Duration(minutes: 10);
+
+  List<Document>? _documents;
+  DateTime? _timestamp;
 
   /// Returns true if the cache exists and is not stale
   bool isValid() {
-    final cache = _cache;
-    if (cache == null) {
+    if (_documents == null) {
       return false;
     }
-    return !cache.isStale(maxAge: CachedElement.defaultMaxAge);
+
+    if (_timestamp == null) {
+      return false;
+    }
+
+    final age = DateTime.now().difference(_timestamp!);
+
+    if (age > ttl) {
+      return false;
+    }
+
+    return true;
   }
 
   /// Returns the cached list if it exists and is valid, otherwise null
   List<Document>? get() {
-    if (!isValid()) {
-      return null;
-    }
-    return _cache?.data;
+    return isValid() ? UnmodifiableListView(_documents!) : null;
   }
 
   /// Stores a new list in the cache
   void set(List<Document> documents) {
-    _cache = CachedElement(List.unmodifiable(documents));
+    _documents ??= [];
+    _documents!.clear();
+    _documents!.addAll(documents);
+    _timestamp = DateTime.now();
   }
 
   /// Clears the cache
   void clear() {
-    _cache = null;
+    _documents = null;
   }
 
   /// Retrieves a document by UUID from the cache if available
@@ -507,18 +520,11 @@ class _InMemoryDocumentListCache {
       return null;
     }
 
-    final data = _cache?.data;
-    if (data == null) {
+    try {
+      return _documents!.firstWhere((doc) => doc.uuid == uuid);
+    } catch (e) {
       return null;
     }
-
-    for (final document in data) {
-      if (document.uuid == uuid) {
-        return document;
-      }
-    }
-
-    return null;
   }
 }
 

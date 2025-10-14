@@ -15,6 +15,9 @@ class DocumentMetadataViewModel {
       _loadDocument,
       initialValue: null,
     );
+
+    // Auto-load document metadata on initialization
+    loadDocument.execute();
   }
 
   final DocumentRepository _documentRepository;

@@ -13,10 +13,6 @@ class DocumentMetadataView extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Careful: do not put this inside a ListenableBuilder
-    // Stateless widgets are never rebuilt, so this will only run once
-    viewModel.loadDocument.execute();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Informações do documento"), //

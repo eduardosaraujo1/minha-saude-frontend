@@ -21,6 +21,9 @@ class DeletedDocumentViewModel {
       _restoreDocument,
       initialValue: null,
     );
+
+    // Auto-load document on initialization
+    loadDocument.execute();
   }
 
   final String documentUuid;

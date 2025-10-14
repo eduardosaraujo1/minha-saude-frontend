@@ -14,6 +14,9 @@ class TrashIndexViewModel {
     trashRepository.addListener(() {
       loadDocuments.execute(false);
     });
+
+    // Auto-load documents on initialization
+    loadDocuments.execute(false);
   }
 
   final TrashRepository trashRepository;

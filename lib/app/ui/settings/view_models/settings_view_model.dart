@@ -25,6 +25,9 @@ class SettingsViewModel {
       initialValue: null,
     );
     profileRepository.addListener(_reload);
+
+    // Auto-load profile on initialization
+    loadProfile.execute();
   }
 
   void _reload() {

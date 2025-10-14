@@ -22,6 +22,9 @@ class DocumentViewModel {
       _handleDeleteDocument,
       initialValue: null,
     );
+
+    // Auto-load document on initialization
+    loadDocument.execute();
   }
 
   final String _documentUuid;

@@ -1,3 +1,4 @@
 {
-    "cSpell.words": ["grey", "Laravel", "riverpod", "Riverpod", "saude"]
+    "cSpell.words": ["grey", "Laravel", "riverpod", "Riverpod", "saude"],
+    "dart.flutterHotReloadOnSave": "manual"
 }

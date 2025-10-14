@@ -11,19 +11,16 @@
 
 ## Para fazer
 
--   [ ] Unir telas feitas pelo Davi aqui
-
--   [ ] Criar inicial de lista de documentos
--   [ ] Fazer lógica de login com Google (criar um mock do componente que se comunica com o backend)
--   Descobrir pq o register tava crashando
--   [ ] Fazer tela de adicionar documento
--   [ ] Fazer navbar e appbar
--   [ ] Fazer tela (display only) de compartilhar, lixeira e configurações de usuário
--   [ ] Fazer lógica de organização de documentos (frontend support)
--   [ ] Fazer lógica de organização de documentos (backend mock)
--   [ ] Fazer lógica de lixeira de documentos (frontend support)
--   [ ] Fazer lógica de lixeira de documentos (backend mock)
--   [ ] Fazer lógica de compartilhar documentos (frontend support)
--   [ ] Fazer lógica de compartilhar documentos (backend mock)
--   [ ] Escrever casos de teste
+-   [ ] Tela de lixeira de documentos
+-   [ ] Testes para repositório de documento, assegurando a descrição dada
+-   [ ] Adicionar atualização para a lista da lixeira quando um documento for apagado do DocumentRepository
+-   [ ] Revisar política de cache in-memory do DocumentRepository
+-   [ ] Ao excluir documento, atualizar lista de documents (invalidar cache do repositório)
+-   [ ] Fazer o form de adicionar documento ter opções padrão (algumas pré-existentes, outras podendo o usuário escolher). API envia a lista de categorias para o cliente e o app usa essas categorias num dropdown, podendo esse ser substituido por um text field normal
+-   [ ] Refatorar ShareRepository para usar interface e consumir ApiClient
+-   [ ] Refatorar tela de compartilhamento
 -   [ ] Tratativa de erro caso o backend se torne não-responsivo
+-   [ ] Deletar conta requisitar login novamente (ver se consegue fazer isso a nivel API)
+-   [ ] Realizar teste exploratório para tela de lado ou areas em que se esqueceu do SafeArea
+-   [ ] SE tiver tempo, considerar fazer a organização dos documentos ocorrer no backend via API para evitar um array com todos os documentos na memoria RAM (permitirá paginação). Requer repensar a arquitetura dos documentos
+-   [ ] Trazer opções prontas para tipos de exame (ainda permitir usuário escolher customizado)

@@ -18,8 +18,10 @@ The application is divided into the following layers:
 ### Important Rules
 
 1. Always test business logic
-2. Modularize tests, aim for each test function testing a single funcionality
+2. Modularize tests, aim for each test function testing a single functionality of your unit
 3. Use models and mocks provided in the [testing](/testing/) folder.
+4. Only check for function calls between layers (i.e. viewModels -> action or viewModels -> repository). This is the equivalent of asserting an HTTP request was made.
+5. Name tests as briefly as you can, use `given, when, then` when asserting what the test should do but always presume the test name starts with `it...`
 
 ## Test Scope
 
@@ -56,4 +58,7 @@ Each View (Screen) should be tested for:
 
 -   [UNIT] Existance of essential elements (i.e. can find a button to do something)
 -   [UNIT] Presence of business logic requirements (example: profile screen must display user info in text)
--   Note: do NOT test for things like navigation or "does this button work", that is for the exploratory test
+-   [UNIT] Form validation
+-   [INTEGRATION] Correct repository methods are called when widget main functionality is performed
+-   Note1: ViewModels should not be mocked as they are part of a widget's internal implementation.
+-   Note2: do NOT test for secondary functionality, only the main one. For example, for a widget that provides a form for the user to fill and upload, assert the form is validated and the form is calling the viewModel, but do not write a test to see if the cancel button is working.

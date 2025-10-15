@@ -54,7 +54,7 @@ void main() {
     expect(find.byKey(ValueKey('inputBirthdate')), findsOneWidget);
     expect(find.byKey(ValueKey('btnSave')), findsOneWidget);
 
-    await waitForDispose(tester);
+    await tester.disposeWidget();
   });
 
   testWidgets("loads initial birthdate value", (tester) async {
@@ -65,7 +65,7 @@ void main() {
     final textFormField = tester.widget<TextFormField>(birthdateField);
 
     expect(textFormField.controller?.text, "01/01/2020");
-    await waitForDispose(tester);
+    await tester.disposeWidget();
   });
 
   testWidgets("calls updateBirthdate when valid date is submitted", (
@@ -86,7 +86,7 @@ void main() {
     verify(
       () => profileRepository.updateBirthdate(DateTime(2025, 1, 1)),
     ).called(1);
-    await waitForDispose(tester);
+    await tester.disposeWidget();
   });
 
   testWidgets(
@@ -104,7 +104,7 @@ void main() {
       await tester.pumpAndSettle();
 
       verifyNever(() => profileRepository.updateBirthdate(any()));
-      await waitForDispose(tester);
+      await tester.disposeWidget();
     },
     timeout: Timeout(Duration(seconds: 10)),
   );

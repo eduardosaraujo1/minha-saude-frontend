@@ -54,7 +54,7 @@ void main() {
     expect(find.byKey(ValueKey('inputName')), findsOneWidget);
     expect(find.byKey(ValueKey('btnSave')), findsOneWidget);
 
-    await waitForDispose(tester);
+    await tester.disposeWidget();
   });
 
   testWidgets("loads initial name value", (tester) async {
@@ -66,7 +66,7 @@ void main() {
 
     expect(textFormField.controller?.text, "initialValue");
 
-    await waitForDispose(tester);
+    await tester.disposeWidget();
   });
 
   testWidgets("calls updateName when valid name is submitted", (tester) async {
@@ -78,7 +78,7 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(() => profileRepository.updateName("new name")).called(1);
-    await waitForDispose(tester);
+    await tester.disposeWidget();
   });
 
   testWidgets(
@@ -92,7 +92,7 @@ void main() {
       await tester.pumpAndSettle();
 
       verifyNever(() => profileRepository.updateName(any()));
-      await waitForDispose(tester);
+      await tester.disposeWidget();
     },
     timeout: Timeout(Duration(seconds: 10)),
   );

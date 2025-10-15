@@ -172,7 +172,7 @@ class _SettingsGeneralTabState extends State<SettingsGeneralTab> {
       ),
       _UserInfoTile(
         label: 'Telefone',
-        value: profile?.telefone,
+        value: _applyPhoneMask(profile?.telefone),
         editKey: ValueKey('btnEditPhone'),
         onEdit: () {
           context.go(Routes.editTelefone);
@@ -232,6 +232,24 @@ class _SettingsGeneralTabState extends State<SettingsGeneralTab> {
 
     // Apply format ###.###.###-##
     return '${cpf.substring(0, 3)}.${cpf.substring(3, 6)}.${cpf.substring(6, 9)}-${cpf.substring(9, 11)}';
+  }
+
+  String? _applyPhoneMask(String? phone) {
+    if (phone == null) return null;
+    if (phone.isEmpty) return null;
+
+    // Remove non-digit characters
+    final digits = phone.replaceAll(RegExp(r'\D'), '');
+    if (digits.length < 10) return phone; // Not enough digits to format
+
+    // Apply format (##) #####-####
+    if (digits.length == 10) {
+      return '(${digits.substring(0, 2)}) ${digits.substring(2, 6)}-${digits.substring(6, 10)}';
+    } else if (digits.length == 11) {
+      return '(${digits.substring(0, 2)}) ${digits.substring(2, 7)}-${digits.substring(7, 11)}';
+    } else {
+      return phone; // Unexpected length, return original
+    }
   }
 }
 

@@ -11,6 +11,10 @@ class LoginViewModel implements ViewModel {
       _loginWithGoogle,
       initialValue: null,
     );
+    loginWithEmail = Command.createAsyncNoParam(
+      _loginWithEmail,
+      initialValue: null,
+    );
   }
 
   final LoginWithGoogle _loginWithGoogleAction;
@@ -21,6 +25,7 @@ class LoginViewModel implements ViewModel {
   /// If result is error then display Snackbar and clear result
   /// If result is success, then use context.go to redirect
   late Command<void, Result<RedirectResponse, Exception>?> loginWithGoogle;
+  late Command<void, Result<RedirectResponse, Exception>?> loginWithEmail;
 
   /// Perform login with Google action
   /// Returns a nullable string that is the route to redirect to
@@ -50,6 +55,28 @@ class LoginViewModel implements ViewModel {
   void dispose() {
     loginWithGoogle.dispose();
   }
-}
 
-enum LoginStatus { initial, loading, error, authenticated, needsRegistration }
+  Future<Result<RedirectResponse, Exception>?> _loginWithEmail() async {
+    try {
+      final Exception defaultErr = Exception(
+        "Não foi possível fazer login com o Email.",
+      );
+
+      // TODO: implement
+      throw UnimplementedError();
+      // final redirectResult = await _loginWithEmailAction.execute();
+      // if (redirectResult.isError()) {
+      //   final err = redirectResult.tryGetError()!;
+      //   _log.warning("Login with Email failed: $err");
+      //   return Result.error(defaultErr);
+      // }
+
+      // return Success(redirectResult.getOrThrow());
+    } catch (e) {
+      _log.severe("Ocorreu um erro desconhecido:", e);
+      return Result.error(
+        Exception("Ocorreu um erro desconhecido. Por favor, tente novamente."),
+      );
+    }
+  }
+}

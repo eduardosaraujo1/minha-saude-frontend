@@ -54,7 +54,7 @@ void main() {
     expect(find.byKey(ValueKey('inputPhone')), findsOneWidget);
     expect(find.byKey(ValueKey('btnSave')), findsOneWidget);
 
-    await waitForDispose(tester);
+    await tester.disposeWidget();
   });
 
   testWidgets("loads initial phone value", (tester) async {
@@ -66,7 +66,7 @@ void main() {
 
     expect(textFormField.controller?.text, "initialValue");
 
-    await waitForDispose(tester);
+    await tester.disposeWidget();
   });
 
   testWidgets("calls updatePhone when valid phone is submitted", (
@@ -81,7 +81,7 @@ void main() {
 
     verify(() => profileRepository.updatePhone("11987654321")).called(1);
 
-    await waitForDispose(tester);
+    await tester.disposeWidget();
   });
 
   testWidgets(
@@ -96,7 +96,7 @@ void main() {
 
       verifyNever(() => profileRepository.updatePhone(any()));
 
-      await waitForDispose(tester);
+      await tester.disposeWidget();
     },
     timeout: Timeout(Duration(seconds: 10)),
   );

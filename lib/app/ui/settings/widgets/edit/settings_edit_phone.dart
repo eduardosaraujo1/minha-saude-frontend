@@ -78,7 +78,7 @@ class _SettingsEditPhoneState extends State<SettingsEditPhone> {
     var result = viewModel.loadCurrentValue.value;
     final value = result?.tryGetSuccess();
     if (value != null) {
-      _formController.phoneController.text = value;
+      _formController.phoneController.text = _applyPhoneMask(value)!;
     }
     if (result != null && result.isError()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -88,6 +88,24 @@ class _SettingsEditPhoneState extends State<SettingsEditPhone> {
           ),
         ),
       );
+    }
+  }
+
+  String? _applyPhoneMask(String? phone) {
+    if (phone == null) return null;
+    if (phone.isEmpty) return null;
+
+    // Remove non-digit characters
+    final digits = phone.replaceAll(RegExp(r'\D'), '');
+    if (digits.length < 10) return phone; // Not enough digits to format
+
+    // Apply format (##) #####-####
+    if (digits.length == 10) {
+      return '(${digits.substring(0, 2)}) ${digits.substring(2, 6)}-${digits.substring(6, 10)}';
+    } else if (digits.length == 11) {
+      return '(${digits.substring(0, 2)}) ${digits.substring(2, 7)}-${digits.substring(7, 11)}';
+    } else {
+      return phone; // Unexpected length, return original
     }
   }
 
@@ -184,9 +202,13 @@ class _EditPhoneFormController {
     if (value == null || value.isEmpty) {
       return 'Por favor, insira um telefone.';
     }
-    if (value.length < 8) {
-      return 'O telefone deve ter pelo menos 8 caracteres.';
+
+    // Verifica se o telefone segue o formato brasileiro
+    final regex = RegExp(r'^\(\d{2}\) (\d{5})-\d{4}$');
+    if (!regex.hasMatch(value)) {
+      return 'Telefone deve estar no formato (XX) XXXXX-XXXX';
     }
+
     return null;
   }
 }

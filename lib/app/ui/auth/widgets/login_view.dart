@@ -79,7 +79,10 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     final loginWithGoogle = viewModel.loginWithGoogle;
-    final colorScheme = Theme.of(context).colorScheme;
+    final loginWithEmail = viewModel.loginWithEmail;
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -87,36 +90,57 @@ class _LoginViewState extends State<LoginView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const LoginDecorator(),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 16.0,
-            ),
-            child: ValueListenableBuilder(
-              valueListenable: loginWithGoogle.isExecuting,
-              builder: (context, googleLoginLoading, child) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Iniciar Sessão",
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    ButtonSignIn(
-                      icon: SvgPicture.asset(Asset.googleLogo, width: 24),
-                      label: "Entrar com Google",
-                      onPressed: googleLoginLoading
-                          ? null
-                          : () => loginWithGoogle.execute(),
-                    ),
-                    SizedBox(height: 8),
-                    if (googleLoginLoading)
-                      SizedBox(
-                        width: double.infinity,
-                        child: Center(child: CircularProgressIndicator()),
+          Expanded(
+            child: ListenableBuilder(
+              listenable: Listenable.merge([
+                loginWithGoogle.isExecuting,
+                loginWithEmail.isExecuting,
+              ]),
+              builder: (context, child) {
+                final isLoading =
+                    loginWithGoogle.isExecuting.value ||
+                    loginWithEmail.isExecuting.value;
+
+                return SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Iniciar Sessão",
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
-                  ],
+                      const SizedBox(height: 16),
+                      ButtonSignIn(
+                        key: const ValueKey("btnLoginGoogle"),
+                        icon: SvgPicture.asset(Asset.googleLogo, width: 24),
+                        label: "Entrar com Google",
+                        onPressed: isLoading
+                            ? null
+                            : () => loginWithGoogle.execute(),
+                      ),
+                      SizedBox(height: 8),
+                      ButtonSignIn(
+                        key: const ValueKey("btnLoginEmail"),
+                        icon: Icon(
+                          Icons.email,
+                          color: colorScheme.onSurfaceVariant,
+                          size: 24,
+                        ),
+                        label: "Entrar com Email",
+                        onPressed: isLoading
+                            ? null
+                            : () => loginWithEmail.execute(),
+                      ),
+                      SizedBox(height: 8),
+                      if (isLoading)
+                        SizedBox(
+                          width: double.infinity,
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                    ],
+                  ),
                 );
               },
             ),

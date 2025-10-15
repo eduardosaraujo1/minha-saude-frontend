@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
+import '../../../domain/actions/auth/register_action.dart';
 import '../../../routing/routes.dart';
+import '../../../utils/format.dart';
 import '../view_models/register_view_model.dart';
 import 'layouts/login_form_layout.dart';
 
@@ -18,6 +20,7 @@ class RegisterView extends StatefulWidget {
 
 class _RegisterViewState extends State<RegisterView> {
   late final RegisterViewModel viewModel;
+  late final RegisterFormController formController = RegisterFormController();
 
   @override
   void initState() {
@@ -30,6 +33,7 @@ class _RegisterViewState extends State<RegisterView> {
   @override
   void dispose() {
     viewModel.registerCommand.removeListener(_onRegisterUpdate);
+    formController.dispose();
     viewModel.dispose();
 
     super.dispose();
@@ -45,30 +49,21 @@ class _RegisterViewState extends State<RegisterView> {
         return;
       }
 
-      if (registerResult.isSuccess()) {
-        final registerStatus = registerResult.tryGetSuccess()!;
-        if (mounted) {
-          switch (registerStatus) {
-            case RegisterResult.success:
-              _showSnack("Cadastro realizado com sucesso!");
-              context.go(Routes.home);
-              break;
-            case RegisterResult.tokenExpired:
-              _showSnack(
-                "Login expirado. Faça login novamente para continuar.",
-              );
-              context.go(Routes.login);
-              break;
-          }
+      if (!mounted) return;
+
+      if (registerResult.isError()) {
+        final error = registerResult.tryGetError()!;
+        if (error is ExpiredLoginException) {
+          _showSnack("Login expirado. Faça login novamente para continuar.");
+          context.go(Routes.login);
+        } else {
+          _showSnack("Ocorreu um erro inesperado ao efetuar o registro.");
         }
         return;
       }
 
-      if (registerResult.isError()) {
-        final error = registerResult.tryGetError()!;
-        _showSnack("Erro: ${error.toString()}");
-        return;
-      }
+      _showSnack("Cadastro realizado com sucesso!");
+      context.go(Routes.home);
     } catch (e) {
       Logger("RegisterView").severe("Ocorreu um erro desconhecido: $e");
       _showSnack("Ocorreu um erro desconhecido.");
@@ -82,7 +77,7 @@ class _RegisterViewState extends State<RegisterView> {
   }
 
   void _triggerBirthDatePicker(BuildContext context) async {
-    final dtNascimentoController = viewModel.form.dataNascimentoController;
+    final dtNascimentoController = formController.dataNascimentoController;
 
     DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -98,17 +93,39 @@ class _RegisterViewState extends State<RegisterView> {
     }
   }
 
+  void _triggerRegisterIfValid() {
+    if (!formController.validate()) return;
+
+    final parsedDate = parseDateString(
+      formController.dataNascimentoController.text,
+    );
+
+    if (parsedDate.isError()) {
+      _showSnack("Data de nascimento inválida. Tente selecioná-la novamente.");
+      return;
+    }
+
+    final formRequest = RegisterRequestModel(
+      cpf: formController.cpfController.text,
+      dataNascimento: parsedDate.tryGetSuccess()!,
+      nome: formController.nomeController.text,
+      telefone: formController.telefoneController.text,
+    );
+
+    viewModel.registerCommand.execute(formRequest);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final form = viewModel.form;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     return LoginFormLayout(
-      child: Padding(
-        padding: EdgeInsetsGeometry.all(16),
+      child: SingleChildScrollView(
+        padding: const EdgeInsetsGeometry.all(16),
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Form(
-          key: form.formKey,
+          key: formController.formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             spacing: 8,
@@ -122,8 +139,9 @@ class _RegisterViewState extends State<RegisterView> {
                 style: theme.textTheme.bodyLarge,
               ),
               TextFormField(
-                controller: form.nomeController,
-                validator: form.validateNome,
+                key: ValueKey('nomeField'),
+                controller: formController.nomeController,
+                validator: formController.validateNome,
                 decoration: const InputDecoration(
                   labelText: 'Nome',
                   counterText: "",
@@ -131,8 +149,9 @@ class _RegisterViewState extends State<RegisterView> {
                 maxLength: 100,
               ),
               TextFormField(
-                controller: form.cpfController,
-                validator: form.validateCpf,
+                key: ValueKey('cpfField'),
+                controller: formController.cpfController,
+                validator: formController.validateCpf,
                 decoration: InputDecoration(
                   hintText: "123.456.789-10",
                   labelText: 'CPF',
@@ -147,8 +166,9 @@ class _RegisterViewState extends State<RegisterView> {
                 ],
               ),
               TextFormField(
-                controller: form.dataNascimentoController,
-                validator: form.validateDtNascimento,
+                key: ValueKey('dataNascimentoField'),
+                controller: formController.dataNascimentoController,
+                validator: formController.validateDtNascimento,
                 decoration: const InputDecoration(
                   labelText: 'Data de Nascimento',
                   suffixIcon: Icon(Icons.calendar_today),
@@ -158,8 +178,9 @@ class _RegisterViewState extends State<RegisterView> {
                 onTap: () => _triggerBirthDatePicker(context),
               ),
               TextFormField(
-                controller: form.telefoneController,
-                validator: form.validateTelefone,
+                key: ValueKey('telefoneField'),
+                controller: formController.telefoneController,
+                validator: formController.validateTelefone,
                 decoration: InputDecoration(
                   hintText: "(11) 98765-4321",
                   labelText: 'Telefone',
@@ -177,9 +198,10 @@ class _RegisterViewState extends State<RegisterView> {
                 valueListenable: viewModel.registerCommand.isExecuting,
                 builder: (context, isExecuting, child) {
                   return FilledButton(
+                    key: ValueKey('btnConfirm'),
                     onPressed: isExecuting
                         ? null
-                        : viewModel.triggerRegisterIfValid,
+                        : () => _triggerRegisterIfValid(),
                     child: isExecuting
                         ? SizedBox(
                             height: 20,
@@ -200,5 +222,99 @@ class _RegisterViewState extends State<RegisterView> {
         ),
       ),
     );
+  }
+}
+
+class RegisterFormController {
+  final formKey = GlobalKey<FormState>();
+  final nomeController = TextEditingController();
+  final cpfController = TextEditingController();
+  final dataNascimentoController = TextEditingController();
+  final telefoneController = TextEditingController();
+
+  /// Validates the form and returns true if valid
+  bool validate() {
+    return formKey.currentState?.validate() ?? false;
+  }
+
+  void onFormChanged(VoidCallback callback) {
+    nomeController.addListener(callback);
+    cpfController.addListener(callback);
+    dataNascimentoController.addListener(callback);
+    telefoneController.addListener(callback);
+  }
+
+  String? validateNome(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Por favor, insira seu nome';
+    }
+
+    return null;
+  }
+
+  String? validateDtNascimento(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Por favor, insira sua data de nascimento';
+    }
+    return null;
+  }
+
+  String? validateCpf(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Por favor, insira seu CPF';
+    }
+
+    // Remove caracteres não numéricos
+    final cpf = value.replaceAll(RegExp(r'[^0-9]'), '');
+
+    // Verifica se o CPF tem 11 dígitos
+    if (cpf.length != 11) {
+      return 'CPF deve conter 11 dígitos';
+    }
+
+    // Verifica se todos os dígitos são iguais (CPF inválido)
+    if (RegExp(r'^(.)\1*$').hasMatch(cpf)) {
+      return 'CPF inválido';
+    }
+
+    // Cálculo dos dígitos verificadores
+    int calcularDigito(String base) {
+      int soma = 0;
+      for (int i = 0; i < base.length; i++) {
+        soma += int.parse(base[i]) * (base.length + 1 - i);
+      }
+      int resto = soma % 11;
+      return resto < 2 ? 0 : 11 - resto;
+    }
+
+    final digito1 = calcularDigito(cpf.substring(0, 9));
+    final digito2 = calcularDigito(cpf.substring(0, 9) + digito1.toString());
+
+    if (cpf.substring(9) != '$digito1$digito2') {
+      return 'CPF inválido';
+    }
+
+    return null;
+  }
+
+  String? validateTelefone(String? value) {
+    if (value?.isEmpty ?? true) {
+      return 'Por favor, insira seu telefone';
+    }
+
+    // Verifica se o telefone segue o formato brasileiro
+    final regex = RegExp(r'^\(\d{2}\) (9\d{4}|\d{4})-\d{4}$');
+    if (!regex.hasMatch(value ?? '')) {
+      return 'Telefone deve estar no formato (XX) XXXX-XXXX ou (XX) 9XXXX-XXXX';
+    }
+
+    return null;
+  }
+
+  void dispose() {
+    nomeController.dispose();
+    cpfController.dispose();
+    dataNascimentoController.dispose();
+    telefoneController.dispose();
   }
 }

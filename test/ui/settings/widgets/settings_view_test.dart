@@ -87,7 +87,7 @@ void main() {
         expect(find.byKey(ValueKey('btnExportData')), findsOneWidget);
         expect(find.byKey(ValueKey('darkThemeSwitch')), findsOneWidget);
 
-        await waitForDispose(tester);
+        await tester.disposeWidget();
       },
     );
 
@@ -113,7 +113,7 @@ void main() {
       expect(find.text(profile.telefone), findsOneWidget);
       expect(find.text(formatDate(profile.dataNascimento)), findsOneWidget);
 
-      await waitForDispose(tester);
+      await tester.disposeWidget();
     });
   });
 
@@ -133,7 +133,7 @@ void main() {
 
         expect(find.byKey(ValueKey('btnLogout')), findsOneWidget);
         expect(find.byKey(ValueKey('btnDeleteAccount')), findsOneWidget);
-        await waitForDispose(tester);
+        await tester.disposeWidget();
       },
     );
   });
@@ -152,7 +152,7 @@ void main() {
 
       verify(() => mockGoRouter.go(Routes.editNome)).called(1);
 
-      await waitForDispose(tester);
+      await tester.disposeWidget();
     });
 
     testWidgets(
@@ -170,7 +170,7 @@ void main() {
           () => mockGoRouter.go('/configuracoes/edit/birthdate'),
         ).called(1);
 
-        await waitForDispose(tester);
+        await tester.disposeWidget();
       },
     );
 
@@ -186,7 +186,7 @@ void main() {
         await tester.pumpAndSettle();
 
         verify(() => mockGoRouter.go('/configuracoes/edit/telefone')).called(1);
-        await waitForDispose(tester);
+        await tester.disposeWidget();
       },
     );
     testWidgets(
@@ -209,7 +209,7 @@ void main() {
 
         // Verify the action was called
         verify(() => mockRequestExportAction.execute()).called(1);
-        await waitForDispose(tester);
+        await tester.disposeWidget();
       },
     );
 
@@ -236,7 +236,7 @@ void main() {
       await tester.pumpAndSettle();
 
       verify(() => mockLogoutAction.execute()).called(1);
-      await waitForDispose(tester);
+      await tester.disposeWidget();
     });
 
     testWidgets(
@@ -264,7 +264,7 @@ void main() {
         await tester.pumpAndSettle();
 
         verify(() => mockDeleteUserAction.execute()).called(1);
-        await waitForDispose(tester);
+        await tester.disposeWidget();
       },
     );
   });

@@ -22,6 +22,7 @@ class RegisterAction {
   }) async {
     try {
       final registerToken = _sessionRepository.getRegisterToken();
+
       if (registerToken == null) {
         _log.severe("Token de registro definido como nulo.");
         return Result.error(
@@ -31,6 +32,16 @@ class RegisterAction {
         );
       }
 
+      // Sanitize fields
+      nome = nome.trim();
+      cpf = cpf.replaceAll(RegExp(r'[^0-9]'), '');
+      telefone = telefone.replaceAll(RegExp(r'[^0-9]'), '');
+
+      if (nome.isEmpty || cpf.isEmpty || telefone.isEmpty) {
+        return Result.error(Exception("Todos os campos são obrigatórios."));
+      }
+
+      // Attempt registration
       final result = await _authRepository.register(
         nome: nome,
         cpf: cpf,

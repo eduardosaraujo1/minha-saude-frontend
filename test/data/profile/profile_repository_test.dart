@@ -7,583 +7,386 @@ import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:test/test.dart';
 
+import '../../../testing/models/profile.dart';
+
 class MockProfileApiClient extends Mock implements ProfileApiClient {}
 
 void main() {
   late ProfileApiClient mockProfileApiClient;
   late ProfileRepository profileRepository;
+  late Profile fakeProfile;
+  late ProfileApiModel fakeProfileApi;
+
   setUp(() {
     mockProfileApiClient = MockProfileApiClient();
     profileRepository = ProfileRepositoryImpl(
       profileApiClient: mockProfileApiClient,
     );
+
+    fakeProfile = randomProfile();
+    fakeProfileApi = ProfileApiModel(
+      id: fakeProfile.id,
+      nome: fakeProfile.nome,
+      cpf: fakeProfile.cpf,
+      email: fakeProfile.email,
+      telefone: fakeProfile.telefone,
+      dataNascimento: fakeProfile.dataNascimento,
+      metodoAutenticacao: fakeProfile.metodoAutenticacao == AuthMethod.google
+          ? 'google'
+          : 'email',
+    );
+
+    // Default: getProfile returns success
+    when(
+      () => mockProfileApiClient.getProfile(),
+    ).thenAnswer((_) async => Success(fakeProfileApi));
   });
 
-  group("getProfile", () {
-    test(
-      "when getProfile is ran, result is the same as the ApiClient",
-      () async {
-        // Mock apiclient to respond success
-        final fakeProfile = ProfileApiModel(
-          id: '12345',
-          nome: 'João Silva',
-          cpf: '123.456.789-00',
-          email: 'joao.silva@example.com',
-          telefone: '11999999999',
-          dataNascimento: DateTime(1990, 1, 1),
-          metodoAutenticacao: 'email',
-        );
-        final fakeProfileModel = Profile(
-          id: fakeProfile.id,
-          nome: fakeProfile.nome,
-          cpf: fakeProfile.cpf,
-          email: fakeProfile.email,
-          telefone: fakeProfile.telefone,
-          dataNascimento: fakeProfile.dataNascimento,
-          metodoAutenticacao: switch (fakeProfile.metodoAutenticacao) {
-            'email' => AuthMethod.email,
-            'google' => AuthMethod.google,
-            _ => AuthMethod.email,
-          },
-        );
-        when(
-          () => mockProfileApiClient.getProfile(),
-        ).thenAnswer((_) async => Success(fakeProfile));
-
-        // Call repository
-        final result = await profileRepository.getProfile();
-
-        // Verify response matches
-        expect(result.isSuccess(), true);
-        expect(result.tryGetSuccess(), fakeProfileModel);
-      },
-    );
-    test(
-      "when getProfile is ran twice, ApiClient is only called once (caching)",
-      () async {
-        // Mock apiclient to respond success
-        final fakeProfile = ProfileApiModel(
-          id: '12345',
-          nome: 'João Silva',
-          cpf: '123.456.789-00',
-          email: 'joao.silva@example.com',
-          telefone: '11999999999',
-          dataNascimento: DateTime(1990, 1, 1),
-          metodoAutenticacao: 'email',
-        );
-        when(
-          () => mockProfileApiClient.getProfile(),
-        ).thenAnswer((_) async => Success(fakeProfile));
-
-        // Call repository getProfile (store response 1)
-        final result1 = await profileRepository.getProfile();
-
-        // Mock apiclient to respond error
-        when(
-          () => mockProfileApiClient.getProfile(),
-        ).thenAnswer((_) async => Error(Exception('Network error')));
-
-        // Call repository getProfile again (store response 2)
-        final result2 = await profileRepository.getProfile();
-
-        final expectedProfile = Profile(
-          id: fakeProfile.id,
-          nome: fakeProfile.nome,
-          cpf: fakeProfile.cpf,
-          email: fakeProfile.email,
-          telefone: fakeProfile.telefone,
-          dataNascimento: fakeProfile.dataNascimento,
-          metodoAutenticacao: AuthMethod.email,
-        );
-
-        // Assert response 1 is success
-        expect(result1.isSuccess(), true);
-        expect(result1.tryGetSuccess(), expectedProfile);
-
-        // Assert response 2 is same success
-        expect(result2.isSuccess(), true);
-        expect(result2.tryGetSuccess(), expectedProfile);
-
-        // Verify API was only called once
-        verify(() => mockProfileApiClient.getProfile()).called(1);
-      },
-    );
-
-    test(
-      "if forceRefresh parameter is passed when getProfile is ran the second time, ApiClient is called again (no caching)",
-      () async {
-        // Mock apiclient to respond success (mock1)
-        final fakeProfile1 = ProfileApiModel(
-          id: '12345',
-          nome: 'João Silva',
-          cpf: '123.456.789-00',
-          email: 'joao.silva@example.com',
-          telefone: '11999999999',
-          dataNascimento: DateTime(1990, 1, 1),
-          metodoAutenticacao: 'email',
-        );
-        when(
-          () => mockProfileApiClient.getProfile(),
-        ).thenAnswer((_) async => Success(fakeProfile1));
-
-        // Call repository getProfile (store response 1)
-        final result1 = await profileRepository.getProfile();
-
-        // Mock apiclient to respond success with different data (mock2)
-        final fakeProfile2 = ProfileApiModel(
-          id: '12345',
-          nome: 'Maria Santos',
-          cpf: '123.456.789-00',
-          email: 'joao.silva@example.com',
-          telefone: '11988888888',
-          dataNascimento: DateTime(1990, 1, 1),
-          metodoAutenticacao: 'email',
-        );
-        when(
-          () => mockProfileApiClient.getProfile(),
-        ).thenAnswer((_) async => Success(fakeProfile2));
-
-        // Call repository getProfile again (store response 2)
-        final result2 = await profileRepository.getProfile(forceRefresh: true);
-
-        final expectedProfile1 = Profile(
-          id: fakeProfile1.id,
-          nome: fakeProfile1.nome,
-          cpf: fakeProfile1.cpf,
-          email: fakeProfile1.email,
-          telefone: fakeProfile1.telefone,
-          dataNascimento: fakeProfile1.dataNascimento,
-          metodoAutenticacao: AuthMethod.email,
-        );
-
-        final expectedProfile2 = Profile(
-          id: fakeProfile2.id,
-          nome: fakeProfile2.nome,
-          cpf: fakeProfile2.cpf,
-          email: fakeProfile2.email,
-          telefone: fakeProfile2.telefone,
-          dataNascimento: fakeProfile2.dataNascimento,
-          metodoAutenticacao: AuthMethod.email,
-        );
-
-        // Assert response 1 is mock1 success
-        expect(result1.isSuccess(), true);
-        expect(result1.tryGetSuccess(), expectedProfile1);
-
-        // Assert response 2 is mock2 success
-        expect(result2.isSuccess(), true);
-        expect(result2.tryGetSuccess(), expectedProfile2);
-
-        // Verify API was called twice
-        verify(() => mockProfileApiClient.getProfile()).called(2);
-      },
-    );
-  });
-
-  group("updateName", () {
-    test("when method is ran, result is the same as the ApiClient", () async {
-      // Mock apiclient to respond success
-      when(
-        () => mockProfileApiClient.updateName(any()),
-      ).thenAnswer((_) async => const Success('João Silva'));
-
-      // Call repository
-      final result1 = await profileRepository.updateName('João Silva');
-
-      // Verify response matches
-      expect(result1.isSuccess(), true);
-
-      // Mock apiclient to respond error
-      when(
-        () => mockProfileApiClient.updateName(any()),
-      ).thenAnswer((_) async => Error(Exception('Network error')));
-
-      // Call repository again
-      final result2 = await profileRepository.updateName('Maria Santos');
-
-      // Verify response matches
-      expect(result2.isError(), true);
-    });
-    test("when method is ran, cache is updated with API response", () async {
-      // Mock apiclient to respond success with name X
-      final initialProfile = ProfileApiModel(
-        id: '12345',
-        nome: 'João Silva',
-        cpf: '123.456.789-00',
-        email: 'joao.silva@example.com',
-        telefone: '11999999999',
-        dataNascimento: DateTime(1990, 1, 1),
-        metodoAutenticacao: 'email',
-      );
-      when(
-        () => mockProfileApiClient.getProfile(),
-      ).thenAnswer((_) async => Success(initialProfile));
-
-      // Load initial cache
-      await profileRepository.getProfile();
-
-      // Call repository to update name to Y
-      final updatedProfile = ProfileApiModel(
-        id: '12345',
-        nome: 'Maria Santos',
-        cpf: '123.456.789-00',
-        email: 'joao.silva@example.com',
-        telefone: '11999999999',
-        dataNascimento: DateTime(1990, 1, 1),
-        metodoAutenticacao: 'email',
-      );
-      when(
-        () => mockProfileApiClient.updateName('Maria Santos'),
-      ).thenAnswer((_) async => const Success('Maria Santos'));
-      when(
-        () => mockProfileApiClient.getProfile(),
-      ).thenAnswer((_) async => Success(updatedProfile));
-
-      await profileRepository.updateName('Maria Santos');
-
-      // call getProfile
+  group("Get Current Profile", () {
+    test("it returns profile from ApiClient", () async {
       final result = await profileRepository.getProfile();
 
-      // Verify edited value matches server (Y) and not locally sent value (X)
       expect(result.isSuccess(), true);
-      expect(result.tryGetSuccess()?.nome, 'Maria Santos');
+      expect(result.tryGetSuccess(), fakeProfile);
+    });
+
+    test("it caches profile and only calls ApiClient once", () async {
+      final result1 = await profileRepository.getProfile();
+
+      // Change mock to return error
+      when(
+        () => mockProfileApiClient.getProfile(),
+      ).thenAnswer((_) async => Error(Exception('Network error')));
+
+      final result2 = await profileRepository.getProfile();
+
+      expect(result1.isSuccess(), true);
+      expect(result1.tryGetSuccess(), fakeProfile);
+
+      expect(result2.isSuccess(), true);
+      expect(result2.tryGetSuccess(), fakeProfile);
+
+      verify(() => mockProfileApiClient.getProfile()).called(1);
+    });
+
+    test("it bypasses cache when forceRefresh is true", () async {
+      final result1 = await profileRepository.getProfile();
+
+      // Change mock to return updated profile
+      final updatedProfile = fakeProfile.copyWith(
+        nome: 'Updated Name',
+        telefone: '11988888888',
+      );
+      final updatedProfileApi = ProfileApiModel(
+        id: updatedProfile.id,
+        nome: updatedProfile.nome,
+        cpf: updatedProfile.cpf,
+        email: updatedProfile.email,
+        telefone: updatedProfile.telefone,
+        dataNascimento: updatedProfile.dataNascimento,
+        metodoAutenticacao:
+            updatedProfile.metodoAutenticacao == AuthMethod.google
+            ? 'google'
+            : 'email',
+      );
+      when(
+        () => mockProfileApiClient.getProfile(),
+      ).thenAnswer((_) async => Success(updatedProfileApi));
+
+      final result2 = await profileRepository.getProfile(forceRefresh: true);
+
+      expect(result1.isSuccess(), true);
+      expect(result1.tryGetSuccess(), fakeProfile);
+
+      expect(result2.isSuccess(), true);
+      expect(result2.tryGetSuccess(), updatedProfile);
+
+      verify(() => mockProfileApiClient.getProfile()).called(2);
     });
   });
 
-  group("updateBirthdate", () {
-    test("when method is ran, result is the same as the ApiClient", () async {
-      // Mock apiclient to respond success
+  group("Change Name", () {
+    setUp(() {
       when(
-        () => mockProfileApiClient.updateBirthdate(any()),
-      ).thenAnswer((_) async => const Success('1990-01-01'));
+        () => mockProfileApiClient.updateName(any()),
+      ).thenAnswer((_) async => const Success('Updated Name'));
+    });
 
-      // Call repository
-      final result1 = await profileRepository.updateBirthdate(
-        DateTime(1990, 1, 1),
+    test("it returns success from ApiClient", () async {
+      final result = await profileRepository.updateName('Updated Name');
+      expect(result.isSuccess(), true);
+    });
+
+    test("it returns error from ApiClient", () async {
+      when(
+        () => mockProfileApiClient.updateName(any()),
+      ).thenAnswer((_) async => Error(Exception('Network error')));
+
+      final result = await profileRepository.updateName('Updated Name');
+      expect(result.isError(), true);
+    });
+    test("it refreshes cache after update", () async {
+      await profileRepository.getProfile();
+
+      final updatedProfile = fakeProfile.copyWith(nome: 'Updated Name');
+      final updatedProfileApi = ProfileApiModel(
+        id: updatedProfile.id,
+        nome: updatedProfile.nome,
+        cpf: updatedProfile.cpf,
+        email: updatedProfile.email,
+        telefone: updatedProfile.telefone,
+        dataNascimento: updatedProfile.dataNascimento,
+        metodoAutenticacao:
+            updatedProfile.metodoAutenticacao == AuthMethod.google
+            ? 'google'
+            : 'email',
       );
 
-      // Verify response matches
-      expect(result1.isSuccess(), true);
+      when(
+        () => mockProfileApiClient.getProfile(),
+      ).thenAnswer((_) async => Success(updatedProfileApi));
 
-      // Mock apiclient to respond error
+      await profileRepository.updateName('Updated Name');
+
+      final result = await profileRepository.getProfile();
+
+      expect(result.isSuccess(), true);
+      expect(result.tryGetSuccess()?.nome, 'Updated Name');
+    });
+  });
+
+  group("Change Birthdate", () {
+    setUp(() {
+      when(
+        () => mockProfileApiClient.updateBirthdate(any()),
+      ).thenAnswer((_) async => const Success('1995-05-05'));
+    });
+
+    test("it returns success from ApiClient", () async {
+      final result = await profileRepository.updateBirthdate(
+        DateTime(1995, 5, 5),
+      );
+      expect(result.isSuccess(), true);
+    });
+
+    test("it returns error from ApiClient", () async {
       when(
         () => mockProfileApiClient.updateBirthdate(any()),
       ).thenAnswer((_) async => Error(Exception('Network error')));
 
-      // Call repository again
-      final result2 = await profileRepository.updateBirthdate(
+      final result = await profileRepository.updateBirthdate(
         DateTime(1995, 5, 5),
       );
-
-      // Verify response matches
-      expect(result2.isError(), true);
+      expect(result.isError(), true);
     });
-    test("when method is ran, cache is updated with API response", () async {
-      // Mock apiclient to respond success with date X
-      final initialProfile = ProfileApiModel(
-        id: '12345',
-        nome: 'João Silva',
-        cpf: '123.456.789-00',
-        email: 'joao.silva@example.com',
-        telefone: '11999999999',
-        dataNascimento: DateTime(1990, 1, 1),
-        metodoAutenticacao: 'email',
-      );
-      when(
-        () => mockProfileApiClient.getProfile(),
-      ).thenAnswer((_) async => Success(initialProfile));
-
-      // Load initial cache
+    test("it refreshes cache after update", () async {
       await profileRepository.getProfile();
 
-      // Call repository to update date to Y
       final newDate = DateTime(1995, 5, 5);
-      final updatedProfile = ProfileApiModel(
-        id: '12345',
-        nome: 'João Silva',
-        cpf: '123.456.789-00',
-        email: 'joao.silva@example.com',
-        telefone: '11999999999',
-        dataNascimento: newDate,
-        metodoAutenticacao: 'email',
+      final updatedProfile = fakeProfile.copyWith(dataNascimento: newDate);
+      final updatedProfileApi = ProfileApiModel(
+        id: updatedProfile.id,
+        nome: updatedProfile.nome,
+        cpf: updatedProfile.cpf,
+        email: updatedProfile.email,
+        telefone: updatedProfile.telefone,
+        dataNascimento: updatedProfile.dataNascimento,
+        metodoAutenticacao:
+            updatedProfile.metodoAutenticacao == AuthMethod.google
+            ? 'google'
+            : 'email',
       );
-      when(
-        () => mockProfileApiClient.updateBirthdate(newDate),
-      ).thenAnswer((_) async => const Success('1995-05-05'));
+
       when(
         () => mockProfileApiClient.getProfile(),
-      ).thenAnswer((_) async => Success(updatedProfile));
+      ).thenAnswer((_) async => Success(updatedProfileApi));
 
       await profileRepository.updateBirthdate(newDate);
 
-      // call getProfile
       final result = await profileRepository.getProfile();
 
-      // Verify edited value matches server (Y) and not locally sent value (X)
       expect(result.isSuccess(), true);
       expect(result.tryGetSuccess()?.dataNascimento, newDate);
     });
   });
 
-  group("updatePhone", () {
-    test(
-      "when updatePhone is ran, result is the same as the ApiClient",
-      () async {
-        // Mock apiclient to respond success
-        when(
-          () => mockProfileApiClient.updatePhone(any()),
-        ).thenAnswer((_) async => const Success('11999999999'));
+  group("Change Phone number", () {
+    setUp(() {
+      when(
+        () => mockProfileApiClient.updatePhone(any()),
+      ).thenAnswer((_) async => const Success('11988888888'));
+    });
 
-        // Call repository
-        final result1 = await profileRepository.updatePhone('11999999999');
+    test("it returns success from ApiClient", () async {
+      final result = await profileRepository.updatePhone('11988888888');
+      expect(result.isSuccess(), true);
+    });
 
-        // Verify response matches
-        expect(result1.isSuccess(), true);
+    test("it returns error from ApiClient", () async {
+      when(
+        () => mockProfileApiClient.updatePhone(any()),
+      ).thenAnswer((_) async => Error(Exception('Network error')));
 
-        // Mock apiclient to respond error
-        when(
-          () => mockProfileApiClient.updatePhone(any()),
-        ).thenAnswer((_) async => Error(Exception('Network error')));
+      final result = await profileRepository.updatePhone('11988888888');
+      expect(result.isError(), true);
+    });
+    test("it refreshes cache after update", () async {
+      await profileRepository.getProfile();
 
-        // Call repository again
-        final result2 = await profileRepository.updatePhone('11988888888');
+      final updatedProfile = fakeProfile.copyWith(telefone: '11988888888');
+      final updatedProfileApi = ProfileApiModel(
+        id: updatedProfile.id,
+        nome: updatedProfile.nome,
+        cpf: updatedProfile.cpf,
+        email: updatedProfile.email,
+        telefone: updatedProfile.telefone,
+        dataNascimento: updatedProfile.dataNascimento,
+        metodoAutenticacao:
+            updatedProfile.metodoAutenticacao == AuthMethod.google
+            ? 'google'
+            : 'email',
+      );
 
-        // Verify response matches
-        expect(result2.isError(), true);
-      },
-    );
-    test(
-      "when updatePhone is ran, cache is updated with API response",
-      () async {
-        // Mock apiclient to respond success with phone X
-        final initialProfile = ProfileApiModel(
-          id: '12345',
-          nome: 'João Silva',
-          cpf: '123.456.789-00',
-          email: 'joao.silva@example.com',
-          telefone: '11999999999',
-          dataNascimento: DateTime(1990, 1, 1),
-          metodoAutenticacao: 'email',
-        );
-        when(
-          () => mockProfileApiClient.getProfile(),
-        ).thenAnswer((_) async => Success(initialProfile));
+      when(
+        () => mockProfileApiClient.getProfile(),
+      ).thenAnswer((_) async => Success(updatedProfileApi));
 
-        // Load initial cache
-        await profileRepository.getProfile();
+      await profileRepository.updatePhone('11988888888');
 
-        // Call repository to update phone to Y
-        final updatedProfile = ProfileApiModel(
-          id: '12345',
-          nome: 'João Silva',
-          cpf: '123.456.789-00',
-          email: 'joao.silva@example.com',
-          telefone: '11988888888',
-          dataNascimento: DateTime(1990, 1, 1),
-          metodoAutenticacao: 'email',
-        );
-        when(
-          () => mockProfileApiClient.updatePhone('11988888888'),
-        ).thenAnswer((_) async => const Success('11988888888'));
-        when(
-          () => mockProfileApiClient.getProfile(),
-        ).thenAnswer((_) async => Success(updatedProfile));
+      final result = await profileRepository.getProfile();
 
-        await profileRepository.updatePhone('11988888888');
-
-        // call getProfile
-        final result = await profileRepository.getProfile();
-
-        // Verify edited value matches server (Y) and not locally sent value (X)
-        expect(result.isSuccess(), true);
-        expect(result.tryGetSuccess()?.telefone, '11988888888');
-      },
-    );
+      expect(result.isSuccess(), true);
+      expect(result.tryGetSuccess()?.telefone, '11988888888');
+    });
   });
 
-  group("deleteAccount", () {
-    test(
-      "when deleteAccount is ran, result is the same as the ApiClient",
-      () async {
-        // Mock apiclient to respond success
-        when(
-          () => mockProfileApiClient.deleteAccount(),
-        ).thenAnswer((_) async => const Success(null));
+  group("Delete Account", () {
+    setUp(() {
+      when(
+        () => mockProfileApiClient.deleteAccount(),
+      ).thenAnswer((_) async => const Success(null));
+    });
 
-        // Call repository
-        final result1 = await profileRepository.deleteAccount();
+    test("it returns success from ApiClient", () async {
+      final result = await profileRepository.deleteAccount();
+      expect(result.isSuccess(), true);
+    });
 
-        // Verify response matches
-        expect(result1.isSuccess(), true);
+    test("it returns error from ApiClient", () async {
+      when(
+        () => mockProfileApiClient.deleteAccount(),
+      ).thenAnswer((_) async => Error(Exception('Network error')));
 
-        // Mock apiclient to respond error
-        when(
-          () => mockProfileApiClient.deleteAccount(),
-        ).thenAnswer((_) async => Error(Exception('Network error')));
+      final result = await profileRepository.deleteAccount();
+      expect(result.isError(), true);
+    });
 
-        // Call repository again
-        final result2 = await profileRepository.deleteAccount();
+    test("it clears cache after deletion", () async {
+      final initialResult = await profileRepository.getProfile();
+      expect(initialResult.isSuccess(), true);
 
-        // Verify response matches
-        expect(result2.isError(), true);
-      },
-    );
-    test(
-      "When deleteAccount is run getProfile must return error (cache clear)",
-      () async {
-        // mock apiclient to return success on getProfile
-        final fakeProfile = ProfileApiModel(
-          id: '12345',
-          nome: 'João Silva',
-          cpf: '123.456.789-00',
-          email: 'joao.silva@example.com',
-          telefone: '11999999999',
-          dataNascimento: DateTime(1990, 1, 1),
-          metodoAutenticacao: 'email',
-        );
-        when(
-          () => mockProfileApiClient.getProfile(),
-        ).thenAnswer((_) async => Success(fakeProfile));
+      await profileRepository.deleteAccount();
 
-        // mock apiclient to return success on deleteAccount
-        when(
-          () => mockProfileApiClient.deleteAccount(),
-        ).thenAnswer((_) async => const Success(null));
+      when(
+        () => mockProfileApiClient.getProfile(),
+      ).thenAnswer((_) async => Error(Exception('User not found')));
 
-        // call getProfile on repository (stores cache)
-        final initialResult = await profileRepository.getProfile();
-        expect(initialResult.isSuccess(), true);
+      final result = await profileRepository.getProfile();
 
-        // call deleteAccount on repository
-        await profileRepository.deleteAccount();
-
-        // mock apiclient to return error on getProfile
-        when(
-          () => mockProfileApiClient.getProfile(),
-        ).thenAnswer((_) async => Error(Exception('User not found')));
-
-        // call getProfile on repository
-        final result = await profileRepository.getProfile();
-
-        // assert return error, not cached value
-        expect(result.isError(), true);
-      },
-    );
+      expect(result.isError(), true);
+    });
   });
 
-  test(
-    "when requestPhoneVerificationCode function is called then response must match ApiClient",
-    () async {
-      // Mock apiclient to respond success
+  group("Request Phone Verification Code", () {
+    setUp(() {
       when(
         () => mockProfileApiClient.requestPhoneVerificationCode(any()),
       ).thenAnswer((_) async => const Success(null));
+    });
 
-      // Call repository
-      final result1 = await profileRepository.requestPhoneVerificationCode(
+    test("it returns success from ApiClient", () async {
+      final result = await profileRepository.requestPhoneVerificationCode(
         '11999999999',
       );
+      expect(result.isSuccess(), true);
+    });
 
-      // Verify response matches
-      expect(result1.isSuccess(), true);
-
-      // Mock apiclient to respond error
+    test("it returns error from ApiClient", () async {
       when(
         () => mockProfileApiClient.requestPhoneVerificationCode(any()),
       ).thenAnswer((_) async => Error(Exception('Network error')));
 
-      // Call repository again
-      final result2 = await profileRepository.requestPhoneVerificationCode(
-        '11988888888',
+      final result = await profileRepository.requestPhoneVerificationCode(
+        '11999999999',
       );
+      expect(result.isError(), true);
+    });
+  });
 
-      // Verify response matches
-      expect(result2.isError(), true);
-    },
-  );
-
-  test(
-    "when verifyPhoneCode function is called then response must match ApiClient",
-    () async {
-      // Mock apiclient to respond success
+  group("Verify Phone Code", () {
+    setUp(() {
       when(
         () => mockProfileApiClient.verifyPhoneCode(any()),
       ).thenAnswer((_) async => const Success(null));
+    });
 
-      // Call repository
-      final result1 = await profileRepository.verifyPhoneCode('123456');
+    test("it returns success from ApiClient", () async {
+      final result = await profileRepository.verifyPhoneCode('123456');
+      expect(result.isSuccess(), true);
+    });
 
-      // Verify response matches
-      expect(result1.isSuccess(), true);
-
-      // Mock apiclient to respond error
+    test("it returns error from ApiClient", () async {
       when(
         () => mockProfileApiClient.verifyPhoneCode(any()),
       ).thenAnswer((_) async => Error(Exception('Invalid code')));
 
-      // Call repository again
-      final result2 = await profileRepository.verifyPhoneCode('000000');
+      final result = await profileRepository.verifyPhoneCode('123456');
+      expect(result.isError(), true);
+    });
+  });
 
-      // Verify response matches
-      expect(result2.isError(), true);
-    },
-  );
-
-  test(
-    "if token is valid when linkGoogleAccount is ran then response must match ApiModel",
-    () async {
-      // Mock apiclient to respond success
+  group("Link Google Account", () {
+    setUp(() {
       when(
         () => mockProfileApiClient.linkGoogleAccount(any()),
       ).thenAnswer((_) async => const Success(null));
+    });
 
-      // Call repository
-      final result1 = await profileRepository.linkGoogleAccount('valid_token');
+    test("it returns success from ApiClient", () async {
+      final result = await profileRepository.linkGoogleAccount('valid_token');
+      expect(result.isSuccess(), true);
+    });
 
-      // Verify response matches
-      expect(result1.isSuccess(), true);
-
-      // Mock apiclient to respond error
+    test("it returns error from ApiClient", () async {
       when(
         () => mockProfileApiClient.linkGoogleAccount(any()),
       ).thenAnswer((_) async => Error(Exception('Invalid token')));
 
-      // Call repository again
-      final result2 = await profileRepository.linkGoogleAccount(
-        'invalid_token',
-      );
+      final result = await profileRepository.linkGoogleAccount('invalid_token');
+      expect(result.isError(), true);
+    });
+  });
 
-      // Verify response matches
-      expect(result2.isError(), true);
-    },
-  );
-
-  test(
-    "when export data is called, correspoding ApiClient method must be invoked and response must match ApiClient",
-    () async {
-      // Mock apiclient to respond success
+  group("Request Data Export", () {
+    setUp(() {
       when(
         () => mockProfileApiClient.requestDataExport(),
       ).thenAnswer((_) async => const Success(null));
+    });
 
-      // Call repository
-      final result1 = await profileRepository.requestDataExport();
-
-      // Verify response matches
-      expect(result1.isSuccess(), true);
+    test("it returns success from ApiClient", () async {
+      final result = await profileRepository.requestDataExport();
+      expect(result.isSuccess(), true);
       verify(() => mockProfileApiClient.requestDataExport()).called(1);
+    });
 
-      // Mock apiclient to respond error
+    test("it returns error from ApiClient", () async {
       when(
         () => mockProfileApiClient.requestDataExport(),
       ).thenAnswer((_) async => Error(Exception('Export failed')));
 
-      // Call repository again
-      final result2 = await profileRepository.requestDataExport();
-
-      // Verify response matches
-      expect(result2.isError(), true);
-      verify(() => mockProfileApiClient.requestDataExport()).called(1);
-    },
-  );
+      final result = await profileRepository.requestDataExport();
+      expect(result.isError(), true);
+    });
+  });
 }

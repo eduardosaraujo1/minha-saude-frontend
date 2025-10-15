@@ -5,24 +5,24 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import '../../view_models/settings_edit_view_model.dart';
 
 class SettingsEditPhone extends StatefulWidget {
-  const SettingsEditPhone({required this.viewModel, super.key});
+  const SettingsEditPhone({required this.viewModelFactory, super.key});
 
-  final SettingsEditViewModel viewModel;
+  final SettingsEditViewModel Function() viewModelFactory;
 
   @override
   State<SettingsEditPhone> createState() => _SettingsEditPhoneState();
 }
 
 class _SettingsEditPhoneState extends State<SettingsEditPhone> {
-  late final SettingsEditViewModel viewModel;
+  late final SettingsEditViewModel viewModel = widget.viewModelFactory();
   late final _EditPhoneFormController _formController;
+
   @override
   void initState() {
     _formController = _EditPhoneFormController();
-    viewModel = widget.viewModel;
     viewModel.loadCurrentValue.addListener(_onDataLoad);
     viewModel.updatePhoneCommand.addListener(_onUpdate);
-    viewModel.loadCurrentValue.execute(null);
+    viewModel.loadCurrentValue.execute();
     super.initState();
   }
 
@@ -31,6 +31,7 @@ class _SettingsEditPhoneState extends State<SettingsEditPhone> {
     viewModel.loadCurrentValue.removeListener(_onDataLoad);
     viewModel.loadCurrentValue.removeListener(_onUpdate);
     _formController.phoneController.dispose();
+    viewModel.dispose();
     super.dispose();
   }
 
@@ -104,58 +105,59 @@ class _SettingsEditPhoneState extends State<SettingsEditPhone> {
             builder: (context, isLoading, child) {
               final fieldValue = viewModel.loadCurrentValue.value
                   ?.tryGetSuccess();
+
+              if (isLoading || fieldValue == null) {
+                return Center(child: CircularProgressIndicator());
+              }
+
               return Column(
                 children: [
                   Form(
                     key: _formController.formKey,
-                    child: isLoading || fieldValue == null
-                        ? CircularProgressIndicator()
-                        : TextFormField(
-                            key: ValueKey('inputPhone'),
-                            controller: _formController.phoneController,
-                            validator: _formController.validatePhone,
-                            keyboardType: TextInputType.phone,
-                            inputFormatters: [
-                              MaskTextInputFormatter(
-                                mask: '(##) #####-####',
-                                filter: {"#": RegExp(r'[0-9]')},
-                                type: MaskAutoCompletionType.lazy,
-                              ),
-                            ],
-                            decoration: InputDecoration(
-                              icon: Icon(Icons.phone),
-                            ),
-                          ),
+                    child: TextFormField(
+                      key: ValueKey('inputPhone'),
+                      controller: _formController.phoneController,
+                      validator: _formController.validatePhone,
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        MaskTextInputFormatter(
+                          mask: '(##) #####-####',
+                          filter: {"#": RegExp(r'[0-9]')},
+                          type: MaskAutoCompletionType.lazy,
+                        ),
+                      ],
+                      decoration: InputDecoration(icon: Icon(Icons.phone)),
+                    ),
                   ),
                   SizedBox(height: 8),
                   ValueListenableBuilder(
                     valueListenable: viewModel.updatePhoneCommand.isExecuting,
                     builder: (context, isRunning, child) {
-                      return isRunning
-                          ? CircularProgressIndicator()
-                          : Row(
-                              spacing: 4,
-                              children: [
-                                Expanded(
-                                  child: FilledButton.tonal(
-                                    key: ValueKey('btnCancel'),
-                                    onPressed: () {
-                                      context.pop();
-                                    },
-                                    child: const Text("Cancelar"),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: FilledButton(
-                                    key: ValueKey('btnSave'),
-                                    onPressed: fieldValue == null
-                                        ? null
-                                        : _triggerSave,
-                                    child: const Text("Salvar"),
-                                  ),
-                                ),
-                              ],
-                            );
+                      if (isRunning) {
+                        return CircularProgressIndicator();
+                      }
+
+                      return Row(
+                        spacing: 4,
+                        children: [
+                          Expanded(
+                            child: FilledButton.tonal(
+                              key: ValueKey('btnCancel'),
+                              onPressed: () {
+                                context.pop();
+                              },
+                              child: const Text("Cancelar"),
+                            ),
+                          ),
+                          Expanded(
+                            child: FilledButton(
+                              key: ValueKey('btnSave'),
+                              onPressed: _triggerSave,
+                              child: const Text("Salvar"),
+                            ),
+                          ),
+                        ],
+                      );
                     },
                   ),
                 ],

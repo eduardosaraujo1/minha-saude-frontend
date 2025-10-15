@@ -271,7 +271,7 @@ final _router = GoRouter(
                       path: Routes.editNomeRelative,
                       builder: (context, state) {
                         return SettingsEditName(
-                          viewModel: () => SettingsEditViewModel(
+                          viewModelFactory: () => SettingsEditViewModel(
                             fieldType: SettingsEditField.name,
                             profileRepository: _getIt<ProfileRepository>(),
                           ),
@@ -282,7 +282,7 @@ final _router = GoRouter(
                       path: Routes.editTelefoneRelative,
                       builder: (context, state) {
                         return SettingsEditPhone(
-                          viewModel: () => SettingsEditViewModel(
+                          viewModelFactory: () => SettingsEditViewModel(
                             fieldType: SettingsEditField.phone,
                             profileRepository: _getIt<ProfileRepository>(),
                           ),
@@ -293,7 +293,7 @@ final _router = GoRouter(
                       path: Routes.editBirthdateRelative,
                       builder: (context, state) {
                         return SettingsEditBirthdate(
-                          viewModel: () => SettingsEditViewModel(
+                          viewModelFactory: () => SettingsEditViewModel(
                             fieldType: SettingsEditField.birthdate,
                             profileRepository: _getIt<ProfileRepository>(),
                           ),

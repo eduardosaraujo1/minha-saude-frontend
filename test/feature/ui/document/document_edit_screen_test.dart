@@ -17,6 +17,7 @@ void main() {
   late DocumentEditViewModel viewModel;
   late MockGoRouter mockGoRouter;
   late DocumentRepository documentRepository;
+  late Widget view;
   const String documentUuid = 'test-uuid';
 
   setUpAll(() {
@@ -30,6 +31,12 @@ void main() {
     viewModel = DocumentEditViewModel(
       documentUuid: documentUuid,
       documentRepository: documentRepository,
+    );
+    view = MaterialApp(
+      home: MockGoRouterProvider(
+        goRouter: mockGoRouter,
+        child: DocumentEditScreen(() => viewModel),
+      ),
     );
   });
 
@@ -50,7 +57,7 @@ void main() {
         () => documentRepository.getDocumentMeta(documentUuid),
       ).thenAnswer((_) async => Success(mockDocument));
 
-      await tester.pumpWidget(MaterialApp(home: DocumentEditScreen(viewModel)));
+      await tester.pumpWidget(view);
 
       // Wait for loadDocument to complete and UI to update
       await tester.pump(const Duration(milliseconds: 500));
@@ -142,15 +149,7 @@ void main() {
       ).thenAnswer((_) async => Success(mockUpdatedDocument));
       when(() => mockGoRouter.canPop()).thenReturn(true);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MockGoRouterProvider(
-            goRouter: mockGoRouter,
-            child: DocumentEditScreen(viewModel),
-          ),
-          // navigatorObservers: [MockNavigatorObserver()],
-        ),
-      );
+      await tester.pumpWidget(view);
 
       // Await for the document to load
       await tester.pump(const Duration(milliseconds: 500));
@@ -205,14 +204,7 @@ void main() {
   testWidgets("when cancel is clicked then pop is invoked", (tester) async {
     when(() => mockGoRouter.canPop()).thenReturn(true);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MockGoRouterProvider(
-          goRouter: mockGoRouter,
-          child: DocumentEditScreen(viewModel),
-        ),
-      ),
-    );
+    await tester.pumpWidget(view);
     await tester.pump(Duration(milliseconds: 100));
 
     // Tap cancel button

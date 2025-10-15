@@ -16,12 +16,16 @@ void main() {
   late ProfileRepository profileRepository;
   late MockGoRouter mockGoRouter;
   late SettingsEditViewModel viewModel;
+  late Widget view;
+
   setUp(() {
     mockGoRouter = MockGoRouter();
+
     when(() => mockGoRouter.pop()).thenReturn(null);
     when(() => mockGoRouter.canPop()).thenReturn(true);
 
     profileRepository = MockProfileRepository();
+
     when(() => profileRepository.getProfile()).thenAnswer(
       (_) async => Success(
         Profile(
@@ -44,16 +48,16 @@ void main() {
         fieldType: SettingsEditField.name,
         profileRepository: profileRepository,
       );
-    });
-    testWidgets("when click on cancel then pop navigation", (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MockGoRouterProvider(
-            goRouter: mockGoRouter,
-            child: SettingsEditName(viewModel: viewModel),
-          ),
+
+      view = MaterialApp(
+        home: MockGoRouterProvider(
+          goRouter: mockGoRouter,
+          child: SettingsEditName(viewModelFactory: () => viewModel),
         ),
       );
+    });
+    testWidgets("when click on cancel then pop navigation", (tester) async {
+      await tester.pumpWidget(view);
 
       await tester.tap(find.byKey(ValueKey('btnCancel')));
       await tester.pumpAndSettle();
@@ -63,9 +67,7 @@ void main() {
     testWidgets("can find edit name field, confirm button and cancel button", (
       tester,
     ) async {
-      await tester.pumpWidget(
-        MaterialApp(home: (SettingsEditName(viewModel: viewModel))),
-      );
+      await tester.pumpWidget(view);
       await tester.pump(
         Duration(milliseconds: 100),
       ); // Allow async load to complete
@@ -78,9 +80,7 @@ void main() {
     testWidgets("when widget loads initial value is placed in text form", (
       tester,
     ) async {
-      await tester.pumpWidget(
-        MaterialApp(home: (SettingsEditName(viewModel: viewModel))),
-      );
+      await tester.pumpWidget(view);
       await tester.pump(
         Duration(milliseconds: 100),
       ); // Allow async load to complete
@@ -95,14 +95,7 @@ void main() {
     testWidgets(
       "when new name is typed and confirm is pressed, then name edit is triggered",
       (tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: MockGoRouterProvider(
-              goRouter: mockGoRouter,
-              child: SettingsEditName(viewModel: viewModel),
-            ),
-          ),
-        );
+        await tester.pumpWidget(view);
         await tester.pump(
           Duration(milliseconds: 100),
         ); // Allow async load to complete
@@ -127,9 +120,7 @@ void main() {
     testWidgets(
       "when invalid name is typed and confirm is pressed, then name edit is not triggered",
       (tester) async {
-        await tester.pumpWidget(
-          MaterialApp(home: (SettingsEditName(viewModel: viewModel))),
-        );
+        await tester.pumpWidget(view);
         await tester.pump(
           Duration(milliseconds: 100),
         ); // Allow async load to complete
@@ -157,16 +148,16 @@ void main() {
         fieldType: SettingsEditField.birthdate,
         profileRepository: profileRepository,
       );
-    });
-    testWidgets("when click on cancel then pop navigation", (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MockGoRouterProvider(
-            goRouter: mockGoRouter,
-            child: SettingsEditBirthdate(viewModel: viewModel),
-          ),
+      view = MaterialApp(
+        home: MockGoRouterProvider(
+          goRouter: mockGoRouter,
+          child: SettingsEditBirthdate(viewModelFactory: () => viewModel),
         ),
       );
+    });
+
+    testWidgets("when click on cancel then pop navigation", (tester) async {
+      await tester.pumpWidget(view);
 
       await tester.tap(find.byKey(ValueKey('btnCancel')));
       await tester.pumpAndSettle();
@@ -177,9 +168,7 @@ void main() {
     testWidgets(
       "can find edit birthdate field, confirm button and cancel button",
       (tester) async {
-        await tester.pumpWidget(
-          MaterialApp(home: (SettingsEditBirthdate(viewModel: viewModel))),
-        );
+        await tester.pumpWidget(view);
         await tester.pump(
           Duration(milliseconds: 100),
         ); // Allow async load to complete
@@ -193,9 +182,7 @@ void main() {
     testWidgets("when widget loads initial value is placed in text form", (
       tester,
     ) async {
-      await tester.pumpWidget(
-        MaterialApp(home: (SettingsEditBirthdate(viewModel: viewModel))),
-      );
+      await tester.pumpWidget(view);
       await tester.pump(
         Duration(milliseconds: 100),
       ); // Allow async load to complete
@@ -210,14 +197,7 @@ void main() {
     testWidgets(
       "when new birthdate is typed and confirm is pressed, then birthdate edit is triggered",
       (tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: MockGoRouterProvider(
-              goRouter: mockGoRouter,
-              child: SettingsEditBirthdate(viewModel: viewModel),
-            ),
-          ),
-        );
+        await tester.pumpWidget(view);
         await tester.pump(
           Duration(milliseconds: 100),
         ); // Allow async load to complete
@@ -246,14 +226,7 @@ void main() {
     testWidgets(
       "when invalid birthdate is typed and confirm is pressed, then birthdate edit is not triggered",
       (tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: (MockGoRouterProvider(
-              goRouter: mockGoRouter,
-              child: SettingsEditBirthdate(viewModel: viewModel),
-            )),
-          ),
-        );
+        await tester.pumpWidget(view);
         await tester.pump(
           Duration(milliseconds: 100),
         ); // Allow async load to complete
@@ -280,16 +253,16 @@ void main() {
         fieldType: SettingsEditField.phone,
         profileRepository: profileRepository,
       );
-    });
-    testWidgets("when click on cancel then pop navigation", (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MockGoRouterProvider(
-            goRouter: mockGoRouter,
-            child: SettingsEditPhone(viewModel: viewModel),
-          ),
+
+      view = MaterialApp(
+        home: MockGoRouterProvider(
+          goRouter: mockGoRouter,
+          child: SettingsEditPhone(viewModelFactory: () => viewModel),
         ),
       );
+    });
+    testWidgets("when click on cancel then pop navigation", (tester) async {
+      await tester.pumpWidget(view);
 
       await tester.tap(find.byKey(ValueKey('btnCancel')));
       await tester.pumpAndSettle();
@@ -300,9 +273,7 @@ void main() {
     testWidgets("can find edit phone field, confirm button and cancel button", (
       tester,
     ) async {
-      await tester.pumpWidget(
-        MaterialApp(home: (SettingsEditPhone(viewModel: viewModel))),
-      );
+      await tester.pumpWidget(view);
       await tester.pump(
         Duration(milliseconds: 100),
       ); // Allow async load to complete
@@ -315,9 +286,7 @@ void main() {
     testWidgets("when widget loads initial value is placed in text form", (
       tester,
     ) async {
-      await tester.pumpWidget(
-        MaterialApp(home: (SettingsEditPhone(viewModel: viewModel))),
-      );
+      await tester.pumpWidget(view);
       await tester.pump(
         Duration(milliseconds: 100),
       ); // Allow async load to complete
@@ -332,14 +301,7 @@ void main() {
     testWidgets(
       "when new phone is typed and confirm is pressed, then phone edit is triggered",
       (tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: MockGoRouterProvider(
-              goRouter: mockGoRouter,
-              child: SettingsEditPhone(viewModel: viewModel),
-            ),
-          ),
-        );
+        await tester.pumpWidget(view);
         await tester.pump(
           Duration(milliseconds: 100),
         ); // Allow async load to complete
@@ -363,9 +325,7 @@ void main() {
     testWidgets(
       "when invalid phone is typed and confirm is pressed, then phone edit is not triggered",
       (tester) async {
-        await tester.pumpWidget(
-          MaterialApp(home: (SettingsEditPhone(viewModel: viewModel))),
-        );
+        await tester.pumpWidget(view);
         await tester.pump(
           Duration(milliseconds: 100),
         ); // Allow async load to complete

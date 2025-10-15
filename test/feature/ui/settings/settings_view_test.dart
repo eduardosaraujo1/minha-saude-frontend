@@ -18,12 +18,13 @@ import '../../../mocks/mock_request_export_action.dart';
 class MockThemeController extends Mock implements ThemeController {}
 
 void main() {
+  late MockGoRouter mockGoRouter;
+  late Widget view;
   late SettingsViewModel viewModel;
   late MockLogoutAction mockLogoutAction;
   late MockDeleteUserAction mockDeleteUserAction;
   late MockRequestExportAction mockRequestExportAction;
   late ProfileRepository profileRepository;
-  late MockGoRouter mockGoRouter;
   setUp(() {
     mockGoRouter = MockGoRouter();
     when(() => mockGoRouter.pop()).thenReturn(null);
@@ -50,19 +51,19 @@ void main() {
       deleteUserAction: mockDeleteUserAction,
       requestExportAction: mockRequestExportAction,
     );
+
+    view = MaterialApp(
+      home: MockGoRouterProvider(
+        goRouter: mockGoRouter,
+        child: SettingsTabView(() => viewModel),
+      ),
+    );
   });
 
   testWidgets(
     "if on general tab can see edit buttons, export button and dark theme button",
     (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MockGoRouterProvider(
-            goRouter: mockGoRouter,
-            child: SettingsTabView(viewModel),
-          ),
-        ),
-      );
+      await tester.pumpWidget(view);
       await tester.pump(Duration(milliseconds: 500));
 
       // Should be on general tab by default
@@ -79,14 +80,7 @@ void main() {
   ) async {
     when(() => mockGoRouter.go(any())).thenReturn(null);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MockGoRouterProvider(
-          goRouter: mockGoRouter,
-          child: SettingsTabView(viewModel),
-        ),
-      ),
-    );
+    await tester.pumpWidget(view);
     await tester.pump(Duration(milliseconds: 500));
 
     await tester.tap(find.byKey(ValueKey('btnEditName')));
@@ -100,14 +94,7 @@ void main() {
     (tester) async {
       when(() => mockGoRouter.go(any())).thenReturn(null);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MockGoRouterProvider(
-            goRouter: mockGoRouter,
-            child: SettingsTabView(viewModel),
-          ),
-        ),
-      );
+      await tester.pumpWidget(view);
       await tester.pump(Duration(milliseconds: 500));
 
       await tester.tap(find.byKey(ValueKey('btnEditBirthdate')));
@@ -122,14 +109,7 @@ void main() {
   ) async {
     when(() => mockGoRouter.go(any())).thenReturn(null);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MockGoRouterProvider(
-          goRouter: mockGoRouter,
-          child: SettingsTabView(viewModel),
-        ),
-      ),
-    );
+    await tester.pumpWidget(view);
     await tester.pump(Duration(milliseconds: 500));
 
     await tester.tap(find.byKey(ValueKey('btnEditPhone')));
@@ -140,14 +120,7 @@ void main() {
   testWidgets(
     "when click on export documents button, calls export documents action",
     (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MockGoRouterProvider(
-            goRouter: mockGoRouter,
-            child: SettingsTabView(viewModel),
-          ),
-        ),
-      );
+      await tester.pumpWidget(view);
       await tester.pump(Duration(milliseconds: 500));
 
       // Tap export data button
@@ -179,17 +152,7 @@ void main() {
       tester.binding.reset();
     });
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MockGoRouterProvider(
-          goRouter: mockGoRouter,
-          child: ThemeProvider(
-            controller: mockThemeController,
-            child: SettingsTabView(viewModel),
-          ),
-        ),
-      ),
-    );
+    await tester.pumpWidget(view);
     await tester.pump(Duration(milliseconds: 500));
     await tester.pumpAndSettle();
 
@@ -209,14 +172,7 @@ void main() {
   testWidgets("if on account tab can see signout and delete account buttons", (
     tester,
   ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MockGoRouterProvider(
-          goRouter: mockGoRouter,
-          child: SettingsTabView(viewModel),
-        ),
-      ),
-    );
+    await tester.pumpWidget(view);
     await tester.pump(Duration(milliseconds: 500));
 
     // Navigate to account tab (index 1)
@@ -233,14 +189,7 @@ void main() {
   testWidgets("when click on signout button, calls logout action", (
     tester,
   ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MockGoRouterProvider(
-          goRouter: mockGoRouter,
-          child: SettingsTabView(viewModel),
-        ),
-      ),
-    );
+    await tester.pumpWidget(view);
     await tester.pump(Duration(milliseconds: 500));
 
     // Navigate to account tab
@@ -265,14 +214,7 @@ void main() {
   testWidgets(
     "when click on delete account button, calls delete account action",
     (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: MockGoRouterProvider(
-            goRouter: mockGoRouter,
-            child: SettingsTabView(viewModel),
-          ),
-        ),
-      );
+      await tester.pumpWidget(view);
       await tester.pump(Duration(milliseconds: 500));
 
       // Navigate to account tab
@@ -315,14 +257,7 @@ void main() {
     ).thenAnswer((_) async => Success(profile));
 
     // Load widget
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MockGoRouterProvider(
-          goRouter: mockGoRouter,
-          child: SettingsTabView(viewModel),
-        ),
-      ),
-    );
+    await tester.pumpWidget(view);
     await tester.pump(Duration(milliseconds: 500));
 
     // Trigger the loadProfile command

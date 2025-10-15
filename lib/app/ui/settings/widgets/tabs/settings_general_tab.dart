@@ -22,15 +22,12 @@ class _SettingsGeneralTabState extends State<SettingsGeneralTab> {
     viewModel = widget.viewModel;
     viewModel.loadProfile.addListener(_handleLoadUpdate);
     viewModel.requestExportCommand.addListener(_handleExportRequest);
-
-    viewModel.loadProfile.execute();
   }
 
   @override
   void dispose() {
     viewModel.loadProfile.removeListener(_handleLoadUpdate);
     viewModel.requestExportCommand.removeListener(_handleExportRequest);
-    viewModel.dispose();
     super.dispose();
   }
 

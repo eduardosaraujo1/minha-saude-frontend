@@ -3,19 +3,16 @@ import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../view_model.dart';
-import '../../../data/repositories/auth/auth_repository.dart';
 import '../../../domain/actions/auth/login_with_google.dart';
-import '../../../routing/routes.dart';
 
 class LoginViewModel implements ViewModel {
-  LoginViewModel(this._authRepository, this._loginWithGoogleAction) {
+  LoginViewModel(this._loginWithGoogleAction) {
     loginWithGoogle = Command.createAsyncNoParam(
       _loginWithGoogle,
       initialValue: null,
     );
   }
 
-  final AuthRepository _authRepository;
   final LoginWithGoogle _loginWithGoogleAction;
   final _log = Logger("LoginViewModel");
 
@@ -23,11 +20,11 @@ class LoginViewModel implements ViewModel {
   /// Rebuild Widget when this notifies
   /// If result is error then display Snackbar and clear result
   /// If result is success, then use context.go to redirect
-  late Command<void, Result<String, Exception>?> loginWithGoogle;
+  late Command<void, Result<RedirectResponse, Exception>?> loginWithGoogle;
 
   /// Perform login with Google action
   /// Returns a nullable string that is the route to redirect to
-  Future<Result<String, Exception>> _loginWithGoogle() async {
+  Future<Result<RedirectResponse, Exception>> _loginWithGoogle() async {
     try {
       final Exception defaultErr = Exception(
         "Não foi possível fazer login com o Google.",
@@ -40,25 +37,12 @@ class LoginViewModel implements ViewModel {
         return Result.error(defaultErr);
       }
 
-      return switch (redirectResult.getOrThrow()) {
-        RedirectResponse.toHome => Result.success(Routes.home),
-        RedirectResponse.toRegister => Result.success(Routes.tos),
-      };
+      return Success(redirectResult.getOrThrow());
     } catch (e) {
       _log.severe("Ocorreu um erro desconhecido:", e);
       return Result.error(
         Exception("Ocorreu um erro desconhecido. Por favor, tente novamente."),
       );
-    }
-  }
-
-  /// Logout user by clearing all tokens and state
-  Future<void> logout() async {
-    try {
-      // Clear all tokens and state through auth repository
-      await _authRepository.logout();
-    } catch (e) {
-      _log.warning("Erro durante logout: $e");
     }
   }
 

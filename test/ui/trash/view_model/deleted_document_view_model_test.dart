@@ -1,11 +1,11 @@
 import 'package:minha_saude_frontend/app/data/repositories/trash/trash_repository.dart';
-import 'package:minha_saude_frontend/app/domain/models/document/document.dart';
 import 'package:minha_saude_frontend/app/ui/trash/view_models/deleted_document_view_model.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:test/test.dart';
 
 import '../../../../testing/mocks/repositories/mock_trash_repository.dart';
+import '../../../../testing/models/document.dart';
 
 void main() {
   late DeletedDocumentViewModel viewModel;
@@ -19,21 +19,13 @@ void main() {
   });
 
   group("load document", () {
-    setUp(() {});
     test(
       "gets document with specified UUID and stores it in the view model",
       () async {
         when(
           () => mockTrashRepository.getTrashDocument(documentUuid),
         ).thenAnswer(
-          (_) async => Success(
-            Document(
-              uuid: documentUuid,
-              paciente: "Paciente Teste",
-              dataDocumento: DateTime(2023, 1, 1),
-              createdAt: DateTime(2023, 1, 1),
-            ),
-          ),
+          (_) async => Success(randomDocument().copyWith(uuid: documentUuid)),
         );
         // act
         viewModel.loadDocument.execute();

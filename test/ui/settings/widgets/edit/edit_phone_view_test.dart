@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:minha_saude_frontend/app/data/repositories/profile/profile_repository.dart';
-import 'package:minha_saude_frontend/app/domain/models/profile/profile.dart';
 import 'package:minha_saude_frontend/app/ui/settings/view_models/settings_edit_view_model.dart';
 import 'package:minha_saude_frontend/app/ui/settings/widgets/edit/settings_edit_phone.dart';
 import 'package:mocktail/mocktail.dart';
@@ -9,6 +8,8 @@ import 'package:multiple_result/multiple_result.dart';
 
 import '../../../../../testing/mocks/mock_go_router.dart';
 import '../../../../../testing/mocks/repositories/mock_profile_repository.dart';
+import '../../../../../testing/models/profile.dart';
+import '../../../../../testing/utils/command_it.dart';
 
 void main() {
   late ProfileRepository profileRepository;
@@ -25,14 +26,10 @@ void main() {
 
     when(() => profileRepository.getProfile()).thenAnswer(
       (_) async => Success(
-        Profile(
-          id: "0",
-          email: "example@gmail.com",
-          cpf: "12345678909",
+        arbitraryProfile().copyWith(
           nome: "initialValue",
           telefone: "initialValue",
           dataNascimento: DateTime(2020, 1, 1),
-          metodoAutenticacao: AuthMethod.google,
         ),
       ),
     );
@@ -56,6 +53,8 @@ void main() {
 
     expect(find.byKey(ValueKey('inputPhone')), findsOneWidget);
     expect(find.byKey(ValueKey('btnSave')), findsOneWidget);
+
+    await waitForDispose(tester);
   });
 
   testWidgets("loads initial phone value", (tester) async {
@@ -66,6 +65,8 @@ void main() {
     final textFormField = tester.widget<TextFormField>(phoneField);
 
     expect(textFormField.controller?.text, "initialValue");
+
+    await waitForDispose(tester);
   });
 
   testWidgets("calls updatePhone when valid phone is submitted", (
@@ -79,6 +80,8 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(() => profileRepository.updatePhone("11987654321")).called(1);
+
+    await waitForDispose(tester);
   });
 
   testWidgets(
@@ -92,6 +95,8 @@ void main() {
       await tester.pumpAndSettle();
 
       verifyNever(() => profileRepository.updatePhone(any()));
+
+      await waitForDispose(tester);
     },
     timeout: Timeout(Duration(seconds: 10)),
   );

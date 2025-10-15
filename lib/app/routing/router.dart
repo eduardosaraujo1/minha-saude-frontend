@@ -3,7 +3,6 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
 // Alt + Shift + O -> organize imports
-import '../data/repositories/auth/auth_repository.dart';
 import '../data/repositories/document/document_repository.dart';
 import '../data/repositories/profile/profile_repository.dart';
 import '../data/repositories/session/session_repository.dart';
@@ -71,12 +70,7 @@ final _router = GoRouter(
         GoRoute(
           path: Routes.login,
           builder: (BuildContext context, GoRouterState state) {
-            return LoginView(
-              () => LoginViewModel(
-                _getIt<AuthRepository>(),
-                _getIt<LoginWithGoogle>(),
-              ),
-            );
+            return LoginView(() => LoginViewModel(_getIt<LoginWithGoogle>()));
           },
         ),
         GoRoute(

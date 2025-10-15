@@ -25,6 +25,7 @@ class _SettingsTabViewState extends State<SettingsTabView>
     super.initState();
 
     _tabController = TabController(length: 3, vsync: this);
+    viewModel.loadProfile.execute();
   }
 
   @override

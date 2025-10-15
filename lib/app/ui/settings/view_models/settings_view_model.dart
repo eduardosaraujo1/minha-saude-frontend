@@ -16,7 +16,7 @@ class SettingsViewModel implements ViewModel {
     required this.deleteUserAction,
     required this.requestExportAction,
   }) {
-    loadProfile = Command.createAsyncNoParam(_loadProfile, initialValue: null);
+    loadProfile = Command.createAsync(_loadProfile, initialValue: null);
     requestDeletionCommand = Command.createAsyncNoParam(
       _requestDeletion,
       initialValue: null,
@@ -26,9 +26,6 @@ class SettingsViewModel implements ViewModel {
       initialValue: null,
     );
     profileRepository.addListener(_reload);
-
-    // Auto-load profile on initialization
-    loadProfile.execute();
   }
 
   void _reload() {
@@ -39,7 +36,7 @@ class SettingsViewModel implements ViewModel {
   final DeleteUserAction deleteUserAction;
   final RequestExportAction requestExportAction;
 
-  late final Command<void, Result<Profile, Exception>?> loadProfile;
+  late final Command<bool?, Result<Profile, Exception>?> loadProfile;
   late final Command<void, Result<void, Exception>?> requestDeletionCommand;
   late final Command<void, Result<void, Exception>?> requestExportCommand;
 
@@ -59,9 +56,11 @@ class SettingsViewModel implements ViewModel {
     return await requestExportAction.execute();
   }
 
-  Future<Result<Profile, Exception>?> _loadProfile() async {
+  Future<Result<Profile, Exception>?> _loadProfile(bool? forceRefresh) async {
     try {
-      final result = await profileRepository.getProfile();
+      final result = await profileRepository.getProfile(
+        forceRefresh: forceRefresh ?? false,
+      );
       if (result.isError()) {
         return Error(
           Exception("Não foi possível carregar os dados do perfil."),

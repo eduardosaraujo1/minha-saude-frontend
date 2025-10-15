@@ -26,11 +26,13 @@ class _DocumentListScreenState extends State<DocumentListScreen> {
     super.initState();
 
     viewModel.loadDocuments.addListener(_onLoadUpdate);
+    viewModel.loadDocuments.execute(false);
   }
 
   @override
   void dispose() {
     viewModel.loadDocuments.removeListener(_onLoadUpdate);
+    viewModel.dispose();
 
     super.dispose();
   }

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 
 import '../../../../config/asset.dart';
+import '../../../domain/actions/auth/login_with_google.dart';
+import '../../../routing/routes.dart';
 import '../view_models/login_view_model.dart';
 import 'button_sign_in.dart';
 import 'login_decorator.dart';
@@ -43,7 +45,11 @@ class _LoginViewState extends State<LoginView> {
       if (result == null) return;
 
       if (result.isSuccess()) {
-        final redirectPath = result.tryGetSuccess()!;
+        final redirectResponse = result.tryGetSuccess()!;
+        final redirectPath = switch (redirectResponse) {
+          RedirectResponse.toHome => Routes.home,
+          RedirectResponse.toRegister => Routes.tos,
+        };
         context.go(redirectPath);
 
         return;

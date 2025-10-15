@@ -1,4 +1,3 @@
-import 'package:intl/intl.dart';
 import 'package:minha_saude_frontend/app/data/repositories/document/document_repository.dart';
 import 'package:minha_saude_frontend/app/domain/models/document/document.dart';
 import 'package:minha_saude_frontend/app/ui/documents/view_models/metadata/document_edit_view_model.dart';
@@ -6,7 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:test/test.dart';
 
-import '../../../testing/mocks/repositories/mock_document_repository.dart';
+import '../../../../testing/mocks/repositories/mock_document_repository.dart';
 
 void main() {
   late DocumentRepository documentRepository;
@@ -95,17 +94,16 @@ void main() {
       viewModel.loadDocument.execute();
       await Future.delayed(const Duration(milliseconds: 100));
 
-      // Populate form fields
-      viewModel.form.titulo.text = mockUpdatedDocument.titulo!;
-      viewModel.form.dataDocumento.text = DateFormat(
-        'dd/MM/yyyy',
-      ).format(mockUpdatedDocument.dataDocumento!);
-      viewModel.form.medico.text = mockUpdatedDocument.medico!;
-      viewModel.form.paciente.text = mockUpdatedDocument.paciente!;
-      viewModel.form.tipo.text = mockUpdatedDocument.tipo!;
-
       // Execute the update command
-      viewModel.updateDocument.execute();
+      viewModel.updateDocument.execute(
+        DocumentUploadModel(
+          titulo: mockUpdatedDocument.titulo!,
+          dataDocumento: mockUpdatedDocument.dataDocumento!,
+          medico: mockUpdatedDocument.medico!,
+          paciente: mockUpdatedDocument.paciente!,
+          tipo: mockUpdatedDocument.tipo!,
+        ),
+      );
       await Future.delayed(const Duration(milliseconds: 100));
 
       // Verify the command's value was updated with success

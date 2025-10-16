@@ -3,13 +3,16 @@
 // found in the LICENSE file.
 
 abstract final class Routes {
-  static const home = '/';
+  // Auth Routes
   static const login = '/login';
+  static const emailLoginRelative = 'email';
+  static const emailLogin = '$login/$emailLoginRelative';
   static const tos = '/register';
   static const register = '$tos/$registerRelative';
   static const registerRelative = 'form';
 
   // Documentos routes
+  static const home = '/';
   static const documentos = '/$documentosRelative';
   static const documentosRelative = 'documentos';
   static const documentosUpload = '$documentos/$documentosUploadRelative';

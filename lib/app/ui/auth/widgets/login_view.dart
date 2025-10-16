@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
+import 'package:minha_saude_frontend/app/domain/models/auth/login_response/login_result.dart';
 
 import '../../../../config/asset.dart';
-import '../../../domain/actions/auth/login_with_google.dart';
 import '../../../routing/routes.dart';
 import '../view_models/login_view_model.dart';
 import 'button_sign_in.dart';
@@ -45,10 +45,10 @@ class _LoginViewState extends State<LoginView> {
       if (result == null) return;
 
       if (result.isSuccess()) {
-        final redirectResponse = result.tryGetSuccess()!;
-        final redirectPath = switch (redirectResponse) {
-          RedirectResponse.toHome => Routes.home,
-          RedirectResponse.toRegister => Routes.tos,
+        final loginResult = result.tryGetSuccess()!;
+        final redirectPath = switch (loginResult) {
+          SuccessfulLoginResult() => Routes.home,
+          NeedsRegistrationLoginResult() => Routes.tos,
         };
         context.go(redirectPath);
 
@@ -79,7 +79,6 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     final loginWithGoogle = viewModel.loginWithGoogle;
-    final loginWithEmail = viewModel.loginWithEmail;
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -92,14 +91,9 @@ class _LoginViewState extends State<LoginView> {
           const LoginDecorator(),
           Expanded(
             child: ListenableBuilder(
-              listenable: Listenable.merge([
-                loginWithGoogle.isExecuting,
-                loginWithEmail.isExecuting,
-              ]),
+              listenable: Listenable.merge([loginWithGoogle.isExecuting]),
               builder: (context, child) {
-                final isLoading =
-                    loginWithGoogle.isExecuting.value ||
-                    loginWithEmail.isExecuting.value;
+                final isLoading = loginWithGoogle.isExecuting.value;
 
                 return SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -131,7 +125,10 @@ class _LoginViewState extends State<LoginView> {
                         label: "Entrar com Email",
                         onPressed: isLoading
                             ? null
-                            : () => loginWithEmail.execute(),
+                            : () => () {
+                                // TODO: fix route
+                                // context.go(Routes.emailLogin)
+                              },
                       ),
                       SizedBox(height: 8),
                       if (isLoading)

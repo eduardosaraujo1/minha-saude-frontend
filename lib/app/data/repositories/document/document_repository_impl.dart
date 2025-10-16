@@ -266,15 +266,16 @@ class DocumentRepositoryImpl extends DocumentRepository {
     bool forceRefresh = false,
   }) async {
     try {
-      // Guard clause: return cached list if available and not forcing refresh
+      // Attempt cache hit
       if (!forceRefresh) {
         final cachedList = _documentListCache.get();
+
         if (cachedList != null) {
           return Result.success(cachedList);
         }
       }
 
-      // Try to fetch from API
+      // Fetch from API
       final apiResult = await _documentApiClient.listDocuments();
       List<Document> documents;
       if (apiResult.isSuccess()) {
@@ -293,14 +294,14 @@ class DocumentRepositoryImpl extends DocumentRepository {
 
         if (dbDocuments.isError()) {
           final error = dbDocuments.tryGetError()!;
-          _log.severe("Failed to fetch document list from cache", error);
-          return Result.error(error);
+          _log.severe("Failed to list database documents", error);
+          return Error(error);
         }
 
         documents = dbDocuments.tryGetSuccess()!;
       }
 
-      // Update Cache
+      // Update cache for future hits
       _documentListCache.set(documents);
 
       return Success(List.unmodifiable(documents));
@@ -450,9 +451,9 @@ class DocumentRepositoryImpl extends DocumentRepository {
 
   @override
   Future<void> clearCache() async {
-    // TODO: clear document files from local storage, make sure this works
     _documentFileCache.clear();
     _documentListCache.clear();
     await _localDatabase.clear();
+    await _fileSystemService.clearDocuments();
   }
 }

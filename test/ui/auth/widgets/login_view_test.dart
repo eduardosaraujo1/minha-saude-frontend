@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:minha_saude_frontend/app/domain/actions/auth/login_with_google.dart';
+import 'package:minha_saude_frontend/app/domain/models/auth/login_response/login_result.dart';
 import 'package:minha_saude_frontend/app/routing/routes.dart';
 import 'package:minha_saude_frontend/app/ui/auth/view_models/login_view_model.dart';
 import 'package:minha_saude_frontend/app/ui/auth/widgets/login_view.dart';
@@ -23,6 +24,11 @@ void main() {
   late LoginViewModel viewModel;
   late LoginWithGoogle loginWithGoogleAction;
   late MockGoRouter mockGoRouter;
+  const SuccessfulLoginResult mockSuccessResponse = SuccessfulLoginResult(
+    sessionToken: "mock_session_token",
+  );
+  const NeedsRegistrationLoginResult mockRegistrationResponse =
+      NeedsRegistrationLoginResult(registerToken: "mock_register_token");
   setUp(() {
     mockGoRouter = MockGoRouter();
     when(() => mockGoRouter.go(any())).thenReturn(null);
@@ -31,10 +37,6 @@ void main() {
 
     loginWithGoogleAction = MockLoginWithGoogle();
 
-    when(
-      () => loginWithGoogleAction.execute(),
-    ).thenAnswer((_) async => Success(RedirectResponse.toRegister));
-
     viewModel = LoginViewModel(loginWithGoogleAction);
     view = testApp(
       mockGoRouter: mockGoRouter,
@@ -42,7 +44,7 @@ void main() {
     );
   });
 
-  group("UNIT - UI Elements", () {
+  group("UI Elements", () {
     testWidgets("it can find login buttons", (tester) async {
       await tester.pumpWidget(view);
 
@@ -57,7 +59,7 @@ void main() {
     setUp(() {
       when(() => loginWithGoogleAction.execute()).thenAnswer((_) async {
         await Future.delayed(const Duration(milliseconds: 500));
-        return const Success(RedirectResponse.toHome);
+        return const Success(mockSuccessResponse);
       });
     });
 
@@ -87,7 +89,7 @@ void main() {
     setUp(() {
       when(
         () => loginWithGoogleAction.execute(),
-      ).thenAnswer((_) async => const Success(RedirectResponse.toHome));
+      ).thenAnswer((_) async => const Success(mockSuccessResponse));
     });
 
     testWidgets("it calls login action when Google button is tapped", (
@@ -119,7 +121,7 @@ void main() {
     setUp(() {
       when(
         () => loginWithGoogleAction.execute(),
-      ).thenAnswer((_) async => const Success(RedirectResponse.toRegister));
+      ).thenAnswer((_) async => const Success(mockRegistrationResponse));
     });
 
     testWidgets("it calls login action when Google button is tapped", (

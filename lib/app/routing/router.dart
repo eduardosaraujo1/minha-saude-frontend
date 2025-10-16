@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/ui/auth/widgets/email/email_auth_view.dart';
 
 // Alt + Shift + O -> organize imports
 import '../data/repositories/document/document_repository.dart';
@@ -12,6 +13,7 @@ import '../domain/actions/auth/logout_action.dart';
 import '../domain/actions/auth/register_action.dart';
 import '../domain/actions/settings/delete_user_action.dart';
 import '../domain/actions/settings/request_export_action.dart';
+import '../ui/auth/view_models/email_auth_view_model.dart';
 import '../ui/auth/view_models/login_view_model.dart';
 import '../ui/auth/view_models/register_view_model.dart';
 import '../ui/auth/view_models/tos_view_model.dart';
@@ -70,10 +72,21 @@ final _router = GoRouter(
         GoRoute(
           path: Routes.login,
           builder: (BuildContext context, GoRouterState state) {
-            return LoginView(() => LoginViewModel(_getIt<LoginWithGoogle>()));
+            final loginViewModel = LoginViewModel(_getIt<LoginWithGoogle>());
+            return LoginView(() => loginViewModel);
           },
+          routes: [
+            GoRoute(
+              path: Routes.emailLoginRelative,
+              builder: (context, state) {
+                final viewModel = EmailAuthViewModel(authRepository: _getIt());
+                return EmailAuthView(viewModelFactory: () => viewModel);
+              },
+            ),
+          ],
         ),
         GoRoute(
+          // TODO: put TOS in the register route (manual local navigation)
           path: Routes.tos,
           builder: (BuildContext context, GoRouterState state) {
             return TosView(TosViewModel());

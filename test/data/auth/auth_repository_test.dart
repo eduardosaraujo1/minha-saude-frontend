@@ -200,7 +200,6 @@ void main() {
       when(
         () => mockAuthApiClient.authSendEmail(any()),
       ).thenAnswer((_) async => const Result.success(null));
-
       final result = await authRepository.requestEmailCode("test@example.com");
 
       expect(result.isSuccess(), true);
@@ -210,9 +209,9 @@ void main() {
     });
 
     test("it returns error when email sending fails", () async {
-      when(() => mockAuthApiClient.authSendEmail(any())).thenAnswer(
-        (_) async => Result.error(Exception("Email sending failed")),
-      );
+      when(
+        () => mockAuthApiClient.authSendEmail(any()),
+      ).thenAnswer((_) async => Error(Exception("Email sending failed")));
 
       final result = await authRepository.requestEmailCode("test@example.com");
 
@@ -229,13 +228,14 @@ void main() {
         () => mockAuthApiClient.authLoginEmail(any(), any()),
       ).thenAnswer((_) async => const Result.success(mockApiResponse));
 
+      // Act
       final result = await authRepository.loginWithEmail(
         "test@example.com",
         "123456",
       );
 
+      final loginResult = result.tryGetSuccess();
       expect(result.isSuccess(), true);
-      final loginResult = result.tryGetSuccess()!;
       expect(loginResult, isA<SuccessfulLoginResult>());
       expect(
         (loginResult as SuccessfulLoginResult).sessionToken,

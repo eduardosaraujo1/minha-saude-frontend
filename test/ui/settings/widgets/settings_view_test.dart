@@ -105,12 +105,10 @@ void main() {
 
       // Find text widgets with profile data
       var profile = mockProfile;
-      var formattedCpf =
-          "${profile.cpf.substring(0, 3)}.${profile.cpf.substring(3, 6)}.${profile.cpf.substring(6, 9)}-${profile.cpf.substring(9)}";
       expect(find.text(profile.nome), findsOneWidget);
       expect(find.text(profile.email), findsOneWidget);
-      expect(find.text(formattedCpf), findsOneWidget);
-      expect(find.text(profile.telefone), findsOneWidget);
+      expect(find.text(formatCpf(profile.cpf)), findsOneWidget);
+      expect(find.text(formatPhone(profile.telefone)), findsOneWidget);
       expect(find.text(formatDate(profile.dataNascimento)), findsOneWidget);
 
       await tester.disposeWidget();

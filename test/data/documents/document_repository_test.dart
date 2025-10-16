@@ -844,6 +844,33 @@ void main() {
       verifyNever(() => localDatabase.trashDocument(testUuid));
     });
   });
+
+  group("Cache Dispose", () {
+    test("clears in-memory cache and local database on disposal", () async {
+      // Stuff to be cleared:
+      // * In-memory document cache
+      // * In-memory file cache
+      // * Local Database
+      // * Locally Stored Files
+      when(() => localDatabase.clear()).thenAnswer((_) async => Success(null));
+      when(
+        () => fileSystemService.clearDocuments(),
+      ).thenAnswer((_) async => Success(null));
+
+      documentListCache.set([randomDocument()]);
+      documentFileCache.set('fake-uuid', File('/path/to/file'));
+
+      // Act
+      await documentRepository.clearCache();
+
+      // verify(() => documentListCache.clear()).called(1);
+      expect(documentFileCache.get('fake-uuid'), isNull);
+      // verify(() => documentFileCache.clear()).called(1);
+      expect(documentListCache.get(), isNull);
+      verify(() => localDatabase.clear()).called(1);
+      verify(() => fileSystemService.clearDocuments()).called(1);
+    });
+  });
 }
 
 DocumentDbModel _mapToDbModel(Document doc) {

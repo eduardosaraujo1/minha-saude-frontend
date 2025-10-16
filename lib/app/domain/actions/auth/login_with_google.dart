@@ -16,11 +16,15 @@ class LoginWithGoogle {
   final SessionRepository _sessionRepository;
   final _log = Logger("LoginWithGoogleAction");
 
-  Future<Result<RedirectResponse, Exception>> execute() async {
+  Future<Result<LoginResult, Exception>> execute() async {
     try {
       // Get Google server auth token
       final googleTokenResult = await _authRepository.getGoogleServerToken();
       if (googleTokenResult.isError()) {
+        _log.severe(
+          "Failed to get Google server token",
+          googleTokenResult.tryGetError(),
+        );
         return Result.error(
           Exception("Não foi possível autenticar-se com o Google."),
         );
@@ -30,20 +34,40 @@ class LoginWithGoogle {
       // Use googleToken to login with google
       final loginResult = await _authRepository.loginWithGoogle(googleToken);
       if (loginResult.isError()) {
-        _log.warning("Login with Google failed: ${loginResult.tryGetError()}");
+        _log.severe("Login with Google failed: ${loginResult.tryGetError()}");
         return Result.error(
           Exception("Não foi possível fazer login com o Google."),
         );
       }
       final loginResponse = loginResult.getOrThrow();
 
-      // Decide if login token should be stored or if user needs to register
-      return switch (loginResponse) {
-        SuccessfulLoginResult() => await _setAuthenticatedState(loginResponse),
-        NeedsRegistrationLoginResult() => await _setRegisteringState(
-          loginResponse,
-        ),
-      };
+      // Store token based on login response type
+      switch (loginResponse) {
+        case SuccessfulLoginResult():
+          final storeResult = await _storeAuthToken(loginResponse);
+          // Error if auth storage failed
+          if (storeResult.isError()) {
+            _log.severe("Login was successful, but couldn't store auth token");
+            return Error(
+              Exception("Não foi possível salvar o token de autenticação."),
+            );
+          }
+          break;
+        case NeedsRegistrationLoginResult():
+          // Error if registration token storage failed
+          final storeResult = await _storeRegisterToken(loginResponse);
+          if (storeResult.isError()) {
+            _log.severe(
+              "Login was successful, but couldn't store registration token",
+            );
+            return Error(
+              Exception("Não foi possível salvar o token de registro."),
+            );
+          }
+          break;
+      }
+
+      return Success(loginResponse);
     } catch (e) {
       _log.severe("Ocorreu um erro desconhecido: ", e);
       return Result.error(
@@ -52,7 +76,7 @@ class LoginWithGoogle {
     }
   }
 
-  Future<Result<RedirectResponse, Exception>> _setAuthenticatedState(
+  Future<Result<void, Exception>> _storeAuthToken(
     SuccessfulLoginResult loginResponse,
   ) async {
     final tokenResult = await _sessionRepository.setAuthToken(
@@ -71,23 +95,23 @@ class LoginWithGoogle {
     // Clear any registration token that might be set from a previous registration attempt
     _sessionRepository.clearRegisterToken();
 
-    return Result.success(RedirectResponse.toHome);
+    return Success(null);
   }
 
-  Future<Result<RedirectResponse, Exception>> _setRegisteringState(
+  Future<Result<void, Exception>> _storeRegisterToken(
     NeedsRegistrationLoginResult loginResponse,
   ) async {
     _sessionRepository.setRegisterToken(loginResponse.registerToken);
 
-    final clearAuthResult = await _sessionRepository.clearAuthToken();
-    if (clearAuthResult.isError()) {
-      return Result.error(
-        Exception("Não foi possível limpar o token de autenticação atual."),
-      );
-    }
+    // REMOVED: loginWithGoogle should not concern itself with this, that's the responsability of the login repository
+    // Clear any existing auth token that might be set from a previous login
+    // final clearAuthResult = await _sessionRepository.clearAuthToken();
+    // if (clearAuthResult.isError()) {
+    //   return Result.error(
+    //     Exception("Não foi possível limpar o token de autenticação atual."),
+    //   );
+    // }
 
-    return Result.success(RedirectResponse.toRegister);
+    return Success(null);
   }
 }
-
-enum RedirectResponse { toRegister, toHome }

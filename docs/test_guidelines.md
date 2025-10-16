@@ -17,11 +17,11 @@ The application is divided into the following layers:
 
 ### Important Rules
 
-1. Always test business logic
+1. Always ask "what does the caller of this method expect to happen?"
 2. Modularize tests, aim for each test function testing a single functionality of your unit
 3. Use models and mocks provided in the [testing](/testing/) folder.
 4. Only check for function calls between layers (i.e. viewModels -> action or viewModels -> repository). This is the equivalent of asserting an HTTP request was made.
-5. Name tests as briefly as you can, use `given, when, then` when asserting what the test should do but always presume the test name starts with `it...`
+5. Name tests as briefly as you can, use `given, when, then` when deciding what the test should do but always presume the test name starts with `it...`
 
 ## Test Scope
 

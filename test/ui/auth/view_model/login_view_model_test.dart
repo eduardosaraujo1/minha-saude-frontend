@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:minha_saude_frontend/app/domain/actions/auth/login_with_google.dart';
+import 'package:minha_saude_frontend/app/domain/models/auth/login_response/login_result.dart';
 import 'package:minha_saude_frontend/app/ui/auth/view_models/login_view_model.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
@@ -14,6 +15,11 @@ void main() {
 
   late LoginWithGoogle mockLoginWithGoogle;
   late LoginViewModel viewModel;
+  const SuccessfulLoginResult mockSuccessResponse = SuccessfulLoginResult(
+    sessionToken: "mock_session_token",
+  );
+  const NeedsRegistrationLoginResult mockRegistrationResponse =
+      NeedsRegistrationLoginResult(registerToken: "mock_register_token");
 
   setUp(() {
     mockLoginWithGoogle = MockLoginWithGoogle();
@@ -24,7 +30,7 @@ void main() {
     setUp(() {
       when(
         () => mockLoginWithGoogle.execute(),
-      ).thenAnswer((_) async => Success(RedirectResponse.toHome));
+      ).thenAnswer((_) async => Success(mockSuccessResponse));
     });
 
     test("has correct state after google login command", () async {
@@ -35,7 +41,7 @@ void main() {
       expect(viewModel.loginWithGoogle.value!.isSuccess(), isTrue);
       expect(
         viewModel.loginWithGoogle.value!.tryGetSuccess(),
-        RedirectResponse.toHome,
+        mockSuccessResponse,
       );
     });
   });
@@ -44,7 +50,7 @@ void main() {
     setUp(() {
       when(
         () => mockLoginWithGoogle.execute(),
-      ).thenAnswer((_) async => Success(RedirectResponse.toRegister));
+      ).thenAnswer((_) async => Success(mockRegistrationResponse));
     });
 
     test("has correct state after google login command", () async {
@@ -55,7 +61,7 @@ void main() {
       expect(viewModel.loginWithGoogle.value!.isSuccess(), isTrue);
       expect(
         viewModel.loginWithGoogle.value!.tryGetSuccess(),
-        RedirectResponse.toRegister,
+        mockRegistrationResponse,
       );
     });
   });

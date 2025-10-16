@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../view_models/email_auth_view_model.dart';
 
-class EmailAuthView extends StatelessWidget {
-  const EmailAuthView({required this.viewModelFactory, super.key});
+class CodeSubmitionForm extends StatelessWidget {
+  const CodeSubmitionForm({required this.viewModel, super.key});
 
-  final EmailAuthViewModel Function() viewModelFactory;
+  final EmailAuthViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {

@@ -76,11 +76,11 @@ class FakeAuthApiClient implements AuthApiClient {
   }
 
   @override
-  Future<Result<String, Exception>> authSendEmail(String email) async {
+  Future<Result<void, Exception>> authSendEmail(String email) async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 800));
 
-    return Result.success("success");
+    return Result.success(null);
   }
 
   @override

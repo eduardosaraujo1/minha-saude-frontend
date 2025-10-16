@@ -10,6 +10,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:test/test.dart';
 
+import '../../../testing/models/document.dart';
+
 class MockTrashApiClient extends Mock implements TrashApiClient {}
 
 class MockCacheDatabase extends Mock implements CacheDatabase {}
@@ -21,6 +23,8 @@ void main() {
   late CacheDatabase localDatabase;
   late FileSystemService fileSystemService;
   late TrashRepository trashRepository;
+  late Document mockDocument;
+
   setUp(() {
     trashApiClient = MockTrashApiClient();
     localDatabase = MockCacheDatabase();
@@ -30,26 +34,31 @@ void main() {
       localDatabase: localDatabase,
       fileSystemService: fileSystemService,
     );
+
+    // Create a deleted document for trash tests
+    mockDocument = randomDocument(isDeleted: true);
   });
 
   group("List documents in trash", () {
-    test("should return a list of documents from the API", () async {
-      // Arrange
-      when(() => trashApiClient.listTrashDocuments()).thenAnswer(
-        (_) async => Result.success([
-          _makeDefaultDocumentApiModel(), //
-        ]),
-      );
+    setUp(() {
+      when(
+        () => trashApiClient.listTrashDocuments(),
+      ).thenAnswer((_) async => Result.success([_mapToApiModel(mockDocument)]));
+    });
 
+    test("should return a list of documents from the API", () async {
       // Act
       final result = await trashRepository.listTrashDocuments();
 
       // Assert
       expect(result, isA<Result<List<Document>, Exception>>());
+      expect(result.isSuccess(), true);
       result.when(
         (data) {
           expect(data, isA<List<Document>>());
-          expect(data.first, _defaultDocument());
+          expect(data.first.uuid, mockDocument.uuid);
+          expect(data.first.titulo, mockDocument.titulo);
+          expect(data.first.paciente, mockDocument.paciente);
         },
         (error) {
           fail("Expected success, but got error: $error");
@@ -73,29 +82,23 @@ void main() {
     });
 
     test("should return cache if called more than once", () async {
-      // Arrange
-      when(() => trashApiClient.listTrashDocuments()).thenAnswer(
-        (_) async => Success([
-          _makeDefaultDocumentApiModel(), //
-        ]),
-      );
-
       // Act
       final result1 = await trashRepository.listTrashDocuments();
 
-      when(() => trashApiClient.listTrashDocuments()).thenAnswer(
-        (_) async => Success([
-          DocumentApiModel(uuid: "alternative", createdAt: DateTime.now()),
-        ]),
-      );
+      // Change API to return different data
+      final alternativeDoc = randomDocument(isDeleted: true);
+      when(
+        () => trashApiClient.listTrashDocuments(),
+      ).thenAnswer((_) async => Success([_mapToApiModel(alternativeDoc)]));
 
       final result2 = await trashRepository.listTrashDocuments();
 
       // Assert
-      // Did not query API again
+      // Did not query API again - should return cached data
       result1.when((data1) {
         result2.when((data2) {
-          expect(data1, equals(data2));
+          expect(data1.first.uuid, equals(data2.first.uuid));
+          expect(data1.first.uuid, mockDocument.uuid);
         }, (error) => fail("result2 should be success"));
       }, (error) => fail("result1 should be success"));
       verify(() => trashApiClient.listTrashDocuments()).called(1);
@@ -103,21 +106,24 @@ void main() {
   });
 
   group("Get document in trash by id", () {
-    test("should return a document from the API", () async {
-      // Arrange
+    setUp(() {
       when(
-        () => trashApiClient.getTrashDocument("test-uuid"),
-      ).thenAnswer((_) async => Result.success(_makeDefaultDocumentApiModel()));
+        () => trashApiClient.getTrashDocument(any()),
+      ).thenAnswer((_) async => Result.success(_mapToApiModel(mockDocument)));
+    });
 
+    test("should return a document from the API", () async {
       // Act
-      final result = await trashRepository.getTrashDocument("test-uuid");
+      final result = await trashRepository.getTrashDocument(mockDocument.uuid);
 
       // Assert
       expect(result, isA<Result<Document, Exception>>());
       result.when(
         (data) {
           expect(data, isA<Document>());
-          expect(data, _defaultDocument());
+          expect(data.uuid, mockDocument.uuid);
+          expect(data.titulo, mockDocument.titulo);
+          expect(data.paciente, mockDocument.paciente);
         },
         (error) {
           fail("Expected success, but got error: $error");
@@ -128,14 +134,16 @@ void main() {
     test("should return an Error if the API call fails", () async {
       // Arrange
       when(
-        () => trashApiClient.getTrashDocument("test-uuid"),
+        () => trashApiClient.getTrashDocument(mockDocument.uuid),
       ).thenAnswer((_) async => Result.error(Exception("API error")));
 
       // Act
-      final result = await trashRepository.getTrashDocument("test-uuid");
+      final result = await trashRepository.getTrashDocument(mockDocument.uuid);
 
       // Assert
-      verify(() => trashApiClient.getTrashDocument("test-uuid")).called(1);
+      verify(
+        () => trashApiClient.getTrashDocument(mockDocument.uuid),
+      ).called(1);
       result.whenSuccess((data) {
         fail("Expected error, but got data: $data");
       });
@@ -143,31 +151,18 @@ void main() {
   });
 
   group("Restore document in trash by id", () {
-    test("should return success if the API call succeeds", () async {
-      // Arrange
+    setUp(() {
       when(
-        () => trashApiClient.restoreTrashDocument("test-uuid"),
+        () => trashApiClient.restoreTrashDocument(any()),
       ).thenAnswer((_) async => Result.success(null));
 
-      when(() => localDatabase.getDocument("test-uuid")).thenAnswer(
-        (_) async => Result.success(
-          DocumentDbModel(
-            uuid: "test-uuid",
-            titulo: "Test Document",
-            paciente: "John Doe",
-            medico: "Dr. Smith",
-            tipo: "Prescription",
-            dataDocumento: DateTime(2023, 1, 1),
-            createdAt: DateTime(2023, 1, 2),
-            deletedAt: DateTime(2023, 1, 3),
-            cachedAt: DateTime(2023, 1, 2),
-          ),
-        ),
-      );
+      when(
+        () => localDatabase.getDocument(any()),
+      ).thenAnswer((_) async => Result.success(_mapToDbModel(mockDocument)));
 
       when(
         () => localDatabase.upsertDocument(
-          "test-uuid",
+          any(),
           titulo: any(named: 'titulo'),
           paciente: any(named: 'paciente'),
           medico: any(named: 'medico'),
@@ -179,29 +174,25 @@ void main() {
         ),
       ).thenAnswer(
         (_) async => Result.success(
-          DocumentDbModel(
-            uuid: "test-uuid",
-            titulo: "Test Document",
-            paciente: "John Doe",
-            medico: "Dr. Smith",
-            tipo: "Prescription",
-            dataDocumento: DateTime(2023, 1, 1),
-            createdAt: DateTime(2023, 1, 2),
-            deletedAt: null,
-            cachedAt: DateTime.now(),
-          ),
+          _mapToDbModel(mockDocument.copyWith(deletedAt: null)),
         ),
       );
+    });
 
+    test("should return success if the API call succeeds", () async {
       // Act
-      final result = await trashRepository.restoreTrashDocument("test-uuid");
+      final result = await trashRepository.restoreTrashDocument(
+        mockDocument.uuid,
+      );
 
       // Assert
-      verify(() => trashApiClient.restoreTrashDocument("test-uuid")).called(1);
-      verify(() => localDatabase.getDocument("test-uuid")).called(1);
+      verify(
+        () => trashApiClient.restoreTrashDocument(mockDocument.uuid),
+      ).called(1);
+      verify(() => localDatabase.getDocument(mockDocument.uuid)).called(1);
       verify(
         () => localDatabase.upsertDocument(
-          "test-uuid",
+          mockDocument.uuid,
           titulo: any(named: 'titulo'),
           paciente: any(named: 'paciente'),
           medico: any(named: 'medico'),
@@ -219,11 +210,13 @@ void main() {
     test("should return an Error if the API call fails", () async {
       // Arrange
       when(
-        () => trashApiClient.restoreTrashDocument("test-uuid"),
+        () => trashApiClient.restoreTrashDocument(mockDocument.uuid),
       ).thenAnswer((_) async => Result.error(Exception("API error")));
 
       // Act
-      final result = await trashRepository.restoreTrashDocument("test-uuid");
+      final result = await trashRepository.restoreTrashDocument(
+        mockDocument.uuid,
+      );
 
       // Assert
       result.when((data) {
@@ -233,7 +226,14 @@ void main() {
       verifyNever(
         () => localDatabase.upsertDocument(
           any(),
+          titulo: any(named: 'titulo'),
+          paciente: any(named: 'paciente'),
+          medico: any(named: 'medico'),
+          tipo: any(named: 'tipo'),
+          dataDocumento: any(named: 'dataDocumento'),
           createdAt: any(named: 'createdAt'),
+          deletedAt: any(named: 'deletedAt'),
+          cachedAt: any(named: 'cachedAt'),
         ),
       );
     });
@@ -241,46 +241,53 @@ void main() {
     test("should succeed even if database update fails", () async {
       // Arrange
       when(
-        () => trashApiClient.restoreTrashDocument("test-uuid"),
-      ).thenAnswer((_) async => Result.success(null));
-
-      when(
-        () => localDatabase.getDocument("test-uuid"),
+        () => localDatabase.getDocument(mockDocument.uuid),
       ).thenAnswer((_) async => Result.error(Exception("DB error")));
 
       // Act
-      final result = await trashRepository.restoreTrashDocument("test-uuid");
+      final result = await trashRepository.restoreTrashDocument(
+        mockDocument.uuid,
+      );
 
       // Assert
-      verify(() => trashApiClient.restoreTrashDocument("test-uuid")).called(1);
-      verify(() => localDatabase.getDocument("test-uuid")).called(1);
+      verify(
+        () => trashApiClient.restoreTrashDocument(mockDocument.uuid),
+      ).called(1);
+      verify(() => localDatabase.getDocument(mockDocument.uuid)).called(1);
       expect(result, isA<Result<void, Exception>>());
       expect(result.isError(), false);
     });
   });
 
   group("Permanently delete document in trash by id", () {
+    setUp(() {
+      when(
+        () => trashApiClient.destroyTrashDocument(any()),
+      ).thenAnswer((_) async => Result.success(null));
+
+      when(
+        () => localDatabase.removeDocument(any()),
+      ).thenAnswer((_) async => Result.success(null));
+
+      when(
+        () => fileSystemService.deleteDocument(any()),
+      ).thenAnswer((_) async => Result.success(null));
+    });
+
     test("should return success if the API call succeeds", () async {
-      // Arrange
-      when(
-        () => trashApiClient.destroyTrashDocument("test-uuid"),
-      ).thenAnswer((_) async => Result.success(null));
-
-      when(
-        () => localDatabase.removeDocument("test-uuid"),
-      ).thenAnswer((_) async => Result.success(null));
-
-      when(
-        () => fileSystemService.deleteDocument("test-uuid"),
-      ).thenAnswer((_) async => Result.success(null));
-
       // Act
-      final result = await trashRepository.destroyTrashDocument("test-uuid");
+      final result = await trashRepository.destroyTrashDocument(
+        mockDocument.uuid,
+      );
 
       // Assert
-      verify(() => trashApiClient.destroyTrashDocument("test-uuid")).called(1);
-      verify(() => localDatabase.removeDocument("test-uuid")).called(1);
-      verify(() => fileSystemService.deleteDocument("test-uuid")).called(1);
+      verify(
+        () => trashApiClient.destroyTrashDocument(mockDocument.uuid),
+      ).called(1);
+      verify(() => localDatabase.removeDocument(mockDocument.uuid)).called(1);
+      verify(
+        () => fileSystemService.deleteDocument(mockDocument.uuid),
+      ).called(1);
       expect(result, isA<Result<void, Exception>>());
       expect(result.isError(), false);
     });
@@ -288,11 +295,13 @@ void main() {
     test("should return an Error if the API call fails", () async {
       // Arrange
       when(
-        () => trashApiClient.destroyTrashDocument("test-uuid"),
+        () => trashApiClient.destroyTrashDocument(mockDocument.uuid),
       ).thenAnswer((_) async => Result.error(Exception("API error")));
 
       // Act
-      final result = await trashRepository.destroyTrashDocument("test-uuid");
+      final result = await trashRepository.destroyTrashDocument(
+        mockDocument.uuid,
+      );
 
       // Assert
       result.when((data) {
@@ -305,52 +314,55 @@ void main() {
     test("should succeed even if database or file removal fails", () async {
       // Arrange
       when(
-        () => trashApiClient.destroyTrashDocument("test-uuid"),
-      ).thenAnswer((_) async => Result.success(null));
-
-      when(
-        () => localDatabase.removeDocument("test-uuid"),
+        () => localDatabase.removeDocument(mockDocument.uuid),
       ).thenAnswer((_) async => Result.error(Exception("DB error")));
 
       when(
-        () => fileSystemService.deleteDocument("test-uuid"),
+        () => fileSystemService.deleteDocument(mockDocument.uuid),
       ).thenAnswer((_) async => Result.error(Exception("FS error")));
 
       // Act
-      final result = await trashRepository.destroyTrashDocument("test-uuid");
+      final result = await trashRepository.destroyTrashDocument(
+        mockDocument.uuid,
+      );
 
       // Assert
-      verify(() => trashApiClient.destroyTrashDocument("test-uuid")).called(1);
-      verify(() => localDatabase.removeDocument("test-uuid")).called(1);
-      verify(() => fileSystemService.deleteDocument("test-uuid")).called(1);
+      verify(
+        () => trashApiClient.destroyTrashDocument(mockDocument.uuid),
+      ).called(1);
+      verify(() => localDatabase.removeDocument(mockDocument.uuid)).called(1);
+      verify(
+        () => fileSystemService.deleteDocument(mockDocument.uuid),
+      ).called(1);
       expect(result, isA<Result<void, Exception>>());
       expect(result.isError(), false);
     });
   });
 }
 
-Document _defaultDocument() {
-  return Document(
-    uuid: "test-uuid",
-    titulo: "Test Document",
-    paciente: "John Doe",
-    medico: "Dr. Smith",
-    tipo: "Prescription",
-    dataDocumento: DateTime(2023, 1, 1),
-    createdAt: DateTime(2023, 1, 2),
-    deletedAt: DateTime(2023, 1, 3),
+DocumentApiModel _mapToApiModel(Document doc) {
+  return DocumentApiModel(
+    uuid: doc.uuid,
+    titulo: doc.titulo,
+    nomePaciente: doc.paciente,
+    nomeMedico: doc.medico,
+    tipoDocumento: doc.tipo,
+    dataDocumento: doc.dataDocumento,
+    createdAt: doc.createdAt,
+    deletedAt: doc.deletedAt,
   );
 }
 
-DocumentApiModel _makeDefaultDocumentApiModel() {
-  return DocumentApiModel(
-    uuid: "test-uuid",
-    titulo: "Test Document",
-    nomePaciente: "John Doe",
-    nomeMedico: "Dr. Smith",
-    tipoDocumento: "Prescription",
-    dataDocumento: DateTime(2023, 1, 1),
-    createdAt: DateTime(2023, 1, 2),
-    deletedAt: DateTime(2023, 1, 3),
+DocumentDbModel _mapToDbModel(Document doc) {
+  return DocumentDbModel(
+    uuid: doc.uuid,
+    titulo: doc.titulo,
+    paciente: doc.paciente,
+    medico: doc.medico,
+    tipo: doc.tipo,
+    dataDocumento: doc.dataDocumento,
+    createdAt: doc.createdAt,
+    deletedAt: doc.deletedAt,
+    cachedAt: DateTime.now(),
   );
 }

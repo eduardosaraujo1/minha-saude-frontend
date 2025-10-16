@@ -62,7 +62,7 @@ class LoginViewModel implements ViewModel {
         "Não foi possível fazer login com o Email.",
       );
 
-      // TODO: implement
+      // TODO: implement login with e-mail view model and views
       throw UnimplementedError();
       // final redirectResult = await _loginWithEmailAction.execute();
       // if (redirectResult.isError()) {

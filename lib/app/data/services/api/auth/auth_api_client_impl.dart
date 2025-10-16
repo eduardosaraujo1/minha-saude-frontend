@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:minha_saude_frontend/app/data/services/api/auth/auth_api_client.dart';
 import 'package:minha_saude_frontend/app/data/services/api/auth/models/login_response/login_api_response.dart';
 import 'package:minha_saude_frontend/app/data/services/api/auth/models/register_response/register_response.dart';
-import 'package:minha_saude_frontend/app/data/services/api/exceptions/bad_response_exception.dart';
+import 'package:minha_saude_frontend/app/data/services/api/exceptions/unreachable_server_exception.dart';
 import 'package:minha_saude_frontend/app/data/services/api/http_client.dart';
 import 'package:multiple_result/multiple_result.dart';
 
@@ -26,7 +26,7 @@ class AuthApiClientImpl implements AuthApiClient {
       // Early return for non-200 status codes
       if (response.statusCode != 200) {
         return Result.error(
-          BadResponseException(
+          UnreachableServerException(
             'Login failed: ${response.statusMessage ?? 'Unknown error'}',
           ),
         );
@@ -35,14 +35,16 @@ class AuthApiClientImpl implements AuthApiClient {
       // Early return for null response data
       if (response.data == null) {
         return Result.error(
-          BadResponseException('Login failed: Server returned empty response'),
+          UnreachableServerException(
+            'Login failed: Server returned empty response',
+          ),
         );
       }
 
       // Early return for invalid response format
       if (response.data is! Map<String, dynamic>) {
         return Result.error(
-          BadResponseException(
+          UnreachableServerException(
             'Login failed: Server returned invalid response format',
           ),
         );
@@ -52,12 +54,12 @@ class AuthApiClientImpl implements AuthApiClient {
       return Result.success(loginResponse);
     } on DioException {
       return Result.error(
-        BadResponseException('Login failed: Unable to connect to server'),
+        UnreachableServerException('Login failed: Unable to connect to server'),
       );
     } catch (e) {
       // This catches JSON parsing errors or missing required fields
       return Result.error(
-        BadResponseException(
+        UnreachableServerException(
           'Login failed: Server response format has changed or is invalid',
         ),
       );
@@ -72,7 +74,9 @@ class AuthApiClientImpl implements AuthApiClient {
       return Result.success(null);
     } on DioException {
       return Result.error(
-        BadResponseException('Sign out failed: Unable to connect to server'),
+        UnreachableServerException(
+          'Sign out failed: Unable to connect to server',
+        ),
       );
     }
   }

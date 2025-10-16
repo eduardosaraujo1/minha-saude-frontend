@@ -4,6 +4,8 @@ import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../app/data/repositories/auth/auth_repository.dart';
+import '../app/data/repositories/document/cache/document_file_cache_store.dart';
+import '../app/data/repositories/document/cache/document_list_cache_store.dart';
 import '../app/data/repositories/document/document_repository.dart';
 import '../app/data/repositories/document/document_repository_impl.dart';
 import '../app/data/repositories/profile/profile_repository.dart';
@@ -64,6 +66,7 @@ Future<void> setup({
   _getIt.registerSingleton<DocumentScanner>(
     mockScanner ? FakeDocumentScanner() : DocumentScannerImpl(),
   );
+  _getIt.registerSingleton<FileSystemService>(FileSystemServiceImpl());
   if (mockGoogle) {
     _getIt.registerSingleton<GoogleService>(GoogleServiceFake());
   } else {
@@ -76,7 +79,9 @@ Future<void> setup({
   } else {
     _getIt.registerSingleton<CacheDatabase>(CacheDatabaseImpl());
   }
-  _getIt.registerSingleton<FileSystemService>(FileSystemServiceImpl());
+
+  _getIt.registerSingleton<DocumentListCacheStore>(DocumentListCacheStore());
+  _getIt.registerSingleton<DocumentFileCacheStore>(DocumentFileCacheStore());
 
   if (mockApiClient) {
     _getIt.registerSingleton<FakeServerPersistentStorage>(
@@ -134,10 +139,12 @@ Future<void> setup({
   );
   _getIt.registerSingleton<DocumentRepository>(
     DocumentRepositoryImpl(
-      _getIt<DocumentApiClient>(),
-      _getIt<CacheDatabase>(),
-      _getIt<DocumentScanner>(),
-      _getIt<FileSystemService>(),
+      documentApiClient: _getIt<DocumentApiClient>(),
+      documentScanner: _getIt<DocumentScanner>(),
+      fileSystemService: _getIt<FileSystemService>(),
+      localDatabase: _getIt<CacheDatabase>(),
+      documentListCache: _getIt<DocumentListCacheStore>(),
+      documentFileCache: _getIt<DocumentFileCacheStore>(),
     ),
   );
   _getIt.registerSingleton<ProfileRepository>(

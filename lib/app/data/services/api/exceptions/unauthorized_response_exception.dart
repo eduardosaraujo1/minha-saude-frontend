@@ -4,5 +4,5 @@ class UnauthorizedResponseException implements Exception {
   final String message;
 
   @override
-  String toString() => 'BadResponseException: $message';
+  String toString() => 'UnauthorizedResponseException: $message';
 }

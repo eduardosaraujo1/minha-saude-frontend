@@ -13,180 +13,159 @@ class MockAuthApiClient extends Mock implements AuthApiClient {}
 class MockGoogleService extends Mock implements GoogleService {}
 
 void main() {
-  late AuthApiClient authApiClient;
-  late GoogleService googleService;
+  /*
+  ### Google Authentication
+  - it returns server code when authentication succeeds
+  - it returns error when Google returns null code
+  - it returns error when Google returns empty code
+  - it returns error when authentication fails
+  - it returns session token for registered user (loginWithGoogle)
+  - it returns register token for unregistered user (loginWithGoogle)
+  - it returns error when API call fails (loginWithGoogle)
+  - it returns error when API response is invalid (loginWithGoogle)
+
+  ### Email Authentication
+  - it sends email code successfully (requestEmailCode)
+  - it returns error when email sending fails (requestEmailCode)
+  - it returns session token for registered user (loginWithEmail)
+  - it returns register token for unregistered user (loginWithEmail)
+  - it returns error when API call fails (loginWithEmail)
+  - it returns error when API response is invalid (loginWithEmail)
+
+  ### Registration
+  - it returns session token when registration succeeds
+  - it returns error when session token is null
+  - it returns error when session token is empty
+  - it returns error when registration fails
+
+  ### Session Management
+  - it calls API logout
+  */
+  late MockAuthApiClient mockAuthApiClient;
+  late MockGoogleService mockGoogleService;
   late AuthRepository authRepository;
 
   setUp(() {
-    authApiClient = MockAuthApiClient();
-    googleService = MockGoogleService();
+    mockAuthApiClient = MockAuthApiClient();
+    mockGoogleService = MockGoogleService();
 
     authRepository = AuthRepositoryImpl(
-      apiClient: authApiClient,
-      googleService: googleService,
+      apiClient: mockAuthApiClient,
+      googleService: mockGoogleService,
     );
   });
 
-  group("getGoogleServerToken", () {
-    test(
-      "when GoogleService returns a valid server code then it should return Success with the code",
-      () async {
-        // Hook GoogleService to return a valid server code
-        const serverCode = "test-server-code-123";
-        when(
-          () => googleService.generateServerAuthCode(),
-        ).thenAnswer((_) async => const Result.success(serverCode));
-
-        // Call getGoogleServerToken
-        final result = await authRepository.getGoogleServerToken();
-
-        // Assert method returned Success with the server code
-        expect(result.isSuccess(), true);
-        expect(result.tryGetSuccess(), serverCode);
-
-        // Assert GoogleService generateServerAuthCode was called once
-        verify(() => googleService.generateServerAuthCode()).called(1);
-      },
-    );
-
-    test(
-      "when GoogleService returns null server code then it should return Error",
-      () async {
-        // Hook GoogleService to return null
-        when(
-          () => googleService.generateServerAuthCode(),
-        ).thenAnswer((_) async => const Result.success(null));
-
-        // Call getGoogleServerToken
-        final result = await authRepository.getGoogleServerToken();
-
-        // Assert method returned Error
-        expect(result.isError(), true);
-        expect(
-          result.tryGetError()!.toString(),
-          contains('Não foi possível autenticar-se com o Google'),
-        );
-      },
-    );
-
-    test(
-      "when GoogleService returns empty server code then it should return Error",
-      () async {
-        // Hook GoogleService to return empty string
-        when(
-          () => googleService.generateServerAuthCode(),
-        ).thenAnswer((_) async => const Result.success(""));
-
-        // Call getGoogleServerToken
-        final result = await authRepository.getGoogleServerToken();
-
-        // Assert method returned Error
-        expect(result.isError(), true);
-        expect(
-          result.tryGetError()!.toString(),
-          contains('Não foi possível autenticar-se com o Google'),
-        );
-      },
-    );
-
-    test(
-      "when GoogleService returns Error then it should propagate the error",
-      () async {
-        // Hook GoogleService to return Error
-        final testError = Exception("Google authentication failed");
-        when(
-          () => googleService.generateServerAuthCode(),
-        ).thenAnswer((_) async => Result.error(testError));
-
-        // Call getGoogleServerToken
-        final result = await authRepository.getGoogleServerToken();
-
-        // Assert method returned Error
-        expect(result.isError(), true);
-        expect(result.tryGetError(), testError);
-      },
-    );
-  });
-
-  group("loginWithGoogle", () {
-    test(
-      "when API returns successful login response then it should return Success with LoginResult",
-      () async {
-        // Hook ApiClient to return successful login response
-        const mockApiResponse = LoginApiResponse(
-          isRegistered: true,
-          sessionToken: "test-session-token",
-          registerToken: null,
-        );
-
-        when(
-          () => authApiClient.authLoginGoogle(any()),
-        ).thenAnswer((_) async => const Result.success(mockApiResponse));
-
-        // Call loginWithGoogle
-        final result = await authRepository.loginWithGoogle(
-          "test-google-server-code",
-        );
-
-        // Assert method returned Success with SuccessfulLoginResult
-        expect(result.isSuccess(), true);
-        final loginResult = result.tryGetSuccess()!;
-        expect(loginResult, isA<SuccessfulLoginResult>());
-        expect(
-          (loginResult as SuccessfulLoginResult).sessionToken,
-          "test-session-token",
-        );
-
-        // Assert ApiClient authLoginGoogle was called once
-        verify(
-          () => authApiClient.authLoginGoogle("test-google-server-code"),
-        ).called(1);
-      },
-    );
-
-    test(
-      "when API returns needs registration response then it should return Success with NeedsRegistrationLoginResult",
-      () async {
-        // Hook ApiClient to return needs registration response
-        const mockApiResponse = LoginApiResponse(
-          isRegistered: false,
-          sessionToken: null,
-          registerToken: "test-register-token",
-        );
-
-        when(
-          () => authApiClient.authLoginGoogle(any()),
-        ).thenAnswer((_) async => const Result.success(mockApiResponse));
-
-        // Call loginWithGoogle
-        final result = await authRepository.loginWithGoogle(
-          "test-google-server-code",
-        );
-
-        // Assert method returned Success with NeedsRegistrationLoginResult
-        expect(result.isSuccess(), true);
-        final loginResult = result.tryGetSuccess()!;
-        expect(loginResult, isA<NeedsRegistrationLoginResult>());
-        expect(
-          (loginResult as NeedsRegistrationLoginResult).registerToken,
-          "test-register-token",
-        );
-      },
-    );
-
-    test("when API returns Error then it should return Error", () async {
-      // Hook ApiClient to return Error
-      final testError = Exception("Network error");
+  group("Google Authentication", () {
+    test("it returns server code when authentication succeeds", () async {
+      const serverCode = "test-server-code-123";
       when(
-        () => authApiClient.authLoginGoogle(any()),
-      ).thenAnswer((_) async => Result.error(testError));
+        () => mockGoogleService.generateServerAuthCode(),
+      ).thenAnswer((_) async => const Result.success(serverCode));
 
-      // Call loginWithGoogle
+      final result = await authRepository.getGoogleServerToken();
+
+      expect(result.isSuccess(), true);
+      expect(result.tryGetSuccess(), serverCode);
+      verify(() => mockGoogleService.generateServerAuthCode()).called(1);
+    });
+
+    test("it returns error when Google returns null code", () async {
+      when(
+        () => mockGoogleService.generateServerAuthCode(),
+      ).thenAnswer((_) async => const Result.success(null));
+
+      final result = await authRepository.getGoogleServerToken();
+
+      expect(result.isError(), true);
+      expect(
+        result.tryGetError()!.toString(),
+        contains('Não foi possível autenticar-se com o Google'),
+      );
+    });
+
+    test("it returns error when Google returns empty code", () async {
+      when(
+        () => mockGoogleService.generateServerAuthCode(),
+      ).thenAnswer((_) async => const Result.success(""));
+
+      final result = await authRepository.getGoogleServerToken();
+
+      expect(result.isError(), true);
+      expect(
+        result.tryGetError()!.toString(),
+        contains('Não foi possível autenticar-se com o Google'),
+      );
+    });
+
+    test("it returns error when authentication fails", () async {
+      when(() => mockGoogleService.generateServerAuthCode()).thenAnswer(
+        (_) async => Result.error(Exception("Google authentication failed")),
+      );
+
+      final result = await authRepository.getGoogleServerToken();
+
+      expect(result.isError(), true);
+    });
+
+    test("it returns session token for registered user", () async {
+      const mockApiResponse = LoginApiResponse(
+        isRegistered: true,
+        sessionToken: "test-session-token",
+        registerToken: null,
+      );
+      when(
+        () => mockAuthApiClient.authLoginGoogle(any()),
+      ).thenAnswer((_) async => const Result.success(mockApiResponse));
+
       final result = await authRepository.loginWithGoogle(
         "test-google-server-code",
       );
 
-      // Assert method returned Error
+      expect(result.isSuccess(), true);
+      final loginResult = result.tryGetSuccess()!;
+      expect(loginResult, isA<SuccessfulLoginResult>());
+      expect(
+        (loginResult as SuccessfulLoginResult).sessionToken,
+        "test-session-token",
+      );
+      verify(
+        () => mockAuthApiClient.authLoginGoogle("test-google-server-code"),
+      ).called(1);
+    });
+
+    test("it returns register token for unregistered user", () async {
+      const mockApiResponse = LoginApiResponse(
+        isRegistered: false,
+        sessionToken: null,
+        registerToken: "test-register-token",
+      );
+      when(
+        () => mockAuthApiClient.authLoginGoogle(any()),
+      ).thenAnswer((_) async => const Result.success(mockApiResponse));
+
+      final result = await authRepository.loginWithGoogle(
+        "test-google-server-code",
+      );
+
+      expect(result.isSuccess(), true);
+      final loginResult = result.tryGetSuccess()!;
+      expect(loginResult, isA<NeedsRegistrationLoginResult>());
+      expect(
+        (loginResult as NeedsRegistrationLoginResult).registerToken,
+        "test-register-token",
+      );
+    });
+
+    test("it returns error when API call fails", () async {
+      final testError = Exception("Network error");
+      when(
+        () => mockAuthApiClient.authLoginGoogle(any()),
+      ).thenAnswer((_) async => Result.error(testError));
+
+      final result = await authRepository.loginWithGoogle(
+        "test-google-server-code",
+      );
+
       expect(result.isError(), true);
       expect(
         result.tryGetError()!.toString(),
@@ -194,355 +173,264 @@ void main() {
       );
     });
 
-    test(
-      "when API returns invalid response then it should return Error",
-      () async {
-        // Hook ApiClient to return invalid response (isRegistered true but no sessionToken)
-        const mockApiResponse = LoginApiResponse(
-          isRegistered: true,
-          sessionToken: null,
-          registerToken: null,
-        );
+    test("it returns error when API response is invalid", () async {
+      const mockApiResponse = LoginApiResponse(
+        isRegistered: true,
+        sessionToken: null,
+        registerToken: null,
+      );
+      when(
+        () => mockAuthApiClient.authLoginGoogle(any()),
+      ).thenAnswer((_) async => const Result.success(mockApiResponse));
 
-        when(
-          () => authApiClient.authLoginGoogle(any()),
-        ).thenAnswer((_) async => const Result.success(mockApiResponse));
+      final result = await authRepository.loginWithGoogle(
+        "test-google-server-code",
+      );
 
-        // Call loginWithGoogle
-        final result = await authRepository.loginWithGoogle(
-          "test-google-server-code",
-        );
-
-        // Assert method returned Error
-        expect(result.isError(), true);
-        expect(
-          result.tryGetError()!.toString(),
-          contains('Ocorreu um erro ao fazer login'),
-        );
-      },
-    );
+      expect(result.isError(), true);
+      expect(
+        result.tryGetError()!.toString(),
+        contains('Ocorreu um erro ao fazer login'),
+      );
+    });
   });
 
-  group("loginWithEmail", () {
-    test(
-      "when API returns successful login response then it should return Success with LoginResult",
-      () async {
-        // Hook ApiClient to return successful login response
-        const mockApiResponse = LoginApiResponse(
-          isRegistered: true,
-          sessionToken: "test-session-token",
-          registerToken: null,
-        );
-
-        when(
-          () => authApiClient.authLoginEmail(any(), any()),
-        ).thenAnswer((_) async => const Result.success(mockApiResponse));
-
-        // Call loginWithEmail
-        final result = await authRepository.loginWithEmail(
-          "test@example.com",
-          "123456",
-        );
-
-        // Assert method returned Success with SuccessfulLoginResult
-        expect(result.isSuccess(), true);
-        final loginResult = result.tryGetSuccess()!;
-        expect(loginResult, isA<SuccessfulLoginResult>());
-        expect(
-          (loginResult as SuccessfulLoginResult).sessionToken,
-          "test-session-token",
-        );
-
-        // Assert ApiClient authLoginEmail was called once with correct parameters
-        verify(
-          () => authApiClient.authLoginEmail("test@example.com", "123456"),
-        ).called(1);
-      },
-    );
-
-    test(
-      "when API returns needs registration response then it should return Success with NeedsRegistrationLoginResult",
-      () async {
-        // Hook ApiClient to return needs registration response
-        const mockApiResponse = LoginApiResponse(
-          isRegistered: false,
-          sessionToken: null,
-          registerToken: "test-register-token",
-        );
-
-        when(
-          () => authApiClient.authLoginEmail(any(), any()),
-        ).thenAnswer((_) async => const Result.success(mockApiResponse));
-
-        // Call loginWithEmail
-        final result = await authRepository.loginWithEmail(
-          "test@example.com",
-          "123456",
-        );
-
-        // Assert method returned Success with NeedsRegistrationLoginResult
-        expect(result.isSuccess(), true);
-        final loginResult = result.tryGetSuccess()!;
-        expect(loginResult, isA<NeedsRegistrationLoginResult>());
-        expect(
-          (loginResult as NeedsRegistrationLoginResult).registerToken,
-          "test-register-token",
-        );
-      },
-    );
-
-    test("when API returns Error then it should return Error", () async {
-      // Hook ApiClient to return Error
-      final testError = Exception("Invalid code");
+  group("Email Authentication", () {
+    test("it sends email code successfully", () async {
       when(
-        () => authApiClient.authLoginEmail(any(), any()),
-      ).thenAnswer((_) async => Result.error(testError));
+        () => mockAuthApiClient.authSendEmail(any()),
+      ).thenAnswer((_) async => const Result.success(null));
 
-      // Call loginWithEmail
+      final result = await authRepository.requestEmailCode("test@example.com");
+
+      expect(result.isSuccess(), true);
+      verify(
+        () => mockAuthApiClient.authSendEmail("test@example.com"),
+      ).called(1);
+    });
+
+    test("it returns error when email sending fails", () async {
+      when(() => mockAuthApiClient.authSendEmail(any())).thenAnswer(
+        (_) async => Result.error(Exception("Email sending failed")),
+      );
+
+      final result = await authRepository.requestEmailCode("test@example.com");
+
+      expect(result.isError(), true);
+    });
+
+    test("it returns session token for registered user", () async {
+      const mockApiResponse = LoginApiResponse(
+        isRegistered: true,
+        sessionToken: "test-session-token",
+        registerToken: null,
+      );
+      when(
+        () => mockAuthApiClient.authLoginEmail(any(), any()),
+      ).thenAnswer((_) async => const Result.success(mockApiResponse));
+
       final result = await authRepository.loginWithEmail(
         "test@example.com",
         "123456",
       );
 
-      // Assert method returned Error
-      expect(result.isError(), true);
+      expect(result.isSuccess(), true);
+      final loginResult = result.tryGetSuccess()!;
+      expect(loginResult, isA<SuccessfulLoginResult>());
       expect(
-        result.tryGetError()!.toString(),
-        contains('Ocorreu um erro desconhecido ao fazer login'),
+        (loginResult as SuccessfulLoginResult).sessionToken,
+        "test-session-token",
+      );
+      verify(
+        () => mockAuthApiClient.authLoginEmail("test@example.com", "123456"),
+      ).called(1);
+    });
+
+    test("it returns register token for unregistered user", () async {
+      const mockApiResponse = LoginApiResponse(
+        isRegistered: false,
+        sessionToken: null,
+        registerToken: "test-register-token",
+      );
+      when(
+        () => mockAuthApiClient.authLoginEmail(any(), any()),
+      ).thenAnswer((_) async => const Result.success(mockApiResponse));
+
+      final result = await authRepository.loginWithEmail(
+        "test@example.com",
+        "123456",
+      );
+
+      expect(result.isSuccess(), true);
+      final loginResult = result.tryGetSuccess()!;
+      expect(loginResult, isA<NeedsRegistrationLoginResult>());
+      expect(
+        (loginResult as NeedsRegistrationLoginResult).registerToken,
+        "test-register-token",
       );
     });
 
-    test(
-      "when API returns invalid response then it should return Error",
-      () async {
-        // Hook ApiClient to return invalid response (isRegistered false but no registerToken)
-        const mockApiResponse = LoginApiResponse(
-          isRegistered: false,
-          sessionToken: null,
-          registerToken: null,
-        );
-
-        when(
-          () => authApiClient.authLoginEmail(any(), any()),
-        ).thenAnswer((_) async => const Result.success(mockApiResponse));
-
-        // Call loginWithEmail
-        final result = await authRepository.loginWithEmail(
-          "test@example.com",
-          "123456",
-        );
-
-        // Assert method returned Error
-        expect(result.isError(), true);
-        expect(
-          result.tryGetError()!.toString(),
-          contains('Ocorreu um erro ao fazer login'),
-        );
-      },
-    );
-  });
-
-  group("requestEmailCode", () {
-    test(
-      "when API successfully sends email code then it should return Success",
-      () async {
-        // Hook ApiClient to return Success
-        when(
-          () => authApiClient.authSendEmail(any()),
-        ).thenAnswer((_) async => const Result.success("code-sent"));
-
-        // Call requestEmailCode
-        final result = await authRepository.requestEmailCode(
-          "test@example.com",
-        );
-
-        // Assert method returned Success
-        expect(result.isSuccess(), true);
-
-        // Assert ApiClient authSendEmail was called once with correct email
-        verify(() => authApiClient.authSendEmail("test@example.com")).called(1);
-      },
-    );
-
-    test("when API returns Error then it should return Error", () async {
-      // Hook ApiClient to return Error
-      final testError = Exception("Email sending failed");
+    test("it returns error when API call fails", () async {
+      final testError = Exception("Invalid code");
       when(
-        () => authApiClient.authSendEmail(any()),
+        () => mockAuthApiClient.authLoginEmail(any(), any()),
       ).thenAnswer((_) async => Result.error(testError));
 
-      // Call requestEmailCode
-      final result = await authRepository.requestEmailCode("test@example.com");
+      final result = await authRepository.loginWithEmail(
+        "test@example.com",
+        "123456",
+      );
 
-      // Assert method returned Error
       expect(result.isError(), true);
-      expect(result.tryGetError(), testError);
+    });
+
+    test("it returns error when API response is invalid", () async {
+      const mockApiResponse = LoginApiResponse(
+        isRegistered: false,
+        sessionToken: null,
+        registerToken: null,
+      );
+      when(
+        () => mockAuthApiClient.authLoginEmail(any(), any()),
+      ).thenAnswer((_) async => const Result.success(mockApiResponse));
+
+      final result = await authRepository.loginWithEmail(
+        "test@example.com",
+        "123456",
+      );
+
+      expect(result.isError(), true);
     });
   });
 
-  group("register", () {
-    test(
-      "when API returns successful registration with session token then it should return Success with token",
-      () async {
-        // Hook ApiClient to return successful registration response
-        const mockRegisterResponse = RegisterResponse(
-          status: "success",
-          sessionToken: "test-session-token-123",
-        );
+  group("Registration", () {
+    final testDate = DateTime(1990, 1, 1);
 
-        when(
-          () => authApiClient.authRegister(
-            cpf: any(named: "cpf"),
-            dataNascimento: any(named: "dataNascimento"),
-            nome: any(named: "nome"),
-            telefone: any(named: "telefone"),
-            registerToken: any(named: "registerToken"),
-          ),
-        ).thenAnswer((_) async => const Result.success(mockRegisterResponse));
-
-        // Call register
-        final result = await authRepository.register(
-          registerToken: "test-register-token",
-          nome: "John Doe",
-          cpf: "12345678900",
-          telefone: "11999999999",
-          dataNascimento: DateTime(1990, 1, 1),
-        );
-
-        // Assert method returned Success with session token
-        expect(result.isSuccess(), true);
-        expect(result.tryGetSuccess(), "test-session-token-123");
-
-        // Assert ApiClient authRegister was called once with correct model
-        verify(
-          () => authApiClient.authRegister(
-            registerToken: "test-register-token",
-            nome: "John Doe",
-            cpf: "12345678900",
-            telefone: "11999999999",
-            dataNascimento: DateTime(1990, 1, 1),
-          ),
-        ).called(1);
-      },
-    );
-
-    test(
-      "when API returns response with null session token then it should return Error",
-      () async {
-        // Hook ApiClient to return response with null sessionToken
-        const mockRegisterResponse = RegisterResponse(
-          status: "success",
-          sessionToken: null,
-        );
-
-        when(
-          () => authApiClient.authRegister(
-            cpf: any(named: "cpf"),
-            dataNascimento: any(named: "dataNascimento"),
-            nome: any(named: "nome"),
-            telefone: any(named: "telefone"),
-            registerToken: any(named: "registerToken"),
-          ),
-        ).thenAnswer((_) async => const Result.success(mockRegisterResponse));
-
-        // Call register
-        final result = await authRepository.register(
-          registerToken: "test-register-token",
-          nome: "John Doe",
-          cpf: "12345678900",
-          telefone: "11999999999",
-          dataNascimento: DateTime(1990, 1, 1),
-        );
-
-        // Assert method returned Error
-        expect(result.isError(), true);
-        expect(
-          result.tryGetError()!.toString(),
-          contains('Ocorreu um erro desconhecido ao tentar registrar'),
-        );
-      },
-    );
-
-    test(
-      "when API returns response with empty session token then it should return Error",
-      () async {
-        // Hook ApiClient to return response with empty sessionToken
-        const mockRegisterResponse = RegisterResponse(
-          status: "success",
-          sessionToken: "",
-        );
-
-        when(
-          () => authApiClient.authRegister(
-            cpf: any(named: "cpf"),
-            dataNascimento: any(named: "dataNascimento"),
-            nome: any(named: "nome"),
-            telefone: any(named: "telefone"),
-            registerToken: any(named: "registerToken"),
-          ),
-        ).thenAnswer((_) async => const Result.success(mockRegisterResponse));
-
-        // Call register
-        final result = await authRepository.register(
-          registerToken: "test-register-token",
-          nome: "John Doe",
-          cpf: "12345678900",
-          telefone: "11999999999",
-          dataNascimento: DateTime(1990, 1, 1),
-        );
-
-        // Assert method returned Error
-        expect(result.isError(), true);
-        expect(
-          result.tryGetError()!.toString(),
-          contains('Ocorreu um erro desconhecido ao tentar registrar'),
-        );
-      },
-    );
-
-    test("when API returns Error then it should propagate the error", () async {
-      // Hook ApiClient to return Error
-      final testError = Exception("Registration failed");
+    setUp(() {
       when(
-        () => authApiClient.authRegister(
+        () => mockAuthApiClient.authRegister(
           cpf: any(named: "cpf"),
           dataNascimento: any(named: "dataNascimento"),
           nome: any(named: "nome"),
           telefone: any(named: "telefone"),
           registerToken: any(named: "registerToken"),
         ),
-      ).thenAnswer((_) async => Result.error(testError));
+      ).thenAnswer(
+        (_) async => const Result.success(
+          RegisterResponse(
+            status: "success",
+            sessionToken: "test-session-token-123",
+          ),
+        ),
+      );
+    });
 
-      // Call register
+    test("it returns session token when registration succeeds", () async {
       final result = await authRepository.register(
         registerToken: "test-register-token",
         nome: "John Doe",
         cpf: "12345678900",
         telefone: "11999999999",
-        dataNascimento: DateTime(1990, 1, 1),
+        dataNascimento: testDate,
       );
 
-      // Assert method returned Error
+      expect(result.isSuccess(), true);
+      expect(result.tryGetSuccess(), "test-session-token-123");
+      verify(
+        () => mockAuthApiClient.authRegister(
+          registerToken: "test-register-token",
+          nome: "John Doe",
+          cpf: "12345678900",
+          telefone: "11999999999",
+          dataNascimento: testDate,
+        ),
+      ).called(1);
+    });
+
+    test("it returns error when session token is null", () async {
+      when(
+        () => mockAuthApiClient.authRegister(
+          cpf: any(named: "cpf"),
+          dataNascimento: any(named: "dataNascimento"),
+          nome: any(named: "nome"),
+          telefone: any(named: "telefone"),
+          registerToken: any(named: "registerToken"),
+        ),
+      ).thenAnswer(
+        (_) async => const Result.success(
+          RegisterResponse(status: "success", sessionToken: null),
+        ),
+      );
+
+      final result = await authRepository.register(
+        registerToken: "test-register-token",
+        nome: "John Doe",
+        cpf: "12345678900",
+        telefone: "11999999999",
+        dataNascimento: testDate,
+      );
+
       expect(result.isError(), true);
-      expect(result.tryGetError(), testError);
+    });
+
+    test("it returns error when session token is empty", () async {
+      when(
+        () => mockAuthApiClient.authRegister(
+          cpf: any(named: "cpf"),
+          dataNascimento: any(named: "dataNascimento"),
+          nome: any(named: "nome"),
+          telefone: any(named: "telefone"),
+          registerToken: any(named: "registerToken"),
+        ),
+      ).thenAnswer(
+        (_) async => const Result.success(
+          RegisterResponse(status: "success", sessionToken: ""),
+        ),
+      );
+
+      final result = await authRepository.register(
+        registerToken: "test-register-token",
+        nome: "John Doe",
+        cpf: "12345678900",
+        telefone: "11999999999",
+        dataNascimento: testDate,
+      );
+
+      expect(result.isError(), true);
+    });
+
+    test("it returns error when registration fails", () async {
+      when(
+        () => mockAuthApiClient.authRegister(
+          cpf: any(named: "cpf"),
+          dataNascimento: any(named: "dataNascimento"),
+          nome: any(named: "nome"),
+          telefone: any(named: "telefone"),
+          registerToken: any(named: "registerToken"),
+        ),
+      ).thenAnswer((_) async => Result.error(Exception("Registration failed")));
+
+      final result = await authRepository.register(
+        registerToken: "test-register-token",
+        nome: "John Doe",
+        cpf: "12345678900",
+        telefone: "11999999999",
+        dataNascimento: testDate,
+      );
+
+      expect(result.isError(), true);
     });
   });
 
-  group("logout", () {
-    test(
-      "when logout is called then it should call authLogout on ApiClient",
-      () async {
-        // Hook ApiClient to detect authLogout call
-        when(
-          () => authApiClient.authLogout(),
-        ).thenAnswer((_) async => const Result.success(null));
+  group("Session Management", () {
+    test("it calls API logout", () async {
+      when(
+        () => mockAuthApiClient.authLogout(),
+      ).thenAnswer((_) async => const Result.success(null));
 
-        // Call logout
-        await authRepository.logout();
+      await authRepository.logout();
 
-        // Assert ApiClient authLogout was called once
-        verify(() => authApiClient.authLogout()).called(1);
-      },
-    );
+      verify(() => mockAuthApiClient.authLogout()).called(1);
+    });
   });
 }

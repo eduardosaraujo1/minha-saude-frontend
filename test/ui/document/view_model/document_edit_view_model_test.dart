@@ -79,7 +79,7 @@ void main() {
       when(
         () => documentRepository.updateDocument(
           documentUuid,
-          titulo: mockUpdatedDocument.titulo!,
+          titulo: mockUpdatedDocument.titulo,
           dataDocumento: mockUpdatedDocument.dataDocumento!,
           medico: mockUpdatedDocument.medico!,
           paciente: mockUpdatedDocument.paciente!,
@@ -97,7 +97,7 @@ void main() {
       // Execute the update command
       viewModel.updateDocument.execute(
         DocumentUploadModel(
-          titulo: mockUpdatedDocument.titulo!,
+          titulo: mockUpdatedDocument.titulo,
           dataDocumento: mockUpdatedDocument.dataDocumento!,
           medico: mockUpdatedDocument.medico!,
           paciente: mockUpdatedDocument.paciente!,
@@ -111,7 +111,7 @@ void main() {
       verify(
         () => documentRepository.updateDocument(
           documentUuid,
-          titulo: mockUpdatedDocument.titulo!,
+          titulo: mockUpdatedDocument.titulo,
           dataDocumento: mockUpdatedDocument.dataDocumento!,
           medico: mockUpdatedDocument.medico!,
           paciente: mockUpdatedDocument.paciente!,

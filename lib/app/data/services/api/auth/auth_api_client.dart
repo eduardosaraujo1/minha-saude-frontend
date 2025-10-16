@@ -16,7 +16,7 @@ abstract class AuthApiClient {
   );
 
   /// Send one time code to email
-  Future<Result<String, Exception>> authSendEmail(String email);
+  Future<Result<void, Exception>> authSendEmail(String email);
 
   /// Register new user
   Future<Result<RegisterResponse, Exception>> authRegister({

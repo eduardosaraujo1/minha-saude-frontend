@@ -82,9 +82,9 @@ class _DocumentEditScreenState extends State<DocumentEditScreen> {
 
           // Populate form fields
           final document = viewModel.loadDocument.value!.tryGetSuccess()!;
-          if (document.titulo != null) {
-            formController.titulo.text = document.titulo!;
-          }
+
+          formController.titulo.text = document.titulo;
+
           if (document.dataDocumento != null) {
             formController.dataDocumento.text = formatDate(
               document.dataDocumento!,
@@ -249,7 +249,11 @@ class DocumentFormController {
   }
 
   String? validateTitulo(String? value) {
-    if (value != null && value.length > 100) {
+    if (value == null || value.isEmpty) {
+      return 'Por favor, insira o título do documento.';
+    }
+
+    if (value.length > 100) {
       return 'O título não pode ter mais de 100 caracteres.';
     }
     return null;

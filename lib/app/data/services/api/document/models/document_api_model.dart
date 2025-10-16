@@ -11,7 +11,7 @@ abstract class DocumentApiModel with _$DocumentApiModel {
 
   const factory DocumentApiModel({
     required String uuid,
-    String? titulo,
+    required String titulo,
     String? nomePaciente,
     String? nomeMedico,
     String? tipoDocumento,

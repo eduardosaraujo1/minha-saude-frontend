@@ -121,7 +121,7 @@ class SortedDocumentList extends StatelessWidget {
               runSpacing: 8,
               children: groupDocuments.map((document) {
                 return DocumentItem(
-                  title: document.titulo ?? "Sem nome",
+                  title: document.titulo,
                   onTap: () => onDocumentTap(document),
                 );
               }).toList(),

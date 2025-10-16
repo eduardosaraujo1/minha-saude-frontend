@@ -9,7 +9,7 @@ part of 'document_api_model.dart';
 _DocumentApiModel _$DocumentApiModelFromJson(Map<String, dynamic> json) =>
     _DocumentApiModel(
       uuid: json['uuid'] as String,
-      titulo: json['titulo'] as String?,
+      titulo: json['titulo'] as String,
       nomePaciente: json['nomePaciente'] as String?,
       nomeMedico: json['nomeMedico'] as String?,
       tipoDocumento: json['tipoDocumento'] as String?,

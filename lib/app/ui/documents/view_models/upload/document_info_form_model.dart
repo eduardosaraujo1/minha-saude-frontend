@@ -52,11 +52,12 @@ class DocumentFormController {
   }
 
   String? validateTitulo(String? value) {
-    if (value != null && value.length > 100) {
-      return 'O título não pode exceder 100 caracteres';
-    }
     if (value == null || value.isEmpty) {
       return 'Por favor, insira o título do documento';
+    }
+
+    if (value.length > 100) {
+      return 'O título não pode exceder 100 caracteres';
     }
     return null;
   }

@@ -166,10 +166,7 @@ Data: ${document.dataDocumento != null ? _formatDate(document.dataDocumento!) : 
         child: SvgPicture.asset(Asset.documentIcon),
       ),
       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      title: Text(
-        document.titulo ?? 'Documento sem título',
-        style: theme.textTheme.titleMedium,
-      ),
+      title: Text(document.titulo, style: theme.textTheme.titleMedium),
       subtitle: Text(lore),
       onTap: onTap,
     );

@@ -33,32 +33,47 @@ abstract class DocumentRepository extends ChangeNotifier {
   Future<Result<File, Exception>> scanDocumentFile();
 
   /// Upload document file with metadata to server
-  /// Also stored document metadata locally through LocalDatabase, only if the server
+  ///
+  /// Also stores document metadata locally through LocalDatabase, only if the server
   /// upload is successful.
   Future<Result<Document, Exception>> uploadDocument(
     File file, {
-    required String paciente,
-    required String? titulo,
+    required String titulo,
+    required String? paciente,
     required String? tipo,
     required String? medico,
     required DateTime? dataDocumento,
   });
 
-  /// List documents stored locally and remotely with metadata and file path (Document model)
+  /// List available document metadata stored in the server
+  ///
+  /// If server is unreachable, falls back to local database
+  ///
+  /// Stores cache in memory for faster subsequent access
+  ///
+  /// If [forceRefresh] is true, ignores local cache and fetches from remote source
+  ///
+  /// Returns [Result] with [List<Document>] on success or [Exception] on failure
   Future<Result<List<Document>, Exception>> listDocuments({
     bool forceRefresh = false,
   });
 
-  /// Get single document by id with metadata (Document model)
+  /// Get single document by id with metadata
+  ///
+  /// Returns [Result] with [Document] on success or [Exception] on failure
   Future<Result<Document, Exception>> getDocumentMeta(
     String uuid, {
     bool forceRefresh = false,
   });
 
-  /// Get single document by id with metadata (Document model)
+  /// Get single document by id with metadata
+  ///
+  /// Caches only the most recent file accessed in memory
   Future<Result<File, Exception>> getDocumentFile(String uuid);
 
-  /// Edit document metadata on server and update local cache, returns updated Document model
+  /// Edits document metadata on server and replicates update on local cache
+  ///
+  /// Returns updated [Document] on success or [Exception] on failure
   Future<Result<Document, Exception>> updateDocument(
     String uuid, {
     String? titulo,
@@ -69,8 +84,13 @@ abstract class DocumentRepository extends ChangeNotifier {
   });
 
   /// Move document to trash on server and update local cache
-  /// Document is not deleted permanently, it can be restored
+  ///
+  /// Document is not deleted permanently, but marked as deleted
+  /// and can be restored from TrashRepository
   Future<Result<void, Exception>> moveToTrash(String uuid);
 
+  /// Clears all cache, including memory, saved document files and local database
+  ///
+  /// Necessary for user logout
   Future<void> clearCache();
 }

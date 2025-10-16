@@ -11,15 +11,13 @@
 
 ## Para fazer
 
--   [ ] Adicionar atualização para a lista da lixeira quando um documento for apagado do DocumentRepository
--   [ ] Revisar política de cache in-memory do DocumentRepository
--   [ ] Ao excluir documento, atualizar lista de documents (invalidar cache do repositório)
+-   [ ] Implementar login via e-mail
+-   [ ] Tela de upload de documento com 3 etapas
 -   [ ] Repensar no que fazer caso server não possa se conectar ao servidor (signout não faz sentido, então se tiver com o session token e a resposta do servidor não for 401 Unauthorized simplesmente exiba os armazenados localmente)
 -   [ ] Fazer o form de adicionar documento ter opções padrão (algumas pré-existentes, outras podendo o usuário escolher). API envia a lista de categorias para o cliente e o app usa essas categorias num dropdown, podendo esse ser substituido por um text field normal
--   [ ] Refatorar ShareRepository para usar interface e consumir ApiClient
--   [ ] Refatorar tela de compartilhamento
--   [ ] Tratativa de erro caso o backend se torne não-responsivo
+-   [ ] Implementar ShareRepository para usar interface e consumir ApiClient
+-   [ ] Implementar tela de compartilhamento
+-   [ ] Tratativa de erro caso o backend se torne não-responsivo (testar)
 -   [ ] Deletar conta requisitar login novamente (ver se consegue fazer isso a nivel API)
 -   [ ] Realizar teste exploratório para tela de lado ou areas em que se esqueceu do SafeArea
 -   [ ] SE tiver tempo, considerar fazer a organização dos documentos ocorrer no backend via API para evitar um array com todos os documentos na memoria RAM (permitirá paginação). Requer repensar a arquitetura dos documentos
--   [ ] Trazer opções prontas para tipos de exame (ainda permitir usuário escolher customizado)

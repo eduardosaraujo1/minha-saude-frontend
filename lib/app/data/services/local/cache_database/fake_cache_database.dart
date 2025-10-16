@@ -36,7 +36,7 @@ class FakeCacheDatabase implements CacheDatabase {
   @override
   Future<Result<DocumentDbModel, Exception>> upsertDocument(
     String uuid, {
-    String? titulo,
+    required String titulo,
     String? paciente,
     String? medico,
     String? tipo,

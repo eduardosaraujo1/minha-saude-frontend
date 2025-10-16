@@ -94,7 +94,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Fields contain correct data
-    final titulo = mockDocument.titulo ?? '';
+    final titulo = mockDocument.titulo;
     final medico = mockDocument.medico ?? '';
     final paciente = mockDocument.paciente ?? '';
     final tipo = mockDocument.tipo ?? '';
@@ -142,7 +142,7 @@ void main() {
 
     final hasTitle = await fillWithText(
       const ValueKey('tituloField'),
-      mockUpdatedDocument.titulo!,
+      mockUpdatedDocument.titulo,
     );
     // ignore: unused_local_variable
     final hasMedico = await fillWithText(

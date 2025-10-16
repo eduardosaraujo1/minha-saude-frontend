@@ -9,10 +9,8 @@ class MockLoginWithGoogle extends Mock implements LoginWithGoogle {}
 void main() {
   // UNIT
   // Has correct state after google login command
-  // ~~Has correct state after email login command~~
   // INTEGRATION
   // Calls repository method on view model command google login call
-  // ~~Calls repository method on view model command email login call~~
 
   late LoginWithGoogle mockLoginWithGoogle;
   late LoginViewModel viewModel;
@@ -22,7 +20,7 @@ void main() {
     viewModel = LoginViewModel(mockLoginWithGoogle);
   });
 
-  group("Google Login", () {
+  group("Scenario: User is already registered", () {
     setUp(() {
       when(
         () => mockLoginWithGoogle.execute(),
@@ -42,7 +40,7 @@ void main() {
     });
   });
 
-  group("Google Register", () {
+  group("Scenario: User needs registration", () {
     setUp(() {
       when(
         () => mockLoginWithGoogle.execute(),

@@ -15,8 +15,8 @@ import '../domain/actions/settings/delete_user_action.dart';
 import '../domain/actions/settings/request_export_action.dart';
 import '../ui/auth/view_models/email_auth_view_model.dart';
 import '../ui/auth/view_models/login_view_model.dart';
-import '../ui/auth/view_models/register_view_model.dart';
-import '../ui/auth/view_models/tos_view_model.dart';
+import '../ui/auth/view_models/old_register_view_model.dart';
+import '../ui/auth/view_models/deprecated_tos_view_model.dart';
 import '../ui/auth/widgets/login_view.dart';
 import '../ui/auth/widgets/register_view.dart';
 import '../ui/auth/widgets/tos_view.dart';
@@ -89,14 +89,14 @@ final _router = GoRouter(
           // TODO: put TOS in the register route (manual local navigation)
           path: Routes.tos,
           builder: (BuildContext context, GoRouterState state) {
-            return TosView(TosViewModel());
+            return DeprecatedTosView(DeprecatedTosViewModel());
           },
           routes: [
             GoRoute(
               path: Routes.registerRelative,
               builder: (BuildContext context, GoRouterState state) {
-                return RegisterView(
-                  () => RegisterViewModel(
+                return OldRegisterView(
+                  () => OldRegisterViewModel(
                     registerAction: _getIt<RegisterAction>(),
                   ),
                 );

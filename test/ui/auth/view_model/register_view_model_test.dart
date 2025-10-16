@@ -1,5 +1,5 @@
 import 'package:minha_saude_frontend/app/domain/actions/auth/register_action.dart';
-import 'package:minha_saude_frontend/app/ui/auth/view_models/register_view_model.dart';
+import 'package:minha_saude_frontend/app/ui/auth/view_models/old_register_view_model.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:test/test.dart';
@@ -11,7 +11,7 @@ void main() {
   // Has correct state after register command with valid data
   // Has correct state after register command with invalid data
 
-  late RegisterViewModel viewModel;
+  late OldRegisterViewModel viewModel;
   late RegisterAction mockRegisterAction;
   setUp(() {
     mockRegisterAction = MockRegisterAction();
@@ -23,7 +23,7 @@ void main() {
         telefone: any(named: 'telefone'),
       ),
     ).thenAnswer((_) async => Success(null));
-    viewModel = RegisterViewModel(registerAction: mockRegisterAction);
+    viewModel = OldRegisterViewModel(registerAction: mockRegisterAction);
   });
 
   test("it has correct state after register with valid data", () async {

@@ -1,5 +1,5 @@
-class TosViewModel {
-  const TosViewModel();
+class DeprecatedTosViewModel {
+  const DeprecatedTosViewModel();
 
   final String termos = """
 Na Avalon, privacidade e segurança são prioridades e nos comprometemos com a transparência do tratamento de dados pessoais dos nossos usuários. Por isso, esta Política de Privacidade estabelece como é feita a coleta, uso e transferência de informações de clientes ou outras pessoas que acessam ou usam nosso aplicativo.

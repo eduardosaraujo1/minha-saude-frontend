@@ -11,7 +11,8 @@
 
 ## Para fazer
 
--   [ ] Implementar login via e-mail
+-   [ ] Refatorar register flow com nested navigator
+-   [ ] Testes para business reqs login via e-mail
 -   [ ] Tela de upload de documento com 3 etapas
 -   [ ] Repensar no que fazer caso server não possa se conectar ao servidor (signout não faz sentido, então se tiver com o session token e a resposta do servidor não for 401 Unauthorized simplesmente exiba os armazenados localmente)
 -   [ ] Fazer o form de adicionar documento ter opções padrão (algumas pré-existentes, outras podendo o usuário escolher). API envia a lista de categorias para o cliente e o app usa essas categorias num dropdown, podendo esse ser substituido por um text field normal

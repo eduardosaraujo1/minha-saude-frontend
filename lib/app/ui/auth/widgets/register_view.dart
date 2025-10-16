@@ -6,20 +6,20 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import '../../../domain/actions/auth/register_action.dart';
 import '../../../routing/routes.dart';
 import '../../../utils/format.dart';
-import '../view_models/register_view_model.dart';
+import '../view_models/old_register_view_model.dart';
 import 'layouts/login_form_layout.dart';
 
-class RegisterView extends StatefulWidget {
-  const RegisterView(this.viewModelFactory, {super.key});
+class OldRegisterView extends StatefulWidget {
+  const OldRegisterView(this.viewModelFactory, {super.key});
 
-  final RegisterViewModel Function() viewModelFactory;
+  final OldRegisterViewModel Function() viewModelFactory;
 
   @override
-  State<RegisterView> createState() => _RegisterViewState();
+  State<OldRegisterView> createState() => _OldRegisterViewState();
 }
 
-class _RegisterViewState extends State<RegisterView> {
-  late final RegisterViewModel viewModel;
+class _OldRegisterViewState extends State<OldRegisterView> {
+  late final OldRegisterViewModel viewModel;
   late final RegisterFormController formController = RegisterFormController();
 
   @override

@@ -307,7 +307,7 @@ void main() {
     });
   });
 
-  group("Index Documents", () {
+  group("Get Document List", () {
     late List<DocumentApiModel> mockDocumentsInAPI;
     late List<DocumentDbModel> mockDocumentsInLocal;
 
@@ -845,7 +845,7 @@ void main() {
     });
   });
 
-  group("Cache Dispose", () {
+  group("Cache disposal on command", () {
     test("clears in-memory cache and local database on disposal", () async {
       // Stuff to be cleared:
       // * In-memory document cache

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:minha_saude_frontend/app/domain/actions/auth/register_action.dart';
-import 'package:minha_saude_frontend/app/ui/auth/view_models/register_view_model.dart';
+import 'package:minha_saude_frontend/app/ui/auth/view_models/old_register_view_model.dart';
 import 'package:minha_saude_frontend/app/ui/auth/widgets/register_view.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
@@ -13,7 +13,7 @@ import '../../../../testing/utils/command_it.dart';
 class MockRegisterAction extends Mock implements RegisterAction {}
 
 void main() {
-  late RegisterViewModel viewModel;
+  late OldRegisterViewModel viewModel;
   late RegisterAction mockRegisterAction;
   late MockGoRouter mockGoRouter;
   late Widget view;
@@ -25,9 +25,9 @@ void main() {
     // Mock GoRouter methods used by the view
     when(() => mockGoRouter.canPop()).thenReturn(true);
 
-    viewModel = RegisterViewModel(registerAction: mockRegisterAction);
+    viewModel = OldRegisterViewModel(registerAction: mockRegisterAction);
     view = testApp(
-      Scaffold(body: RegisterView(() => viewModel)),
+      Scaffold(body: OldRegisterView(() => viewModel)),
       mockGoRouter: mockGoRouter,
     );
   });

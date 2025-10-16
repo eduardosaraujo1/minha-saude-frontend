@@ -3,13 +3,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/routing/routes.dart';
 import '../../core/widgets/markdown_text_scroller.dart';
-import '../view_models/tos_view_model.dart';
+import '../view_models/deprecated_tos_view_model.dart';
 import 'layouts/login_form_layout.dart';
 
-class TosView extends StatelessWidget {
-  final TosViewModel viewModel;
+class DeprecatedTosView extends StatelessWidget {
+  final DeprecatedTosViewModel viewModel;
 
-  const TosView(this.viewModel, {super.key});
+  const DeprecatedTosView(this.viewModel, {super.key});
 
   @override
   Widget build(BuildContext context) {

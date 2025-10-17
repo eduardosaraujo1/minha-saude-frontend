@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:minha_saude_frontend/app/domain/actions/auth/get_tos_action.dart';
 
 import '../app/data/repositories/auth/auth_repository.dart';
 import '../app/data/repositories/document/cache/document_file_cache_store.dart';
@@ -175,6 +176,7 @@ Future<void> setup({
       profileRepository: _getIt<ProfileRepository>(),
     ),
   );
+  _getIt.registerSingleton<GetTosAction>(GetTosAction());
   _getIt.registerSingleton<RegisterAction>(
     RegisterAction(
       sessionRepository: _getIt<SessionRepository>(),

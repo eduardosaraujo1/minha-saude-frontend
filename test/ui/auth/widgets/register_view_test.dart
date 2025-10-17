@@ -1,381 +1,171 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:minha_saude_frontend/app/domain/actions/auth/register_action.dart';
-import 'package:minha_saude_frontend/app/ui/auth/view_models/old_register_view_model.dart';
-import 'package:minha_saude_frontend/app/ui/auth/widgets/register_view.dart';
+import 'package:minha_saude_frontend/app/ui/auth/view_models/register_view_model.dart';
+import 'package:minha_saude_frontend/app/ui/auth/widgets/register/register_navigator.dart';
+import 'package:minha_saude_frontend/app/ui/auth/widgets/register/register_view.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../../../testing/app.dart';
 import '../../../../testing/mocks/mock_go_router.dart';
+import '../../../../testing/models/profile.dart';
 import '../../../../testing/utils/command_it.dart';
-
-class MockRegisterAction extends Mock implements RegisterAction {}
+import '../../../../testing/utils/format.dart';
+import '../view_model/register_view_model_test.dart';
 
 void main() {
-  late OldRegisterViewModel viewModel;
-  late RegisterAction mockRegisterAction;
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  /** Business Requirements
+   * GROUP: TOS Screen
+   * - can see Terms of Service text and accept button
+   * - can tap accept button and go to Register Form screen
+   * GROUP: Register Form Screen
+   * - can see registration form field and submit button
+   * - can submit form and complete registration
+   */
+  const String mockTos = 'terms-of-service';
   late MockGoRouter mockGoRouter;
+  late RegisterViewModel viewModel;
+  late MockRegisterAction mockRegisterAction;
+  late MockGetTosAction mockGetTosAction;
   late Widget view;
-
   setUp(() {
-    mockRegisterAction = MockRegisterAction();
     mockGoRouter = MockGoRouter();
+    mockRegisterAction = MockRegisterAction();
+    mockGetTosAction = MockGetTosAction();
+    viewModel = RegisterViewModel(
+      registerAction: mockRegisterAction,
+      getTosAction: mockGetTosAction,
+    );
 
-    // Mock GoRouter methods used by the view
+    // GoRouter boilerplate
     when(() => mockGoRouter.canPop()).thenReturn(true);
+    when(() => mockGoRouter.pop()).thenReturn(null);
+    when(() => mockGoRouter.go(any())).thenReturn(null);
 
-    viewModel = OldRegisterViewModel(registerAction: mockRegisterAction);
+    // Successful register
+    when(
+      () => mockRegisterAction.execute(
+        nome: any(named: 'nome'),
+        cpf: any(named: 'cpf'),
+        dataNascimento: any(named: 'dataNascimento'),
+        telefone: any(named: 'telefone'),
+      ),
+    ).thenAnswer((_) async => Success(null));
+
+    // Successfully loaded TOS
+    when(
+      () => mockGetTosAction.execute(),
+    ).thenAnswer((_) async => Success(mockTos));
+
     view = testApp(
-      Scaffold(body: OldRegisterView(() => viewModel)),
       mockGoRouter: mockGoRouter,
+      Scaffold(body: RegisterNavigator(viewModelFactory: () => viewModel)),
     );
   });
 
-  group("UNIT - Form Fields", () {
-    testWidgets("it can find all form fields and confirm button", (
+  group("TOS Screen", () {
+    testWidgets("can see Terms of Service text and accept button", (
       tester,
     ) async {
+      // Arrange
       await tester.pumpWidget(view);
-
-      expect(find.byKey(const ValueKey('nomeField')), findsOneWidget);
-      expect(find.byKey(const ValueKey('cpfField')), findsOneWidget);
-      expect(find.byKey(const ValueKey('dataNascimentoField')), findsOneWidget);
-      expect(find.byKey(const ValueKey('telefoneField')), findsOneWidget);
-      expect(find.byKey(const ValueKey('btnConfirm')), findsOneWidget);
-
-      await tester.disposeWidget();
-    });
-  });
-
-  group("Form Submission Validation", () {
-    setUp(() {
-      when(
-        () => mockRegisterAction.execute(
-          nome: any(named: 'nome'),
-          cpf: any(named: 'cpf'),
-          dataNascimento: any(named: 'dataNascimento'),
-          telefone: any(named: 'telefone'),
-        ),
-      ).thenAnswer((_) async => const Success(null));
-    });
-
-    testWidgets("it rejects submission when nome is empty", (tester) async {
-      await tester.pumpWidget(view);
-
-      // Leave nome empty
-      await tester.enterText(
-        find.byKey(const ValueKey('cpfField')),
-        '529.982.247-25',
-      );
-      setFormFieldText(
-        find.byKey(const ValueKey('dataNascimentoField')),
-        '01/01/1990',
-        tester,
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey('telefoneField')),
-        '(11) 98765-4321',
-      );
-
-      await tester.tap(find.byKey(const ValueKey('btnConfirm')));
-      await tester.pump();
-
-      // Verify register was NOT called
-      verifyNever(
-        () => mockRegisterAction.execute(
-          nome: any(named: 'nome'),
-          cpf: any(named: 'cpf'),
-          dataNascimento: any(named: 'dataNascimento'),
-          telefone: any(named: 'telefone'),
-        ),
-      );
-
-      await tester.disposeWidget();
-    });
-
-    testWidgets("it rejects submission when CPF is empty", (tester) async {
-      await tester.pumpWidget(view);
-
-      await tester.enterText(
-        find.byKey(const ValueKey('nomeField')),
-        'John Doe',
-      );
-      // Leave CPF empty
-      setFormFieldText(
-        find.byKey(const ValueKey('dataNascimentoField')),
-        '01/01/1990',
-        tester,
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey('telefoneField')),
-        '(11) 98765-4321',
-      );
-
-      await tester.tap(find.byKey(const ValueKey('btnConfirm')));
-      await tester.pump();
-
-      verifyNever(
-        () => mockRegisterAction.execute(
-          nome: any(named: 'nome'),
-          cpf: any(named: 'cpf'),
-          dataNascimento: any(named: 'dataNascimento'),
-          telefone: any(named: 'telefone'),
-        ),
-      );
-
-      await tester.disposeWidget();
-    });
-
-    testWidgets("it rejects submission when CPF is invalid", (tester) async {
-      await tester.pumpWidget(view);
-
-      await tester.enterText(
-        find.byKey(const ValueKey('nomeField')),
-        'John Doe',
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey('cpfField')),
-        '111.111.111-11', // Invalid CPF
-      );
-      setFormFieldText(
-        find.byKey(const ValueKey('dataNascimentoField')),
-        '01/01/1990',
-        tester,
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey('telefoneField')),
-        '(11) 98765-4321',
-      );
-
-      await tester.tap(find.byKey(const ValueKey('btnConfirm')));
-      await tester.pump();
-
-      verifyNever(
-        () => mockRegisterAction.execute(
-          nome: any(named: 'nome'),
-          cpf: any(named: 'cpf'),
-          dataNascimento: any(named: 'dataNascimento'),
-          telefone: any(named: 'telefone'),
-        ),
-      );
-
-      await tester.disposeWidget();
-    });
-
-    testWidgets("it rejects submission when data de nascimento is empty", (
-      tester,
-    ) async {
-      await tester.pumpWidget(view);
-
-      await tester.enterText(
-        find.byKey(const ValueKey('nomeField')),
-        'John Doe',
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey('cpfField')),
-        '529.982.247-25',
-      );
-      // Leave date empty
-      await tester.enterText(
-        find.byKey(const ValueKey('telefoneField')),
-        '(11) 98765-4321',
-      );
-
-      await tester.tap(find.byKey(const ValueKey('btnConfirm')));
-      await tester.pump();
-
-      verifyNever(
-        () => mockRegisterAction.execute(
-          nome: any(named: 'nome'),
-          cpf: any(named: 'cpf'),
-          dataNascimento: any(named: 'dataNascimento'),
-          telefone: any(named: 'telefone'),
-        ),
-      );
-
-      await tester.disposeWidget();
-    });
-
-    testWidgets("it rejects submission when telefone is empty", (tester) async {
-      await tester.pumpWidget(view);
-
-      await tester.enterText(
-        find.byKey(const ValueKey('nomeField')),
-        'John Doe',
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey('cpfField')),
-        '529.982.247-25',
-      );
-      setFormFieldText(
-        find.byKey(const ValueKey('dataNascimentoField')),
-        '01/01/1990',
-        tester,
-      );
-      // Leave telefone empty
-
-      await tester.tap(find.byKey(const ValueKey('btnConfirm')));
-      await tester.pump();
-
-      verifyNever(
-        () => mockRegisterAction.execute(
-          nome: any(named: 'nome'),
-          cpf: any(named: 'cpf'),
-          dataNascimento: any(named: 'dataNascimento'),
-          telefone: any(named: 'telefone'),
-        ),
-      );
-
-      await tester.disposeWidget();
-    });
-
-    testWidgets("it rejects submission when telefone is invalid", (
-      tester,
-    ) async {
-      await tester.pumpWidget(view);
-
-      await tester.enterText(
-        find.byKey(const ValueKey('nomeField')),
-        'John Doe',
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey('cpfField')),
-        '529.982.247-25',
-      );
-      setFormFieldText(
-        find.byKey(const ValueKey('dataNascimentoField')),
-        '01/01/1990',
-        tester,
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey('telefoneField')),
-        '1234567890', // Invalid format
-      );
-
-      await tester.tap(find.byKey(const ValueKey('btnConfirm')));
-      await tester.pump();
-
-      verifyNever(
-        () => mockRegisterAction.execute(
-          nome: any(named: 'nome'),
-          cpf: any(named: 'cpf'),
-          dataNascimento: any(named: 'dataNascimento'),
-          telefone: any(named: 'telefone'),
-        ),
-      );
-
-      await tester.disposeWidget();
-    });
-
-    testWidgets("it accepts submission when all fields are valid", (
-      tester,
-    ) async {
-      await tester.pumpWidget(view);
-
-      // Fill in valid form data
-      await tester.enterText(
-        find.byKey(const ValueKey('nomeField')),
-        'John Doe',
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey('cpfField')),
-        '529.982.247-25',
-      );
-      setFormFieldText(
-        find.byKey(const ValueKey('dataNascimentoField')),
-        '01/01/1990',
-        tester,
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey('telefoneField')),
-        '(11) 98765-4321',
-      );
-
-      await tester.tap(find.byKey(const ValueKey('btnConfirm')));
-      await tester.pump();
-
-      // Wait for async operations
       await tester.pump(const Duration(milliseconds: 100));
 
-      verify(
-        () => mockRegisterAction.execute(
-          nome: 'John Doe',
-          cpf: '529.982.247-25',
-          dataNascimento: DateTime(1990, 1, 1),
-          telefone: '(11) 98765-4321',
-        ),
-      ).called(1);
+      // Assert (TOS Text loaded)
+      var val = viewModel.loadTosCommand.value;
+      expect(val, isNotNull);
+      expect(val!.isSuccess(), true);
+      expect(val.tryGetSuccess(), mockTos);
+
+      // Assert (accept button present)
+      expect(find.byKey(const Key('btnAcceptTos')), findsOneWidget);
 
       await tester.disposeWidget();
     });
-  });
-
-  group("Submission Protection", () {
-    setUp(() {
-      when(
-        () => mockRegisterAction.execute(
-          nome: any(named: 'nome'),
-          cpf: any(named: 'cpf'),
-          dataNascimento: any(named: 'dataNascimento'),
-          telefone: any(named: 'telefone'),
-        ),
-      ).thenAnswer((_) async {
-        await Future.delayed(const Duration(milliseconds: 500));
-        return const Success(null);
-      });
-    });
-
-    testWidgets("it prevents duplicate submissions while processing", (
+    testWidgets("can tap accept button and go to Register Form screen", (
       tester,
     ) async {
+      // Arrange
       await tester.pumpWidget(view);
+      await tester.pump(const Duration(milliseconds: 100));
 
-      // Fill in valid form data
-      await tester.enterText(
-        find.byKey(const ValueKey('nomeField')),
-        'John Doe',
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey('cpfField')),
-        '529.982.247-25',
-      );
-      setFormFieldText(
-        find.byKey(const ValueKey('dataNascimentoField')),
-        '01/01/1990',
-        tester,
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey('telefoneField')),
-        '(11) 98765-4321',
-      );
-
-      await tester.tap(find.byKey(const ValueKey('btnConfirm')));
-      await tester.pump(); // Start async work
-
-      // Try to submit again immediately
-      await tester.tap(find.byKey(const ValueKey('btnConfirm')));
-      await tester.pump();
-
-      // Wait for operation to complete
+      // Act
+      await tester.tap(find.byKey(const Key('btnAcceptTos')));
       await tester.pumpAndSettle();
 
-      // Verify register was only called once (not twice)
+      // Assert
+      expect(find.byType(RegisterView), findsOneWidget);
+      await tester.disposeWidget();
+    });
+  });
+
+  group('Register Form Screen', () {
+    Future<void> arrangeInRegisterForm(WidgetTester tester) async {
+      await tester.pumpWidget(view);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(find.byKey(const Key('btnAcceptTos')));
+      await tester.pumpAndSettle();
+    }
+
+    void setFormFieldText(
+      WidgetTester tester,
+      Finder finder,
+      String text,
+    ) async {
+      var formField = tester.widget<TextFormField>(finder);
+      formField.controller?.text = text;
+    }
+
+    testWidgets("can see registration form field and submit button", (
+      tester,
+    ) async {
+      // Arrange
+      await arrangeInRegisterForm(tester);
+
+      // Assert (form fields present)
+      expect(find.byKey(const Key('inputNome')), findsOneWidget);
+      expect(find.byKey(const Key('inputCpf')), findsOneWidget);
+      expect(find.byKey(const Key('inputDataNascimento')), findsOneWidget);
+      expect(find.byKey(const Key('inputTelefone')), findsOneWidget);
+      expect(find.byKey(const Key('btnSubmit')), findsOneWidget);
+
+      await tester.disposeWidget();
+    });
+    testWidgets("can submit form and complete registration", (tester) async {
+      // Arrange
+      await arrangeInRegisterForm(tester);
+      final profile = randomProfile();
+
+      // Act
+      await tester.enterText(find.byKey(const Key('inputNome')), profile.nome);
+      await tester.enterText(find.byKey(const Key('inputCpf')), profile.cpf);
+      setFormFieldText(
+        tester,
+        find.byKey(const Key('inputDataNascimento')),
+        formatDate(profile.dataNascimento),
+      );
+      await tester.enterText(
+        find.byKey(const Key('inputTelefone')),
+        profile.telefone,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('btnSubmit')));
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+
+      // Assert
       verify(
         () => mockRegisterAction.execute(
-          nome: 'John Doe',
-          cpf: '529.982.247-25',
-          dataNascimento: DateTime(1990, 1, 1),
-          telefone: '(11) 98765-4321',
+          nome: profile.nome,
+          cpf: profile.cpf,
+          dataNascimento: profile.dataNascimento,
+          telefone: profile.telefone,
         ),
       ).called(1);
 
       await tester.disposeWidget();
     });
   });
-}
-
-void setFormFieldText(Finder finder, String text, WidgetTester tester) async {
-  var formField = tester.widget<TextFormField>(finder);
-  formField.controller?.text = text;
 }

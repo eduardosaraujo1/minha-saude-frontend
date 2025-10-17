@@ -14,7 +14,7 @@ class RegisterAction {
   final AuthRepository _authRepository;
   final Logger _log = Logger("RegisterAction");
 
-  Future<Result<void, Exception>> execute({
+  Future<Result<void, RegisterException>> execute({
     required String nome,
     required String cpf,
     required DateTime dataNascimento,
@@ -38,7 +38,9 @@ class RegisterAction {
       telefone = telefone.replaceAll(RegExp(r'[^0-9]'), '');
 
       if (nome.isEmpty || cpf.isEmpty || telefone.isEmpty) {
-        return Result.error(Exception("Todos os campos são obrigatórios."));
+        return Result.error(
+          UnexpectedRegisterException("Todos os campos são obrigatórios."),
+        );
       }
 
       // Attempt registration
@@ -53,7 +55,7 @@ class RegisterAction {
       if (result.isError()) {
         _log.severe("Registration failed: ", result.tryGetError()!);
         return Result.error(
-          Exception(
+          UnexpectedRegisterException(
             "Ocorreu um erro desconhecido durante o processo de registro",
           ),
         );
@@ -71,7 +73,7 @@ class RegisterAction {
     } catch (e) {
       _log.severe("Unexpected error: ", e);
       return Result.error(
-        Exception(
+        UnexpectedRegisterException(
           "Ocorreu um erro desconhecido durante o processo de registro",
         ),
       );
@@ -79,11 +81,18 @@ class RegisterAction {
   }
 }
 
-class ExpiredLoginException implements Exception {
-  ExpiredLoginException(this.message);
-
+abstract class RegisterException implements Exception {
   final String message;
+  RegisterException(this.message);
 
   @override
-  String toString() => message;
+  String toString() => 'RegisterException: $message';
+}
+
+class UnexpectedRegisterException extends RegisterException {
+  UnexpectedRegisterException(super.message);
+}
+
+class ExpiredLoginException extends RegisterException {
+  ExpiredLoginException(super.message);
 }

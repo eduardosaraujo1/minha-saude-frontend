@@ -48,7 +48,7 @@ class _LoginViewState extends State<LoginView> {
         final loginResult = result.tryGetSuccess()!;
         final redirectPath = switch (loginResult) {
           SuccessfulLoginResult() => Routes.home,
-          NeedsRegistrationLoginResult() => Routes.tos,
+          NeedsRegistrationLoginResult() => Routes.register,
         };
         context.go(redirectPath);
 

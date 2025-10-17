@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/domain/actions/auth/get_tos_action.dart';
 import 'package:minha_saude_frontend/app/ui/auth/widgets/email/email_auth_view.dart';
+import 'package:minha_saude_frontend/app/ui/auth/widgets/register/register_navigator.dart';
 
 // Alt + Shift + O -> organize imports
 import '../data/repositories/document/document_repository.dart';
@@ -15,11 +17,8 @@ import '../domain/actions/settings/delete_user_action.dart';
 import '../domain/actions/settings/request_export_action.dart';
 import '../ui/auth/view_models/email_auth_view_model.dart';
 import '../ui/auth/view_models/login_view_model.dart';
-import '../ui/auth/view_models/old_register_view_model.dart';
-import '../ui/auth/view_models/deprecated_tos_view_model.dart';
+import '../ui/auth/view_models/register_view_model.dart';
 import '../ui/auth/widgets/login_view.dart';
-import '../ui/auth/widgets/register_view.dart';
-import '../ui/auth/widgets/tos_view.dart';
 import '../ui/core/widgets/not_found.dart';
 import '../ui/core/widgets/scaffold_with_navbar.dart';
 import '../ui/core/widgets/under_construction_screen.dart';
@@ -70,36 +69,28 @@ final _router = GoRouter(
       routes: [
         // Auth Routes (without bottom navigation)
         GoRoute(
-          path: Routes.login,
+          path: Routes.auth,
           builder: (BuildContext context, GoRouterState state) {
             final loginViewModel = LoginViewModel(_getIt<LoginWithGoogle>());
             return LoginView(() => loginViewModel);
           },
           routes: [
             GoRoute(
-              path: Routes.emailLoginRelative,
+              path: Routes.emailAuthRelative,
               builder: (context, state) {
                 final viewModel = EmailAuthViewModel(authRepository: _getIt());
                 return EmailAuthView(viewModelFactory: () => viewModel);
               },
             ),
-          ],
-        ),
-        GoRoute(
-          // TODO: put TOS in the register route (manual local navigation)
-          path: Routes.tos,
-          builder: (BuildContext context, GoRouterState state) {
-            return DeprecatedTosView(DeprecatedTosViewModel());
-          },
-          routes: [
             GoRoute(
               path: Routes.registerRelative,
               builder: (BuildContext context, GoRouterState state) {
-                return OldRegisterView(
-                  () => OldRegisterViewModel(
-                    registerAction: _getIt<RegisterAction>(),
-                  ),
+                final viewModel = RegisterViewModel(
+                  registerAction: _getIt<RegisterAction>(),
+                  getTosAction: _getIt<GetTosAction>(),
                 );
+
+                return RegisterNavigator(viewModelFactory: () => viewModel);
               },
             ),
           ],
@@ -329,7 +320,7 @@ Future<String?> _redirectHandler(
   GoRouterState state,
   SessionRepository sessionRepository,
 ) async {
-  const authRoutes = <String>{Routes.login, Routes.tos, Routes.register};
+  const authRoutes = <String>{Routes.auth, Routes.register};
 
   final isAuthed = await sessionRepository.hasAuthToken();
   final isRegistering = sessionRepository.getRegisterToken() != null;
@@ -340,7 +331,7 @@ Future<String?> _redirectHandler(
     if (isRegistering) {
       return Routes.register;
     }
-    return Routes.login;
+    return Routes.auth;
   }
 
   if (isAuthed && isOnAuthRoute) {

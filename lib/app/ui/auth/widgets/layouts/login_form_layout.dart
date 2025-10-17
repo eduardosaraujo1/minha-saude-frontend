@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/config/asset.dart';
 
 class LoginFormLayout extends StatelessWidget {
@@ -37,13 +36,13 @@ class _LoginTopBar extends StatelessWidget {
       height: layoutHeight,
       child: Stack(
         children: [
-          if (context.canPop())
+          if (Navigator.of(context).canPop())
             Positioned(
               top: 0,
               left: 0,
               child: IconButton(
                 icon: const Icon(Icons.arrow_back),
-                onPressed: () => context.pop(),
+                onPressed: () => Navigator.of(context).pop(),
               ),
             ),
           Padding(

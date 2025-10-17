@@ -144,7 +144,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('btnLoginGoogle')));
       await tester.pumpAndSettle(Duration(milliseconds: 500));
 
-      verify(() => mockGoRouter.go(Routes.tos)).called(1);
+      verify(() => mockGoRouter.go(Routes.register)).called(1);
 
       await tester.disposeWidget();
     });

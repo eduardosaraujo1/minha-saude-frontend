@@ -20,7 +20,7 @@ class OldRegisterViewModel implements ViewModel {
   /// Returns [Error] with [Exception] on other failures
   late Command<RegisterRequestModel, Result<void, Exception>?> registerCommand;
 
-  /// Register user with current form data
+  /// Register user with provided form data
   Future<Result<void, Exception>?> _registerUser(
     RegisterRequestModel requestModel,
   ) async {

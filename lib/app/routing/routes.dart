@@ -4,12 +4,11 @@
 
 abstract final class Routes {
   // Auth Routes
-  static const login = '/login';
-  static const emailLoginRelative = 'email';
-  static const emailLogin = '$login/$emailLoginRelative';
-  static const tos = '/register';
-  static const register = '$tos/$registerRelative';
-  static const registerRelative = 'form';
+  static const auth = '/auth';
+  static const emailAuthRelative = 'email';
+  static const emailAuth = '$auth/$emailAuthRelative';
+  static const registerRelative = 'register';
+  static const register = '$auth/$registerRelative';
 
   // Documentos routes
   static const home = '/';

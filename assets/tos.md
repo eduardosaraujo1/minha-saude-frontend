@@ -1,7 +1,3 @@
-class DeprecatedTosViewModel {
-  const DeprecatedTosViewModel();
-
-  final String termos = """
 Na Avalon, privacidade e segurança são prioridades e nos comprometemos com a transparência do tratamento de dados pessoais dos nossos usuários. Por isso, esta Política de Privacidade estabelece como é feita a coleta, uso e transferência de informações de clientes ou outras pessoas que acessam ou usam nosso aplicativo.
 
 Ao utilizar nossos serviços, você entende que coletaremos e usaremos suas informações pessoais nas formas descritas nesta Política, sob as normas da Constituição Federal de 1988 (art. 5º, LXXIX; e o art. 22º, XXX – incluídos pela EC 115/2022), das normas de Proteção de Dados (LGPD, Lei Federal 13.709/2018), das disposições consumeristas da Lei Federal 8078/1990 e as demais normas do ordenamento jurídico brasileiro aplicáveis.
@@ -112,7 +108,5 @@ A Avalon se responsabiliza pelo tratamento adequado dos dados e pelo cumprimento
 
 ### 11. ENCARREGADO DE PROTEÇÃO DE DADOS
 
-- Encarregado (DPO): Eduardo Soares e Araújo
-- E-mail: eduardosaraujo1@proton.me
-""";
-}
+-   Encarregado (DPO): Eduardo Soares e Araújo
+-   E-mail: eduardosaraujo1@proton.me

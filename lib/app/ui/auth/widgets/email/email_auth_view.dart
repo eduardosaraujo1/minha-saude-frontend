@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../domain/models/auth/login_response/login_result.dart';
 import '../../../../routing/routes.dart';
 import '../../view_models/email_auth_view_model.dart';
+import '../layouts/login_form_layout.dart';
 
 part 'code_request_form.dart';
 part 'code_submission_form.dart';
@@ -97,6 +98,7 @@ class _EmailAuthViewState extends State<EmailAuthView> {
   final navigatorKey = GlobalKey<NavigatorState>();
   @override
   Widget build(BuildContext context) {
+    // TODO: Use IndexedStack instead of navigator to keep the e-mail form field intact.  This does mean we need to manage the back button manually, so update the LoginFormLayout to accept a custom back button handler
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {

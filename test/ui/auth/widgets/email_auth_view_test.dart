@@ -9,6 +9,7 @@ import 'package:multiple_result/src/result.dart';
 import '../../../../testing/app.dart';
 import '../../../../testing/mocks/mock_go_router.dart';
 import '../../../../testing/mocks/repositories/mock_auth_repository.dart';
+import '../../../../testing/utils/command_it.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -72,10 +73,12 @@ void main() {
         await tester.pumpWidget(view);
 
         // Assert: has email input field
-        expect(find.byKey(const ValueKey('emailInputField')), findsOneWidget);
+        expect(find.byKey(const ValueKey('inputEmail')), findsOneWidget);
 
         // Assert: has request code button
         expect(find.byKey(const ValueKey('btnRequestCode')), findsOneWidget);
+
+        await tester.disposeWidget();
       },
     );
     testWidgets(
@@ -83,14 +86,12 @@ void main() {
       (tester) async {
         await tester.pumpWidget(view);
 
-        await tester.enterText(
-          find.byKey(const ValueKey('emailInputField')),
-          email,
-        );
+        await tester.enterText(find.byKey(const ValueKey('inputEmail')), email);
         await tester.tap(find.byKey(const ValueKey('btnRequestCode')));
         await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
         verify(() => mockAuthRepository.requestEmailCode(email)).called(1);
+        await tester.disposeWidget();
       },
     );
     testWidgets("it should not request a code with invalid email format", (
@@ -101,7 +102,7 @@ void main() {
       // Act
       await tester.pumpWidget(view);
       await tester.enterText(
-        find.byKey(const ValueKey('emailInputField')),
+        find.byKey(const ValueKey('inputEmail')),
         invalidEmail,
       );
       await tester.tap(find.byKey(const ValueKey('btnRequestCode')));
@@ -109,13 +110,14 @@ void main() {
 
       // Assert
       verifyNever(() => mockAuthRepository.requestEmailCode(any()));
+      await tester.disposeWidget();
     });
   });
   group("Code Confirmation Screen", () {
     Future<void> setupCodeConfirmationScreen(WidgetTester tester) async {
       await tester.pumpWidget(view);
 
-      final emailField = find.byKey(const ValueKey('emailInputField'));
+      final emailField = find.byKey(const ValueKey('inputEmail'));
       final requestCodeButton = find.byKey(const ValueKey('btnRequestCode'));
 
       await tester.enterText(emailField, email);
@@ -125,15 +127,19 @@ void main() {
     }
 
     testWidgets(
-      "it should have a text field for code input and a button to confirm code",
+      "it should have a text field for code input, a button for resend, and a button to confirm code",
       (tester) async {
         await setupCodeConfirmationScreen(tester);
 
         // Assert: has code input field
-        expect(find.byKey(const ValueKey('codeInputField')), findsOneWidget);
+        expect(find.byKey(const ValueKey('inputCode')), findsOneWidget);
+
+        // Assert: has resend code button
+        expect(find.byKey(const ValueKey('btnResendCode')), findsOneWidget);
 
         // Assert: has confirm code button
         expect(find.byKey(const ValueKey('btnConfirmCode')), findsOneWidget);
+        await tester.disposeWidget();
       },
     );
     testWidgets("it should attempt login when a valid code is provided", (
@@ -142,15 +148,13 @@ void main() {
       await setupCodeConfirmationScreen(tester);
 
       // Act
-      await tester.enterText(
-        find.byKey(const ValueKey('codeInputField')),
-        code,
-      );
+      await tester.enterText(find.byKey(const ValueKey('inputCode')), code);
       await tester.tap(find.byKey(const ValueKey('btnConfirmCode')));
       await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
       // Assert
       verify(() => mockAuthRepository.loginWithEmail(email, code)).called(1);
+      await tester.disposeWidget();
     });
     testWidgets("it should not submit when invalid code is provided", (
       tester,
@@ -161,7 +165,7 @@ void main() {
 
       // Act
       await tester.enterText(
-        find.byKey(const ValueKey('codeInputField')),
+        find.byKey(const ValueKey('inputCode')),
         invalidCode,
       );
       await tester.tap(find.byKey(const ValueKey('btnConfirmCode')));
@@ -169,6 +173,7 @@ void main() {
 
       // Assert
       verifyNever(() => mockAuthRepository.loginWithEmail(any(), any()));
+      await tester.disposeWidget();
     });
     testWidgets("smoke: should not throw when incorrect code is provided", (
       tester,
@@ -179,19 +184,18 @@ void main() {
 
       // Act
       await tester.enterText(
-        find.byKey(const ValueKey('codeInputField')),
+        find.byKey(const ValueKey('inputCode')),
         wrongCode,
       );
       await tester.tap(find.byKey(const ValueKey('btnConfirmCode')));
 
-      // Assert: does not throw
-      expect(() async {
-        await tester.pumpAndSettle(const Duration(milliseconds: 500));
-      }, returnsNormally);
+      // Assert: if it throws then it'll fail the test
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
       verify(
         () => mockAuthRepository.loginWithEmail(email, wrongCode),
       ).called(1);
+      await tester.disposeWidget();
     });
   });
 }

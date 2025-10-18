@@ -322,12 +322,10 @@ Future<String?> _redirectHandler(
   GoRouterState state,
   SessionRepository sessionRepository,
 ) async {
-  const authRoutes = <String>{Routes.auth, Routes.register};
-
   final isAuthed = await sessionRepository.hasAuthToken();
   final isRegistering = sessionRepository.getRegisterToken() != null;
   final requestedRoute = state.fullPath ?? state.matchedLocation;
-  final isOnAuthRoute = authRoutes.contains(requestedRoute);
+  final isOnAuthRoute = requestedRoute.startsWith(Routes.auth);
 
   if (!isAuthed && !isOnAuthRoute) {
     if (isRegistering) {

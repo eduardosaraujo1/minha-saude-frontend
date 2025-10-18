@@ -125,10 +125,7 @@ class _LoginViewState extends State<LoginView> {
                         label: "Entrar com Email",
                         onPressed: isLoading
                             ? null
-                            : () => () {
-                                // TODO: fix route
-                                // context.go(Routes.emailLogin)
-                              },
+                            : () => context.go(Routes.emailAuth),
                       ),
                       SizedBox(height: 8),
                       if (isLoading)

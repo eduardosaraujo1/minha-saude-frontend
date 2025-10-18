@@ -1,13 +1,16 @@
+import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
 import 'package:minha_saude_frontend/app/domain/models/auth/login_response/login_result.dart';
 import 'package:minha_saude_frontend/app/ui/auth/view_models/email_auth_view_model.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:test/test.dart';
 
+import '../../../../testing/mocks/actions/mock_process_login_result_action.dart';
 import '../../../../testing/mocks/repositories/mock_auth_repository.dart';
 
 void main() {
-  late MockAuthRepository authRepository;
+  late MockAuthRepository mockAuthRepository;
+  late MockProcessLoginResultAction mockProcessLoginResultAction;
   late EmailAuthViewModel viewModel;
   const LoginResult serverSuccessLogin = LoginResult.successful(
     sessionToken: "valid-session-token-123",
@@ -18,19 +21,34 @@ void main() {
   const String serverCode = "123456";
   const String email = "test@example.com";
 
+  setUpAll(() {
+    registerFallbackValue(
+      const LoginResult.successful(sessionToken: "default-session-token"),
+    );
+  });
+
   setUp(() {
-    authRepository = MockAuthRepository();
-    viewModel = EmailAuthViewModel(authRepository: authRepository);
+    mockAuthRepository = MockAuthRepository();
+    mockProcessLoginResultAction = MockProcessLoginResultAction();
+    viewModel = EmailAuthViewModel(
+      authRepository: mockAuthRepository,
+      processLoginResultAction: mockProcessLoginResultAction,
+    );
 
     // Arrange: successful sending of email verification code
     when(
-      () => authRepository.requestEmailCode(email),
+      () => mockAuthRepository.requestEmailCode(email),
     ).thenAnswer((_) async => const Success(null));
 
     // Arrange: successful login with email
     when(
-      () => authRepository.loginWithEmail(email, serverCode),
+      () => mockAuthRepository.loginWithEmail(email, serverCode),
     ).thenAnswer((_) async => const Success(serverSuccessLogin));
+
+    // Arrange: successful processing of login result
+    when(
+      () => mockProcessLoginResultAction.execute(any()),
+    ).thenAnswer((_) async => const Success(null));
   });
   /** Business Requirements (ViewModel, not View)
    * Group: Main Scenario
@@ -55,7 +73,7 @@ void main() {
         expect(viewModel.requestCodeCommand.value!.isSuccess(), true);
         expect(viewModel.requestCodeCommand.value!.tryGetSuccess(), email);
 
-        verify(() => authRepository.requestEmailCode(email)).called(1);
+        verify(() => mockAuthRepository.requestEmailCode(email)).called(1);
       },
     );
 
@@ -76,7 +94,12 @@ void main() {
         serverSuccessLogin,
       );
 
-      verify(() => authRepository.loginWithEmail(email, serverCode)).called(1);
+      verify(
+        () => mockAuthRepository.loginWithEmail(email, serverCode),
+      ).called(1);
+      verify(
+        () => mockProcessLoginResultAction.execute(serverSuccessLogin),
+      ).called(1);
     });
 
     test("it must handle login that requires registration", () async {
@@ -86,7 +109,7 @@ void main() {
 
       // Arrange: unregistered user
       when(
-        () => authRepository.loginWithEmail(email, serverCode),
+        () => mockAuthRepository.loginWithEmail(email, serverCode),
       ).thenAnswer((_) async => const Success(serverNeedsRegister));
 
       // Act
@@ -100,6 +123,9 @@ void main() {
         viewModel.verifyCodeCommand.value!.tryGetSuccess(),
         serverNeedsRegister,
       );
+      verify(
+        () => mockProcessLoginResultAction.execute(serverNeedsRegister),
+      ).called(1);
     });
   });
 
@@ -110,7 +136,7 @@ void main() {
         // Arrange
         const String email = "test@example.com";
         when(
-          () => authRepository.requestEmailCode(any()),
+          () => mockAuthRepository.requestEmailCode(any()),
         ).thenAnswer((_) async => Error(Exception("Network error")));
 
         // Act
@@ -132,8 +158,10 @@ void main() {
 
         // Arrange: error on login
         when(
-          () => authRepository.loginWithEmail(any(), serverCode),
-        ).thenAnswer((_) async => Error(Exception("Invalid code")));
+          () => mockAuthRepository.loginWithEmail(any(), serverCode),
+        ).thenAnswer(
+          (_) async => Error(EmailLoginIncorrectCodeException("Invalid code")),
+        );
 
         // Act
         viewModel.verifyCodeCommand.execute(serverCode);
@@ -142,6 +170,38 @@ void main() {
         // Assert
         expect(viewModel.verifyCodeCommand.value, isNotNull);
         expect(viewModel.verifyCodeCommand.value!.isError(), true);
+        expect(
+          viewModel.verifyCodeCommand.value!.tryGetError(),
+          isA<EmailLoginIncorrectCodeException>(),
+        );
+      },
+    );
+
+    test(
+      "it must handle errors when logging in with email and code fails",
+      () async {
+        // Arrange: should have e-mail set
+        viewModel.requestCodeCommand.execute(email);
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // Arrange: error on login
+        when(
+          () => mockAuthRepository.loginWithEmail(any(), serverCode),
+        ).thenAnswer(
+          (_) async => Error(EmailLoginUnexpectedException("Unknown Error")),
+        );
+
+        // Act
+        viewModel.verifyCodeCommand.execute(serverCode);
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // Assert
+        expect(viewModel.verifyCodeCommand.value, isNotNull);
+        expect(viewModel.verifyCodeCommand.value!.isError(), true);
+        expect(
+          viewModel.verifyCodeCommand.value!.tryGetError(),
+          isA<EmailLoginUnexpectedException>(),
+        );
       },
     );
 

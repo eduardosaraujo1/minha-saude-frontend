@@ -1,6 +1,7 @@
 import 'package:command_it/command_it.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:minha_saude_frontend/app/domain/actions/auth/process_login_result_action.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../../data/repositories/auth/auth_repository.dart';
@@ -8,13 +9,17 @@ import '../../../domain/models/auth/login_response/login_result.dart';
 import '../../view_model.dart';
 
 class EmailAuthViewModel implements ViewModel {
-  EmailAuthViewModel({required AuthRepository authRepository})
-    : _authRepository = authRepository {
+  EmailAuthViewModel({
+    required AuthRepository authRepository,
+    required ProcessLoginResultAction processLoginResultAction,
+  }) : _authRepository = authRepository,
+       _processLoginResultAction = processLoginResultAction {
     requestCodeCommand = Command.createAsync(_requestCode, initialValue: null);
     verifyCodeCommand = Command.createAsync(_verifyCode, initialValue: null);
   }
 
   final AuthRepository _authRepository;
+  final ProcessLoginResultAction _processLoginResultAction;
   final Logger _logger = Logger('EmailAuthViewModel');
 
   /// Requests a verification code to be sent to the provided e-mail address.
@@ -32,10 +37,10 @@ class EmailAuthViewModel implements ViewModel {
   /// - [SuccessfulLoginResult]: The user has successfully logged in.
   /// - [NeedsRegistrationLoginResult]: The user needs to complete registration.
   ///
-  /// Returns an [CodeVerificationException] on failure, which can be one of:
-  /// - [IncorrectCodeException]: The provided code was incorrect.
-  /// - [UnexpectedVerificationException]: A general exception occurred during verification.
-  late final Command<String, Result<LoginResult, CodeVerificationException>?>
+  /// Returns an [EmailLoginException] on failure, which can be one of:
+  /// - [EmailLoginIncorrectCodeException]: The provided code was incorrect.
+  /// - [EmailLoginUnexpectedException]: A general exception occurred during verification.
+  late final Command<String, Result<LoginResult, EmailLoginException>?>
   verifyCodeCommand;
 
   /// Current stage of the email authentication flow.
@@ -58,7 +63,7 @@ class EmailAuthViewModel implements ViewModel {
     }
   }
 
-  Future<Result<LoginResult, CodeVerificationException>> _verifyCode(
+  Future<Result<LoginResult, EmailLoginException>> _verifyCode(
     String code,
   ) async {
     try {
@@ -69,7 +74,7 @@ class EmailAuthViewModel implements ViewModel {
           requestCodeCommand.value?.tryGetError(),
         );
         return Error(
-          UnexpectedVerificationException(
+          EmailLoginUnexpectedException(
             "No email available for code verification.",
           ),
         );
@@ -77,15 +82,26 @@ class EmailAuthViewModel implements ViewModel {
 
       final loginResult = await _authRepository.loginWithEmail(email, code);
       if (loginResult.isError()) {
-        return Error(IncorrectCodeException("Incorrect verification code."));
+        return Error(loginResult.tryGetError()!);
+      }
+
+      // Process login result (either successful login or needs registration)
+      final processedResult = await _processLoginResultAction.execute(
+        loginResult.tryGetSuccess()!,
+      );
+
+      if (processedResult.isError()) {
+        return Error(
+          EmailLoginUnexpectedException(
+            "Unexpected error occurred during login processing.",
+          ),
+        );
       }
 
       return Success(loginResult.tryGetSuccess()!);
     } catch (e, s) {
       _logger.severe('Failed to verify code for $code', e, s);
-      return Error(
-        UnexpectedVerificationException("Unexpected error occurred."),
-      );
+      return Error(EmailLoginUnexpectedException("Unexpected error occurred."));
     }
   }
 
@@ -94,20 +110,6 @@ class EmailAuthViewModel implements ViewModel {
     requestCodeCommand.dispose();
     verifyCodeCommand.dispose();
   }
-}
-
-abstract class CodeVerificationException implements Exception {
-  final String message;
-
-  CodeVerificationException(this.message);
-}
-
-class UnexpectedVerificationException extends CodeVerificationException {
-  UnexpectedVerificationException(super.message);
-}
-
-class IncorrectCodeException extends CodeVerificationException {
-  IncorrectCodeException(super.message);
 }
 
 enum EmailRoutes { requestCode, submitCode }

@@ -84,7 +84,7 @@ class FakeAuthApiClient implements AuthApiClient {
   }
 
   @override
-  Future<Result<LoginApiResponse, Exception>> authLoginEmail(
+  Future<Result<LoginApiResponse, ApiEmailLoginException>> authLoginEmail(
     String email,
     String code,
   ) async {

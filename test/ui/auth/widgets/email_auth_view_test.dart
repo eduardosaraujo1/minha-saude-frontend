@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
 import 'package:minha_saude_frontend/app/domain/models/auth/login_response/login_result.dart';
 import 'package:minha_saude_frontend/app/ui/auth/view_models/email_auth_view_model.dart';
 import 'package:minha_saude_frontend/app/ui/auth/widgets/email/email_auth_view.dart';
@@ -7,6 +8,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/src/result.dart';
 
 import '../../../../testing/app.dart';
+import '../../../../testing/mocks/actions/mock_process_login_result_action.dart';
 import '../../../../testing/mocks/mock_go_router.dart';
 import '../../../../testing/mocks/repositories/mock_auth_repository.dart';
 import '../../../../testing/utils/command_it.dart';
@@ -17,13 +19,21 @@ void main() {
   late Widget view;
   late EmailAuthViewModel viewModel;
   late MockAuthRepository mockAuthRepository;
+  late MockProcessLoginResultAction mockProcessLoginResultAction;
 
   const String email = "test@example.com";
   const String code = "123456";
   const String serverSessionToken = "valid-session-token-123";
 
+  setUpAll(() {
+    registerFallbackValue(
+      const LoginResult.successful(sessionToken: "default-session-token"),
+    );
+  });
+
   setUp(() {
     // Mock ViewModel Commands
+    mockProcessLoginResultAction = MockProcessLoginResultAction();
     mockAuthRepository = MockAuthRepository();
 
     // Arrange: successful sending of email verification code
@@ -35,18 +45,27 @@ void main() {
     ).thenAnswer((_) async => const Success(null));
 
     // Arrange: successful login with email on correct code
-    when(
-      () => mockAuthRepository.loginWithEmail(email, any()),
-    ).thenAnswer((_) async => Error(Exception("Invalid verification code")));
+    when(() => mockAuthRepository.loginWithEmail(email, any())).thenAnswer(
+      (_) async =>
+          Error(EmailLoginIncorrectCodeException("Invalid verification code")),
+    );
     when(() => mockAuthRepository.loginWithEmail(email, code)).thenAnswer(
       (_) async => const Success(
         LoginResult.successful(sessionToken: serverSessionToken),
       ),
     );
+
+    // Arrange: successful processing of login result
+    when(
+      () => mockProcessLoginResultAction.execute(any()),
+    ).thenAnswer((_) async => const Success(null));
     // Note: NeedsRegistration case could be added, but is not currently necessary
     // as it concerns only the ViewModel (View would only change navigation, which is not tested)
 
-    viewModel = EmailAuthViewModel(authRepository: mockAuthRepository);
+    viewModel = EmailAuthViewModel(
+      authRepository: mockAuthRepository,
+      processLoginResultAction: mockProcessLoginResultAction,
+    );
 
     view = testApp(
       mockGoRouter: MockGoRouter(),

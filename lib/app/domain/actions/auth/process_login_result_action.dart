@@ -37,6 +37,7 @@ class ProcessLoginResultAction {
 
   Future<Result<void, Exception>> _storeAuthToken(String sessionToken) async {
     try {
+      _sessionRepository.clearRegisterToken();
       final storeResult = await _sessionRepository.setAuthToken(sessionToken);
 
       if (storeResult.isError()) {

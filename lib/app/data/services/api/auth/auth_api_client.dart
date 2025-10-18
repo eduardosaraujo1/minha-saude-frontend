@@ -10,7 +10,7 @@ abstract class AuthApiClient {
   );
 
   /// Login with email and one time code
-  Future<Result<LoginApiResponse, Exception>> authLoginEmail(
+  Future<Result<LoginApiResponse, ApiEmailLoginException>> authLoginEmail(
     String email,
     String code,
   );
@@ -29,4 +29,18 @@ abstract class AuthApiClient {
 
   /// Signout
   Future<Result<void, Exception>> authLogout();
+}
+
+sealed class ApiEmailLoginException implements Exception {
+  final String message;
+
+  const ApiEmailLoginException(this.message);
+}
+
+class ApiEmailLoginIncorrectCodeException extends ApiEmailLoginException {
+  const ApiEmailLoginIncorrectCodeException(super.message);
+}
+
+class ApiUnexpectedEmailLoginException extends ApiEmailLoginException {
+  const ApiUnexpectedEmailLoginException(super.message);
 }

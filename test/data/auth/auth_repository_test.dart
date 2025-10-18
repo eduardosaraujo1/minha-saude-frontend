@@ -29,7 +29,8 @@ void main() {
   - it returns error when email sending fails (requestEmailCode)
   - it returns session token for registered user (loginWithEmail)
   - it returns register token for unregistered user (loginWithEmail)
-  - it returns error when API call fails (loginWithEmail)
+  - it returns appropriate error when API call fails (loginWithEmail)
+  - it returns appropriate error when API returns incorrect code error (loginWithEmail)
   - it returns error when API response is invalid (loginWithEmail)
 
   ### Registration
@@ -270,19 +271,41 @@ void main() {
       );
     });
 
-    test("it returns error when API call fails", () async {
-      final testError = Exception("Invalid code");
-      when(
-        () => mockAuthApiClient.authLoginEmail(any(), any()),
-      ).thenAnswer((_) async => Result.error(testError));
+    test(
+      "it returns appropriate error when API returns incorrect code error",
+      () async {
+        final testError = ApiUnexpectedEmailLoginException("Unexpected Error");
+        when(
+          () => mockAuthApiClient.authLoginEmail(any(), any()),
+        ).thenAnswer((_) async => Result.error(testError));
 
-      final result = await authRepository.loginWithEmail(
-        "test@example.com",
-        "123456",
-      );
+        final result = await authRepository.loginWithEmail(
+          "test@example.com",
+          "123456",
+        );
 
-      expect(result.isError(), true);
-    });
+        expect(result.isError(), true);
+        expect(result.tryGetError(), isA<EmailLoginUnexpectedException>());
+      },
+    );
+
+    test(
+      "it returns appropriate error when API returns incorrect code error",
+      () async {
+        final testError = ApiEmailLoginIncorrectCodeException("Invalid code");
+        when(
+          () => mockAuthApiClient.authLoginEmail(any(), any()),
+        ).thenAnswer((_) async => Result.error(testError));
+
+        final result = await authRepository.loginWithEmail(
+          "test@example.com",
+          "123456",
+        );
+
+        expect(result.isError(), true);
+        expect(result.tryGetError(), isA<EmailLoginIncorrectCodeException>());
+      },
+    );
 
     test("it returns error when API response is invalid", () async {
       const mockApiResponse = LoginApiResponse(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
 
 // Alt + Shift + O -> organize imports
 import '../data/repositories/document/document_repository.dart';
@@ -81,7 +82,10 @@ final _router = GoRouter(
             GoRoute(
               path: Routes.emailAuthRelative,
               builder: (context, state) {
-                final viewModel = EmailAuthViewModel(authRepository: _getIt());
+                final viewModel = EmailAuthViewModel(
+                  authRepository: _getIt<AuthRepository>(),
+                  processLoginResultAction: _getIt<ProcessLoginResultAction>(),
+                );
                 return EmailAuthView(viewModelFactory: () => viewModel);
               },
             ),

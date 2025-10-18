@@ -60,6 +60,10 @@ void main() {
     );
 
     test("it must login with the email and code successfully", () async {
+      // Arrange: should have e-mail set
+      viewModel.requestCodeCommand.execute(email);
+      await Future.delayed(const Duration(milliseconds: 100));
+
       // Act
       viewModel.verifyCodeCommand.execute(serverCode);
       await Future.delayed(const Duration(milliseconds: 100));
@@ -76,7 +80,11 @@ void main() {
     });
 
     test("it must handle login that requires registration", () async {
-      // Arrange
+      // Arrange: should have e-mail set
+      viewModel.requestCodeCommand.execute(email);
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // Arrange: unregistered user
       when(
         () => authRepository.loginWithEmail(email, serverCode),
       ).thenAnswer((_) async => const Success(serverNeedsRegister));
@@ -118,11 +126,28 @@ void main() {
     test(
       "it must handle errors when logging in with email and code fails",
       () async {
-        // Arrange
+        // Arrange: should have e-mail set
+        viewModel.requestCodeCommand.execute(email);
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // Arrange: error on login
         when(
           () => authRepository.loginWithEmail(any(), serverCode),
         ).thenAnswer((_) async => Error(Exception("Invalid code")));
 
+        // Act
+        viewModel.verifyCodeCommand.execute(serverCode);
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        // Assert
+        expect(viewModel.verifyCodeCommand.value, isNotNull);
+        expect(viewModel.verifyCodeCommand.value!.isError(), true);
+      },
+    );
+
+    test(
+      "it must handle errors when no e-mail is set for code verification",
+      () async {
         // Act
         viewModel.verifyCodeCommand.execute(serverCode);
         await Future.delayed(const Duration(milliseconds: 100));

@@ -16,6 +16,17 @@ import '../view_model/register_view_model_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  setUpAll(() {
+    registerFallbackValue(
+      RegisterRequestModel(
+        cpf: "123.456.789-09",
+        dataNascimento: DateTime(1990, 1, 1),
+        nome: "Mock User",
+        telefone: "11953925678",
+      ),
+    );
+  });
+
   /** Business Requirements
    * GROUP: TOS Screen
    * - can see Terms of Service text and accept button
@@ -132,8 +143,13 @@ void main() {
       // Arrange
       await arrangeInRegisterForm(tester);
       final profile = randomProfile();
+      final expectedRequest = RegisterRequestModel(
+        nome: profile.nome,
+        cpf: profile.cpf,
+        dataNascimento: profile.dataNascimento,
+        telefone: profile.telefone,
+      );
 
-      // Act
       await tester.enterText(find.byKey(const Key('inputNome')), profile.nome);
       await tester.enterText(find.byKey(const Key('inputCpf')), profile.cpf);
       setFormFieldText(
@@ -147,19 +163,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // Act
       await tester.tap(find.byKey(const Key('btnSubmit')));
       await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
       // Assert
-      final captured = verify(() => mockRegisterAction.execute(any())).captured;
-
-      expect(captured.length, 1);
-      final RegisterRequestModel requestModel =
-          captured[0] as RegisterRequestModel;
-      expect(requestModel.nome, profile.nome);
-      expect(requestModel.cpf, profile.cpf);
-      expect(requestModel.dataNascimento, profile.dataNascimento);
-      expect(requestModel.telefone, profile.telefone);
+      verify(() => mockRegisterAction.execute(expectedRequest)).called(1);
 
       await tester.disposeWidget();
     });

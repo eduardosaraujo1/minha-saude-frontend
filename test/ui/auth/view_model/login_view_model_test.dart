@@ -15,6 +15,12 @@ void main() {
   // INTEGRATION
   // Calls repository method on view model command google login call
 
+  setUpAll(() {
+    registerFallbackValue(
+      const LoginResult.successful(sessionToken: "default_session_token"),
+    );
+  });
+
   late MockProcessLoginResult mockProcessLoginResult;
   late MockAuthRepository mockAuthRepository;
   late LoginViewModel viewModel;

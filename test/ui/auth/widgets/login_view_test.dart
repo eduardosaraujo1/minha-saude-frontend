@@ -23,6 +23,12 @@ void main() {
     sessionToken: "mock_session_token",
   );
 
+  setUpAll(() {
+    registerFallbackValue(
+      const LoginResult.successful(sessionToken: "default_session_token"),
+    );
+  });
+
   setUp(() {
     mockGoRouter = MockGoRouter();
     when(() => mockGoRouter.canPop()).thenReturn(false);

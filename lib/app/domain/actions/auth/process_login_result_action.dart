@@ -37,7 +37,17 @@ class ProcessLoginResultAction {
 
   Future<Result<void, Exception>> _storeAuthToken(String sessionToken) async {
     try {
-      await _sessionRepository.setAuthToken(sessionToken);
+      final storeResult = await _sessionRepository.setAuthToken(sessionToken);
+
+      if (storeResult.isError()) {
+        return Error(
+          Exception(
+            "Falha ao armazenar o token de sessão: "
+            "${storeResult.tryGetError()}",
+          ),
+        );
+      }
+
       return const Success(null);
     } catch (e) {
       return Error(Exception("Falha ao armazenar o token de sessão: $e"));

@@ -101,6 +101,25 @@ class RegisterRequestModel {
     );
     nome = nome.substring(0, nome.length.clamp(0, 100)).trim();
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is RegisterRequestModel &&
+        other.nome == nome &&
+        other.cpf == cpf &&
+        other.dataNascimento == dataNascimento &&
+        other.telefone == telefone;
+  }
+
+  @override
+  int get hashCode {
+    return nome.hashCode ^
+        cpf.hashCode ^
+        dataNascimento.hashCode ^
+        telefone.hashCode;
+  }
 }
 
 abstract class RegisterException implements Exception {

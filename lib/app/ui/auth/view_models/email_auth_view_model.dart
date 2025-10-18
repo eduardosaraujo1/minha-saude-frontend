@@ -39,9 +39,15 @@ class EmailAuthViewModel implements ViewModel {
 
   Future<Result<String, Exception>> _requestCode(String email) async {
     try {
-      // TODO: Implement email sending logic here.
-      throw UnimplementedError();
-    } catch (e) {
+      final requestResult = await _authRepository.requestEmailCode(email);
+      if (requestResult.isError()) {
+        // not recomended, but goes to the catch flow and is logged
+        throw requestResult.tryGetError()!;
+      }
+
+      return Success(email);
+    } catch (e, s) {
+      _logger.severe('Failed to request email code for $email', e, s);
       return Error(Exception("Failed to send verification code."));
     }
   }
@@ -50,10 +56,30 @@ class EmailAuthViewModel implements ViewModel {
     String code,
   ) async {
     try {
-      // TODO: Implement email verification logic here
-      throw UnimplementedError();
-    } catch (e) {
-      return Error(IncorrectCodeException("Failed to verify code."));
+      final email = requestCodeCommand.value?.tryGetSuccess();
+      if (email == null) {
+        _logger.severe(
+          'No email available for code verification for code $code',
+          requestCodeCommand.value?.tryGetError(),
+        );
+        return Error(
+          UnexpectedVerificationException(
+            "No email available for code verification.",
+          ),
+        );
+      }
+
+      final loginResult = await _authRepository.loginWithEmail(email, code);
+      if (loginResult.isError()) {
+        return Error(IncorrectCodeException("Incorrect verification code."));
+      }
+
+      return Success(loginResult.tryGetSuccess()!);
+    } catch (e, s) {
+      _logger.severe('Failed to verify code for $code', e, s);
+      return Error(
+        UnexpectedVerificationException("Unexpected error occurred."),
+      );
     }
   }
 

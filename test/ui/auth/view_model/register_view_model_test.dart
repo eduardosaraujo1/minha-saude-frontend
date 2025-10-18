@@ -14,6 +14,17 @@ class MockGetTosAction extends Mock implements GetTosAction {}
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  setUpAll(() {
+    registerFallbackValue(
+      RegisterRequestModel(
+        cpf: "123.456.789-09",
+        dataNascimento: DateTime(1990, 1, 1),
+        nome: "Mock User",
+        telefone: "11953925678",
+      ),
+    );
+  });
+
   /** Business Requirements (ViewModel, not View)
    * - can load Terms of Service
    * - can submit registration form

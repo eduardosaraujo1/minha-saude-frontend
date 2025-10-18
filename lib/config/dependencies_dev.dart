@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:minha_saude_frontend/app/domain/actions/auth/get_tos_action.dart';
 
 import '../app/data/repositories/auth/auth_repository.dart';
 import '../app/data/repositories/document/cache/document_file_cache_store.dart';
@@ -37,8 +36,9 @@ import '../app/data/services/local/cache_database/fake_cache_database.dart';
 import '../app/data/services/local/file_system_service/file_system_service.dart';
 import '../app/data/services/local/file_system_service/file_system_service_impl.dart';
 import '../app/data/services/local/secure_storage/secure_storage.dart';
-import '../app/domain/actions/auth/login_with_google.dart';
+import '../app/domain/actions/auth/get_tos_action.dart';
 import '../app/domain/actions/auth/logout_action.dart';
+import '../app/domain/actions/auth/process_login_result_action.dart';
 import '../app/domain/actions/auth/register_action.dart';
 import '../app/domain/actions/settings/delete_user_action.dart';
 import '../app/domain/actions/settings/request_export_action.dart';
@@ -162,11 +162,8 @@ Future<void> setup({
   );
 
   // Actions
-  _getIt.registerSingleton<LoginWithGoogle>(
-    LoginWithGoogle(
-      authRepository: _getIt<AuthRepository>(),
-      sessionRepository: _getIt<SessionRepository>(),
-    ),
+  _getIt.registerSingleton<ProcessLoginResultAction>(
+    ProcessLoginResultAction(sessionRepository: _getIt<SessionRepository>()),
   );
   _getIt.registerSingleton<LogoutAction>(
     LogoutAction(

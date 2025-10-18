@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/domain/actions/auth/get_tos_action.dart';
-import 'package:minha_saude_frontend/app/ui/auth/widgets/email/email_auth_view.dart';
-import 'package:minha_saude_frontend/app/ui/auth/widgets/register/register_navigator.dart';
 
 // Alt + Shift + O -> organize imports
 import '../data/repositories/document/document_repository.dart';
 import '../data/repositories/profile/profile_repository.dart';
 import '../data/repositories/session/session_repository.dart';
 import '../data/repositories/trash/trash_repository.dart';
-import '../domain/actions/auth/login_with_google.dart';
+import '../domain/actions/auth/get_tos_action.dart';
 import '../domain/actions/auth/logout_action.dart';
+import '../domain/actions/auth/process_login_result_action.dart';
 import '../domain/actions/auth/register_action.dart';
 import '../domain/actions/settings/delete_user_action.dart';
 import '../domain/actions/settings/request_export_action.dart';
 import '../ui/auth/view_models/email_auth_view_model.dart';
 import '../ui/auth/view_models/login_view_model.dart';
 import '../ui/auth/view_models/register_view_model.dart';
+import '../ui/auth/widgets/email/email_auth_view.dart';
 import '../ui/auth/widgets/login_view.dart';
+import '../ui/auth/widgets/register/register_navigator.dart';
 import '../ui/core/widgets/not_found.dart';
 import '../ui/core/widgets/scaffold_with_navbar.dart';
 import '../ui/core/widgets/under_construction_screen.dart';
@@ -71,7 +71,10 @@ final _router = GoRouter(
         GoRoute(
           path: Routes.auth,
           builder: (BuildContext context, GoRouterState state) {
-            final loginViewModel = LoginViewModel(_getIt<LoginWithGoogle>());
+            final loginViewModel = LoginViewModel(
+              authRepository: _getIt(),
+              processLoginAction: _getIt<ProcessLoginResultAction>(),
+            );
             return LoginView(() => loginViewModel);
           },
           routes: [
@@ -312,7 +315,6 @@ final _router = GoRouter(
 );
 
 // Cache the router instance to preserve navigation state across rebuilds
-
 GoRouter router() => _router;
 
 Future<String?> _redirectHandler(

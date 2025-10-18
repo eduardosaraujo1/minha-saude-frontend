@@ -1,20 +1,26 @@
 import 'package:command_it/command_it.dart';
 import 'package:logging/logging.dart';
+import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
+import 'package:minha_saude_frontend/app/domain/actions/auth/process_login_result_action.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-import '../../../domain/actions/auth/login_with_google.dart';
 import '../../../domain/models/auth/login_response/login_result.dart';
 import '../../view_model.dart';
 
 class LoginViewModel implements ViewModel {
-  LoginViewModel(this._loginWithGoogleAction) {
+  LoginViewModel({
+    required AuthRepository authRepository,
+    required ProcessLoginResultAction processLoginAction,
+  }) : _authRepository = authRepository,
+       _processGoogleLoginAction = processLoginAction {
     loginWithGoogle = Command.createAsyncNoParam(
       _loginWithGoogle,
       initialValue: null,
     );
   }
 
-  final LoginWithGoogle _loginWithGoogleAction;
+  final ProcessLoginResultAction _processGoogleLoginAction;
+  final AuthRepository _authRepository;
   final _log = Logger("LoginViewModel");
 
   /// Command to initiate Google login, returns an app route path to redirect to
@@ -31,14 +37,38 @@ class LoginViewModel implements ViewModel {
         "Não foi possível fazer login com o Google.",
       );
 
-      final redirectResult = await _loginWithGoogleAction.execute();
-      if (redirectResult.isError()) {
-        final err = redirectResult.tryGetError()!;
-        _log.warning("Login with Google failed: $err");
-        return Result.error(defaultErr);
+      // Get Google server auth token
+      final googleTokenResult = await _authRepository.getGoogleServerToken();
+      if (googleTokenResult.isError()) {
+        _log.severe(
+          "Failed to get Google server token",
+          googleTokenResult.tryGetError(),
+        );
+        return Error(defaultErr);
       }
 
-      return Success(redirectResult.getOrThrow());
+      // Use googleToken to login with google
+      final loginResult = await _authRepository.loginWithGoogle(
+        googleTokenResult.tryGetSuccess()!,
+      );
+      if (loginResult.isError()) {
+        _log.severe("Login with Google failed: ${loginResult.tryGetError()}");
+        return Error(Exception(defaultErr));
+      }
+
+      // Store token based on login response type
+      final storeResult = await _processGoogleLoginAction.execute(
+        loginResult.tryGetSuccess()!,
+      );
+
+      if (storeResult.isError()) {
+        _log.severe("Login was successful, but couldn't store token");
+        return Error(
+          Exception("Não foi possível salvar o token de autenticação."),
+        );
+      }
+
+      return loginResult;
     } catch (e) {
       _log.severe("Ocorreu um erro desconhecido:", e);
       return Result.error(

@@ -1,17 +1,20 @@
 import 'package:command_it/command_it.dart';
+import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-import '../../../domain/models/auth/login_response/login_result.dart';
 import '../../../data/repositories/auth/auth_repository.dart';
+import '../../../domain/models/auth/login_response/login_result.dart';
 import '../../view_model.dart';
 
 class EmailAuthViewModel implements ViewModel {
-  EmailAuthViewModel({required this.authRepository}) {
+  EmailAuthViewModel({required AuthRepository authRepository})
+    : _authRepository = authRepository {
     requestCodeCommand = Command.createAsync(_requestCode, initialValue: null);
-    confirmCodeCommand = Command.createAsync(_confirmCode, initialValue: null);
+    verifyCodeCommand = Command.createAsync(_verifyCode, initialValue: null);
   }
 
-  final AuthRepository authRepository;
+  final AuthRepository _authRepository;
+  final Logger _logger = Logger('EmailAuthViewModel');
 
   /// Requests a verification code to be sent to the provided e-mail address.
   ///
@@ -32,18 +35,18 @@ class EmailAuthViewModel implements ViewModel {
   /// - [IncorrectCodeException]: The provided code was incorrect.
   /// - [UnexpectedVerificationException]: A general exception occurred during verification.
   late final Command<String, Result<LoginResult, CodeVerificationException>?>
-  confirmCodeCommand;
+  verifyCodeCommand;
 
   Future<Result<String, Exception>> _requestCode(String email) async {
     try {
-      // TODO: Implement email sending logic here
+      // TODO: Implement email sending logic here.
       throw UnimplementedError();
     } catch (e) {
       return Error(Exception("Failed to send verification code."));
     }
   }
 
-  Future<Result<LoginResult, CodeVerificationException>> _confirmCode(
+  Future<Result<LoginResult, CodeVerificationException>> _verifyCode(
     String code,
   ) async {
     try {
@@ -57,7 +60,7 @@ class EmailAuthViewModel implements ViewModel {
   @override
   void dispose() {
     requestCodeCommand.dispose();
-    confirmCodeCommand.dispose();
+    verifyCodeCommand.dispose();
   }
 }
 

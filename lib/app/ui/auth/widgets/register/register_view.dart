@@ -1,10 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:minha_saude_frontend/app/ui/auth/view_models/register_view_model.dart';
-import 'package:minha_saude_frontend/app/utils/format.dart';
-
-import '../../../../domain/actions/auth/register_action.dart';
-import '../layouts/login_form_layout.dart';
+part of 'register_navigator.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key, required this.viewModel});

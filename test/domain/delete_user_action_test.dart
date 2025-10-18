@@ -6,7 +6,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../testing/mocks/repositories/mock_profile_repository.dart';
-import 'auth/login_with_google_test.dart';
+import '../../testing/mocks/repositories/mock_session_repository.dart';
 
 void main() {
   late DeleteUserAction deleteUserAction;

@@ -1,10 +1,4 @@
-// TODO: control document TOS using RegisterViewModel
-import 'package:flutter/material.dart';
-
-import '../../../core/widgets/markdown_text_scroller.dart';
-import '../../view_models/register_view_model.dart';
-import '../layouts/login_form_layout.dart';
-import 'register_navigator.dart' show RegisterRoutes;
+part of 'register_navigator.dart';
 
 class RegisterTos extends StatelessWidget {
   const RegisterTos({super.key, required this.viewModel});
@@ -54,7 +48,7 @@ class RegisterTos extends StatelessWidget {
                   key: const ValueKey('btnAcceptTos'),
                   onPressed: () {
                     // Use local RouterNavigator to go to Register Form
-                    Navigator.of(context).pushNamed(RegisterRoutes.form);
+                    Navigator.of(context).pushNamed(_RegisterRoutes.form);
                   },
                   child: Text('Li e concordo com os termos'),
                 ),

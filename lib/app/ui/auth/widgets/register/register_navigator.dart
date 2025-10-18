@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minha_saude_frontend/app/ui/auth/view_models/register_view_model.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
+import '../../../../domain/actions/auth/register_action.dart';
 import '../../../../routing/routes.dart';
-import 'register_tos.dart';
-import 'register_view.dart';
+import '../../../../utils/format.dart';
+import '../../../core/widgets/markdown_text_scroller.dart';
+import '../../view_models/register_view_model.dart';
+import '../layouts/login_form_layout.dart';
 
-abstract class RegisterRoutes {
+part 'register_tos.dart';
+part 'register_view.dart';
+
+abstract class _RegisterRoutes {
   static const tos = '/tos';
   static const form = '/form';
 }
@@ -89,14 +95,14 @@ class _RegisterNavigatorState extends State<RegisterNavigator> {
       },
       child: Navigator(
         key: navigatorKey,
-        initialRoute: RegisterRoutes.tos,
+        initialRoute: _RegisterRoutes.tos,
         onGenerateRoute: (settings) {
           switch (settings.name) {
-            case RegisterRoutes.tos:
+            case _RegisterRoutes.tos:
               return MaterialPageRoute(
                 builder: (context) => RegisterTos(viewModel: viewModel),
               );
-            case RegisterRoutes.form:
+            case _RegisterRoutes.form:
               return MaterialPageRoute(
                 builder: (context) => RegisterView(viewModel: viewModel),
               );

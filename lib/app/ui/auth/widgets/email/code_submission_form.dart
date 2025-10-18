@@ -1,7 +1,7 @@
 part of 'email_auth_view.dart';
 
-class CodeRequestForm extends StatelessWidget {
-  const CodeRequestForm({required this.viewModel, super.key});
+class CodeSubmissionForm extends StatelessWidget {
+  const CodeSubmissionForm({required this.viewModel, super.key});
 
   final EmailAuthViewModel viewModel;
 

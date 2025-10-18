@@ -1,17 +1,50 @@
 part of 'email_auth_view.dart';
 
-class CodeRequestForm extends StatelessWidget {
+class CodeRequestForm extends StatefulWidget {
   const CodeRequestForm({required this.viewModel, super.key});
 
   final EmailAuthViewModel viewModel;
 
   @override
+  State<CodeRequestForm> createState() => _CodeRequestFormState();
+}
+
+class _CodeRequestFormState extends State<CodeRequestForm> {
+  final CodeRequestFormController controller = CodeRequestFormController();
+
+  EmailAuthViewModel get viewModel => widget.viewModel;
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  /// Requests a new code using the email in the controller
+  ///
+  /// Will only be called if the form is valid and the e-mail is different
+  /// from the one previously used (if any)
+  void _requestCode() {
+    if (!controller.validate()) return;
+    final previousEmail = viewModel.requestCodeCommand.value?.tryGetSuccess();
+    final email = controller.emailController.text;
+
+    if (email != previousEmail) {
+      viewModel.requestCodeCommand.execute(email);
+    } else {
+      viewModel.stage.value = EmailRoutes.submitCode;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final controller = CodeRequestFormController();
 
     return LoginFormLayout(
+      onBackPressed: () {
+        context.go(Routes.auth);
+      },
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         physics: const AlwaysScrollableScrollPhysics(),
@@ -38,15 +71,7 @@ class CodeRequestForm extends StatelessWidget {
                 builder: (context, isExecuting, child) {
                   return FilledButton(
                     key: ValueKey('btnRequestCode'),
-                    onPressed: isExecuting
-                        ? null
-                        : () {
-                            if (controller.validate()) {
-                              viewModel.requestCodeCommand.execute(
-                                controller.emailController.text,
-                              );
-                            }
-                          },
+                    onPressed: isExecuting ? null : _requestCode,
                     child: isExecuting
                         ? SizedBox(
                             height: 20,

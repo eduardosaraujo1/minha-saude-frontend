@@ -1,4 +1,5 @@
 import 'package:command_it/command_it.dart';
+import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
@@ -36,6 +37,11 @@ class EmailAuthViewModel implements ViewModel {
   /// - [UnexpectedVerificationException]: A general exception occurred during verification.
   late final Command<String, Result<LoginResult, CodeVerificationException>?>
   verifyCodeCommand;
+
+  /// Current stage of the email authentication flow.
+  ///
+  /// Defines which form should be shown to the user.
+  final ValueNotifier<EmailRoutes> stage = ValueNotifier(EmailRoutes.values[0]);
 
   Future<Result<String, Exception>> _requestCode(String email) async {
     try {
@@ -103,3 +109,5 @@ class UnexpectedVerificationException extends CodeVerificationException {
 class IncorrectCodeException extends CodeVerificationException {
   IncorrectCodeException(super.message);
 }
+
+enum EmailRoutes { requestCode, submitCode }

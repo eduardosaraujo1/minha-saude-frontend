@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,11 +10,6 @@ import '../layouts/login_form_layout.dart';
 
 part 'code_request_form.dart';
 part 'code_submission_form.dart';
-
-class _EmailRoutes {
-  static const String requestCode = '/request';
-  static const String submitCode = '/submit';
-}
 
 class EmailAuthView extends StatefulWidget {
   const EmailAuthView({required this.viewModelFactory, super.key});
@@ -49,7 +46,7 @@ class _EmailAuthViewState extends State<EmailAuthView> {
 
     if (result.isSuccess()) {
       // Navigate to code submission screen
-      navigatorKey.currentState?.pushNamed(_EmailRoutes.submitCode);
+      viewModel.stage.value = EmailRoutes.submitCode;
       return;
     }
 
@@ -95,39 +92,31 @@ class _EmailAuthViewState extends State<EmailAuthView> {
     }
   }
 
-  final navigatorKey = GlobalKey<NavigatorState>();
   @override
   Widget build(BuildContext context) {
-    // TODO: Use IndexedStack instead of navigator to keep the e-mail form field intact.  This does mean we need to manage the back button manually, so update the LoginFormLayout to accept a custom back button handler
     return PopScope(
-      canPop: false,
+      canPop: true,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
 
-        if (navigatorKey.currentState?.canPop() ?? false) {
-          navigatorKey.currentState?.pop();
+        final current = viewModel.stage.value;
+
+        if (current.index <= 0) {
+          context.go(Routes.auth);
         }
+
+        viewModel.stage.value = EmailRoutes.values[current.index - 1];
       },
-      child: Navigator(
-        key: navigatorKey,
-        initialRoute: _EmailRoutes.requestCode,
-        onGenerateRoute: (RouteSettings settings) {
-          WidgetBuilder builder;
-          switch (settings.name) {
-            case _EmailRoutes.requestCode:
-              builder = (BuildContext context) {
-                return CodeRequestForm(viewModel: viewModel);
-              };
-              break;
-            case _EmailRoutes.submitCode:
-              builder = (BuildContext context) {
-                return CodeSubmissionForm(viewModel: viewModel);
-              };
-              break;
-            default:
-              return null;
-          }
-          return MaterialPageRoute(builder: builder, settings: settings);
+      child: ValueListenableBuilder(
+        valueListenable: viewModel.stage,
+        builder: (context, currentStage, child) {
+          return IndexedStack(
+            index: currentStage.index,
+            children: [
+              CodeRequestForm(viewModel: viewModel),
+              CodeSubmissionForm(viewModel: viewModel),
+            ],
+          );
         },
       ),
     );

@@ -39,12 +39,7 @@ void main() {
 
     // Successful register
     when(
-      () => mockRegisterAction.execute(
-        nome: any(named: 'nome'),
-        cpf: any(named: 'cpf'),
-        dataNascimento: any(named: 'dataNascimento'),
-        telefone: any(named: 'telefone'),
-      ),
+      () => mockRegisterAction.execute(any()),
     ).thenAnswer((_) async => Success(null));
 
     // Successfully loaded TOS
@@ -78,14 +73,7 @@ void main() {
       var val = viewModel.registerCommand.value;
       expect(val, isNotNull);
       expect(val!.isSuccess(), true);
-      verify(
-        () => mockRegisterAction.execute(
-          nome: requestModel.nome,
-          cpf: requestModel.cpf,
-          dataNascimento: requestModel.dataNascimento,
-          telefone: requestModel.telefone,
-        ),
-      ).called(1);
+      verify(() => mockRegisterAction.execute(requestModel)).called(1);
     });
   });
 
@@ -109,14 +97,7 @@ void main() {
       'handles errors when registration fails with expired login exception',
       () async {
         // Arrange
-        when(
-          () => mockRegisterAction.execute(
-            nome: any(named: 'nome'),
-            cpf: any(named: 'cpf'),
-            dataNascimento: any(named: 'dataNascimento'),
-            telefone: any(named: 'telefone'),
-          ),
-        ).thenAnswer(
+        when(() => mockRegisterAction.execute(any())).thenAnswer(
           (_) async => Error(ExpiredLoginException("Session expired")),
         );
 
@@ -135,14 +116,7 @@ void main() {
       'handles errors when registration fails with unexpected register exception',
       () async {
         // Arrange
-        when(
-          () => mockRegisterAction.execute(
-            nome: any(named: 'nome'),
-            cpf: any(named: 'cpf'),
-            dataNascimento: any(named: 'dataNascimento'),
-            telefone: any(named: 'telefone'),
-          ),
-        ).thenAnswer(
+        when(() => mockRegisterAction.execute(any())).thenAnswer(
           (_) async => Error(UnexpectedRegisterException("Unexpected error")),
         );
 

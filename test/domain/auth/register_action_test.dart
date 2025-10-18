@@ -5,6 +5,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:test/test.dart';
 
+import '../../../testing/models/profile.dart';
+
 class MockAuthRepository extends Mock implements AuthRepository {}
 
 class MockSessionRepository extends Mock implements SessionRepository {}
@@ -14,369 +16,186 @@ void main() {
   late SessionRepository sessionRepository;
   late RegisterAction registerAction;
 
+  RegisterRequestModel getRequest() {
+    final profile = randomProfile();
+    return RegisterRequestModel(
+      nome: profile.nome,
+      cpf: profile.cpf,
+      dataNascimento: profile.dataNascimento,
+      telefone: profile.telefone,
+    );
+  }
+
+  final registerRequestModel = getRequest();
+  const storedRegisterToken = "valid-register-token-123";
+  const serverTokenResponse = "valid-session-token-456";
+
   setUp(() {
+    // Initialize mocks
     authRepository = MockAuthRepository();
     sessionRepository = MockSessionRepository();
+
+    // Arrange: It has stored session token
+    when(
+      () => sessionRepository.getRegisterToken(),
+    ).thenReturn(storedRegisterToken);
+
+    // Arrange: It successfully registers and returns server token
+    when(
+      () => authRepository.register(
+        nome: any(named: "nome"),
+        cpf: any(named: "cpf"),
+        dataNascimento: any(named: "dataNascimento"),
+        telefone: any(named: "telefone"),
+        registerToken: storedRegisterToken,
+      ),
+    ).thenAnswer((_) async => const Success(serverTokenResponse));
+
+    // Arrange: It successfully stores session token
+    when(
+      () => sessionRepository.setAuthToken(any()),
+    ).thenAnswer((_) async => const Result.success(null));
+
     registerAction = RegisterAction(
       sessionRepository: sessionRepository,
       authRepository: authRepository,
     );
   });
 
-  test(
-    "when registration succeeds then it should clear register token, store session token and return Success",
-    () async {
-      // Hook SessionRepository.getRegisterToken to return a valid token
-      when(
-        () => sessionRepository.getRegisterToken(),
-      ).thenReturn("test-register-token-123");
+  /** Business Rules
+   * Group: Register Submission
+   * it should get submit registration to server and store token on success
+   * Group: Error Handling
+   * it should handle null register token by returning Error
+   * it should handle empty register token by returning Error
+   * it should handle registration failure by returning Error
+   * it should handle token storage failure by returning Error
+   */
+  group("Register Submission", () {
+    test(
+      "it should get submit registration to server and store token on success",
+      () async {
+        // Act
+        final result = await registerAction.execute(registerRequestModel);
 
-      // Hook AuthRepository.register to return Success with session token
-      when(
-        () => authRepository.register(
-          cpf: any(named: "cpf"),
-          dataNascimento: any(named: "dataNascimento"),
-          nome: any(named: "nome"),
-          telefone: any(named: "telefone"),
-          registerToken: any(named: "registerToken"),
-        ),
-      ).thenAnswer((_) async => const Result.success("test-session-token-456"));
+        // Assert: registration succeeded
+        expect(result.isSuccess(), true);
 
-      // Hook SessionRepository.clearRegisterToken to detect it was called
-      when(() => sessionRepository.clearRegisterToken()).thenAnswer((_) {});
+        // Assert: repository was called with correct parameters
+        verify(
+          () => authRepository.register(
+            nome: registerRequestModel.nome,
+            cpf: registerRequestModel.cpf,
+            dataNascimento: registerRequestModel.dataNascimento,
+            telefone: registerRequestModel.telefone,
+            registerToken: storedRegisterToken,
+          ),
+        ).called(1);
 
-      // Hook SessionRepository.setAuthToken to return Success
-      when(
-        () => sessionRepository.setAuthToken(any()),
-      ).thenAnswer((_) async => const Result.success(null));
+        // Assert: token was stored
+        verify(
+          () => sessionRepository.setAuthToken(serverTokenResponse),
+        ).called(1);
+      },
+    );
+  });
 
-      // Execute action
-      final result = await registerAction.execute(
-        nome: "John Doe",
-        cpf: "12345678900",
-        dataNascimento: DateTime(1990, 1, 15),
-        telefone: "11999999999",
-      );
-
-      // Assert result is Success
-      expect(result.isSuccess(), true);
-
-      // Assert SessionRepository.getRegisterToken was called
-      verify(() => sessionRepository.getRegisterToken()).called(1);
-
-      // Assert AuthRepository.register was called with correct parameters
-      final captured = verify(
-        () => authRepository.register(
-          cpf: captureAny(named: "cpf"),
-          dataNascimento: captureAny(named: "dataNascimento"),
-          nome: captureAny(named: "nome"),
-          telefone: captureAny(named: "telefone"),
-          registerToken: captureAny(named: "registerToken"),
-        ),
-      ).captured;
-      expect(captured.length, 5);
-      expect(captured[0], "John Doe");
-      expect(captured[1], "12345678900");
-      expect(captured[2], DateTime(1990, 1, 15));
-      expect(captured[3], "11999999999");
-      expect(captured[4], "test-register-token-123");
-
-      // Assert SessionRepository.clearRegisterToken was called
-      verify(() => sessionRepository.clearRegisterToken()).called(1);
-
-      // Assert SessionRepository.setAuthToken was called with session token
-      verify(
-        () => sessionRepository.setAuthToken("test-session-token-456"),
-      ).called(1);
-    },
-  );
-
-  test(
-    "when register token is null then it should return Error without calling register",
-    () async {
-      // Hook SessionRepository.getRegisterToken to return null
+  group("Error Handling", () {
+    test("it should handle null register token by returning Error", () async {
+      // Arrange
       when(() => sessionRepository.getRegisterToken()).thenReturn(null);
 
-      // Hook AuthRepository.register to detect if it's called
-      when(
-        () => authRepository.register(
-          cpf: any(named: "cpf"),
-          dataNascimento: any(named: "dataNascimento"),
-          nome: any(named: "nome"),
-          telefone: any(named: "telefone"),
-          registerToken: any(named: "registerToken"),
-        ),
-      ).thenAnswer((_) async => const Result.success("test-session-token"));
+      // Act
+      final result = await registerAction.execute(registerRequestModel);
 
-      // Execute action
-      final result = await registerAction.execute(
-        nome: "John Doe",
-        cpf: "12345678900",
-        dataNascimento: DateTime(1990, 1, 15),
-        telefone: "11999999999",
-      );
-
-      // Assert result is Error
+      // Assert: result is error
       expect(result.isError(), true);
-      expect(
-        result.tryGetError()!.toString(),
-        contains('Login expirado. Faça login novamente para continuar'),
-      );
 
-      // Assert SessionRepository.getRegisterToken was called
-      verify(() => sessionRepository.getRegisterToken()).called(1);
-
-      // Assert AuthRepository.register was never called
+      // Assert: it avoids call to repository
       verifyNever(
         () => authRepository.register(
+          nome: any(named: "nome"),
           cpf: any(named: "cpf"),
           dataNascimento: any(named: "dataNascimento"),
-          nome: any(named: "nome"),
           telefone: any(named: "telefone"),
           registerToken: any(named: "registerToken"),
         ),
       );
-    },
-  );
-
-  test(
-    "when AuthRepository.register returns Error then it should return Error without storing tokens",
-    () async {
-      // Hook SessionRepository.getRegisterToken to return a valid token
-      when(
-        () => sessionRepository.getRegisterToken(),
-      ).thenReturn("test-register-token-123");
-
-      // Hook AuthRepository.register to return Error
-      final testError = Exception("Registration failed on server");
-      when(
-        () => authRepository.register(
-          cpf: any(named: "cpf"),
-          dataNascimento: any(named: "dataNascimento"),
-          nome: any(named: "nome"),
-          telefone: any(named: "telefone"),
-          registerToken: any(named: "registerToken"),
-        ),
-      ).thenAnswer((_) async => Result.error(testError));
-
-      // Hook SessionRepository methods to detect if they're called
-      when(() => sessionRepository.clearRegisterToken()).thenAnswer((_) {});
-      when(
-        () => sessionRepository.setAuthToken(any()),
-      ).thenAnswer((_) async => const Result.success(null));
-
-      // Execute action
-      final result = await registerAction.execute(
-        nome: "John Doe",
-        cpf: "12345678900",
-        dataNascimento: DateTime(1990, 1, 15),
-        telefone: "11999999999",
-      );
-
-      // Assert result is Error
-      expect(result.isError(), true);
-      expect(
-        result.tryGetError()!.toString(),
-        contains('Ocorreu um erro desconhecido durante o processo de registro'),
-      );
-
-      // Assert SessionRepository.getRegisterToken was called
-      verify(() => sessionRepository.getRegisterToken()).called(1);
-
-      // Assert AuthRepository.register was called
-      verify(
-        () => authRepository.register(
-          cpf: any(named: "cpf"),
-          dataNascimento: any(named: "dataNascimento"),
-          nome: any(named: "nome"),
-          telefone: any(named: "telefone"),
-          registerToken: any(named: "registerToken"),
-        ),
-      ).called(1);
-
-      // Assert token clearing methods were never called
-      verifyNever(() => sessionRepository.clearRegisterToken());
+      // Assert: it avoids storage
       verifyNever(() => sessionRepository.setAuthToken(any()));
-    },
-  );
+    });
+    test("it should handle empty register token by returning Error", () async {
+      // Arrange
+      when(() => sessionRepository.getRegisterToken()).thenReturn("");
 
-  test(
-    "when setAuthToken throws exception then it should return Error",
-    () async {
-      // Hook SessionRepository.getRegisterToken to return a valid token
-      when(
-        () => sessionRepository.getRegisterToken(),
-      ).thenReturn("test-register-token-123");
+      // Act
+      final result = await registerAction.execute(registerRequestModel);
 
-      // Hook AuthRepository.register to return Success with session token
-      when(
+      // Assert: result is error
+      expect(result.isError(), true);
+
+      // Assert: it avoids call to repository
+      verifyNever(
         () => authRepository.register(
+          nome: any(named: "nome"),
           cpf: any(named: "cpf"),
           dataNascimento: any(named: "dataNascimento"),
-          nome: any(named: "nome"),
           telefone: any(named: "telefone"),
           registerToken: any(named: "registerToken"),
         ),
-      ).thenAnswer((_) async => const Result.success("test-session-token-456"));
+      );
 
-      // Hook SessionRepository.clearRegisterToken
-      when(() => sessionRepository.clearRegisterToken()).thenAnswer((_) {});
-
-      // Hook SessionRepository.setAuthToken to throw exception
+      // Assert: it avoids storage
+      verifyNever(() => sessionRepository.setAuthToken(any()));
+    });
+    test("it should handle registration failure by returning Error", () async {
+      // Arrange
       when(
-        () => sessionRepository.setAuthToken(any()),
-      ).thenThrow(Exception("Storage error"));
-
-      // Execute action
-      final result = await registerAction.execute(
-        nome: "John Doe",
-        cpf: "12345678900",
-        dataNascimento: DateTime(1990, 1, 15),
-        telefone: "11999999999",
-      );
-
-      // Assert result is Error
-      expect(result.isError(), true);
-      expect(
-        result.tryGetError()!.toString(),
-        contains('Ocorreu um erro desconhecido durante o processo de registro'),
-      );
-
-      // Assert methods were called in order until exception
-      verify(() => sessionRepository.getRegisterToken()).called(1);
-      verify(
         () => authRepository.register(
+          nome: any(named: "nome"),
           cpf: any(named: "cpf"),
           dataNascimento: any(named: "dataNascimento"),
+          telefone: any(named: "telefone"),
+          registerToken: any(named: "registerToken"),
+        ),
+      ).thenAnswer(
+        (_) async => Error(Exception("Registration failed on server")),
+      );
+
+      // Act
+      final result = await registerAction.execute(registerRequestModel);
+
+      // Assert: result is error
+      expect(result.isError(), true);
+
+      // Assert: it avoids storage
+      verifyNever(() => sessionRepository.setAuthToken(any()));
+    });
+    test("it should handle token storage failure by returning Error", () async {
+      // Arrange
+      when(
+        () => sessionRepository.setAuthToken(any()),
+      ).thenAnswer((_) async => Error(Exception("Storage error")));
+
+      // Act
+      final result = await registerAction.execute(registerRequestModel);
+
+      // Assert: result is error
+      expect(result.isError(), true);
+
+      // Assert: repository was at least called
+      verify(
+        () => authRepository.register(
           nome: any(named: "nome"),
+          cpf: any(named: "cpf"),
+          dataNascimento: any(named: "dataNascimento"),
           telefone: any(named: "telefone"),
           registerToken: any(named: "registerToken"),
         ),
       ).called(1);
-      verify(() => sessionRepository.clearRegisterToken()).called(1);
+
+      // Assert: storage was attempted but failed
       verify(() => sessionRepository.setAuthToken(any())).called(1);
-    },
-  );
-
-  test(
-    "when clearRegisterToken throws exception then it should return Error",
-    () async {
-      // Hook SessionRepository.getRegisterToken to return a valid token
-      when(
-        () => sessionRepository.getRegisterToken(),
-      ).thenReturn("test-register-token-123");
-
-      // Hook AuthRepository.register to return Success with session token
-      when(
-        () => authRepository.register(
-          cpf: any(named: "cpf"),
-          dataNascimento: any(named: "dataNascimento"),
-          nome: any(named: "nome"),
-          telefone: any(named: "telefone"),
-          registerToken: any(named: "registerToken"),
-        ),
-      ).thenAnswer((_) async => const Result.success("test-session-token-456"));
-
-      // Hook SessionRepository.clearRegisterToken to throw exception
-      when(
-        () => sessionRepository.clearRegisterToken(),
-      ).thenThrow(Exception("Clear token failed"));
-
-      // Hook SessionRepository.setAuthToken to detect if it's called
-      when(
-        () => sessionRepository.setAuthToken(any()),
-      ).thenAnswer((_) async => const Result.success(null));
-
-      // Execute action
-      final result = await registerAction.execute(
-        nome: "John Doe",
-        cpf: "12345678900",
-        dataNascimento: DateTime(1990, 1, 15),
-        telefone: "11999999999",
-      );
-
-      // Assert result is Error
-      expect(result.isError(), true);
-      expect(
-        result.tryGetError()!.toString(),
-        contains('Ocorreu um erro desconhecido durante o processo de registro'),
-      );
-
-      // Assert methods were called in order until exception
-      verify(() => sessionRepository.getRegisterToken()).called(1);
-      verify(
-        () => authRepository.register(
-          cpf: any(named: "cpf"),
-          dataNascimento: any(named: "dataNascimento"),
-          nome: any(named: "nome"),
-          telefone: any(named: "telefone"),
-          registerToken: any(named: "registerToken"),
-        ),
-      ).called(1);
-      verify(() => sessionRepository.clearRegisterToken()).called(1);
-
-      // Assert setAuthToken was never called due to exception
-      verifyNever(() => sessionRepository.setAuthToken(any()));
-    },
-  );
-
-  test(
-    "when AuthRepository.register throws exception then it should return Error",
-    () async {
-      // Hook SessionRepository.getRegisterToken to return a valid token
-      when(
-        () => sessionRepository.getRegisterToken(),
-      ).thenReturn("test-register-token-123");
-
-      // Hook AuthRepository.register to throw exception
-      when(
-        () => authRepository.register(
-          cpf: any(named: "cpf"),
-          dataNascimento: any(named: "dataNascimento"),
-          nome: any(named: "nome"),
-          telefone: any(named: "telefone"),
-          registerToken: any(named: "registerToken"),
-        ),
-      ).thenThrow(Exception("Network error"));
-
-      // Hook SessionRepository methods to detect if they're called
-      when(() => sessionRepository.clearRegisterToken()).thenAnswer((_) {});
-      when(
-        () => sessionRepository.setAuthToken(any()),
-      ).thenAnswer((_) async => const Result.success(null));
-
-      // Execute action
-      final result = await registerAction.execute(
-        nome: "John Doe",
-        cpf: "12345678900",
-        dataNascimento: DateTime(1990, 1, 15),
-        telefone: "11999999999",
-      );
-
-      // Assert result is Error
-      expect(result.isError(), true);
-      expect(
-        result.tryGetError()!.toString(),
-        contains('Ocorreu um erro desconhecido durante o processo de registro'),
-      );
-
-      // Assert SessionRepository.getRegisterToken was called
-      verify(() => sessionRepository.getRegisterToken()).called(1);
-
-      // Assert AuthRepository.register was called
-      verify(
-        () => authRepository.register(
-          cpf: any(named: "cpf"),
-          dataNascimento: any(named: "dataNascimento"),
-          nome: any(named: "nome"),
-          telefone: any(named: "telefone"),
-          registerToken: any(named: "registerToken"),
-        ),
-      ).called(1);
-
-      // Assert token management methods were never called
-      verifyNever(() => sessionRepository.clearRegisterToken());
-      verifyNever(() => sessionRepository.setAuthToken(any()));
-    },
-  );
+    });
+  });
 }

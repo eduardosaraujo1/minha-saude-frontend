@@ -63,12 +63,7 @@ class RegisterViewModel implements ViewModel {
   ) async {
     try {
       // Delegate to action
-      return await _registerAction.execute(
-        nome: requestModel.nome,
-        cpf: requestModel.cpf,
-        dataNascimento: requestModel.dataNascimento,
-        telefone: requestModel.telefone,
-      );
+      return await _registerAction.execute(requestModel);
     } catch (e, s) {
       _logger.severe("Ocorreu um erro desconhecido durante o registro", e, s);
       return Result.error(
@@ -77,28 +72,5 @@ class RegisterViewModel implements ViewModel {
         ),
       );
     }
-  }
-}
-
-class RegisterRequestModel {
-  String nome;
-  String cpf;
-  DateTime dataNascimento;
-  String telefone;
-
-  RegisterRequestModel({
-    required this.nome,
-    required this.cpf,
-    required this.dataNascimento,
-    required this.telefone,
-  }) {
-    cpf = cpf.replaceAll(RegExp(r'[^0-9]'), '');
-    telefone = telefone.replaceAll(RegExp(r'[^0-9]'), '');
-    dataNascimento = DateTime(
-      dataNascimento.year,
-      dataNascimento.month,
-      dataNascimento.day,
-    );
-    nome = nome.substring(0, nome.length.clamp(0, 100)).trim();
   }
 }

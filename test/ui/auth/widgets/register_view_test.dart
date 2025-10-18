@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:minha_saude_frontend/app/domain/actions/auth/register_action.dart';
 import 'package:minha_saude_frontend/app/ui/auth/view_models/register_view_model.dart';
 import 'package:minha_saude_frontend/app/ui/auth/widgets/register/register_navigator.dart';
 import 'package:minha_saude_frontend/app/ui/auth/widgets/register/register_view.dart';
@@ -46,12 +47,7 @@ void main() {
 
     // Successful register
     when(
-      () => mockRegisterAction.execute(
-        nome: any(named: 'nome'),
-        cpf: any(named: 'cpf'),
-        dataNascimento: any(named: 'dataNascimento'),
-        telefone: any(named: 'telefone'),
-      ),
+      () => mockRegisterAction.execute(any()),
     ).thenAnswer((_) async => Success(null));
 
     // Successfully loaded TOS
@@ -156,14 +152,15 @@ void main() {
       await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
       // Assert
-      verify(
-        () => mockRegisterAction.execute(
-          nome: profile.nome,
-          cpf: profile.cpf,
-          dataNascimento: profile.dataNascimento,
-          telefone: profile.telefone,
-        ),
-      ).called(1);
+      final captured = verify(() => mockRegisterAction.execute(any())).captured;
+
+      expect(captured.length, 1);
+      final RegisterRequestModel requestModel =
+          captured[0] as RegisterRequestModel;
+      expect(requestModel.nome, profile.nome);
+      expect(requestModel.cpf, profile.cpf);
+      expect(requestModel.dataNascimento, profile.dataNascimento);
+      expect(requestModel.telefone, profile.telefone);
 
       await tester.disposeWidget();
     });

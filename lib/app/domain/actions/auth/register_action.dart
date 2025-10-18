@@ -14,47 +14,34 @@ class RegisterAction {
   final AuthRepository _authRepository;
   final Logger _log = Logger("RegisterAction");
 
-  Future<Result<void, RegisterException>> execute({
-    required String nome,
-    required String cpf,
-    required DateTime dataNascimento,
-    required String telefone,
-  }) async {
+  Future<Result<void, RegisterException>> execute(
+    RegisterRequestModel requestModel,
+  ) async {
     try {
       final registerToken = _sessionRepository.getRegisterToken();
 
-      if (registerToken == null) {
+      if (registerToken == null || registerToken.isEmpty) {
         _log.severe("Token de registro definido como nulo.");
-        return Result.error(
+
+        return Error(
           ExpiredLoginException(
             "Login expirado. Faça login novamente para continuar.",
           ),
         );
       }
 
-      // Sanitize fields
-      nome = nome.trim();
-      cpf = cpf.replaceAll(RegExp(r'[^0-9]'), '');
-      telefone = telefone.replaceAll(RegExp(r'[^0-9]'), '');
-
-      if (nome.isEmpty || cpf.isEmpty || telefone.isEmpty) {
-        return Result.error(
-          UnexpectedRegisterException("Todos os campos são obrigatórios."),
-        );
-      }
-
       // Attempt registration
       final result = await _authRepository.register(
-        nome: nome,
-        cpf: cpf,
-        dataNascimento: dataNascimento,
-        telefone: telefone,
+        nome: requestModel.nome,
+        cpf: requestModel.cpf,
+        dataNascimento: requestModel.dataNascimento,
+        telefone: requestModel.telefone,
         registerToken: registerToken,
       );
 
       if (result.isError()) {
         _log.severe("Registration failed: ", result.tryGetError()!);
-        return Result.error(
+        return Error(
           UnexpectedRegisterException(
             "Ocorreu um erro desconhecido durante o processo de registro",
           ),
@@ -67,17 +54,52 @@ class RegisterAction {
       _sessionRepository.clearRegisterToken();
 
       // Store session token
-      await _sessionRepository.setAuthToken(sessionToken);
+      final storeResult = await _sessionRepository.setAuthToken(sessionToken);
 
-      return Result.success(null);
+      if (storeResult.isError()) {
+        _log.severe(
+          "Failed to store session token: ",
+          storeResult.tryGetError()!,
+        );
+        return Error(
+          UnexpectedRegisterException(
+            "Ocorreu um erro desconhecido durante o processo de registro",
+          ),
+        );
+      }
+
+      return Success(null);
     } catch (e) {
       _log.severe("Unexpected error: ", e);
-      return Result.error(
+      return Error(
         UnexpectedRegisterException(
           "Ocorreu um erro desconhecido durante o processo de registro",
         ),
       );
     }
+  }
+}
+
+class RegisterRequestModel {
+  String nome;
+  String cpf;
+  DateTime dataNascimento;
+  String telefone;
+
+  RegisterRequestModel({
+    required this.nome,
+    required this.cpf,
+    required this.dataNascimento,
+    required this.telefone,
+  }) {
+    cpf = cpf.replaceAll(RegExp(r'[^0-9]'), '');
+    telefone = telefone.replaceAll(RegExp(r'[^0-9]'), '');
+    dataNascimento = DateTime(
+      dataNascimento.year,
+      dataNascimento.month,
+      dataNascimento.day,
+    );
+    nome = nome.substring(0, nome.length.clamp(0, 100)).trim();
   }
 }
 

@@ -1,21 +1,22 @@
 import 'package:command_it/command_it.dart';
 import 'package:logging/logging.dart';
-import 'package:minha_saude_frontend/app/data/repositories/profile/profile_repository.dart';
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../../data/repositories/profile/profile_repository.dart';
+import '../../view_model.dart';
 import '../../../domain/actions/settings/request_export_action.dart';
 import '../../../domain/models/profile/profile.dart';
 import '../../../domain/actions/settings/delete_user_action.dart';
 import '../../../domain/actions/auth/logout_action.dart';
 
-class SettingsViewModel {
+class SettingsViewModel implements ViewModel {
   SettingsViewModel({
     required this.profileRepository,
     required this.logoutAction,
     required this.deleteUserAction,
     required this.requestExportAction,
   }) {
-    loadProfile = Command.createAsyncNoParam(_loadProfile, initialValue: null);
+    loadProfile = Command.createAsync(_loadProfile, initialValue: null);
     requestDeletionCommand = Command.createAsyncNoParam(
       _requestDeletion,
       initialValue: null,
@@ -25,9 +26,6 @@ class SettingsViewModel {
       initialValue: null,
     );
     profileRepository.addListener(_reload);
-
-    // Auto-load profile on initialization
-    loadProfile.execute();
   }
 
   void _reload() {
@@ -38,7 +36,7 @@ class SettingsViewModel {
   final DeleteUserAction deleteUserAction;
   final RequestExportAction requestExportAction;
 
-  late final Command<void, Result<Profile, Exception>?> loadProfile;
+  late final Command<bool?, Result<Profile, Exception>?> loadProfile;
   late final Command<void, Result<void, Exception>?> requestDeletionCommand;
   late final Command<void, Result<void, Exception>?> requestExportCommand;
 
@@ -58,9 +56,11 @@ class SettingsViewModel {
     return await requestExportAction.execute();
   }
 
-  Future<Result<Profile, Exception>?> _loadProfile() async {
+  Future<Result<Profile, Exception>?> _loadProfile(bool? forceRefresh) async {
     try {
-      final result = await profileRepository.getProfile();
+      final result = await profileRepository.getProfile(
+        forceRefresh: forceRefresh ?? false,
+      );
       if (result.isError()) {
         return Error(
           Exception("Não foi possível carregar os dados do perfil."),
@@ -73,7 +73,11 @@ class SettingsViewModel {
     }
   }
 
+  @override
   void dispose() {
     profileRepository.removeListener(_reload);
+    loadProfile.dispose();
+    requestDeletionCommand.dispose();
+    requestExportCommand.dispose();
   }
 }

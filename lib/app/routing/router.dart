@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
+import 'package:minha_saude_frontend/app/ui/documents/widgets/upload/document_upload_navigator.dart';
 
 // Alt + Shift + O -> organize imports
-import '../data/repositories/auth/auth_repository.dart';
 import '../data/repositories/document/document_repository.dart';
 import '../data/repositories/profile/profile_repository.dart';
 import '../data/repositories/session/session_repository.dart';
 import '../data/repositories/trash/trash_repository.dart';
-import '../domain/actions/auth/login_with_google.dart';
+import '../domain/actions/auth/get_tos_action.dart';
 import '../domain/actions/auth/logout_action.dart';
+import '../domain/actions/auth/process_login_result_action.dart';
 import '../domain/actions/auth/register_action.dart';
 import '../domain/actions/settings/delete_user_action.dart';
 import '../domain/actions/settings/request_export_action.dart';
+import '../ui/auth/view_models/email_auth_view_model.dart';
 import '../ui/auth/view_models/login_view_model.dart';
 import '../ui/auth/view_models/register_view_model.dart';
-import '../ui/auth/view_models/tos_view_model.dart';
+import '../ui/auth/widgets/email/email_auth_view.dart';
 import '../ui/auth/widgets/login_view.dart';
-import '../ui/auth/widgets/register_view.dart';
-import '../ui/auth/widgets/tos_view.dart';
+import '../ui/auth/widgets/register/register_navigator.dart';
 import '../ui/core/widgets/not_found.dart';
 import '../ui/core/widgets/scaffold_with_navbar.dart';
 import '../ui/core/widgets/under_construction_screen.dart';
@@ -31,7 +33,6 @@ import '../ui/documents/widgets/document_view.dart';
 import '../ui/documents/widgets/index/document_list_screen.dart';
 import '../ui/documents/widgets/metadata/document_edit_screen.dart';
 import '../ui/documents/widgets/metadata/document_metadata_screen.dart';
-import '../ui/documents/widgets/upload/document_upload_view.dart';
 import '../ui/settings/view_models/settings_edit_view_model.dart';
 import '../ui/settings/view_models/settings_view_model.dart';
 import '../ui/settings/widgets/edit/settings_edit_birthdate.dart';
@@ -69,28 +70,34 @@ final _router = GoRouter(
       routes: [
         // Auth Routes (without bottom navigation)
         GoRoute(
-          path: Routes.login,
+          path: Routes.auth,
           builder: (BuildContext context, GoRouterState state) {
-            return LoginView(
-              LoginViewModel(
-                _getIt<AuthRepository>(),
-                _getIt<LoginWithGoogle>(),
-              ),
+            final loginViewModel = LoginViewModel(
+              authRepository: _getIt(),
+              processLoginAction: _getIt<ProcessLoginResultAction>(),
             );
-          },
-        ),
-        GoRoute(
-          path: Routes.tos,
-          builder: (BuildContext context, GoRouterState state) {
-            return TosView(TosViewModel());
+            return LoginView(() => loginViewModel);
           },
           routes: [
             GoRoute(
+              path: Routes.emailAuthRelative,
+              builder: (context, state) {
+                final viewModel = EmailAuthViewModel(
+                  authRepository: _getIt<AuthRepository>(),
+                  processLoginResultAction: _getIt<ProcessLoginResultAction>(),
+                );
+                return EmailAuthView(viewModelFactory: () => viewModel);
+              },
+            ),
+            GoRoute(
               path: Routes.registerRelative,
               builder: (BuildContext context, GoRouterState state) {
-                return RegisterView(
-                  RegisterViewModel(registerAction: _getIt<RegisterAction>()),
+                final viewModel = RegisterViewModel(
+                  registerAction: _getIt<RegisterAction>(),
+                  getTosAction: _getIt<GetTosAction>(),
                 );
+
+                return RegisterNavigator(viewModelFactory: () => viewModel);
               },
             ),
           ],
@@ -99,10 +106,10 @@ final _router = GoRouter(
         GoRoute(
           path: Routes.documentosUpload,
           builder: (BuildContext context, GoRouterState state) {
-            return DocumentUploadView(
-              DocumentUploadViewModel(
-                DocumentUploadMethod.upload,
-                _getIt<DocumentRepository>(),
+            return DocumentUploadNavigator(
+              viewModelFactory: () => DocumentUploadViewModel(
+                type: DocumentUploadMethod.filePicker,
+                documentRepository: _getIt<DocumentRepository>(),
               ),
             );
           },
@@ -110,10 +117,10 @@ final _router = GoRouter(
         GoRoute(
           path: Routes.documentosScan,
           builder: (BuildContext context, GoRouterState state) {
-            return DocumentUploadView(
-              DocumentUploadViewModel(
-                DocumentUploadMethod.scan,
-                _getIt<DocumentRepository>(),
+            return DocumentUploadNavigator(
+              viewModelFactory: () => DocumentUploadViewModel(
+                type: DocumentUploadMethod.docScanner,
+                documentRepository: _getIt<DocumentRepository>(),
               ),
             );
           },
@@ -135,18 +142,26 @@ final _router = GoRouter(
                 GoRoute(
                   path: Routes.documentosRelative,
                   builder: (context, state) {
-                    return DocumentListScreen(
-                      DocumentListViewModel(
-                        documentRepository: _getIt<DocumentRepository>(),
-                      ),
+                    if (state.extra is SnackBar) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(state.extra as SnackBar);
+                      });
+                    }
+
+                    var documentListViewModel = DocumentListViewModel(
+                      documentRepository: _getIt<DocumentRepository>(),
                     );
+
+                    return DocumentListScreen(() => documentListViewModel);
                   },
                   routes: [
                     GoRoute(
                       path: ':id',
                       builder: (BuildContext context, GoRouterState state) {
                         return DocumentView(
-                          DocumentViewModel(
+                          () => DocumentViewModel(
                             documentUuid: state.pathParameters['id'] ?? '',
                             documentRepository: _getIt<DocumentRepository>(),
                           ),
@@ -169,7 +184,7 @@ final _router = GoRouter(
                           path: Routes.documentosEditRelative,
                           builder: (context, state) {
                             return DocumentEditScreen(
-                              DocumentEditViewModel(
+                              () => DocumentEditViewModel(
                                 documentUuid: state.pathParameters['id'] ?? '',
                                 documentRepository:
                                     _getIt<DocumentRepository>(),
@@ -217,7 +232,7 @@ final _router = GoRouter(
                   path: Routes.lixeira,
                   builder: (BuildContext context, GoRouterState state) {
                     return TrashIndexView(
-                      viewModel: TrashIndexViewModel(
+                      viewModelFactory: () => TrashIndexViewModel(
                         trashRepository: _getIt<TrashRepository>(),
                       ),
                     );
@@ -238,7 +253,7 @@ final _router = GoRouter(
                       },
                       builder: (context, state) {
                         return DeletedDocumentView(
-                          viewModel: DeletedDocumentViewModel(
+                          viewModelFactory: () => DeletedDocumentViewModel(
                             documentUuid: state.pathParameters['id']!,
                             trashRepository: _getIt<TrashRepository>(),
                           ),
@@ -256,7 +271,7 @@ final _router = GoRouter(
                   path: Routes.configuracoes,
                   builder: (BuildContext context, GoRouterState state) {
                     return SettingsTabView(
-                      SettingsViewModel(
+                      () => SettingsViewModel(
                         profileRepository: _getIt<ProfileRepository>(),
                         deleteUserAction: _getIt<DeleteUserAction>(),
                         requestExportAction: _getIt<RequestExportAction>(),
@@ -269,7 +284,7 @@ final _router = GoRouter(
                       path: Routes.editNomeRelative,
                       builder: (context, state) {
                         return SettingsEditName(
-                          viewModel: SettingsEditViewModel(
+                          viewModelFactory: () => SettingsEditViewModel(
                             fieldType: SettingsEditField.name,
                             profileRepository: _getIt<ProfileRepository>(),
                           ),
@@ -280,7 +295,7 @@ final _router = GoRouter(
                       path: Routes.editTelefoneRelative,
                       builder: (context, state) {
                         return SettingsEditPhone(
-                          viewModel: SettingsEditViewModel(
+                          viewModelFactory: () => SettingsEditViewModel(
                             fieldType: SettingsEditField.phone,
                             profileRepository: _getIt<ProfileRepository>(),
                           ),
@@ -291,7 +306,7 @@ final _router = GoRouter(
                       path: Routes.editBirthdateRelative,
                       builder: (context, state) {
                         return SettingsEditBirthdate(
-                          viewModel: SettingsEditViewModel(
+                          viewModelFactory: () => SettingsEditViewModel(
                             fieldType: SettingsEditField.birthdate,
                             profileRepository: _getIt<ProfileRepository>(),
                           ),
@@ -312,7 +327,6 @@ final _router = GoRouter(
 );
 
 // Cache the router instance to preserve navigation state across rebuilds
-
 GoRouter router() => _router;
 
 Future<String?> _redirectHandler(
@@ -320,18 +334,16 @@ Future<String?> _redirectHandler(
   GoRouterState state,
   SessionRepository sessionRepository,
 ) async {
-  const authRoutes = <String>{Routes.login, Routes.tos, Routes.register};
-
   final isAuthed = await sessionRepository.hasAuthToken();
   final isRegistering = sessionRepository.getRegisterToken() != null;
   final requestedRoute = state.fullPath ?? state.matchedLocation;
-  final isOnAuthRoute = authRoutes.contains(requestedRoute);
+  final isOnAuthRoute = requestedRoute.startsWith(Routes.auth);
 
   if (!isAuthed && !isOnAuthRoute) {
     if (isRegistering) {
       return Routes.register;
     }
-    return Routes.login;
+    return Routes.auth;
   }
 
   if (isAuthed && isOnAuthRoute) {

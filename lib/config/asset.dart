@@ -16,4 +16,6 @@ class Asset {
   static const String fakeDocumentPdf = 'assets/fake/document.pdf';
 
   static String minhaSaudeLogoDark = 'assets/brand/minha_saude/logo_dark.svg';
+
+  static String tos = 'assets/tos.md';
 }

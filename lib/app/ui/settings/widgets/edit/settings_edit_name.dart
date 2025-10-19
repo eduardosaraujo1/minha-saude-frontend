@@ -4,31 +4,33 @@ import 'package:go_router/go_router.dart';
 import '../../view_models/settings_edit_view_model.dart';
 
 class SettingsEditName extends StatefulWidget {
-  const SettingsEditName({required this.viewModel, super.key});
+  const SettingsEditName({required this.viewModelFactory, super.key});
 
-  final SettingsEditViewModel viewModel;
+  final SettingsEditViewModel Function() viewModelFactory;
 
   @override
   State<SettingsEditName> createState() => _SettingsEditNameState();
 }
 
 class _SettingsEditNameState extends State<SettingsEditName> {
-  late final SettingsEditViewModel viewModel;
+  late final SettingsEditViewModel viewModel = widget.viewModelFactory();
   late final _EditNameFormController _formController;
+
   @override
   void initState() {
     _formController = _EditNameFormController();
-    viewModel = widget.viewModel;
     viewModel.loadCurrentValue.addListener(_onDataLoad);
     viewModel.updateNameCommand.addListener(_onUpdate);
-    viewModel.loadCurrentValue.execute(null);
+    viewModel.loadCurrentValue.execute();
     super.initState();
   }
 
   @override
   void dispose() {
-    viewModel.loadCurrentValue.removeListener(_onDataLoad);
     _formController.nameController.dispose();
+    viewModel.loadCurrentValue.removeListener(_onDataLoad);
+    viewModel.updateNameCommand.removeListener(_onUpdate);
+    viewModel.dispose();
     super.dispose();
   }
 
@@ -99,50 +101,51 @@ class _SettingsEditNameState extends State<SettingsEditName> {
             builder: (context, isLoading, child) {
               final fieldValue = viewModel.loadCurrentValue.value
                   ?.tryGetSuccess();
+
+              if (isLoading || fieldValue == null) {
+                return Center(child: CircularProgressIndicator());
+              }
+
               return Column(
                 children: [
                   Form(
                     key: _formController.formKey,
-                    child: isLoading || fieldValue == null
-                        ? CircularProgressIndicator()
-                        : TextFormField(
-                            key: ValueKey('inputName'),
-                            controller: _formController.nameController,
-                            validator: _formController.validateName,
-                            decoration: InputDecoration(
-                              icon: Icon(Icons.person),
-                            ),
-                          ),
+                    child: TextFormField(
+                      key: ValueKey('inputName'),
+                      controller: _formController.nameController,
+                      validator: _formController.validateName,
+                      decoration: InputDecoration(icon: Icon(Icons.person)),
+                    ),
                   ),
                   SizedBox(height: 8),
                   ValueListenableBuilder(
                     valueListenable: viewModel.updateNameCommand.isExecuting,
                     builder: (context, isRunning, child) {
-                      return isRunning
-                          ? CircularProgressIndicator()
-                          : Row(
-                              spacing: 4,
-                              children: [
-                                Expanded(
-                                  child: FilledButton.tonal(
-                                    key: ValueKey('btnCancel'),
-                                    onPressed: () {
-                                      context.pop();
-                                    },
-                                    child: const Text("Cancelar"),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: FilledButton(
-                                    key: ValueKey('btnSave'),
-                                    onPressed: fieldValue == null
-                                        ? null
-                                        : _triggerSave,
-                                    child: const Text("Salvar"),
-                                  ),
-                                ),
-                              ],
-                            );
+                      if (isRunning) {
+                        return CircularProgressIndicator();
+                      }
+
+                      return Row(
+                        spacing: 4,
+                        children: [
+                          Expanded(
+                            child: FilledButton.tonal(
+                              key: ValueKey('btnCancel'),
+                              onPressed: () {
+                                context.pop();
+                              },
+                              child: const Text("Cancelar"),
+                            ),
+                          ),
+                          Expanded(
+                            child: FilledButton(
+                              key: ValueKey('btnSave'),
+                              onPressed: _triggerSave,
+                              child: const Text("Salvar"),
+                            ),
+                          ),
+                        ],
+                      );
                     },
                   ),
                 ],

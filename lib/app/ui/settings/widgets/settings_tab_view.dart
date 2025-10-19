@@ -7,9 +7,9 @@ import 'tabs/settings_general_tab.dart';
 import 'tabs/settings_support_tab.dart';
 
 class SettingsTabView extends StatefulWidget {
-  final SettingsViewModel viewModel;
+  final SettingsViewModel Function() viewModelFactory;
 
-  const SettingsTabView(this.viewModel, {super.key});
+  const SettingsTabView(this.viewModelFactory, {super.key});
 
   @override
   State<SettingsTabView> createState() => _SettingsTabViewState();
@@ -18,19 +18,20 @@ class SettingsTabView extends StatefulWidget {
 class _SettingsTabViewState extends State<SettingsTabView>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-  late final SettingsViewModel viewModel;
+  late final SettingsViewModel viewModel = widget.viewModelFactory();
 
   @override
   void initState() {
     super.initState();
 
-    viewModel = widget.viewModel;
     _tabController = TabController(length: 3, vsync: this);
+    viewModel.loadProfile.execute();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    viewModel.dispose();
     super.dispose();
   }
 

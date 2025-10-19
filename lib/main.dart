@@ -26,6 +26,7 @@ void main() async {
         mockGoogle: true,
         mockScanner: true,
         mockSecureStorage: false,
+        mockCacheDb: false,
       );
     } else {
       await prod.setup();

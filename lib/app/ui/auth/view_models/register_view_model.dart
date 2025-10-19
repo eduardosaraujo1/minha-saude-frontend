@@ -1,177 +1,76 @@
+// Control navigation, terms of service and form submission here
+
 import 'package:command_it/command_it.dart';
-import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:minha_saude_frontend/app/domain/actions/auth/get_tos_action.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../../domain/actions/auth/register_action.dart';
+import '../../view_model.dart';
 
-class RegisterViewModel {
-  RegisterViewModel({required RegisterAction registerAction})
-    : _registerAction = registerAction {
-    registerCommand = Command.createAsyncNoParam(
-      _registerUser,
-      initialValue: null,
-    );
+class RegisterViewModel implements ViewModel {
+  RegisterViewModel({
+    required RegisterAction registerAction,
+    required GetTosAction getTosAction,
+  }) : _getTosAction = getTosAction,
+       _registerAction = registerAction {
+    loadTosCommand = Command.createAsyncNoParam(_loadTos, initialValue: null);
+    registerCommand = Command.createAsync(_registerUser, initialValue: null);
   }
 
   final RegisterAction _registerAction;
-  final Logger _log = Logger("RegisterViewModel");
+  final GetTosAction _getTosAction;
 
-  final RegisterForm _form = RegisterForm();
+  final Logger _logger = Logger('RegisterViewModel');
 
-  RegisterForm get form => _form;
+  /// Loads Terms of Service from assets
+  ///
+  /// Returns [Success] with Terms of Service text on success
+  /// Returns [Error] with [Exception] on failure
+  late final Command<void, Result<String, Exception>?> loadTosCommand;
 
-  late Command<void, Result<RegisterResult, Exception>?> registerCommand;
+  /// Registers used with provided request
+  ///
+  /// Returns [Success] on success
+  /// Returns [Error] on failure with the following cases:
+  /// - [ExpiredLoginException] on failure due to expired login
+  /// - [UnexpectedRegisterException] on other failures
+  late Command<RegisterRequestModel, Result<void, RegisterException>?>
+  registerCommand;
 
-  /// Register user with current form data
-  Future<Result<RegisterResult, Exception>?> _registerUser() async {
+  @override
+  void dispose() {
+    loadTosCommand.dispose();
+  }
+
+  Future<Result<String, Exception>> _loadTos() async {
     try {
-      // Iniciar registro
-      final result = await _registerAction.execute(
-        nome: form.nomeController.text.trim(),
-        cpf: form.cpfController.text.replaceAll(RegExp(r'[^0-9]'), ''),
-        dataNascimento: _parseDate(form.dataNascimentoController.text.trim()),
-        telefone: form.telefoneController.text.trim(),
+      // Delegate to action
+      return await _getTosAction.execute();
+    } catch (e, s) {
+      _logger.severe('Failed to load Terms of Service: $e', e, s);
+      return Error(
+        Exception(
+          'Não foi possível carregar os Termos de Serviço. Consulte nossa equipe de suporte.',
+        ),
       );
+    }
+  }
 
-      if (result.isError()) {
-        final error = result.tryGetError()!;
-
-        if (error is ExpiredLoginException) {
-          // TODO: display snackbar "Login expirado. Faça login novamente para continuar."
-          return Result.success(RegisterResult.tokenExpired);
-        }
-
-        return Result.error(result.tryGetError()!);
-      }
-
-      return Result.success(RegisterResult.success);
-    } catch (e) {
-      _log.severe("Ocorreu um erro desconhecido durante o registro: $e");
+  /// Register user with provided form data
+  Future<Result<void, RegisterException>?> _registerUser(
+    RegisterRequestModel requestModel,
+  ) async {
+    try {
+      // Delegate to action
+      return await _registerAction.execute(requestModel);
+    } catch (e, s) {
+      _logger.severe("Ocorreu um erro desconhecido durante o registro", e, s);
       return Result.error(
-        Exception("Ocorreu um erro desconhecido durante o registro."),
+        UnexpectedRegisterException(
+          "Ocorreu um erro desconhecido durante o registro.",
+        ),
       );
     }
-  }
-
-  /// Dispose form controllers
-  void dispose() {
-    form.dispose();
-  }
-
-  void triggerRegisterIfValid() {
-    if (form.validate()) {
-      registerCommand.execute();
-    }
-  }
-
-  /// Parse date from DD/MM/YYYY format
-  DateTime _parseDate(String dateText) {
-    final parts = dateText.split('/');
-
-    if (parts.length == 3) {
-      final day = int.parse(parts[0]);
-      final month = int.parse(parts[1]);
-      final year = int.parse(parts[2]);
-      return DateTime(year, month, day);
-    } else {
-      throw FormatException('Data de nascimento inválida');
-    }
-  }
-}
-
-enum RegisterResult { success, tokenExpired }
-
-class RegisterForm {
-  final formKey = GlobalKey<FormState>();
-  final nomeController = TextEditingController();
-  final cpfController = TextEditingController();
-  final dataNascimentoController = TextEditingController();
-  final telefoneController = TextEditingController();
-
-  /// Validates the form and returns true if valid
-  bool validate() {
-    return formKey.currentState?.validate() ?? false;
-  }
-
-  void onFormChanged(VoidCallback callback) {
-    nomeController.addListener(callback);
-    cpfController.addListener(callback);
-    dataNascimentoController.addListener(callback);
-    telefoneController.addListener(callback);
-  }
-
-  String? validateNome(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Por favor, insira seu nome';
-    }
-
-    return null;
-  }
-
-  String? validateDtNascimento(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Por favor, insira sua data de nascimento';
-    }
-    return null;
-  }
-
-  String? validateCpf(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Por favor, insira seu CPF';
-    }
-
-    // Remove caracteres não numéricos
-    final cpf = value.replaceAll(RegExp(r'[^0-9]'), '');
-
-    // Verifica se o CPF tem 11 dígitos
-    if (cpf.length != 11) {
-      return 'CPF deve conter 11 dígitos';
-    }
-
-    // Verifica se todos os dígitos são iguais (CPF inválido)
-    if (RegExp(r'^(.)\1*$').hasMatch(cpf)) {
-      return 'CPF inválido';
-    }
-
-    // Cálculo dos dígitos verificadores
-    int calcularDigito(String base) {
-      int soma = 0;
-      for (int i = 0; i < base.length; i++) {
-        soma += int.parse(base[i]) * (base.length + 1 - i);
-      }
-      int resto = soma % 11;
-      return resto < 2 ? 0 : 11 - resto;
-    }
-
-    final digito1 = calcularDigito(cpf.substring(0, 9));
-    final digito2 = calcularDigito(cpf.substring(0, 9) + digito1.toString());
-
-    if (cpf.substring(9) != '$digito1$digito2') {
-      return 'CPF inválido';
-    }
-
-    return null;
-  }
-
-  String? validateTelefone(String? value) {
-    if (value?.isEmpty ?? true) {
-      return 'Por favor, insira seu telefone';
-    }
-
-    // Verifica se o telefone segue o formato brasileiro
-    final regex = RegExp(r'^\(\d{2}\) \d{5}-\d{4}$');
-    if (!regex.hasMatch(value ?? '')) {
-      return 'Telefone deve estar no formato (XX) XXXXX-XXXX';
-    }
-
-    return null;
-  }
-
-  void dispose() {
-    nomeController.dispose();
-    cpfController.dispose();
-    dataNascimentoController.dispose();
-    telefoneController.dispose();
   }
 }

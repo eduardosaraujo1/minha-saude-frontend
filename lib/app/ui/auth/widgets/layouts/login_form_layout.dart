@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/config/asset.dart';
 
 class LoginFormLayout extends StatelessWidget {
   final Widget child;
+  final VoidCallback? onBackPressed;
 
-  const LoginFormLayout({required this.child, super.key});
+  const LoginFormLayout({required this.child, this.onBackPressed, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class LoginFormLayout extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const _LoginTopBar(),
+            _LoginTopBar(onBackPressed: onBackPressed),
             Expanded(child: child),
           ],
         ),
@@ -25,7 +25,9 @@ class LoginFormLayout extends StatelessWidget {
 }
 
 class _LoginTopBar extends StatelessWidget {
-  const _LoginTopBar();
+  const _LoginTopBar({this.onBackPressed});
+
+  final VoidCallback? onBackPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +39,13 @@ class _LoginTopBar extends StatelessWidget {
       height: layoutHeight,
       child: Stack(
         children: [
-          if (context.canPop())
+          if (onBackPressed != null || Navigator.of(context).canPop())
             Positioned(
               top: 0,
               left: 0,
               child: IconButton(
                 icon: const Icon(Icons.arrow_back),
-                onPressed: () => context.pop(),
+                onPressed: onBackPressed ?? () => Navigator.of(context).pop(),
               ),
             ),
           Padding(

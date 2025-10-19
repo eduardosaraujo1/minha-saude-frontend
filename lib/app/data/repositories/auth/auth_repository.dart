@@ -12,7 +12,7 @@ abstract class AuthRepository extends ChangeNotifier {
   );
 
   /// Login with email and code
-  Future<Result<LoginResult, Exception>> loginWithEmail(
+  Future<Result<LoginResult, EmailLoginException>> loginWithEmail(
     String email,
     String code,
   );
@@ -38,4 +38,18 @@ abstract class AuthRepository extends ChangeNotifier {
   // [GOOGLE INTEGRATION]
   /// Gets the current auth token, reading from SecureStorage if unavailable in memory
   Future<Result<String, Exception>> getGoogleServerToken();
+}
+
+sealed class EmailLoginException implements Exception {
+  final String message;
+
+  const EmailLoginException(this.message);
+}
+
+class EmailLoginIncorrectCodeException extends EmailLoginException {
+  const EmailLoginIncorrectCodeException(super.message);
+}
+
+class EmailLoginUnexpectedException extends EmailLoginException {
+  const EmailLoginUnexpectedException(super.message);
 }

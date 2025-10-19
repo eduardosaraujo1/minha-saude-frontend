@@ -36,13 +36,13 @@ class CacheDatabaseImpl implements CacheDatabase {
           CREATE TABLE documents (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             uuid TEXT NOT NULL UNIQUE,
-            titulo TEXT NULL,
+            titulo TEXT NOT NULL,
             paciente TEXT NULL,
             medico TEXT NULL,
             tipo TEXT NULL,
             data_documento TEXT NULL,
             created_at TEXT NOT NULL,
-            deleted_at TEXT,
+            deleted_at TEXT NULL,
             cached_at TEXT NOT NULL
           )
         ''');
@@ -63,7 +63,7 @@ class CacheDatabaseImpl implements CacheDatabase {
   @override
   Future<Result<DocumentDbModel, Exception>> upsertDocument(
     String uuid, {
-    String? titulo,
+    required String titulo,
     String? paciente,
     String? medico,
     String? tipo,

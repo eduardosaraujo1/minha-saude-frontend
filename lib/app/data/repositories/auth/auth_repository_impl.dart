@@ -50,7 +50,7 @@ class AuthRepositoryImpl extends AuthRepository {
   }
 
   @override
-  Future<Result<LoginResult, Exception>> loginWithEmail(
+  Future<Result<LoginResult, EmailLoginException>> loginWithEmail(
     String email,
     String code,
   ) async {
@@ -59,22 +59,36 @@ class AuthRepositoryImpl extends AuthRepository {
 
       if (result.isError()) {
         _log.severe("Login E-mail tentativa falhou: ", result.tryGetError()!);
-        return Result.error(
-          Exception("Ocorreu um erro desconhecido ao fazer login."),
-        );
+        final error = result.tryGetError()!;
+        switch (error) {
+          case ApiEmailLoginIncorrectCodeException():
+            return Error(
+              EmailLoginIncorrectCodeException(
+                "Código de verificação incorreto.",
+              ),
+            );
+          case ApiUnexpectedEmailLoginException():
+            return Error(
+              EmailLoginUnexpectedException("Erro ao fazer login por e-mail."),
+            );
+        }
       }
 
       final apiLoginResponse = result.tryGetSuccess()!;
       final loginResponseResult = _parseApiLoginResponse(apiLoginResponse);
 
       if (loginResponseResult.isError()) {
-        return Result.error(Exception("Ocorreu um erro ao fazer login."));
+        return Error(
+          EmailLoginUnexpectedException("Ocorreu um erro ao fazer login."),
+        );
       }
 
       return Result.success(loginResponseResult.tryGetSuccess()!);
     } on Exception catch (e) {
       _log.warning("Unexpected error", e);
-      return Result.error(Exception("Ocorreu um erro inesperado."));
+      return Error(
+        EmailLoginUnexpectedException("Ocorreu um erro inesperado."),
+      );
     }
   }
 

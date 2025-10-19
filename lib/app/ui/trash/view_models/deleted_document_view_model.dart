@@ -1,10 +1,11 @@
 import 'package:command_it/command_it.dart';
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../view_model.dart';
 import '../../../domain/models/document/document.dart';
 import '../../../data/repositories/trash/trash_repository.dart';
 
-class DeletedDocumentViewModel {
+class DeletedDocumentViewModel implements ViewModel {
   DeletedDocumentViewModel({
     required this.documentUuid,
     required this.trashRepository,
@@ -21,9 +22,6 @@ class DeletedDocumentViewModel {
       _restoreDocument,
       initialValue: null,
     );
-
-    // Auto-load document on initialization
-    loadDocument.execute();
   }
 
   final String documentUuid;
@@ -86,5 +84,12 @@ class DeletedDocumentViewModel {
     } catch (e) {
       return Error(Exception('Ocorreu um erro inesperado.'));
     }
+  }
+
+  @override
+  void dispose() {
+    loadDocument.dispose();
+    deleteDocumentForever.dispose();
+    restoreDocument.dispose();
   }
 }

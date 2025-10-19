@@ -2,9 +2,10 @@ import 'package:command_it/command_it.dart';
 import 'package:intl/intl.dart';
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../view_model.dart';
 import '../../../data/repositories/profile/profile_repository.dart';
 
-class SettingsEditViewModel {
+class SettingsEditViewModel implements ViewModel {
   SettingsEditViewModel({
     required this.fieldType,
     required this.profileRepository,
@@ -20,9 +21,6 @@ class SettingsEditViewModel {
       _loadCurrentValue,
       initialValue: null,
     );
-
-    // Auto-load current value on initialization
-    loadCurrentValue.execute();
   }
 
   final ProfileRepository profileRepository;
@@ -81,6 +79,14 @@ class SettingsEditViewModel {
     } catch (e) {
       return Error(Exception("Não foi possível carregar o valor atual."));
     }
+  }
+
+  @override
+  void dispose() {
+    updateNameCommand.dispose();
+    updateBirthdateCommand.dispose();
+    updatePhoneCommand.dispose();
+    loadCurrentValue.dispose();
   }
 }
 

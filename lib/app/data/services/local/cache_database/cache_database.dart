@@ -16,7 +16,7 @@ abstract class CacheDatabase {
   /// By default, fills cachedAt with current time
   Future<Result<DocumentDbModel, Exception>> upsertDocument(
     String uuid, {
-    String? titulo,
+    required String titulo,
     String? paciente,
     String? medico,
     String? tipo,

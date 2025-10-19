@@ -6,7 +6,7 @@ abstract class ProfileRepository extends ChangeNotifier {
   /// Obtém o perfil do usuário.
   ///
   /// Retorna um [Result] contendo o [Profile] em caso de sucesso ou [Exception] em caso de erro.
-  Future<Result<Profile, Exception>> getProfile({forceRefresh = false});
+  Future<Result<Profile, Exception>> getProfile({bool forceRefresh = false});
 
   // UPDATE
   /// Atualiza o nome do usuário no perfil.

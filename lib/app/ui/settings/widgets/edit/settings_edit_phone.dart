@@ -5,24 +5,24 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import '../../view_models/settings_edit_view_model.dart';
 
 class SettingsEditPhone extends StatefulWidget {
-  const SettingsEditPhone({required this.viewModel, super.key});
+  const SettingsEditPhone({required this.viewModelFactory, super.key});
 
-  final SettingsEditViewModel viewModel;
+  final SettingsEditViewModel Function() viewModelFactory;
 
   @override
   State<SettingsEditPhone> createState() => _SettingsEditPhoneState();
 }
 
 class _SettingsEditPhoneState extends State<SettingsEditPhone> {
-  late final SettingsEditViewModel viewModel;
+  late final SettingsEditViewModel viewModel = widget.viewModelFactory();
   late final _EditPhoneFormController _formController;
+
   @override
   void initState() {
     _formController = _EditPhoneFormController();
-    viewModel = widget.viewModel;
     viewModel.loadCurrentValue.addListener(_onDataLoad);
     viewModel.updatePhoneCommand.addListener(_onUpdate);
-    viewModel.loadCurrentValue.execute(null);
+    viewModel.loadCurrentValue.execute();
     super.initState();
   }
 
@@ -31,6 +31,7 @@ class _SettingsEditPhoneState extends State<SettingsEditPhone> {
     viewModel.loadCurrentValue.removeListener(_onDataLoad);
     viewModel.loadCurrentValue.removeListener(_onUpdate);
     _formController.phoneController.dispose();
+    viewModel.dispose();
     super.dispose();
   }
 
@@ -77,7 +78,7 @@ class _SettingsEditPhoneState extends State<SettingsEditPhone> {
     var result = viewModel.loadCurrentValue.value;
     final value = result?.tryGetSuccess();
     if (value != null) {
-      _formController.phoneController.text = value;
+      _formController.phoneController.text = _applyPhoneMask(value)!;
     }
     if (result != null && result.isError()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -87,6 +88,24 @@ class _SettingsEditPhoneState extends State<SettingsEditPhone> {
           ),
         ),
       );
+    }
+  }
+
+  String? _applyPhoneMask(String? phone) {
+    if (phone == null) return null;
+    if (phone.isEmpty) return null;
+
+    // Remove non-digit characters
+    final digits = phone.replaceAll(RegExp(r'\D'), '');
+    if (digits.length < 10) return phone; // Not enough digits to format
+
+    // Apply format (##) #####-####
+    if (digits.length == 10) {
+      return '(${digits.substring(0, 2)}) ${digits.substring(2, 6)}-${digits.substring(6, 10)}';
+    } else if (digits.length == 11) {
+      return '(${digits.substring(0, 2)}) ${digits.substring(2, 7)}-${digits.substring(7, 11)}';
+    } else {
+      return phone; // Unexpected length, return original
     }
   }
 
@@ -104,58 +123,59 @@ class _SettingsEditPhoneState extends State<SettingsEditPhone> {
             builder: (context, isLoading, child) {
               final fieldValue = viewModel.loadCurrentValue.value
                   ?.tryGetSuccess();
+
+              if (isLoading || fieldValue == null) {
+                return Center(child: CircularProgressIndicator());
+              }
+
               return Column(
                 children: [
                   Form(
                     key: _formController.formKey,
-                    child: isLoading || fieldValue == null
-                        ? CircularProgressIndicator()
-                        : TextFormField(
-                            key: ValueKey('inputPhone'),
-                            controller: _formController.phoneController,
-                            validator: _formController.validatePhone,
-                            keyboardType: TextInputType.phone,
-                            inputFormatters: [
-                              MaskTextInputFormatter(
-                                mask: '(##) #####-####',
-                                filter: {"#": RegExp(r'[0-9]')},
-                                type: MaskAutoCompletionType.lazy,
-                              ),
-                            ],
-                            decoration: InputDecoration(
-                              icon: Icon(Icons.phone),
-                            ),
-                          ),
+                    child: TextFormField(
+                      key: ValueKey('inputPhone'),
+                      controller: _formController.phoneController,
+                      validator: _formController.validatePhone,
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        MaskTextInputFormatter(
+                          mask: '(##) #####-####',
+                          filter: {"#": RegExp(r'[0-9]')},
+                          type: MaskAutoCompletionType.lazy,
+                        ),
+                      ],
+                      decoration: InputDecoration(icon: Icon(Icons.phone)),
+                    ),
                   ),
                   SizedBox(height: 8),
                   ValueListenableBuilder(
                     valueListenable: viewModel.updatePhoneCommand.isExecuting,
                     builder: (context, isRunning, child) {
-                      return isRunning
-                          ? CircularProgressIndicator()
-                          : Row(
-                              spacing: 4,
-                              children: [
-                                Expanded(
-                                  child: FilledButton.tonal(
-                                    key: ValueKey('btnCancel'),
-                                    onPressed: () {
-                                      context.pop();
-                                    },
-                                    child: const Text("Cancelar"),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: FilledButton(
-                                    key: ValueKey('btnSave'),
-                                    onPressed: fieldValue == null
-                                        ? null
-                                        : _triggerSave,
-                                    child: const Text("Salvar"),
-                                  ),
-                                ),
-                              ],
-                            );
+                      if (isRunning) {
+                        return CircularProgressIndicator();
+                      }
+
+                      return Row(
+                        spacing: 4,
+                        children: [
+                          Expanded(
+                            child: FilledButton.tonal(
+                              key: ValueKey('btnCancel'),
+                              onPressed: () {
+                                context.pop();
+                              },
+                              child: const Text("Cancelar"),
+                            ),
+                          ),
+                          Expanded(
+                            child: FilledButton(
+                              key: ValueKey('btnSave'),
+                              onPressed: _triggerSave,
+                              child: const Text("Salvar"),
+                            ),
+                          ),
+                        ],
+                      );
                     },
                   ),
                 ],
@@ -182,9 +202,13 @@ class _EditPhoneFormController {
     if (value == null || value.isEmpty) {
       return 'Por favor, insira um telefone.';
     }
-    if (value.length < 8) {
-      return 'O telefone deve ter pelo menos 8 caracteres.';
+
+    // Verifica se o telefone segue o formato brasileiro
+    final regex = RegExp(r'^\(\d{2}\) (\d{5})-\d{4}$');
+    if (!regex.hasMatch(value)) {
+      return 'Telefone deve estar no formato (XX) XXXXX-XXXX';
     }
+
     return null;
   }
 }

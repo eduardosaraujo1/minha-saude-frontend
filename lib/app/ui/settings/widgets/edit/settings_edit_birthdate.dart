@@ -5,57 +5,62 @@ import 'package:intl/intl.dart';
 import '../../view_models/settings_edit_view_model.dart';
 
 class SettingsEditBirthdate extends StatefulWidget {
-  const SettingsEditBirthdate({required this.viewModel, super.key});
+  const SettingsEditBirthdate({required this.viewModelFactory, super.key});
 
-  final SettingsEditViewModel viewModel;
+  final SettingsEditViewModel Function() viewModelFactory;
 
   @override
   State<SettingsEditBirthdate> createState() => _SettingsEditBirthdateState();
 }
 
 class _SettingsEditBirthdateState extends State<SettingsEditBirthdate> {
-  late final SettingsEditViewModel viewModel;
-  late final _EditBirthdateFormController _formController;
+  late final SettingsEditViewModel viewModel = widget.viewModelFactory();
+  late final _EditBirthdateFormController _formController =
+      _EditBirthdateFormController();
+
   @override
   void initState() {
-    _formController = _EditBirthdateFormController();
-    viewModel = widget.viewModel;
     viewModel.loadCurrentValue.addListener(_onDataLoad);
     viewModel.updateBirthdateCommand.addListener(_onUpdate);
-    viewModel.loadCurrentValue.execute(null);
+    viewModel.loadCurrentValue.execute();
     super.initState();
   }
 
   @override
   void dispose() {
     viewModel.loadCurrentValue.removeListener(_onDataLoad);
+    viewModel.updateBirthdateCommand.removeListener(_onUpdate);
     _formController.birthdateController.dispose();
+    viewModel.dispose();
     super.dispose();
   }
 
   void _triggerSave() {
-    // If form is valid
-    if (_formController.validate()) {
-      final date = DateFormat(
-        "dd/MM/yyyy",
-      ).tryParse(_formController.birthdateController.text);
-      if (date == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              "Ocorreu um erro ao interpretar a data. Formato correto: DD/MM/AAAA.",
-            ),
-          ),
-        );
-        return;
-      }
-
-      viewModel.updateBirthdateCommand.execute(date);
+    if (!_formController.validate()) {
+      return;
     }
+
+    final date = DateFormat(
+      "dd/MM/yyyy",
+    ).tryParse(_formController.birthdateController.text);
+
+    if (date == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Ocorreu um erro ao interpretar a data. Formato correto: DD/MM/AAAA.",
+          ),
+        ),
+      );
+      return;
+    }
+
+    viewModel.updateBirthdateCommand.execute(date);
   }
 
   void _onUpdate() {
     var result = viewModel.updateBirthdateCommand.value;
+
     if (result == null) return;
 
     if (result.isError()) {
@@ -116,57 +121,60 @@ class _SettingsEditBirthdateState extends State<SettingsEditBirthdate> {
             builder: (context, isLoading, child) {
               final fieldValue = viewModel.loadCurrentValue.value
                   ?.tryGetSuccess();
+
+              if (isLoading || fieldValue == null) {
+                return Center(child: CircularProgressIndicator());
+              }
+
               return Column(
                 children: [
                   Form(
                     key: _formController.formKey,
-                    child: isLoading || fieldValue == null
-                        ? CircularProgressIndicator()
-                        : TextFormField(
-                            key: ValueKey('inputBirthdate'),
-                            controller: _formController.birthdateController,
-                            validator: _formController.validateBirthdate,
-                            keyboardType: TextInputType.datetime,
-                            readOnly: true,
-                            onTap: () {
-                              _triggerDatePicker();
-                            },
-                            decoration: InputDecoration(
-                              icon: Icon(Icons.calendar_today),
-                              hintText: 'DD/MM/AAAA',
-                            ),
-                          ),
+                    child: TextFormField(
+                      key: ValueKey('inputBirthdate'),
+                      controller: _formController.birthdateController,
+                      validator: _formController.validateBirthdate,
+                      keyboardType: TextInputType.datetime,
+                      readOnly: true,
+                      onTap: () {
+                        _triggerDatePicker();
+                      },
+                      decoration: InputDecoration(
+                        icon: Icon(Icons.calendar_today),
+                        hintText: 'DD/MM/AAAA',
+                      ),
+                    ),
                   ),
                   SizedBox(height: 8),
                   ValueListenableBuilder(
                     valueListenable:
                         viewModel.updateBirthdateCommand.isExecuting,
                     builder: (context, isRunning, child) {
-                      return isRunning
-                          ? CircularProgressIndicator()
-                          : Row(
-                              spacing: 4,
-                              children: [
-                                Expanded(
-                                  child: FilledButton.tonal(
-                                    key: ValueKey('btnCancel'),
-                                    onPressed: () {
-                                      context.pop();
-                                    },
-                                    child: const Text("Cancelar"),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: FilledButton(
-                                    key: ValueKey('btnSave'),
-                                    onPressed: fieldValue == null
-                                        ? null
-                                        : _triggerSave,
-                                    child: const Text("Salvar"),
-                                  ),
-                                ),
-                              ],
-                            );
+                      if (isRunning) {
+                        return CircularProgressIndicator();
+                      }
+
+                      return Row(
+                        spacing: 4,
+                        children: [
+                          Expanded(
+                            child: FilledButton.tonal(
+                              key: ValueKey('btnCancel'),
+                              onPressed: () {
+                                context.pop();
+                              },
+                              child: const Text("Cancelar"),
+                            ),
+                          ),
+                          Expanded(
+                            child: FilledButton(
+                              key: ValueKey('btnSave'),
+                              onPressed: _triggerSave,
+                              child: const Text("Salvar"),
+                            ),
+                          ),
+                        ],
+                      );
                     },
                   ),
                 ],

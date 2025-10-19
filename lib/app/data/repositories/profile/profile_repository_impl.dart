@@ -34,7 +34,7 @@ class ProfileRepositoryImpl extends ProfileRepository {
   }
 
   @override
-  Future<Result<Profile, Exception>> getProfile({forceRefresh = false}) {
+  Future<Result<Profile, Exception>> getProfile({bool forceRefresh = false}) {
     return _wrapException<Profile>(() async {
       if (!forceRefresh && _cache.profile != null) {
         return Success(_cache.profile!);

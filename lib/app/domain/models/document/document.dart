@@ -7,8 +7,8 @@ part 'document.g.dart';
 abstract class Document with _$Document {
   const factory Document({
     required String uuid,
+    required String titulo,
     String? paciente,
-    String? titulo,
     String? tipo,
     String? medico,
     DateTime? dataDocumento,

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DocumentApiModel {
 
- String get uuid; String? get titulo; String? get nomePaciente; String? get nomeMedico; String? get tipoDocumento; DateTime? get dataDocumento; DateTime get createdAt; DateTime? get deletedAt;
+ String get uuid; String get titulo; String? get nomePaciente; String? get nomeMedico; String? get tipoDocumento; DateTime? get dataDocumento; DateTime get createdAt; DateTime? get deletedAt;
 /// Create a copy of DocumentApiModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $DocumentApiModelCopyWith<$Res>  {
   factory $DocumentApiModelCopyWith(DocumentApiModel value, $Res Function(DocumentApiModel) _then) = _$DocumentApiModelCopyWithImpl;
 @useResult
 $Res call({
- String uuid, String? titulo, String? nomePaciente, String? nomeMedico, String? tipoDocumento, DateTime? dataDocumento, DateTime createdAt, DateTime? deletedAt
+ String uuid, String titulo, String? nomePaciente, String? nomeMedico, String? tipoDocumento, DateTime? dataDocumento, DateTime createdAt, DateTime? deletedAt
 });
 
 
@@ -65,11 +65,11 @@ class _$DocumentApiModelCopyWithImpl<$Res>
 
 /// Create a copy of DocumentApiModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? uuid = null,Object? titulo = freezed,Object? nomePaciente = freezed,Object? nomeMedico = freezed,Object? tipoDocumento = freezed,Object? dataDocumento = freezed,Object? createdAt = null,Object? deletedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? uuid = null,Object? titulo = null,Object? nomePaciente = freezed,Object? nomeMedico = freezed,Object? tipoDocumento = freezed,Object? dataDocumento = freezed,Object? createdAt = null,Object? deletedAt = freezed,}) {
   return _then(_self.copyWith(
 uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
-as String,titulo: freezed == titulo ? _self.titulo : titulo // ignore: cast_nullable_to_non_nullable
-as String?,nomePaciente: freezed == nomePaciente ? _self.nomePaciente : nomePaciente // ignore: cast_nullable_to_non_nullable
+as String,titulo: null == titulo ? _self.titulo : titulo // ignore: cast_nullable_to_non_nullable
+as String,nomePaciente: freezed == nomePaciente ? _self.nomePaciente : nomePaciente // ignore: cast_nullable_to_non_nullable
 as String?,nomeMedico: freezed == nomeMedico ? _self.nomeMedico : nomeMedico // ignore: cast_nullable_to_non_nullable
 as String?,tipoDocumento: freezed == tipoDocumento ? _self.tipoDocumento : tipoDocumento // ignore: cast_nullable_to_non_nullable
 as String?,dataDocumento: freezed == dataDocumento ? _self.dataDocumento : dataDocumento // ignore: cast_nullable_to_non_nullable
@@ -160,7 +160,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uuid,  String? titulo,  String? nomePaciente,  String? nomeMedico,  String? tipoDocumento,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uuid,  String titulo,  String? nomePaciente,  String? nomeMedico,  String? tipoDocumento,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DocumentApiModel() when $default != null:
 return $default(_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_that.tipoDocumento,_that.dataDocumento,_that.createdAt,_that.deletedAt);case _:
@@ -181,7 +181,7 @@ return $default(_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uuid,  String? titulo,  String? nomePaciente,  String? nomeMedico,  String? tipoDocumento,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uuid,  String titulo,  String? nomePaciente,  String? nomeMedico,  String? tipoDocumento,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt)  $default,) {final _that = this;
 switch (_that) {
 case _DocumentApiModel():
 return $default(_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_that.tipoDocumento,_that.dataDocumento,_that.createdAt,_that.deletedAt);case _:
@@ -201,7 +201,7 @@ return $default(_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uuid,  String? titulo,  String? nomePaciente,  String? nomeMedico,  String? tipoDocumento,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uuid,  String titulo,  String? nomePaciente,  String? nomeMedico,  String? tipoDocumento,  DateTime? dataDocumento,  DateTime createdAt,  DateTime? deletedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _DocumentApiModel() when $default != null:
 return $default(_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_that.tipoDocumento,_that.dataDocumento,_that.createdAt,_that.deletedAt);case _:
@@ -216,11 +216,11 @@ return $default(_that.uuid,_that.titulo,_that.nomePaciente,_that.nomeMedico,_tha
 @JsonSerializable()
 
 class _DocumentApiModel extends DocumentApiModel {
-  const _DocumentApiModel({required this.uuid, this.titulo, this.nomePaciente, this.nomeMedico, this.tipoDocumento, this.dataDocumento, required this.createdAt, this.deletedAt}): super._();
+  const _DocumentApiModel({required this.uuid, required this.titulo, this.nomePaciente, this.nomeMedico, this.tipoDocumento, this.dataDocumento, required this.createdAt, this.deletedAt}): super._();
   factory _DocumentApiModel.fromJson(Map<String, dynamic> json) => _$DocumentApiModelFromJson(json);
 
 @override final  String uuid;
-@override final  String? titulo;
+@override final  String titulo;
 @override final  String? nomePaciente;
 @override final  String? nomeMedico;
 @override final  String? tipoDocumento;
@@ -261,7 +261,7 @@ abstract mixin class _$DocumentApiModelCopyWith<$Res> implements $DocumentApiMod
   factory _$DocumentApiModelCopyWith(_DocumentApiModel value, $Res Function(_DocumentApiModel) _then) = __$DocumentApiModelCopyWithImpl;
 @override @useResult
 $Res call({
- String uuid, String? titulo, String? nomePaciente, String? nomeMedico, String? tipoDocumento, DateTime? dataDocumento, DateTime createdAt, DateTime? deletedAt
+ String uuid, String titulo, String? nomePaciente, String? nomeMedico, String? tipoDocumento, DateTime? dataDocumento, DateTime createdAt, DateTime? deletedAt
 });
 
 
@@ -278,11 +278,11 @@ class __$DocumentApiModelCopyWithImpl<$Res>
 
 /// Create a copy of DocumentApiModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? uuid = null,Object? titulo = freezed,Object? nomePaciente = freezed,Object? nomeMedico = freezed,Object? tipoDocumento = freezed,Object? dataDocumento = freezed,Object? createdAt = null,Object? deletedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? uuid = null,Object? titulo = null,Object? nomePaciente = freezed,Object? nomeMedico = freezed,Object? tipoDocumento = freezed,Object? dataDocumento = freezed,Object? createdAt = null,Object? deletedAt = freezed,}) {
   return _then(_DocumentApiModel(
 uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
-as String,titulo: freezed == titulo ? _self.titulo : titulo // ignore: cast_nullable_to_non_nullable
-as String?,nomePaciente: freezed == nomePaciente ? _self.nomePaciente : nomePaciente // ignore: cast_nullable_to_non_nullable
+as String,titulo: null == titulo ? _self.titulo : titulo // ignore: cast_nullable_to_non_nullable
+as String,nomePaciente: freezed == nomePaciente ? _self.nomePaciente : nomePaciente // ignore: cast_nullable_to_non_nullable
 as String?,nomeMedico: freezed == nomeMedico ? _self.nomeMedico : nomeMedico // ignore: cast_nullable_to_non_nullable
 as String?,tipoDocumento: freezed == tipoDocumento ? _self.tipoDocumento : tipoDocumento // ignore: cast_nullable_to_non_nullable
 as String?,dataDocumento: freezed == dataDocumento ? _self.dataDocumento : dataDocumento // ignore: cast_nullable_to_non_nullable

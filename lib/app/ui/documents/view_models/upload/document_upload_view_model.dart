@@ -6,106 +6,182 @@ import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../../../data/repositories/document/document_repository.dart';
-import '../../../../domain/models/document/document.dart';
-import 'document_info_form_model.dart';
+import '../../../view_model.dart';
 
-class DocumentUploadViewModel {
-  DocumentUploadViewModel(this._type, this._documentRepository) {
-    loadDocument = Command.createAsyncNoParam(
-      _loadDocument,
+class DocumentUploadViewModel extends ViewModel {
+  DocumentUploadViewModel({
+    required DocumentUploadMethod type,
+    required DocumentRepository documentRepository,
+  }) : _documentRepository = documentRepository,
+       _type = type {
+    getDocumentCommand = Command.createAsyncNoParam(
+      _getDocument,
       initialValue: null,
     );
-    uploadDocument = Command.createAsync(_uploadDocument, initialValue: null);
+    uploadDocument = Command.createAsync(
+      _uploadDocument, //
+      initialValue: null,
+    );
   }
 
+  final Logger _logger = Logger('DocumentUploadViewModel');
   final DocumentRepository _documentRepository;
   final DocumentUploadMethod _type;
-  final Logger _logger = Logger('DocumentUploadViewModel');
 
-  final currentStep = ValueNotifier<UploadStep>(UploadStep.preview);
+  /// Gets the document to be uploaded through the selected method:
+  /// - If the method is [DocumentUploadMethod.docScanner], it will use the scanner to get the document
+  /// - If the method is [DocumentUploadMethod.filePicker], it will use the file picker to get the document
+  ///
+  /// Returns uploaded [File] on success, or an [Exception] on failure.
+  late final Command<void, Result<File, Exception>?> getDocumentCommand;
 
-  late final Command<void, Result<File, Exception>?> loadDocument;
-  late final Command<DocumentFormData, Result<Document?, Exception>?>
+  /// Uploads the document with the provided metadata and file to server.
+  late final Command<DocumentUploadRequest, Result<void, Exception>?>
   uploadDocument;
 
-  Future<Result<File, Exception>> _loadDocument() async {
+  /// Title of the document being uploaded (set in the UI).
+  final ValueNotifier<String?> documentTitle = ValueNotifier(null);
+
+  /// Holds the current step of the upload process.
+  ///
+  /// Used for navigation between steps in the UI.
+  final ValueNotifier<UploadStep> currentStep = ValueNotifier<UploadStep>(
+    UploadStep.preview,
+  );
+
+  Future<Result<File, Exception>> _getDocument() async {
     try {
-      final result = switch (_type) {
-        DocumentUploadMethod.scan =>
-          await _documentRepository.scanDocumentFile(),
-        DocumentUploadMethod.upload =>
-          await _documentRepository.pickDocumentFile(),
-      };
-
-      if (result.isError()) {
-        _logger.severe('Error loading document: ${result.tryGetError()}');
-        return Result.error(
-          Exception("Não foi possível carregar o documento."),
-        );
+      switch (_type) {
+        case DocumentUploadMethod.docScanner:
+          return await _documentRepository.scanDocumentFile();
+        case DocumentUploadMethod.filePicker:
+          return await _documentRepository.pickDocumentFile();
       }
-
-      return Result.success(result.getOrThrow());
     } catch (e, s) {
-      _logger.severe('Exception loading document:', e, s);
-      return Result.error(
-        Exception("Ocorreu um erro desconhecido ao carregar o documento."),
-      );
+      _logger.severe('Exception getting document:', e, s);
+      return Result.error(Exception('Erro ao obter o documento: $e'));
     }
   }
 
-  Future<Result<Document, Exception>> _uploadDocument(
-    DocumentFormData formData,
+  Future<Result<void, Exception>> _uploadDocument(
+    DocumentUploadRequest request,
   ) async {
-    final document = loadDocument.value;
-
-    if (document == null || document.isError()) {
-      _logger.severe('No file uploaded when trying to upload document.');
-      return Result.error(Exception("Nenhum arquivo foi carregado."));
-    }
-
     try {
       final result = await _documentRepository.uploadDocument(
-        document.getOrThrow(),
-        paciente: formData.nomePaciente ?? '',
-        titulo: formData.titulo,
-        tipo: formData.tipoDocumento,
-        medico: formData.nomeMedico,
-        dataDocumento: formData.dataDocumento,
+        request.file,
+        titulo: request.titulo,
+        paciente: request.paciente,
+        medico: request.medico,
+        tipo: request.tipo,
+        dataDocumento: request.dataDocumento,
       );
 
       if (result.isError()) {
         _logger.severe('Error uploading document: ${result.tryGetError()}');
-        return Result.error(
-          Exception("Não foi possível fazer upload do documento."),
-        );
+        return Error(Exception('Não foi possível enviar o documento.'));
       }
 
-      return result;
+      return Success(null);
     } catch (e, s) {
       _logger.severe('Exception uploading document:', e, s);
-      return Result.error(
-        Exception("Ocorreu um erro desconhecido ao fazer upload do documento."),
+      return Error(
+        Exception('Ocorreu um erro desconhecido ao enviar o documento.'),
       );
     }
   }
 
-  void goToForm() {
-    currentStep.value = UploadStep.form;
+  /// Uploads the document with the provided metadata and current viewModel state.
+  ///
+  /// Returns [Success] on successful upload initiation, or [Error] if validation fails.
+  Result<void, Exception> triggerUploadWithMetadata({
+    String? nomePaciente,
+    String? nomeMedico,
+    String? tipoDocumento,
+    DateTime? dataDocumento,
+  }) {
+    try {
+      final title = documentTitle.value;
+      if (title == null || title.isEmpty) {
+        return Error(Exception('Título do documento não pode ser vazio.'));
+      }
+
+      final file = getDocumentCommand.value?.tryGetSuccess();
+      if (file == null) {
+        return Error(
+          Exception('Nenhum arquivo de documento disponível para upload.'),
+        );
+      }
+
+      final request = DocumentUploadRequest(
+        titulo: title,
+        file: file,
+        paciente: nomePaciente,
+        medico: nomeMedico,
+        tipo: tipoDocumento,
+        dataDocumento: dataDocumento,
+      );
+
+      uploadDocument.execute(request);
+
+      return Success(null);
+    } catch (e) {
+      return Error(Exception('Erro ao iniciar o upload do documento: $e'));
+    }
   }
 
-  void goBackToPreview() {
-    currentStep.value = UploadStep.preview;
-  }
-
-  void handleFormSubmit(DocumentFormData formData) {
-    uploadDocument.execute(formData);
-  }
-
+  @override
   void dispose() {
-    currentStep.dispose();
+    getDocumentCommand.dispose();
+    uploadDocument.dispose();
+    documentTitle.dispose();
   }
 }
 
-enum DocumentUploadMethod { scan, upload }
+class DocumentUploadRequest {
+  final String titulo;
+  final File file;
+  final String? paciente;
+  final String? medico;
+  final String? tipo;
+  final DateTime? dataDocumento;
 
-enum UploadStep { preview, form }
+  DocumentUploadRequest({
+    required this.titulo,
+    required this.file,
+    this.paciente,
+    this.medico,
+    this.tipo,
+    this.dataDocumento,
+  }) {
+    if (titulo.isEmpty) {
+      throw ArgumentError('Título do documento não pode ser vazio.');
+    }
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is DocumentUploadRequest &&
+        other.titulo == titulo &&
+        other.paciente == paciente &&
+        other.medico == medico &&
+        other.tipo == tipo &&
+        other.dataDocumento == dataDocumento &&
+        other.file.path == file.path;
+  }
+
+  @override
+  int get hashCode {
+    return titulo.hashCode ^
+        paciente.hashCode ^
+        medico.hashCode ^
+        tipo.hashCode ^
+        dataDocumento.hashCode ^
+        file.hashCode;
+  }
+}
+
+enum DocumentUploadMethod { docScanner, filePicker }
+
+enum UploadStep { preview, labeling, metadata }

@@ -1,54 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
+import '../../../../utils/format.dart';
 import '../../view_models/metadata/document_edit_view_model.dart';
 
 class DocumentEditScreen extends StatefulWidget {
-  const DocumentEditScreen(this.viewModel, {super.key});
+  const DocumentEditScreen(this.viewModelFactory, {super.key});
 
-  final DocumentEditViewModel viewModel;
+  final DocumentEditViewModel Function() viewModelFactory;
 
   @override
   State<DocumentEditScreen> createState() => _DocumentEditScreenState();
 }
 
 class _DocumentEditScreenState extends State<DocumentEditScreen> {
+  late final DocumentEditViewModel viewModel = widget.viewModelFactory();
+  late final DocumentFormController formController = DocumentFormController();
+
   @override
   void initState() {
     super.initState();
-    widget.viewModel.updateDocument.addListener(_onUpdateCommand);
-  }
-
-  @override
-  void didUpdateWidget(DocumentEditScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.viewModel != widget.viewModel) {
-      oldWidget.viewModel.updateDocument.removeListener(_onUpdateCommand);
-      widget.viewModel.updateDocument.addListener(_onUpdateCommand);
-    }
+    viewModel.updateDocument.addListener(_onUpdateCommand);
+    viewModel.loadDocument.execute();
   }
 
   @override
   void dispose() {
-    widget.viewModel.updateDocument.removeListener(_onUpdateCommand);
+    formController.dispose();
+    viewModel.updateDocument.removeListener(_onUpdateCommand);
     super.dispose();
-  }
-
-  void triggerUpdateIfValid() {
-    if (widget.viewModel.form.validate()) {
-      widget.viewModel.updateDocument.execute();
-    }
   }
 
   void _onUpdateCommand() {
     if (!mounted) return;
-    if (widget.viewModel.updateDocument.value == null) {
+    if (viewModel.updateDocument.value == null) {
       // Initial state
       return;
     }
 
-    if (widget.viewModel.updateDocument.value!.isError()) {
-      final error = widget.viewModel.updateDocument.value!.tryGetError()!;
+    if (viewModel.updateDocument.value!.isError()) {
+      final error = viewModel.updateDocument.value!.tryGetError()!;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -72,64 +64,94 @@ class _DocumentEditScreenState extends State<DocumentEditScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Editar Documento')),
       body: ValueListenableBuilder(
-        valueListenable: widget.viewModel.loadDocument.isExecuting,
+        valueListenable: viewModel.loadDocument.isExecuting,
         builder: (context, isLoading, child) {
-          if (isLoading || widget.viewModel.loadDocument.value == null) {
+          if (isLoading || viewModel.loadDocument.value == null) {
             return const Center(child: CircularProgressIndicator());
+          }
+
+          if (viewModel.loadDocument.value!.isError()) {
+            final error = viewModel.loadDocument.value!.tryGetError()!;
+            return Center(
+              child: Text(
+                'Erro ao carregar documento: $error',
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            );
+          }
+
+          // Populate form fields
+          final document = viewModel.loadDocument.value!.tryGetSuccess()!;
+
+          formController.titulo.text = document.titulo;
+
+          if (document.dataDocumento != null) {
+            formController.dataDocumento.text = formatDate(
+              document.dataDocumento!,
+            );
+          }
+          if (document.medico != null) {
+            formController.medico.text = document.medico!;
+          }
+          if (document.paciente != null) {
+            formController.paciente.text = document.paciente!;
+          }
+          if (document.tipo != null) {
+            formController.tipo.text = document.tipo!;
           }
 
           return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Form(
-                key: widget.viewModel.form.formKey,
+                key: formController.formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   spacing: 8,
                   children: [
                     TextFormField(
                       key: const ValueKey('tituloField'),
-                      controller: widget.viewModel.form.titulo,
+                      controller: formController.titulo,
                       decoration: const InputDecoration(
                         labelText: 'Título',
                         counterText: '',
                       ),
                       maxLength: 100,
-                      validator: widget.viewModel.form.validateTitulo,
+                      validator: formController.validateTitulo,
                     ),
                     TextFormField(
                       key: const ValueKey('pacienteField'),
-                      controller: widget.viewModel.form.paciente,
+                      controller: formController.paciente,
                       decoration: const InputDecoration(
                         labelText: 'Paciente',
                         counterText: '',
                       ),
                       maxLength: 100,
-                      validator: widget.viewModel.form.validatePaciente,
+                      validator: formController.validatePaciente,
                     ),
                     TextFormField(
                       key: const ValueKey('medicoField'),
-                      controller: widget.viewModel.form.medico,
+                      controller: formController.medico,
                       decoration: const InputDecoration(
                         labelText: 'Médico',
                         counterText: '',
                       ),
                       maxLength: 100,
-                      validator: widget.viewModel.form.validateMedico,
+                      validator: formController.validateMedico,
                     ),
                     TextFormField(
                       key: const ValueKey('tipoField'),
-                      controller: widget.viewModel.form.tipo,
+                      controller: formController.tipo,
                       decoration: const InputDecoration(
                         labelText: 'Tipo de Documento',
                         counterText: '',
                       ),
                       maxLength: 100,
-                      validator: widget.viewModel.form.validateTipo,
+                      validator: formController.validateTipo,
                     ),
                     TextFormField(
                       key: const ValueKey("dataDocumentoField"),
-                      controller: widget.viewModel.form.dataDocumento,
+                      controller: formController.dataDocumento,
                       decoration: const InputDecoration(
                         labelText: 'Data do Documento',
                         suffixIcon: Icon(Icons.calendar_today),
@@ -139,8 +161,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen> {
                       onTap: () => _triggerDocDatePicker(context),
                     ),
                     ValueListenableBuilder(
-                      valueListenable:
-                          widget.viewModel.updateDocument.isExecuting,
+                      valueListenable: viewModel.updateDocument.isExecuting,
                       builder: (context, updatingDoc, child) {
                         return Row(
                           spacing: 4,
@@ -161,7 +182,15 @@ class _DocumentEditScreenState extends State<DocumentEditScreen> {
                                 key: const ValueKey("saveButton"),
                                 onPressed: updatingDoc
                                     ? null
-                                    : triggerUpdateIfValid,
+                                    : () {
+                                        if (formController.validate()) {
+                                          final formData =
+                                              formController.formData;
+                                          viewModel.updateDocument.execute(
+                                            formData,
+                                          );
+                                        }
+                                      },
                                 child: const Text('Salvar'),
                               ),
                             ),
@@ -180,7 +209,7 @@ class _DocumentEditScreenState extends State<DocumentEditScreen> {
   }
 
   void _triggerDocDatePicker(BuildContext context) async {
-    final controller = widget.viewModel.form.dataDocumento;
+    final controller = formController.dataDocumento;
 
     DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -194,5 +223,86 @@ class _DocumentEditScreenState extends State<DocumentEditScreen> {
         text: "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}",
       );
     }
+  }
+}
+
+class DocumentFormController {
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final TextEditingController titulo = TextEditingController();
+  final TextEditingController paciente = TextEditingController();
+  final TextEditingController medico = TextEditingController();
+  final TextEditingController tipo = TextEditingController();
+  final TextEditingController dataDocumento = TextEditingController();
+
+  DocumentUploadModel get formData => DocumentUploadModel(
+    titulo: titulo.text,
+    paciente: paciente.text.isEmpty ? null : paciente.text,
+    medico: medico.text.isEmpty ? null : medico.text,
+    tipo: tipo.text.isEmpty ? null : tipo.text,
+    dataDocumento: dataDocumento.text.isEmpty
+        ? null
+        : _parseDate(dataDocumento.text),
+  );
+
+  bool validate() {
+    return formKey.currentState?.validate() ?? false;
+  }
+
+  String? validateTitulo(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Por favor, insira o título do documento.';
+    }
+
+    if (value.length > 100) {
+      return 'O título não pode ter mais de 100 caracteres.';
+    }
+    return null;
+  }
+
+  String? validatePaciente(String? value) {
+    if (value != null && value.length > 100) {
+      return 'O nome do paciente não pode ter mais de 100 caracteres.';
+    }
+    return null;
+  }
+
+  String? validateMedico(String? value) {
+    if (value != null && value.length > 100) {
+      return 'O nome do médico não pode ter mais de 100 caracteres.';
+    }
+    return null;
+  }
+
+  String? validateTipo(String? value) {
+    if (value != null && value.length > 50) {
+      return 'O tipo não pode ter mais de 50 caracteres.';
+    }
+    return null;
+  }
+
+  String? validateDataDocumento(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Por favor, insira a data do documento.';
+    }
+
+    try {
+      _parseDate(value);
+    } catch (e) {
+      return 'Data do documento inválida. Use o formato DD/MM/AAAA.';
+    }
+
+    return null;
+  }
+
+  DateTime _parseDate(String value) {
+    return DateFormat('dd/MM/yyyy').parseStrict(value);
+  }
+
+  void dispose() {
+    titulo.dispose();
+    paciente.dispose();
+    medico.dispose();
+    tipo.dispose();
+    dataDocumento.dispose();
   }
 }

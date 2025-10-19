@@ -25,7 +25,9 @@ Document randomDocument({bool isDeleted = false}) {
   return Document(
     uuid: faker.guid.guid(),
     titulo: faker.lorem.words(2).join(' '),
-    dataDocumento: dataDocumento,
+    dataDocumento: dataDocumento != null
+        ? DateTime(dataDocumento.year, dataDocumento.month, dataDocumento.day)
+        : null,
     paciente: paciente,
     medico: medico,
     tipo: tipo,

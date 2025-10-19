@@ -16,6 +16,7 @@ import 'package:minha_saude_frontend/app/data/services/local/cache_database/cach
 import 'package:minha_saude_frontend/app/data/services/doc_scanner/document_scanner.dart';
 import 'package:minha_saude_frontend/app/data/services/local/file_system_service/file_system_service.dart';
 
+import '../../../testing/mocks/mock_file.dart';
 import '../../../testing/models/document.dart';
 
 class MockDocumentApiClient extends Mock implements DocumentApiClient {}
@@ -28,8 +29,6 @@ class MockCacheDatabase extends Mock implements CacheDatabase {
 }
 
 class MockFileSystemService extends Mock implements FileSystemService {}
-
-class MockFile extends Mock implements File {}
 
 void main() {
   late DocumentApiClient documentApiClient;

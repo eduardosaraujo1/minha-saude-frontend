@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
+import 'package:minha_saude_frontend/app/ui/documents/widgets/upload/document_upload_navigator.dart';
 
 // Alt + Shift + O -> organize imports
 import '../data/repositories/document/document_repository.dart';
@@ -32,7 +33,6 @@ import '../ui/documents/widgets/document_view.dart';
 import '../ui/documents/widgets/index/document_list_screen.dart';
 import '../ui/documents/widgets/metadata/document_edit_screen.dart';
 import '../ui/documents/widgets/metadata/document_metadata_screen.dart';
-import '../ui/documents/widgets/upload/document_upload_view.dart';
 import '../ui/settings/view_models/settings_edit_view_model.dart';
 import '../ui/settings/view_models/settings_view_model.dart';
 import '../ui/settings/widgets/edit/settings_edit_birthdate.dart';
@@ -106,10 +106,10 @@ final _router = GoRouter(
         GoRoute(
           path: Routes.documentosUpload,
           builder: (BuildContext context, GoRouterState state) {
-            return DocumentUploadView(
-              () => DocumentUploadViewModel(
-                DocumentUploadMethod.upload,
-                _getIt<DocumentRepository>(),
+            return DocumentUploadNavigator(
+              viewModelFactory: () => DocumentUploadViewModel(
+                type: DocumentUploadMethod.filePicker,
+                documentRepository: _getIt<DocumentRepository>(),
               ),
             );
           },
@@ -117,10 +117,10 @@ final _router = GoRouter(
         GoRoute(
           path: Routes.documentosScan,
           builder: (BuildContext context, GoRouterState state) {
-            return DocumentUploadView(
-              () => DocumentUploadViewModel(
-                DocumentUploadMethod.scan,
-                _getIt<DocumentRepository>(),
+            return DocumentUploadNavigator(
+              viewModelFactory: () => DocumentUploadViewModel(
+                type: DocumentUploadMethod.docScanner,
+                documentRepository: _getIt<DocumentRepository>(),
               ),
             );
           },
@@ -142,11 +142,19 @@ final _router = GoRouter(
                 GoRoute(
                   path: Routes.documentosRelative,
                   builder: (context, state) {
-                    return DocumentListScreen(
-                      () => DocumentListViewModel(
-                        documentRepository: _getIt<DocumentRepository>(),
-                      ),
+                    if (state.extra is SnackBar) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(state.extra as SnackBar);
+                      });
+                    }
+
+                    var documentListViewModel = DocumentListViewModel(
+                      documentRepository: _getIt<DocumentRepository>(),
                     );
+
+                    return DocumentListScreen(() => documentListViewModel);
                   },
                   routes: [
                     GoRoute(

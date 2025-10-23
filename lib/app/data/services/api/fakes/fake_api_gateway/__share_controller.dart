@@ -1,7 +1,7 @@
 part of 'fake_api_gateway.dart';
 
-class __ShareController {
-  __ShareController({
+class _ShareController {
+  _ShareController({
     required this.fakeServerDatabase,
     required this.fakeServerCacheEngine,
     required this.fakeServerFileStorage,
@@ -10,28 +10,139 @@ class __ShareController {
   final FakeServerDatabase fakeServerDatabase;
   final FakeServerFileStorage fakeServerFileStorage;
 
+  // Helper to get the current user (in fake, we just use the first user)
+  Future<Map<String, dynamic>?> _getCurrentUser() async {
+    final users = await fakeServerDatabase.users.readAll();
+    return users.isEmpty ? null : users.first;
+  }
+
   /// POST /shares - Create document share code
   ///
   /// Data: `{idsDocumentos: int[]}`
   ///
   /// Response: `{codigo: String}`
-  static const String createShare = '/shares';
+  Future<Result<Map<String, dynamic>, ApiGatewayException>> createShare({
+    required Map<String, dynamic> data,
+  }) async {
+    try {
+      final idsDocumentos = data['idsDocumentos'] as List<dynamic>?;
+      if (idsDocumentos == null || idsDocumentos.isEmpty) {
+        return Error(ClientException('Missing idsDocumentos'));
+      }
+
+      final user = await _getCurrentUser();
+      if (user == null) {
+        return Error(ClientException('User not found'));
+      }
+
+      final userId = user['id'] as int;
+      final codigo = _generateShareCode();
+
+      // Create share record
+      final shareId = await fakeServerDatabase.shares.create({
+        'codigo': codigo,
+        'data_primeiro_uso': null,
+        'expirado': 0,
+        'created_at': DateTime.now().toIso8601String(),
+        'fk_id_usuario': userId,
+      });
+
+      // Link documents to share
+      for (final docId in idsDocumentos) {
+        await fakeServerDatabase.shares.addDocument(shareId, docId as int);
+      }
+
+      return Success({'codigo': codigo});
+    } catch (e) {
+      return Error(ServerException('Failed to create share: $e'));
+    }
+  }
 
   /// GET /shares - List active share codes (paginated)
   ///
-  /// Query params: `{page: int?, perPage: int?}`
-  ///
   /// Response: Paginated list of share codes
-  static const String listShares = '/shares';
-  // Implementation: do NOT use pagination, just return all share codes
+  Future<Result<Map<String, dynamic>, ApiGatewayException>> listShares() async {
+    try {
+      final user = await _getCurrentUser();
+      if (user == null) {
+        return Error(ClientException('User not found'));
+      }
+
+      final userId = user['id'] as int;
+      final shares = await fakeServerDatabase.shares.findByUser(userId);
+
+      final data = shares.map((share) {
+        return {
+          'id': share['id'],
+          'codigo': share['codigo'],
+          'dataprimeiroUso': share['data_primeiro_uso'],
+          'expirado': share['expirado'] == 1,
+          'createdAt': share['created_at'],
+        };
+      }).toList();
+
+      return Success({
+        'data': data,
+        'pagination': {'total': data.length, 'page': 1, 'perPage': data.length},
+      });
+    } catch (e) {
+      return Error(ServerException('Failed to list shares: $e'));
+    }
+  }
 
   /// GET /shares/{code} - View share code details
   ///
   /// Response: `{codigo: String, primeiroUsoEm: String? (YYYY-MM-DD), documentos: [{id: int, titulo: String}]}`
-  static String getShareDetails(String code) => '/shares/$code';
+  Future<Result<Map<String, dynamic>, ApiGatewayException>> getShareDetails({
+    required String code,
+  }) async {
+    try {
+      final share = await fakeServerDatabase.shares.findByCode(code);
+      if (share == null) {
+        return Error(ClientException('Share code not found'));
+      }
+
+      final shareId = share['id'] as int;
+      final docs = await fakeServerDatabase.shares.getDocuments(shareId);
+
+      final documentos = docs.map((doc) {
+        return {'id': doc['id'], 'titulo': doc['titulo']};
+      }).toList();
+
+      return Success({
+        'codigo': share['codigo'],
+        'primeiroUsoEm': share['data_primeiro_uso'],
+        'documentos': documentos,
+      });
+    } catch (e) {
+      return Error(ServerException('Failed to get share details: $e'));
+    }
+  }
 
   /// DELETE /shares/{code} - Invalidate share code
   ///
   /// Response: `{status: String (success | error), message: String?}`
-  static String deleteShare(String code) => '/shares/$code';
+  Future<Result<Map<String, dynamic>, ApiGatewayException>> deleteShare({
+    required String code,
+  }) async {
+    try {
+      final share = await fakeServerDatabase.shares.findByCode(code);
+      if (share == null) {
+        return Error(ClientException('Share code not found'));
+      }
+
+      await fakeServerDatabase.shares.deleteByCode(code);
+
+      return Success({'status': 'success', 'message': null});
+    } catch (e) {
+      return Error(ServerException('Failed to delete share: $e'));
+    }
+  }
+
+  /// Generate a random share code
+  String _generateShareCode() {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final random = timestamp.hashCode;
+    return 'SHARE${timestamp.toString().substring(7)}${random.toString().substring(0, 4)}';
+  }
 }

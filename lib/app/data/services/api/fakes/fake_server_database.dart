@@ -80,7 +80,6 @@ class FakeServerDatabase {
           CREATE TABLE tb_documento (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             uuid TEXT NOT NULL UNIQUE,
-            caminho_arquivo TEXT NOT NULL,
             titulo TEXT NOT NULL,
             nome_paciente TEXT,
             nome_medico TEXT,

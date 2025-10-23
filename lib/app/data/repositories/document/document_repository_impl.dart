@@ -5,8 +5,8 @@ import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../../domain/models/document/document.dart';
-import '../../services/api/document/document_api_client.dart';
-import '../../services/api/document/models/document_api_model.dart';
+import '../../services/api/deprecating/document/document_api_client.dart';
+import '../../services/api/deprecating/document/models/document_api_model.dart';
 import '../../services/doc_scanner/document_scanner.dart';
 import '../../services/local/cache_database/cache_database.dart';
 import '../../services/local/cache_database/models/document_db_model.dart';

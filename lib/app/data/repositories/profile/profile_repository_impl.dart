@@ -3,7 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../../domain/models/profile/profile.dart';
-import '../../services/api/profile/profile_api_client.dart';
+import '../../services/api/deprecating/profile/profile_api_client.dart';
 import 'profile_repository.dart';
 
 class ProfileRepositoryImpl extends ProfileRepository {

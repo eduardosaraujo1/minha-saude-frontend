@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:command_it/command_it.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -22,11 +24,11 @@ void main() async {
     if (Environment.appEnv.isDev) {
       await dev.setup(
         mockApiClient: true,
-        // mockGoogle: !(Platform.isAndroid || Platform.isIOS),
-        mockGoogle: true,
+        mockGoogle: !(Platform.isAndroid || Platform.isIOS),
+        // mockGoogle: true,
         mockScanner: true,
         mockSecureStorage: false,
-        mockCacheDb: false,
+        mockCacheDb: !(Platform.isAndroid || Platform.isIOS),
       );
     } else {
       await prod.setup();

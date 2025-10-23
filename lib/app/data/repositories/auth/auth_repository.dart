@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../../domain/models/auth/login_response/login_result.dart';
-export 'auth_repository_impl.dart';
+import '../../services/api/gateway/api_gateway.dart';
+import '../../services/api/deprecating/auth/models/login_response/login_api_response.dart';
+import '../../services/api/deprecating/auth/models/register_response/register_response.dart';
+import '../../services/api/gateway/routes.dart';
+import '../../services/google/google_service.dart';
+
+part 'local_auth_repository.dart';
+// part 'remote_auth_repository.dart';
 
 abstract class AuthRepository extends ChangeNotifier {
   // [AUTHENTICATION]

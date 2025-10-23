@@ -2,8 +2,8 @@ import 'package:dio/dio.dart';
 
 typedef AuthHeaderProvider = Future<String?> Function();
 
-class HttpClient {
-  HttpClient({
+class LegacyHttpClient {
+  LegacyHttpClient({
     required String baseUrl,
     Dio? dio,
     Duration connectTimeout = const Duration(seconds: 10),

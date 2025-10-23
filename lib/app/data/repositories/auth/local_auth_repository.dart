@@ -1,21 +1,14 @@
-import 'package:logging/logging.dart';
-import 'package:multiple_result/multiple_result.dart';
+part of 'auth_repository.dart';
 
-import '../../services/api/auth/auth_api_client.dart';
-import '../../services/api/auth/models/login_response/login_api_response.dart';
-import '../../services/google/google_service.dart';
-import '../../../domain/models/auth/login_response/login_result.dart';
-import 'auth_repository.dart';
-
-class AuthRepositoryImpl extends AuthRepository {
-  AuthRepositoryImpl({
+class LocalAuthRepository extends AuthRepository {
+  LocalAuthRepository({
     required GoogleService googleService,
-    required AuthApiClient apiClient,
+    required ApiGateway apiGateway,
   }) : _googleService = googleService,
-       _apiClient = apiClient;
+       _apiGateway = apiGateway;
 
   final GoogleService _googleService;
-  final AuthApiClient _apiClient;
+  final ApiGateway _apiGateway;
   final Logger _log = Logger("AuthRepositoryImplementation");
 
   Result<LoginResult, Exception> _parseApiLoginResponse(
@@ -55,26 +48,31 @@ class AuthRepositoryImpl extends AuthRepository {
     String code,
   ) async {
     try {
-      final result = await _apiClient.authLoginEmail(email, code);
+      final result = await _apiGateway.post(
+        GatewayRoutes.loginEmail,
+        data: {'email': email, 'codigoEmail': code},
+      );
 
       if (result.isError()) {
         _log.severe("Login E-mail tentativa falhou: ", result.tryGetError()!);
         final error = result.tryGetError()!;
-        switch (error) {
-          case ApiEmailLoginIncorrectCodeException():
-            return Error(
-              EmailLoginIncorrectCodeException(
-                "Código de verificação incorreto.",
-              ),
-            );
-          case ApiUnexpectedEmailLoginException():
-            return Error(
-              EmailLoginUnexpectedException("Erro ao fazer login por e-mail."),
-            );
+
+        // Check if it's a client error that might be incorrect code
+        if (error is ClientException && error.message.contains('400')) {
+          return Error(
+            EmailLoginIncorrectCodeException(
+              "Código de verificação incorreto.",
+            ),
+          );
         }
+
+        return Error(
+          EmailLoginUnexpectedException("Erro ao fazer login por e-mail."),
+        );
       }
 
-      final apiLoginResponse = result.tryGetSuccess()!;
+      final responseData = result.tryGetSuccess()!;
+      final apiLoginResponse = LoginApiResponse.fromJson(responseData);
       final loginResponseResult = _parseApiLoginResponse(apiLoginResponse);
 
       if (loginResponseResult.isError()) {
@@ -97,7 +95,10 @@ class AuthRepositoryImpl extends AuthRepository {
     String googleServerCode,
   ) async {
     try {
-      final result = await _apiClient.authLoginGoogle(googleServerCode);
+      final result = await _apiGateway.post(
+        GatewayRoutes.loginGoogle,
+        data: {'tokenOauth': googleServerCode},
+      );
 
       if (result.isError()) {
         _log.severe("Login Google tentativa falhou: ", result.tryGetError()!);
@@ -106,7 +107,8 @@ class AuthRepositoryImpl extends AuthRepository {
         );
       }
 
-      final apiLoginResponse = result.tryGetSuccess()!;
+      final responseData = result.tryGetSuccess()!;
+      final apiLoginResponse = LoginApiResponse.fromJson(responseData);
       final loginResponseResult = _parseApiLoginResponse(apiLoginResponse);
 
       if (loginResponseResult.isError()) {
@@ -122,7 +124,7 @@ class AuthRepositoryImpl extends AuthRepository {
 
   @override
   Future<void> logout() async {
-    await _apiClient.authLogout();
+    await _apiGateway.post(GatewayRoutes.logout);
   }
 
   @override
@@ -133,19 +135,23 @@ class AuthRepositoryImpl extends AuthRepository {
     required String telefone,
     required String registerToken,
   }) async {
-    final result = await _apiClient.authRegister(
-      nome: nome,
-      cpf: cpf,
-      dataNascimento: dataNascimento,
-      telefone: telefone,
-      registerToken: registerToken,
+    final result = await _apiGateway.post(
+      GatewayRoutes.registerUser,
+      data: {
+        'nome': nome,
+        'cpf': cpf,
+        'dataNascimento': dataNascimento.toIso8601String(),
+        'telefone': telefone,
+        'registerToken': registerToken,
+      },
     );
 
     if (result.isError()) {
       return Result.error(result.tryGetError()!);
     }
 
-    final registerResponse = result.tryGetSuccess()!;
+    final responseData = result.tryGetSuccess()!;
+    final registerResponse = RegisterResponse.fromJson(responseData);
 
     if (registerResponse.sessionToken == null ||
         registerResponse.sessionToken!.isEmpty) {
@@ -159,7 +165,10 @@ class AuthRepositoryImpl extends AuthRepository {
 
   @override
   Future<Result<void, Exception>> requestEmailCode(String email) async {
-    final result = await _apiClient.authSendEmail(email);
+    final result = await _apiGateway.post(
+      GatewayRoutes.sendEmail,
+      data: {'email': email},
+    );
 
     if (result.isError()) {
       return Result.error(result.tryGetError()!);

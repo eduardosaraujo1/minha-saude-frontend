@@ -1,14 +1,14 @@
 import 'package:multiple_result/multiple_result.dart';
 
 import '../document/models/document_api_model.dart';
-import '../http_client.dart';
+import '../http_client/http_client.dart';
 
 import 'trash_api_client.dart';
 
 class TrashApiClientImpl extends TrashApiClient {
   TrashApiClientImpl({required this.httpClient});
 
-  final HttpClient httpClient;
+  final LegacyHttpClient httpClient;
 
   @override
   Future<Result<void, Exception>> destroyTrashDocument(String id) {

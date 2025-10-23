@@ -13,21 +13,21 @@ import '../app/data/repositories/profile/profile_repository_impl.dart';
 import '../app/data/repositories/session/session_repository.dart';
 import '../app/data/repositories/trash/trash_repository.dart';
 import '../app/data/repositories/trash/trash_repository_impl.dart';
-import '../app/data/services/api/auth/auth_api_client.dart';
-import '../app/data/services/api/auth/auth_api_client_impl.dart';
-import '../app/data/services/api/auth/fake_auth_api_client.dart';
-import '../app/data/services/api/document/document_api_client.dart';
-import '../app/data/services/api/document/document_api_client_impl.dart';
-import '../app/data/services/api/document/fake_document_api_client.dart';
-import '../app/data/services/api/fakes/fake_document_server_storage.dart';
-import '../app/data/services/api/fakes/fake_server_persistent_storage.dart';
-import '../app/data/services/api/http_client.dart';
-import '../app/data/services/api/profile/fake_profile_api_client.dart';
-import '../app/data/services/api/profile/profile_api_client.dart';
-import '../app/data/services/api/profile/profile_api_client_impl.dart';
-import '../app/data/services/api/trash/fake_trash_api_client.dart';
-import '../app/data/services/api/trash/trash_api_client.dart';
-import '../app/data/services/api/trash/trash_api_client_impl.dart';
+import '../app/data/services/api/deprecating/auth/auth_api_client.dart';
+import '../app/data/services/api/deprecating/auth/fake_auth_api_client.dart';
+import '../app/data/services/api/deprecating/document/document_api_client.dart';
+import '../app/data/services/api/deprecating/document/document_api_client_impl.dart';
+import '../app/data/services/api/deprecating/document/fake_document_api_client.dart';
+import '../app/data/services/api/fakes/deprecating/fake_document_server_storage.dart';
+import '../app/data/services/api/fakes/deprecating/fake_server_persistent_storage.dart';
+import '../app/data/services/api/gateway/api_gateway.dart';
+import '../app/data/services/api/deprecating/http_client/http_client.dart';
+import '../app/data/services/api/deprecating/profile/fake_profile_api_client.dart';
+import '../app/data/services/api/deprecating/profile/profile_api_client.dart';
+import '../app/data/services/api/deprecating/profile/profile_api_client_impl.dart';
+import '../app/data/services/api/deprecating/trash/fake_trash_api_client.dart';
+import '../app/data/services/api/deprecating/trash/trash_api_client.dart';
+import '../app/data/services/api/deprecating/trash/trash_api_client_impl.dart';
 import '../app/data/services/doc_scanner/document_scanner.dart';
 import '../app/data/services/google/google_service.dart';
 import '../app/data/services/local/cache_database/cache_database.dart';
@@ -84,12 +84,19 @@ Future<void> setup({
   _getIt.registerSingleton<DocumentListCacheStore>(DocumentListCacheStore());
   _getIt.registerSingleton<DocumentFileCacheStore>(DocumentFileCacheStore());
 
+  // Register ApiGateway
+  if (mockApiClient) {
+    _getIt.registerSingleton<ApiGateway>(FakeApiGateway());
+  } else {
+    _getIt.registerSingleton<ApiGateway>(ApiGatewayImpl());
+  }
+
   if (mockApiClient) {
     _getIt.registerSingleton<FakeServerPersistentStorage>(
       FakeServerPersistentStorage(),
     );
-    _getIt.registerSingleton<FakeDocumentServerStorage>(
-      FakeDocumentServerStorage(cacheDatabase: _getIt<CacheDatabase>()),
+    _getIt.registerSingleton<FakeServerFileStorage>(
+      FakeServerFileStorage(cacheDatabase: _getIt<CacheDatabase>()),
     );
     _getIt.registerSingleton<AuthApiClient>(
       FakeAuthApiClient(
@@ -97,10 +104,10 @@ Future<void> setup({
       ),
     );
     _getIt.registerSingleton<DocumentApiClient>(
-      FakeDocumentApiClient(serverStorage: _getIt<FakeDocumentServerStorage>()),
+      FakeDocumentApiClient(serverStorage: _getIt<FakeServerFileStorage>()),
     );
     _getIt.registerSingleton<TrashApiClient>(
-      FakeTrashApiClient(serverStorage: _getIt<FakeDocumentServerStorage>()),
+      FakeTrashApiClient(serverStorage: _getIt<FakeServerFileStorage>()),
     );
     _getIt.registerSingleton<ProfileApiClient>(
       FakeProfileApiClient(
@@ -109,28 +116,25 @@ Future<void> setup({
     );
   } else {
     // Register real implementation
-    _getIt.registerSingleton<HttpClient>(
-      HttpClient(baseUrl: Environment.apiUrl),
-    );
-    _getIt.registerSingleton<AuthApiClient>(
-      AuthApiClientImpl(_getIt<HttpClient>()),
+    _getIt.registerSingleton<LegacyHttpClient>(
+      LegacyHttpClient(baseUrl: Environment.apiUrl),
     );
     _getIt.registerSingleton<DocumentApiClient>(
-      DocumentApiClientImpl(_getIt<HttpClient>()),
+      DocumentApiClientImpl(_getIt<LegacyHttpClient>()),
     );
     _getIt.registerSingleton<ProfileApiClient>(
-      ProfileApiClientImpl(_getIt<HttpClient>()),
+      ProfileApiClientImpl(_getIt<LegacyHttpClient>()),
     );
     _getIt.registerSingleton<TrashApiClient>(
-      TrashApiClientImpl(httpClient: _getIt<HttpClient>()),
+      TrashApiClientImpl(httpClient: _getIt<LegacyHttpClient>()),
     );
   }
 
   // Repositories
   _getIt.registerSingleton<AuthRepository>(
-    AuthRepositoryImpl(
+    LocalAuthRepository(
       googleService: _getIt<GoogleService>(),
-      apiClient: _getIt<AuthApiClient>(),
+      apiGateway: _getIt<ApiGateway>(),
     ),
   );
   _getIt.registerSingleton<SessionRepository>(
@@ -195,9 +199,22 @@ Future<void> setup({
 
   if (mockApiClient) {
     // Initialize fake server storage with data from cache database
-    await _getIt<FakeDocumentServerStorage>().initialize();
+    await _getIt<FakeServerFileStorage>().initialize();
   } else {
-    _getIt<HttpClient>().authHeaderProvider = () async {
+    // Configure ApiGateway auth header provider
+    _getIt<ApiGateway>().authHeaderProvider = () async {
+      final token = await _getIt<SessionRepository>().getAuthToken();
+      final t = token.tryGetSuccess();
+
+      if (t == null) {
+        return null;
+      }
+
+      return t;
+    };
+
+    // Legacy HTTP client configuration (for other API clients still using it)
+    _getIt<LegacyHttpClient>().authHeaderProvider = () async {
       final token = await _getIt<SessionRepository>().getAuthToken();
       final t = token.tryGetSuccess();
 

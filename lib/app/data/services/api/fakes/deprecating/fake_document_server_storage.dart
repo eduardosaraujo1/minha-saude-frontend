@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:minha_saude_frontend/app/data/services/api/document/models/document_api_model.dart';
+import 'package:minha_saude_frontend/app/data/services/api/deprecating/document/models/document_api_model.dart';
 import 'package:minha_saude_frontend/app/data/services/local/cache_database/cache_database.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:path_provider/path_provider.dart';
@@ -9,8 +9,8 @@ import 'package:path_provider/path_provider.dart';
 /// Simulates server-side document storage
 /// Stores document metadata in-memory and files in temporary directory
 /// Shared between DocumentApiClient and TrashApiClient to simulate backend behavior
-class FakeDocumentServerStorage {
-  FakeDocumentServerStorage({required this.cacheDatabase});
+class FakeServerFileStorage {
+  FakeServerFileStorage({required this.cacheDatabase});
 
   final CacheDatabase cacheDatabase;
 

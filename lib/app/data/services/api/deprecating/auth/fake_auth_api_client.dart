@@ -1,4 +1,4 @@
-import 'package:minha_saude_frontend/app/data/services/api/fakes/fake_server_persistent_storage.dart';
+import 'package:minha_saude_frontend/app/data/services/api/fakes/deprecating/fake_server_persistent_storage.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import 'models/login_response/login_api_response.dart';

@@ -50,6 +50,7 @@ class _LoginViewState extends State<LoginView> {
           SuccessfulLoginResult() => Routes.home,
           NeedsRegistrationLoginResult() => Routes.register,
         };
+
         context.go(redirectPath);
 
         return;

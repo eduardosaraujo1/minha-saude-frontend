@@ -1,16 +1,15 @@
 import 'package:minha_saude_frontend/app/data/repositories/auth/auth_repository.dart';
-import 'package:minha_saude_frontend/app/data/services/api/auth/auth_api_client.dart';
-import 'package:minha_saude_frontend/app/data/services/api/auth/models/login_response/login_api_response.dart';
-import 'package:minha_saude_frontend/app/data/services/api/auth/models/register_response/register_response.dart';
+import 'package:minha_saude_frontend/app/data/services/api/gateway/api_gateway.dart';
+import 'package:minha_saude_frontend/app/data/services/api/gateway/routes.dart';
 import 'package:minha_saude_frontend/app/data/services/google/google_service.dart';
 import 'package:minha_saude_frontend/app/domain/models/auth/login_response/login_result.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:test/test.dart';
 
-class MockAuthApiClient extends Mock implements AuthApiClient {}
-
 class MockGoogleService extends Mock implements GoogleService {}
+
+class MockApiGateway extends Mock implements ApiGateway {}
 
 void main() {
   /*
@@ -42,16 +41,16 @@ void main() {
   ### Session Management
   - it calls API logout
   */
-  late MockAuthApiClient mockAuthApiClient;
   late MockGoogleService mockGoogleService;
+  late MockApiGateway mockApiGateway;
   late AuthRepository authRepository;
 
   setUp(() {
-    mockAuthApiClient = MockAuthApiClient();
+    mockApiGateway = MockApiGateway();
     mockGoogleService = MockGoogleService();
 
-    authRepository = AuthRepositoryImpl(
-      apiClient: mockAuthApiClient,
+    authRepository = LocalAuthRepository(
+      apiGateway: mockApiGateway,
       googleService: mockGoogleService,
     );
   });
@@ -109,13 +108,15 @@ void main() {
     });
 
     test("it returns session token for registered user", () async {
-      const mockApiResponse = LoginApiResponse(
-        isRegistered: true,
-        sessionToken: "test-session-token",
-        registerToken: null,
-      );
+      const mockApiResponse = {
+        'isRegistered': true,
+        'sessionToken': 'test-session-token',
+      };
       when(
-        () => mockAuthApiClient.authLoginGoogle(any()),
+        () => mockApiGateway.post(
+          GatewayRoutes.loginGoogle,
+          data: any(named: 'data'),
+        ),
       ).thenAnswer((_) async => const Result.success(mockApiResponse));
 
       final result = await authRepository.loginWithGoogle(
@@ -130,18 +131,23 @@ void main() {
         "test-session-token",
       );
       verify(
-        () => mockAuthApiClient.authLoginGoogle("test-google-server-code"),
+        () => mockApiGateway.post(
+          GatewayRoutes.loginGoogle,
+          data: any(named: 'data'),
+        ),
       ).called(1);
     });
 
     test("it returns register token for unregistered user", () async {
-      const mockApiResponse = LoginApiResponse(
-        isRegistered: false,
-        sessionToken: null,
-        registerToken: "test-register-token",
-      );
+      const mockApiResponse = {
+        'isRegistered': false,
+        'registerToken': 'test-register-token',
+      };
       when(
-        () => mockAuthApiClient.authLoginGoogle(any()),
+        () => mockApiGateway.post(
+          GatewayRoutes.loginGoogle,
+          data: any(named: 'data'),
+        ),
       ).thenAnswer((_) async => const Result.success(mockApiResponse));
 
       final result = await authRepository.loginWithGoogle(
@@ -158,9 +164,12 @@ void main() {
     });
 
     test("it returns error when API call fails", () async {
-      final testError = Exception("Network error");
+      final testError = ClientException("Network error");
       when(
-        () => mockAuthApiClient.authLoginGoogle(any()),
+        () => mockApiGateway.post(
+          GatewayRoutes.loginGoogle,
+          data: any(named: 'data'),
+        ),
       ).thenAnswer((_) async => Result.error(testError));
 
       final result = await authRepository.loginWithGoogle(
@@ -175,13 +184,12 @@ void main() {
     });
 
     test("it returns error when API response is invalid", () async {
-      const mockApiResponse = LoginApiResponse(
-        isRegistered: true,
-        sessionToken: null,
-        registerToken: null,
-      );
+      const mockApiResponse = {'isRegistered': true};
       when(
-        () => mockAuthApiClient.authLoginGoogle(any()),
+        () => mockApiGateway.post(
+          GatewayRoutes.loginGoogle,
+          data: any(named: 'data'),
+        ),
       ).thenAnswer((_) async => const Result.success(mockApiResponse));
 
       final result = await authRepository.loginWithGoogle(
@@ -198,21 +206,31 @@ void main() {
 
   group("Email Authentication", () {
     test("it sends email code successfully", () async {
+      const mockApiResponse = {'status': 'success'};
       when(
-        () => mockAuthApiClient.authSendEmail(any()),
-      ).thenAnswer((_) async => const Result.success(null));
+        () => mockApiGateway.post(
+          GatewayRoutes.sendEmail,
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer((_) async => const Result.success(mockApiResponse));
       final result = await authRepository.requestEmailCode("test@example.com");
 
       expect(result.isSuccess(), true);
       verify(
-        () => mockAuthApiClient.authSendEmail("test@example.com"),
+        () => mockApiGateway.post(
+          GatewayRoutes.sendEmail,
+          data: any(named: 'data'),
+        ),
       ).called(1);
     });
 
     test("it returns error when email sending fails", () async {
       when(
-        () => mockAuthApiClient.authSendEmail(any()),
-      ).thenAnswer((_) async => Error(Exception("Email sending failed")));
+        () => mockApiGateway.post(
+          GatewayRoutes.sendEmail,
+          data: any(named: 'data'),
+        ),
+      ).thenAnswer((_) async => Error(ClientException("Email sending failed")));
 
       final result = await authRepository.requestEmailCode("test@example.com");
 
@@ -220,13 +238,15 @@ void main() {
     });
 
     test("it returns session token for registered user", () async {
-      const mockApiResponse = LoginApiResponse(
-        isRegistered: true,
-        sessionToken: "test-session-token",
-        registerToken: null,
-      );
+      const mockApiResponse = {
+        'isRegistered': true,
+        'sessionToken': 'test-session-token',
+      };
       when(
-        () => mockAuthApiClient.authLoginEmail(any(), any()),
+        () => mockApiGateway.post(
+          GatewayRoutes.loginEmail,
+          data: any(named: 'data'),
+        ),
       ).thenAnswer((_) async => const Result.success(mockApiResponse));
 
       // Act
@@ -243,18 +263,23 @@ void main() {
         "test-session-token",
       );
       verify(
-        () => mockAuthApiClient.authLoginEmail("test@example.com", "123456"),
+        () => mockApiGateway.post(
+          GatewayRoutes.loginEmail,
+          data: any(named: 'data'),
+        ),
       ).called(1);
     });
 
     test("it returns register token for unregistered user", () async {
-      const mockApiResponse = LoginApiResponse(
-        isRegistered: false,
-        sessionToken: null,
-        registerToken: "test-register-token",
-      );
+      const mockApiResponse = {
+        'isRegistered': false,
+        'registerToken': 'test-register-token',
+      };
       when(
-        () => mockAuthApiClient.authLoginEmail(any(), any()),
+        () => mockApiGateway.post(
+          GatewayRoutes.loginEmail,
+          data: any(named: 'data'),
+        ),
       ).thenAnswer((_) async => const Result.success(mockApiResponse));
 
       final result = await authRepository.loginWithEmail(
@@ -272,11 +297,16 @@ void main() {
     });
 
     test(
-      "it returns appropriate error when API returns incorrect code error",
+      "it returns appropriate error when API returns unexpected error",
       () async {
-        final testError = ApiUnexpectedEmailLoginException("Unexpected Error");
+        final testError = ClientException(
+          "Client error: 500 - Internal Server Error",
+        );
         when(
-          () => mockAuthApiClient.authLoginEmail(any(), any()),
+          () => mockApiGateway.post(
+            GatewayRoutes.loginEmail,
+            data: any(named: 'data'),
+          ),
         ).thenAnswer((_) async => Result.error(testError));
 
         final result = await authRepository.loginWithEmail(
@@ -292,9 +322,12 @@ void main() {
     test(
       "it returns appropriate error when API returns incorrect code error",
       () async {
-        final testError = ApiEmailLoginIncorrectCodeException("Invalid code");
+        final testError = ClientException("Client error: 400 - Bad Request");
         when(
-          () => mockAuthApiClient.authLoginEmail(any(), any()),
+          () => mockApiGateway.post(
+            GatewayRoutes.loginEmail,
+            data: any(named: 'data'),
+          ),
         ).thenAnswer((_) async => Result.error(testError));
 
         final result = await authRepository.loginWithEmail(
@@ -308,13 +341,12 @@ void main() {
     );
 
     test("it returns error when API response is invalid", () async {
-      const mockApiResponse = LoginApiResponse(
-        isRegistered: false,
-        sessionToken: null,
-        registerToken: null,
-      );
+      const mockApiResponse = {'isRegistered': false};
       when(
-        () => mockAuthApiClient.authLoginEmail(any(), any()),
+        () => mockApiGateway.post(
+          GatewayRoutes.loginEmail,
+          data: any(named: 'data'),
+        ),
       ).thenAnswer((_) async => const Result.success(mockApiResponse));
 
       final result = await authRepository.loginWithEmail(
@@ -330,22 +362,16 @@ void main() {
     final testDate = DateTime(1990, 1, 1);
 
     setUp(() {
+      const mockApiResponse = {
+        'status': 'success',
+        'sessionToken': 'test-session-token-123',
+      };
       when(
-        () => mockAuthApiClient.authRegister(
-          cpf: any(named: "cpf"),
-          dataNascimento: any(named: "dataNascimento"),
-          nome: any(named: "nome"),
-          telefone: any(named: "telefone"),
-          registerToken: any(named: "registerToken"),
+        () => mockApiGateway.post(
+          GatewayRoutes.registerUser,
+          data: any(named: 'data'),
         ),
-      ).thenAnswer(
-        (_) async => const Result.success(
-          RegisterResponse(
-            status: "success",
-            sessionToken: "test-session-token-123",
-          ),
-        ),
-      );
+      ).thenAnswer((_) async => const Result.success(mockApiResponse));
     });
 
     test("it returns session token when registration succeeds", () async {
@@ -360,30 +386,21 @@ void main() {
       expect(result.isSuccess(), true);
       expect(result.tryGetSuccess(), "test-session-token-123");
       verify(
-        () => mockAuthApiClient.authRegister(
-          registerToken: "test-register-token",
-          nome: "John Doe",
-          cpf: "12345678900",
-          telefone: "11999999999",
-          dataNascimento: testDate,
+        () => mockApiGateway.post(
+          GatewayRoutes.registerUser,
+          data: any(named: 'data'),
         ),
       ).called(1);
     });
 
     test("it returns error when session token is null", () async {
+      const mockApiResponse = {'status': 'success'};
       when(
-        () => mockAuthApiClient.authRegister(
-          cpf: any(named: "cpf"),
-          dataNascimento: any(named: "dataNascimento"),
-          nome: any(named: "nome"),
-          telefone: any(named: "telefone"),
-          registerToken: any(named: "registerToken"),
+        () => mockApiGateway.post(
+          GatewayRoutes.registerUser,
+          data: any(named: 'data'),
         ),
-      ).thenAnswer(
-        (_) async => const Result.success(
-          RegisterResponse(status: "success", sessionToken: null),
-        ),
-      );
+      ).thenAnswer((_) async => const Result.success(mockApiResponse));
 
       final result = await authRepository.register(
         registerToken: "test-register-token",
@@ -397,19 +414,13 @@ void main() {
     });
 
     test("it returns error when session token is empty", () async {
+      const mockApiResponse = {'status': 'success', 'sessionToken': ''};
       when(
-        () => mockAuthApiClient.authRegister(
-          cpf: any(named: "cpf"),
-          dataNascimento: any(named: "dataNascimento"),
-          nome: any(named: "nome"),
-          telefone: any(named: "telefone"),
-          registerToken: any(named: "registerToken"),
+        () => mockApiGateway.post(
+          GatewayRoutes.registerUser,
+          data: any(named: 'data'),
         ),
-      ).thenAnswer(
-        (_) async => const Result.success(
-          RegisterResponse(status: "success", sessionToken: ""),
-        ),
-      );
+      ).thenAnswer((_) async => const Result.success(mockApiResponse));
 
       final result = await authRepository.register(
         registerToken: "test-register-token",
@@ -424,14 +435,13 @@ void main() {
 
     test("it returns error when registration fails", () async {
       when(
-        () => mockAuthApiClient.authRegister(
-          cpf: any(named: "cpf"),
-          dataNascimento: any(named: "dataNascimento"),
-          nome: any(named: "nome"),
-          telefone: any(named: "telefone"),
-          registerToken: any(named: "registerToken"),
+        () => mockApiGateway.post(
+          GatewayRoutes.registerUser,
+          data: any(named: 'data'),
         ),
-      ).thenAnswer((_) async => Result.error(Exception("Registration failed")));
+      ).thenAnswer(
+        (_) async => Result.error(ClientException("Registration failed")),
+      );
 
       final result = await authRepository.register(
         registerToken: "test-register-token",
@@ -447,13 +457,18 @@ void main() {
 
   group("Session Management", () {
     test("it calls API logout", () async {
+      const mockApiResponse = {'status': 'success'};
       when(
-        () => mockAuthApiClient.authLogout(),
-      ).thenAnswer((_) async => const Result.success(null));
+        () =>
+            mockApiGateway.post(GatewayRoutes.logout, data: any(named: 'data')),
+      ).thenAnswer((_) async => const Result.success(mockApiResponse));
 
       await authRepository.logout();
 
-      verify(() => mockAuthApiClient.authLogout()).called(1);
+      verify(
+        () =>
+            mockApiGateway.post(GatewayRoutes.logout, data: any(named: 'data')),
+      ).called(1);
     });
   });
 }

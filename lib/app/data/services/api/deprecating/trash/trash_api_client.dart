@@ -1,4 +1,4 @@
-import 'package:minha_saude_frontend/app/data/services/api/document/models/document_api_model.dart';
+import 'package:minha_saude_frontend/app/data/services/api/deprecating/document/models/document_api_model.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 abstract class TrashApiClient {

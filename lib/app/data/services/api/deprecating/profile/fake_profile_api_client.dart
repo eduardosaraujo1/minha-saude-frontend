@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-import '../fakes/fake_server_persistent_storage.dart';
+import '../../fakes/deprecating/fake_server_persistent_storage.dart';
 import 'models/profile_api_model.dart';
 import 'profile_api_client.dart';
 

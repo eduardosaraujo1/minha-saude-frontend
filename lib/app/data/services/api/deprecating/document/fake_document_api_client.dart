@@ -1,13 +1,12 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:minha_saude_frontend/app/data/services/api/exceptions/unreachable_server_exception.dart';
-import 'package:minha_saude_frontend/app/data/services/api/fakes/fake_document_server_storage.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:uuid/uuid.dart';
 
-import 'models/document_api_model.dart';
+import '../../fakes/deprecating/fake_document_server_storage.dart';
 import 'document_api_client.dart';
+import 'models/document_api_model.dart';
 
 /// Fake implementation of DocumentApiClient for testing/development
 /// Simulates backend API behavior using FakeDocumentServerStorage
@@ -15,7 +14,7 @@ class FakeDocumentApiClient implements DocumentApiClient {
   FakeDocumentApiClient({required this.serverStorage});
 
   // Server-side storage (simulates backend)
-  final FakeDocumentServerStorage serverStorage;
+  final FakeServerFileStorage serverStorage;
 
   // UUID generator (simulates server-side UUID generation)
   final _uuid = const Uuid();
@@ -75,7 +74,7 @@ class FakeDocumentApiClient implements DocumentApiClient {
 
       return Success(document);
     } catch (e) {
-      return Error(UnreachableServerException('Failed to upload document: $e'));
+      return Error(Exception('Failed to upload document: $e'));
     }
   }
 
@@ -87,7 +86,7 @@ class FakeDocumentApiClient implements DocumentApiClient {
 
       return await serverStorage.queryDocumentList();
     } catch (e) {
-      return Error(UnreachableServerException('Failed to list documents: $e'));
+      return Error(Exception('Failed to list documents: $e'));
     }
   }
 
@@ -106,9 +105,7 @@ class FakeDocumentApiClient implements DocumentApiClient {
       // Query file from server storage
       return await serverStorage.queryDocumentFile(uuid);
     } catch (e) {
-      return Error(
-        UnreachableServerException('Failed to download document: $e'),
-      );
+      return Error(Exception('Failed to download document: $e'));
     }
   }
 
@@ -122,9 +119,7 @@ class FakeDocumentApiClient implements DocumentApiClient {
       // This endpoint returns metadata even if document is deleted (matches API spec)
       return await serverStorage.queryDocumentMetadata(uuid);
     } catch (e) {
-      return Error(
-        UnreachableServerException('Failed to get document metadata: $e'),
-      );
+      return Error(Exception('Failed to get document metadata: $e'));
     }
   }
 
@@ -151,7 +146,7 @@ class FakeDocumentApiClient implements DocumentApiClient {
         dataDocumento: dataDocumento,
       );
     } catch (e) {
-      return Error(UnreachableServerException('Failed to update document: $e'));
+      return Error(Exception('Failed to update document: $e'));
     }
   }
 }

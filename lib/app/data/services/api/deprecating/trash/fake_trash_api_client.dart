@@ -1,6 +1,6 @@
 import 'package:logging/logging.dart';
-import 'package:minha_saude_frontend/app/data/services/api/document/models/document_api_model.dart';
-import 'package:minha_saude_frontend/app/data/services/api/fakes/fake_document_server_storage.dart';
+import 'package:minha_saude_frontend/app/data/services/api/deprecating/document/models/document_api_model.dart';
+import 'package:minha_saude_frontend/app/data/services/api/fakes/deprecating/fake_document_server_storage.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import 'trash_api_client.dart';
@@ -8,7 +8,7 @@ import 'trash_api_client.dart';
 class FakeTrashApiClient extends TrashApiClient {
   FakeTrashApiClient({required this.serverStorage});
 
-  final FakeDocumentServerStorage serverStorage;
+  final FakeServerFileStorage serverStorage;
   final _logger = Logger('FakeTrashApiClient');
 
   @override

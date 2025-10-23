@@ -3,7 +3,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:test/test.dart';
 
-import '../../../testing/mocks/mock_secure_storage.dart';
+import '../../../testing/mocks/services/mock_secure_storage.dart';
 
 void main() {
   late SessionRepository sessionRepository;

@@ -21,9 +21,11 @@ class Environment {
   );
 
   /// The API base URL
-  static const String apiUrl = String.fromEnvironment(
-    'API_URL',
-    defaultValue: 'http://localhost:8000',
+  static String apiUrl = _trimUrl(
+    const String.fromEnvironment(
+      'API_URL',
+      defaultValue: 'http://localhost:8000',
+    ),
   );
 
   /// Google OAuth client ID
@@ -45,5 +47,9 @@ class Environment {
       default:
         return AppEnv.development;
     }
+  }
+
+  static String _trimUrl(String string) {
+    return string.replaceAll(RegExp(r'\/$'), '');
   }
 }

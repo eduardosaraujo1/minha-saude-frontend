@@ -1,13 +1,13 @@
 import 'package:multiple_result/multiple_result.dart';
 
-import '../http_client.dart';
+import '../http_client/http_client.dart';
 import 'models/profile_api_model.dart';
 import 'profile_api_client.dart';
 
 class ProfileApiClientImpl extends ProfileApiClient {
   ProfileApiClientImpl(this.httpClient);
 
-  final HttpClient httpClient;
+  final LegacyHttpClient httpClient;
 
   @override
   Future<Result<void, Exception>> deleteAccount() {

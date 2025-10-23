@@ -1,56 +1,7 @@
-// Use fake_server.sqlite file, creating if it doesn't exist, just like in local/cache_database
-// This simulates a server-side database
-// Store Documents, Users and Shares
-// DB Schema (needs to be adapted to SQLite):
-/*
-CREATE TABLE tb_usuario (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    cpf VARCHAR(14) NOT NULL UNIQUE,
-    nome VARCHAR(255) NOT NULL,
-    data_nascimento DATE NOT NULL,
-    telefone VARCHAR(20) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    metodo_autenticacao VARCHAR(255) NOT NULL, -- Google, Email
-    google_id VARCHAR(255) NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL
-);
-
-CREATE TABLE tb_documento (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    uuid CHAR(36) NOT NULL UNIQUE, -- Usado no app para referenciar o documento
-    caminho_arquivo VARCHAR(255) NOT NULL,
-    titulo VARCHAR(255) NOT NULL,
-    nome_paciente VARCHAR(255),
-    nome_medico VARCHAR(255),
-    tipo_documento VARCHAR(120),
-    data_documento DATE,
-    processando_metadados TINYINT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL,
-    fk_id_usuario CHAR(36) NOT NULL,
-    FOREIGN KEY (fk_id_usuario) REFERENCES tb_usuario(id)
-);
-
-CREATE TABLE tb_compartilhamento (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    codigo CHAR(8) NOT NULL UNIQUE,
-    data_primeiro_uso TIMESTAMP NULL,
-    expirado BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL,
-    fk_id_usuario CHAR(36) NOT NULL,
-    FOREIGN KEY (fk_id_usuario) REFERENCES tb_usuario(id)
-);
-
-CREATE TABLE tb_compartilhamento_documento (
-    id_compartilhamento CHAR(36),
-    id_documento CHAR(36),
-    PRIMARY KEY (id_compartilhamento, id_documento),
-    FOREIGN KEY (id_compartilhamento) REFERENCES tb_compartilhamento(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_documento) REFERENCES tb_documento(id) ON DELETE CASCADE
-);
- */
+/// Fake Server Database - Simulates server-side persistence
+///
+/// Uses SQLite to store users, documents, and shares just like a real backend.
+/// This enables offline demos and comprehensive testing.
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -60,6 +11,9 @@ class FakeServerDatabase {
   FakeServerDatabase();
 
   Database? _database;
+  UserTableORM? _userTable;
+  DocumentTableORM? _documentTable;
+  ShareTableORM? _shareTable;
 
   Database get database {
     if (_database == null) {
@@ -70,7 +24,30 @@ class FakeServerDatabase {
     return _database!;
   }
 
-  @override
+  /// User table operations
+  UserTableORM get users {
+    if (_userTable == null) {
+      throw StateError('Database not initialized. Call init() first.');
+    }
+    return _userTable!;
+  }
+
+  /// Document table operations
+  DocumentTableORM get documents {
+    if (_documentTable == null) {
+      throw StateError('Database not initialized. Call init() first.');
+    }
+    return _documentTable!;
+  }
+
+  /// Share table operations
+  ShareTableORM get shares {
+    if (_shareTable == null) {
+      throw StateError('Database not initialized. Call init() first.');
+    }
+    return _shareTable!;
+  }
+
   Future<void> init() async {
     // Get the application documents directory for persistent storage
     final databasesPath = await getApplicationDocumentsDirectory();
@@ -82,38 +59,170 @@ class FakeServerDatabase {
       path,
       version: 1,
       onCreate: (db, version) async {
+        // Users table
         await db.execute('''
-          
+          CREATE TABLE tb_usuario (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            cpf TEXT NOT NULL UNIQUE,
+            nome TEXT NOT NULL,
+            data_nascimento TEXT NOT NULL,
+            telefone TEXT,
+            email TEXT NOT NULL UNIQUE,
+            metodo_autenticacao TEXT NOT NULL,
+            google_id TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            deleted_at TEXT
+          )
+        ''');
+
+        // Documents table
+        await db.execute('''
+          CREATE TABLE tb_documento (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            uuid TEXT NOT NULL UNIQUE,
+            caminho_arquivo TEXT NOT NULL,
+            titulo TEXT NOT NULL,
+            nome_paciente TEXT,
+            nome_medico TEXT,
+            tipo_documento TEXT,
+            data_documento TEXT,
+            processando_metadados INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            deleted_at TEXT,
+            fk_id_usuario INTEGER NOT NULL,
+            FOREIGN KEY (fk_id_usuario) REFERENCES tb_usuario(id)
+          )
+        ''');
+
+        // Shares table
+        await db.execute('''
+          CREATE TABLE tb_compartilhamento (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            codigo TEXT NOT NULL UNIQUE,
+            data_primeiro_uso TEXT,
+            expirado INTEGER DEFAULT 0,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            deleted_at TEXT,
+            fk_id_usuario INTEGER NOT NULL,
+            FOREIGN KEY (fk_id_usuario) REFERENCES tb_usuario(id)
+          )
+        ''');
+
+        // Share-Document junction table
+        await db.execute('''
+          CREATE TABLE tb_compartilhamento_documento (
+            id_compartilhamento INTEGER,
+            id_documento INTEGER,
+            PRIMARY KEY (id_compartilhamento, id_documento),
+            FOREIGN KEY (id_compartilhamento) REFERENCES tb_compartilhamento(id) ON DELETE CASCADE,
+            FOREIGN KEY (id_documento) REFERENCES tb_documento(id) ON DELETE CASCADE
+          )
+        ''');
+
+        // Session tokens table (for auth)
+        await db.execute('''
+          CREATE TABLE tb_session_token (
+            token TEXT PRIMARY KEY,
+            fk_id_usuario INTEGER NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            expires_at TEXT,
+            FOREIGN KEY (fk_id_usuario) REFERENCES tb_usuario(id)
+          )
+        ''');
+
+        // Email verification codes table
+        await db.execute('''
+          CREATE TABLE tb_email_code (
+            email TEXT PRIMARY KEY,
+            code TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            expires_at TEXT NOT NULL
+          )
         ''');
       },
     );
+
+    // Initialize ORM instances
+    _userTable = UserTableORM(_database!);
+    _documentTable = DocumentTableORM(_database!);
+    _shareTable = ShareTableORM(_database!);
+  }
+
+  /// Clear all data (useful for testing)
+  Future<void> clearAll() async {
+    await database.delete('tb_compartilhamento_documento');
+    await database.delete('tb_compartilhamento');
+    await database.delete('tb_documento');
+    await database.delete('tb_session_token');
+    await database.delete('tb_email_code');
+    await database.delete('tb_usuario');
   }
 }
+
+// ========== ORM Base Interface ==========
 
 abstract class TableORM {
-  Future<void> create(Map<String, dynamic> data);
-  Future<Map<String, dynamic>?> read(String id);
+  Future<int> create(Map<String, dynamic> data);
+  Future<Map<String, dynamic>?> read(int id);
   Future<List<Map<String, dynamic>>> readAll();
-  Future<void> update(String id, Map<String, dynamic> data);
-  Future<void> delete(String id);
+  Future<void> update(int id, Map<String, dynamic> data);
+  Future<void> delete(int id);
 }
 
-class DocumentTableORM implements TableORM {
+// ========== User Table ORM ==========
+
+class UserTableORM implements TableORM {
   final Database database;
 
-  DocumentTableORM(this.database);
+  UserTableORM(this.database);
 
   @override
-  Future<void> create(Map<String, dynamic> data) async {
-    await database.insert('tb_documento', data);
+  Future<int> create(Map<String, dynamic> data) async {
+    return await database.insert('tb_usuario', data);
   }
 
   @override
-  Future<Map<String, dynamic>?> read(String id) async {
+  Future<Map<String, dynamic>?> read(int id) async {
     final results = await database.query(
-      'tb_documento',
-      where: 'uuid = ?',
+      'tb_usuario',
+      where: 'id = ?',
       whereArgs: [id],
+    );
+    if (results.isNotEmpty) {
+      return results.first;
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> findByEmail(String email) async {
+    final results = await database.query(
+      'tb_usuario',
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+    if (results.isNotEmpty) {
+      return results.first;
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> findByCpf(String cpf) async {
+    final results = await database.query(
+      'tb_usuario',
+      where: 'cpf = ?',
+      whereArgs: [cpf],
+    );
+    if (results.isNotEmpty) {
+      return results.first;
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> findByGoogleId(String googleId) async {
+    final results = await database.query(
+      'tb_usuario',
+      where: 'google_id = ?',
+      whereArgs: [googleId],
     );
     if (results.isNotEmpty) {
       return results.first;
@@ -123,21 +232,264 @@ class DocumentTableORM implements TableORM {
 
   @override
   Future<List<Map<String, dynamic>>> readAll() async {
-    return await database.query('tb_documento');
+    return await database.query('tb_usuario', where: 'deleted_at IS NULL');
   }
 
   @override
-  Future<void> update(String id, Map<String, dynamic> data) async {
+  Future<void> update(int id, Map<String, dynamic> data) async {
+    await database.update('tb_usuario', data, where: 'id = ?', whereArgs: [id]);
+  }
+
+  @override
+  Future<void> delete(int id) async {
+    // Soft delete
     await database.update(
-      'tb_documento',
-      data,
-      where: 'uuid = ?',
+      'tb_usuario',
+      {'deleted_at': DateTime.now().toIso8601String()},
+      where: 'id = ?',
       whereArgs: [id],
     );
   }
 
+  Future<void> hardDelete(int id) async {
+    await database.delete('tb_usuario', where: 'id = ?', whereArgs: [id]);
+  }
+}
+
+// ========== Document Table ORM ==========
+
+class DocumentTableORM implements TableORM {
+  final Database database;
+
+  DocumentTableORM(this.database);
+
   @override
-  Future<void> delete(String id) async {
-    await database.delete('tb_documento', where: 'uuid = ?', whereArgs: [id]);
+  Future<int> create(Map<String, dynamic> data) async {
+    return await database.insert('tb_documento', data);
+  }
+
+  @override
+  Future<Map<String, dynamic>?> read(int id) async {
+    final results = await database.query(
+      'tb_documento',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (results.isNotEmpty) {
+      return results.first;
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> findByUuid(String uuid) async {
+    final results = await database.query(
+      'tb_documento',
+      where: 'uuid = ?',
+      whereArgs: [uuid],
+    );
+    if (results.isNotEmpty) {
+      return results.first;
+    }
+    return null;
+  }
+
+  Future<List<Map<String, dynamic>>> findByUser(int userId) async {
+    return await database.query(
+      'tb_documento',
+      where: 'fk_id_usuario = ? AND deleted_at IS NULL',
+      whereArgs: [userId],
+      orderBy: 'created_at DESC',
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> findDeletedByUser(int userId) async {
+    return await database.query(
+      'tb_documento',
+      where: 'fk_id_usuario = ? AND deleted_at IS NOT NULL',
+      whereArgs: [userId],
+      orderBy: 'deleted_at DESC',
+    );
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> readAll() async {
+    return await database.query('tb_documento', where: 'deleted_at IS NULL');
+  }
+
+  @override
+  Future<void> update(int id, Map<String, dynamic> data) async {
+    await database.update(
+      'tb_documento',
+      data,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> updateByUuid(String uuid, Map<String, dynamic> data) async {
+    await database.update(
+      'tb_documento',
+      data,
+      where: 'uuid = ?',
+      whereArgs: [uuid],
+    );
+  }
+
+  @override
+  Future<void> delete(int id) async {
+    // Soft delete
+    await database.update(
+      'tb_documento',
+      {'deleted_at': DateTime.now().toIso8601String()},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> restore(int id) async {
+    await database.update(
+      'tb_documento',
+      {'deleted_at': null},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> hardDelete(int id) async {
+    await database.delete('tb_documento', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> hardDeleteByUuid(String uuid) async {
+    await database.delete('tb_documento', where: 'uuid = ?', whereArgs: [uuid]);
+  }
+}
+
+// ========== Share Table ORM ==========
+
+class ShareTableORM implements TableORM {
+  final Database database;
+
+  ShareTableORM(this.database);
+
+  @override
+  Future<int> create(Map<String, dynamic> data) async {
+    return await database.insert('tb_compartilhamento', data);
+  }
+
+  @override
+  Future<Map<String, dynamic>?> read(int id) async {
+    final results = await database.query(
+      'tb_compartilhamento',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (results.isNotEmpty) {
+      return results.first;
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> findByCode(String code) async {
+    final results = await database.query(
+      'tb_compartilhamento',
+      where: 'codigo = ? AND deleted_at IS NULL',
+      whereArgs: [code],
+    );
+    if (results.isNotEmpty) {
+      return results.first;
+    }
+    return null;
+  }
+
+  Future<List<Map<String, dynamic>>> findByUser(int userId) async {
+    return await database.query(
+      'tb_compartilhamento',
+      where: 'fk_id_usuario = ? AND deleted_at IS NULL',
+      whereArgs: [userId],
+      orderBy: 'created_at DESC',
+    );
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> readAll() async {
+    return await database.query(
+      'tb_compartilhamento',
+      where: 'deleted_at IS NULL',
+    );
+  }
+
+  @override
+  Future<void> update(int id, Map<String, dynamic> data) async {
+    await database.update(
+      'tb_compartilhamento',
+      data,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> updateByCode(String code, Map<String, dynamic> data) async {
+    await database.update(
+      'tb_compartilhamento',
+      data,
+      where: 'codigo = ?',
+      whereArgs: [code],
+    );
+  }
+
+  @override
+  Future<void> delete(int id) async {
+    // Soft delete
+    await database.update(
+      'tb_compartilhamento',
+      {'deleted_at': DateTime.now().toIso8601String()},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> deleteByCode(String code) async {
+    await database.update(
+      'tb_compartilhamento',
+      {'deleted_at': DateTime.now().toIso8601String()},
+      where: 'codigo = ?',
+      whereArgs: [code],
+    );
+  }
+
+  Future<void> hardDelete(int id) async {
+    await database.delete(
+      'tb_compartilhamento',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // Share-Document relationship methods
+  Future<void> addDocument(int shareId, int documentId) async {
+    await database.insert('tb_compartilhamento_documento', {
+      'id_compartilhamento': shareId,
+      'id_documento': documentId,
+    });
+  }
+
+  Future<void> removeDocument(int shareId, int documentId) async {
+    await database.delete(
+      'tb_compartilhamento_documento',
+      where: 'id_compartilhamento = ? AND id_documento = ?',
+      whereArgs: [shareId, documentId],
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getDocuments(int shareId) async {
+    final results = await database.rawQuery(
+      '''
+      SELECT d.* FROM tb_documento d
+      INNER JOIN tb_compartilhamento_documento cd ON d.id = cd.id_documento
+      WHERE cd.id_compartilhamento = ?
+    ''',
+      [shareId],
+    );
+    return results;
   }
 }

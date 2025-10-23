@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:minha_saude_frontend/config/environment.dart';
 import 'package:multiple_result/multiple_result.dart';
 
+import '../../../../../config/environment.dart';
+
 part 'api_gateway_impl.dart';
-part '../fakes/fake_api_gateway.dart';
 
 typedef Response = http.Response;
 

@@ -1,6 +1,8 @@
 part of 'api_gateway.dart';
 
 class ApiGatewayImpl implements ApiGateway {
+  ApiGatewayImpl();
+
   Future<String?> Function()? _authHeaderProvider;
 
   Future<String?> Function()? _onUnauthorizedResponse;

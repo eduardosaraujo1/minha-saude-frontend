@@ -8,7 +8,7 @@ import 'trash_api_client.dart';
 class FakeTrashApiClient extends TrashApiClient {
   FakeTrashApiClient({required this.serverStorage});
 
-  final FakeServerFileStorage serverStorage;
+  final FakeDocumentServerStorage serverStorage;
   final _logger = Logger('FakeTrashApiClient');
 
   @override

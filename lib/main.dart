@@ -23,7 +23,7 @@ void main() async {
 
     if (Environment.appEnv.isDev) {
       await dev.setup(
-        mockApiClient: true,
+        mockServer: true,
         mockGoogle: !(Platform.isAndroid || Platform.isIOS),
         // mockGoogle: true,
         mockScanner: true,

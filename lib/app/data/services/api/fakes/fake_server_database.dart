@@ -118,27 +118,6 @@ class FakeServerDatabase {
             FOREIGN KEY (id_documento) REFERENCES tb_documento(id) ON DELETE CASCADE
           )
         ''');
-
-        // Session tokens table (for auth)
-        await db.execute('''
-          CREATE TABLE tb_session_token (
-            token TEXT PRIMARY KEY,
-            fk_id_usuario INTEGER NOT NULL,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            expires_at TEXT,
-            FOREIGN KEY (fk_id_usuario) REFERENCES tb_usuario(id)
-          )
-        ''');
-
-        // Email verification codes table
-        await db.execute('''
-          CREATE TABLE tb_email_code (
-            email TEXT PRIMARY KEY,
-            code TEXT NOT NULL,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            expires_at TEXT NOT NULL
-          )
-        ''');
       },
     );
 
@@ -153,8 +132,6 @@ class FakeServerDatabase {
     await database.delete('tb_compartilhamento_documento');
     await database.delete('tb_compartilhamento');
     await database.delete('tb_documento');
-    await database.delete('tb_session_token');
-    await database.delete('tb_email_code');
     await database.delete('tb_usuario');
   }
 }

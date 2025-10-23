@@ -9,8 +9,8 @@ import 'package:path_provider/path_provider.dart';
 /// Simulates server-side document storage
 /// Stores document metadata in-memory and files in temporary directory
 /// Shared between DocumentApiClient and TrashApiClient to simulate backend behavior
-class FakeServerFileStorage {
-  FakeServerFileStorage({required this.cacheDatabase});
+class FakeDocumentServerStorage {
+  FakeDocumentServerStorage({required this.cacheDatabase});
 
   final CacheDatabase cacheDatabase;
 

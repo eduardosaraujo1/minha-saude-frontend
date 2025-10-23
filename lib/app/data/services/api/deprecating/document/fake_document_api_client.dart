@@ -14,7 +14,7 @@ class FakeDocumentApiClient implements DocumentApiClient {
   FakeDocumentApiClient({required this.serverStorage});
 
   // Server-side storage (simulates backend)
-  final FakeServerFileStorage serverStorage;
+  final FakeDocumentServerStorage serverStorage;
 
   // UUID generator (simulates server-side UUID generation)
   final _uuid = const Uuid();

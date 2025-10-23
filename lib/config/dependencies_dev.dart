@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:minha_saude_frontend/app/data/services/api/fakes/fake_server_file_storage.dart';
 
 import '../app/data/repositories/auth/auth_repository.dart';
 import '../app/data/repositories/document/cache/document_file_cache_store.dart';
@@ -18,9 +19,6 @@ import '../app/data/services/api/deprecating/auth/fake_auth_api_client.dart';
 import '../app/data/services/api/deprecating/document/document_api_client.dart';
 import '../app/data/services/api/deprecating/document/document_api_client_impl.dart';
 import '../app/data/services/api/deprecating/document/fake_document_api_client.dart';
-import '../app/data/services/api/fakes/deprecating/fake_document_server_storage.dart';
-import '../app/data/services/api/fakes/deprecating/fake_server_persistent_storage.dart';
-import '../app/data/services/api/gateway/api_gateway.dart';
 import '../app/data/services/api/deprecating/http_client/http_client.dart';
 import '../app/data/services/api/deprecating/profile/fake_profile_api_client.dart';
 import '../app/data/services/api/deprecating/profile/profile_api_client.dart';
@@ -28,6 +26,12 @@ import '../app/data/services/api/deprecating/profile/profile_api_client_impl.dar
 import '../app/data/services/api/deprecating/trash/fake_trash_api_client.dart';
 import '../app/data/services/api/deprecating/trash/trash_api_client.dart';
 import '../app/data/services/api/deprecating/trash/trash_api_client_impl.dart';
+import '../app/data/services/api/fakes/deprecating/fake_document_server_storage.dart';
+import '../app/data/services/api/fakes/deprecating/fake_server_persistent_storage.dart';
+import '../app/data/services/api/fakes/fake_api_gateway/fake_api_gateway.dart';
+import '../app/data/services/api/fakes/fake_server_cache_engine.dart';
+import '../app/data/services/api/fakes/fake_server_database.dart';
+import '../app/data/services/api/gateway/api_gateway.dart';
 import '../app/data/services/doc_scanner/document_scanner.dart';
 import '../app/data/services/google/google_service.dart';
 import '../app/data/services/local/cache_database/cache_database.dart';
@@ -49,7 +53,7 @@ final _getIt = GetIt.instance;
 
 Future<void> setup({
   bool mockGoogle = false,
-  bool mockApiClient = false,
+  bool mockServer = false,
   bool mockScanner = false,
   bool mockSecureStorage = false,
   bool mockCacheDb = false,
@@ -85,18 +89,27 @@ Future<void> setup({
   _getIt.registerSingleton<DocumentFileCacheStore>(DocumentFileCacheStore());
 
   // Register ApiGateway
-  if (mockApiClient) {
-    _getIt.registerSingleton<ApiGateway>(FakeApiGateway());
+  if (mockServer) {
+    _getIt.registerSingleton<FakeServerCacheEngine>(FakeServerCacheEngine());
+    _getIt.registerSingleton<FakeServerDatabase>(FakeServerDatabase());
+    _getIt.registerSingleton<FakeServerFileStorage>(FakeServerFileStorage());
+    _getIt.registerSingleton<ApiGateway>(
+      FakeApiGateway(
+        fakeServerCacheEngine: _getIt<FakeServerCacheEngine>(),
+        fakeServerDatabase: _getIt<FakeServerDatabase>(),
+        fakeServerFileStorage: _getIt<FakeServerFileStorage>(),
+      ),
+    );
   } else {
     _getIt.registerSingleton<ApiGateway>(ApiGatewayImpl());
   }
 
-  if (mockApiClient) {
+  if (mockServer) {
     _getIt.registerSingleton<FakeServerPersistentStorage>(
       FakeServerPersistentStorage(),
     );
-    _getIt.registerSingleton<FakeServerFileStorage>(
-      FakeServerFileStorage(cacheDatabase: _getIt<CacheDatabase>()),
+    _getIt.registerSingleton<FakeDocumentServerStorage>(
+      FakeDocumentServerStorage(cacheDatabase: _getIt<CacheDatabase>()),
     );
     _getIt.registerSingleton<AuthApiClient>(
       FakeAuthApiClient(
@@ -104,10 +117,10 @@ Future<void> setup({
       ),
     );
     _getIt.registerSingleton<DocumentApiClient>(
-      FakeDocumentApiClient(serverStorage: _getIt<FakeServerFileStorage>()),
+      FakeDocumentApiClient(serverStorage: _getIt<FakeDocumentServerStorage>()),
     );
     _getIt.registerSingleton<TrashApiClient>(
-      FakeTrashApiClient(serverStorage: _getIt<FakeServerFileStorage>()),
+      FakeTrashApiClient(serverStorage: _getIt<FakeDocumentServerStorage>()),
     );
     _getIt.registerSingleton<ProfileApiClient>(
       FakeProfileApiClient(
@@ -197,9 +210,9 @@ Future<void> setup({
   // Post-register configuration
   await _getIt<CacheDatabase>().init();
 
-  if (mockApiClient) {
+  if (mockServer) {
     // Initialize fake server storage with data from cache database
-    await _getIt<FakeServerFileStorage>().initialize();
+    await _getIt<FakeDocumentServerStorage>().initialize();
   } else {
     // Configure ApiGateway auth header provider
     _getIt<ApiGateway>().authHeaderProvider = () async {

@@ -2,27 +2,22 @@
 ///
 /// Uses SQLite to store users, documents, and shares just like a real backend.
 /// This enables offline demos and comprehensive testing.
+library;
 
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common/sqlite_api.dart';
+
+import '../../sqlite/sqlite_database.dart';
 
 class FakeServerDatabase {
-  FakeServerDatabase();
+  FakeServerDatabase({required this.sqliteDatabase});
 
-  Database? _database;
+  final SqliteDatabase sqliteDatabase;
+
   UserTableORM? _userTable;
   DocumentTableORM? _documentTable;
   ShareTableORM? _shareTable;
 
-  Database get database {
-    if (_database == null) {
-      throw StateError(
-        'Database not initialized. Call init() before using the database.',
-      );
-    }
-    return _database!;
-  }
+  Database get database => sqliteDatabase.database;
 
   /// User table operations
   UserTableORM get users {
@@ -49,81 +44,12 @@ class FakeServerDatabase {
   }
 
   Future<void> init() async {
-    // Get the application documents directory for persistent storage
-    final databasesPath = await getApplicationDocumentsDirectory();
-    final path = join(databasesPath.path, 'fake_server.sqlite');
-
-    // openDatabase only creates the database if it doesn't exist
-    // onCreate is only called once when the database is first created
-    _database = await openDatabase(
-      path,
-      version: 1,
-      onCreate: (db, version) async {
-        // Users table
-        await db.execute('''
-          CREATE TABLE tb_usuario (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            cpf TEXT NOT NULL UNIQUE,
-            nome TEXT NOT NULL,
-            data_nascimento TEXT NOT NULL,
-            telefone TEXT,
-            email TEXT NOT NULL UNIQUE,
-            metodo_autenticacao TEXT NOT NULL,
-            google_id TEXT,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            deleted_at TEXT
-          )
-        ''');
-
-        // Documents table
-        await db.execute('''
-          CREATE TABLE tb_documento (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            uuid TEXT NOT NULL UNIQUE,
-            titulo TEXT NOT NULL,
-            nome_paciente TEXT,
-            nome_medico TEXT,
-            tipo_documento TEXT,
-            data_documento TEXT,
-            processando_metadados INTEGER NOT NULL DEFAULT 0,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            deleted_at TEXT,
-            fk_id_usuario INTEGER NOT NULL,
-            FOREIGN KEY (fk_id_usuario) REFERENCES tb_usuario(id)
-          )
-        ''');
-
-        // Shares table
-        await db.execute('''
-          CREATE TABLE tb_compartilhamento (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            codigo TEXT NOT NULL UNIQUE,
-            data_primeiro_uso TEXT,
-            expirado INTEGER DEFAULT 0,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            deleted_at TEXT,
-            fk_id_usuario INTEGER NOT NULL,
-            FOREIGN KEY (fk_id_usuario) REFERENCES tb_usuario(id)
-          )
-        ''');
-
-        // Share-Document junction table
-        await db.execute('''
-          CREATE TABLE tb_compartilhamento_documento (
-            id_compartilhamento INTEGER,
-            id_documento INTEGER,
-            PRIMARY KEY (id_compartilhamento, id_documento),
-            FOREIGN KEY (id_compartilhamento) REFERENCES tb_compartilhamento(id) ON DELETE CASCADE,
-            FOREIGN KEY (id_documento) REFERENCES tb_documento(id) ON DELETE CASCADE
-          )
-        ''');
-      },
-    );
+    await sqliteDatabase.init();
 
     // Initialize ORM instances
-    _userTable = UserTableORM(_database!);
-    _documentTable = DocumentTableORM(_database!);
-    _shareTable = ShareTableORM(_database!);
+    _userTable = UserTableORM(database);
+    _documentTable = DocumentTableORM(database);
+    _shareTable = ShareTableORM(database);
   }
 
   /// Clear all data (useful for testing)

@@ -1,7 +1,7 @@
 part of 'auth_repository.dart';
 
-class LocalAuthRepository extends AuthRepository {
-  LocalAuthRepository({
+class AuthRepositoryImpl extends AuthRepository {
+  AuthRepositoryImpl({
     required GoogleService googleService,
     required ApiGateway apiGateway,
   }) : _googleService = googleService,

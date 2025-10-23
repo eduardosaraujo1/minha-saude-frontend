@@ -49,7 +49,7 @@ void main() {
     mockApiGateway = MockApiGateway();
     mockGoogleService = MockGoogleService();
 
-    authRepository = LocalAuthRepository(
+    authRepository = AuthRepositoryImpl(
       apiGateway: mockApiGateway,
       googleService: mockGoogleService,
     );

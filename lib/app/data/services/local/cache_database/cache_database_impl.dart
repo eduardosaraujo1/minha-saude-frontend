@@ -1,53 +1,22 @@
 import 'package:multiple_result/multiple_result.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common/sqlite_api.dart';
 
-import 'models/document_db_model.dart';
+import '../../sqlite/sqlite_database.dart';
 import 'cache_database.dart';
+import 'models/document_db_model.dart';
 
-/// Implementation of CacheDatabase using SQLite via sqflite package.
+/// Implementation of CacheDatabase using SQLite via sqflite_common_ffi.
 /// Uses DocumentDbModel for database operations with snake_case field mapping.
 class CacheDatabaseImpl implements CacheDatabase {
-  Database? _database;
+  CacheDatabaseImpl({required this.sqliteDatabase});
 
-  Database get database {
-    if (_database == null) {
-      throw StateError(
-        'Database not initialized. Call init() before using the database.',
-      );
-    }
-    return _database!;
-  }
+  final SqliteDatabase sqliteDatabase;
+
+  Database get database => sqliteDatabase.database;
 
   @override
   Future<void> init() async {
-    // Get the application documents directory for persistent storage
-    final databasesPath = await getApplicationDocumentsDirectory();
-    final path = p.join(databasesPath.path, 'minha_saude.db');
-
-    // openDatabase only creates the database if it doesn't exist
-    // onCreate is only called once when the database is first created
-    _database = await openDatabase(
-      path,
-      version: 1,
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE documents (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            uuid TEXT NOT NULL UNIQUE,
-            titulo TEXT NOT NULL,
-            paciente TEXT NULL,
-            medico TEXT NULL,
-            tipo TEXT NULL,
-            data_documento TEXT NULL,
-            created_at TEXT NOT NULL,
-            deleted_at TEXT NULL,
-            cached_at TEXT NOT NULL
-          )
-        ''');
-      },
-    );
+    await sqliteDatabase.init();
   }
 
   @override

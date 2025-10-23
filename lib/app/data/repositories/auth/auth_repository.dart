@@ -9,7 +9,7 @@ import '../../services/api/deprecating/auth/models/register_response/register_re
 import '../../services/api/gateway/routes.dart';
 import '../../services/google/google_service.dart';
 
-part 'local_auth_repository.dart';
+part 'auth_repository_impl.dart';
 // part 'remote_auth_repository.dart';
 
 abstract class AuthRepository extends ChangeNotifier {

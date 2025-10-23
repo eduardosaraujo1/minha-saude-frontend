@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:minha_saude_frontend/app/data/services/api/fakes/fake_server_file_storage.dart';
 
 import '../app/data/repositories/auth/auth_repository.dart';
 import '../app/data/repositories/document/cache/document_file_cache_store.dart';
@@ -31,6 +30,7 @@ import '../app/data/services/api/fakes/deprecating/fake_server_persistent_storag
 import '../app/data/services/api/fakes/fake_api_gateway/fake_api_gateway.dart';
 import '../app/data/services/api/fakes/fake_server_cache_engine.dart';
 import '../app/data/services/api/fakes/fake_server_database.dart';
+import '../app/data/services/api/fakes/fake_server_file_storage.dart';
 import '../app/data/services/api/gateway/api_gateway.dart';
 import '../app/data/services/doc_scanner/document_scanner.dart';
 import '../app/data/services/google/google_service.dart';
@@ -40,6 +40,7 @@ import '../app/data/services/local/cache_database/fake_cache_database.dart';
 import '../app/data/services/local/file_system_service/file_system_service.dart';
 import '../app/data/services/local/file_system_service/file_system_service_impl.dart';
 import '../app/data/services/local/secure_storage/secure_storage.dart';
+import '../app/data/services/sqlite/sqlite_database.dart';
 import '../app/domain/actions/auth/get_tos_action.dart';
 import '../app/domain/actions/auth/logout_action.dart';
 import '../app/domain/actions/auth/process_login_result_action.dart';
@@ -82,7 +83,9 @@ Future<void> setup({
   if (mockCacheDb) {
     _getIt.registerSingleton<CacheDatabase>(FakeCacheDatabase());
   } else {
-    _getIt.registerSingleton<CacheDatabase>(CacheDatabaseImpl());
+    _getIt.registerSingleton<CacheDatabase>(
+      CacheDatabaseImpl(sqliteDatabase: SqliteDatabase.forCacheDatabase()),
+    );
   }
 
   _getIt.registerSingleton<DocumentListCacheStore>(DocumentListCacheStore());
@@ -91,7 +94,11 @@ Future<void> setup({
   // Register ApiGateway
   if (mockServer) {
     _getIt.registerSingleton<FakeServerCacheEngine>(FakeServerCacheEngine());
-    _getIt.registerSingleton<FakeServerDatabase>(FakeServerDatabase());
+    _getIt.registerSingleton<FakeServerDatabase>(
+      FakeServerDatabase(
+        sqliteDatabase: SqliteDatabase.forFakeServerDatabase(),
+      ),
+    );
     _getIt.registerSingleton<FakeServerFileStorage>(FakeServerFileStorage());
     _getIt.registerSingleton<ApiGateway>(
       FakeApiGateway(
@@ -145,7 +152,7 @@ Future<void> setup({
 
   // Repositories
   _getIt.registerSingleton<AuthRepository>(
-    LocalAuthRepository(
+    AuthRepositoryImpl(
       googleService: _getIt<GoogleService>(),
       apiGateway: _getIt<ApiGateway>(),
     ),

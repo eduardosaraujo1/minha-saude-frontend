@@ -23,7 +23,7 @@ class _ProfileController {
     try {
       final user = await _getCurrentUser();
       if (user == null) {
-        return Error(ClientException('User not found'));
+        return Error(ApiGatewayException('User not found', statusCode: 404));
       }
 
       return Success({
@@ -36,7 +36,9 @@ class _ProfileController {
         'metodoAutenticacao': user['metodo_autenticacao'],
       });
     } catch (e) {
-      return Error(ServerException('Failed to get user profile: $e'));
+      return Error(
+        ApiGatewayException('Failed to get user profile: $e', statusCode: 500),
+      );
     }
   }
 
@@ -51,12 +53,12 @@ class _ProfileController {
     try {
       final nome = data['nome'] as String?;
       if (nome == null) {
-        return Error(ClientException('Missing nome'));
+        return Error(ApiGatewayException('Missing nome', statusCode: 422));
       }
 
       final user = await _getCurrentUser();
       if (user == null) {
-        return Error(ClientException('User not found'));
+        return Error(ApiGatewayException('User not found', statusCode: 404));
       }
 
       final userId = user['id'] as int;
@@ -64,7 +66,9 @@ class _ProfileController {
 
       return Success({'id': userId, 'nome': nome});
     } catch (e) {
-      return Error(ServerException('Failed to edit name: $e'));
+      return Error(
+        ApiGatewayException('Failed to edit name: $e', statusCode: 500),
+      );
     }
   }
 
@@ -79,12 +83,14 @@ class _ProfileController {
     try {
       final dataNascimento = data['dataNascimento'] as String?;
       if (dataNascimento == null) {
-        return Error(ClientException('Missing dataNascimento'));
+        return Error(
+          ApiGatewayException('Missing dataNascimento', statusCode: 422),
+        );
       }
 
       final user = await _getCurrentUser();
       if (user == null) {
-        return Error(ClientException('User not found'));
+        return Error(ApiGatewayException('User not found', statusCode: 404));
       }
 
       final userId = user['id'] as int;
@@ -94,7 +100,9 @@ class _ProfileController {
 
       return Success({'id': userId, 'dataNascimento': dataNascimento});
     } catch (e) {
-      return Error(ServerException('Failed to edit birthdate: $e'));
+      return Error(
+        ApiGatewayException('Failed to edit birthdate: $e', statusCode: 500),
+      );
     }
   }
 
@@ -111,18 +119,20 @@ class _ProfileController {
       final codigoSms = data['codigoSms'] as String?;
 
       if (telefone == null || codigoSms == null) {
-        return Error(ClientException('Missing telefone or codigoSms'));
+        return Error(
+          ApiGatewayException('Missing telefone or codigoSms', statusCode: 422),
+        );
       }
 
       // Verify SMS code
       final storedCode = fakeServerCacheEngine.get('sms_code_$telefone');
       if (storedCode == null || storedCode != codigoSms) {
-        return Error(ClientException('Invalid SMS code'));
+        return Error(ApiGatewayException('Invalid SMS code', statusCode: 401));
       }
 
       final user = await _getCurrentUser();
       if (user == null) {
-        return Error(ClientException('User not found'));
+        return Error(ApiGatewayException('User not found', statusCode: 404));
       }
 
       final userId = user['id'] as int;
@@ -133,7 +143,9 @@ class _ProfileController {
 
       return Success({'id': userId, 'telefone': telefone});
     } catch (e) {
-      return Error(ServerException('Failed to edit phone: $e'));
+      return Error(
+        ApiGatewayException('Failed to edit phone: $e', statusCode: 500),
+      );
     }
   }
 
@@ -148,7 +160,7 @@ class _ProfileController {
     try {
       final telefone = data['telefone'] as String?;
       if (telefone == null) {
-        return Error(ClientException('Missing telefone'));
+        return Error(ApiGatewayException('Missing telefone', statusCode: 422));
       }
 
       // Store fixed SMS code in cache
@@ -156,7 +168,9 @@ class _ProfileController {
 
       return Success({'status': 'success', 'message': null});
     } catch (e) {
-      return Error(ServerException('Failed to send SMS: $e'));
+      return Error(
+        ApiGatewayException('Failed to send SMS: $e', statusCode: 500),
+      );
     }
   }
 
@@ -171,12 +185,14 @@ class _ProfileController {
     try {
       final tokenOauth = data['tokenOauth'] as String?;
       if (tokenOauth == null) {
-        return Error(ClientException('Missing tokenOauth'));
+        return Error(
+          ApiGatewayException('Missing tokenOauth', statusCode: 422),
+        );
       }
 
       final user = await _getCurrentUser();
       if (user == null) {
-        return Error(ClientException('User not found'));
+        return Error(ApiGatewayException('User not found', statusCode: 404));
       }
 
       // Generate fake Google ID
@@ -192,7 +208,12 @@ class _ProfileController {
 
       return Success({'status': 'success', 'message': null});
     } catch (e) {
-      return Error(ServerException('Failed to link Google account: $e'));
+      return Error(
+        ApiGatewayException(
+          'Failed to link Google account: $e',
+          statusCode: 500,
+        ),
+      );
     }
   }
 
@@ -209,13 +230,15 @@ class _ProfileController {
       final auth = data['auth'] as Map<String, dynamic>?;
 
       if (authType == null || auth == null) {
-        return Error(ClientException('Missing authType or auth'));
+        return Error(
+          ApiGatewayException('Missing authType or auth', statusCode: 422),
+        );
       }
 
       // In fake implementation, skip actual auth verification
       final user = await _getCurrentUser();
       if (user == null) {
-        return Error(ClientException('User not found'));
+        return Error(ApiGatewayException('User not found', statusCode: 404));
       }
 
       final userId = user['id'] as int;
@@ -223,7 +246,9 @@ class _ProfileController {
 
       return Success({'status': 'success'});
     } catch (e) {
-      return Error(ServerException('Failed to delete account: $e'));
+      return Error(
+        ApiGatewayException('Failed to delete account: $e', statusCode: 500),
+      );
     }
   }
 }

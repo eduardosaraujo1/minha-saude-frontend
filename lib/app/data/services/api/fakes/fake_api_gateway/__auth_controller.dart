@@ -19,7 +19,9 @@ class _AuthController {
     try {
       final tokenOauth = data['tokenOauth'] as String?;
       if (tokenOauth == null) {
-        return Error(ClientException('Missing tokenOauth'));
+        return Error(
+          ApiGatewayException('Missing tokenOauth', statusCode: 422),
+        );
       }
 
       // Generate fake Google ID (10 digit number)
@@ -55,7 +57,9 @@ class _AuthController {
         'registerToken': registerToken,
       });
     } catch (e) {
-      return Error(ClientException('Login with Google failed: $e'));
+      return Error(
+        ApiGatewayException('Login with Google failed: $e', statusCode: 500),
+      );
     }
   }
 
@@ -72,19 +76,26 @@ class _AuthController {
       final codigoEmail = data['codigoEmail'] as String?;
 
       if (email == null || codigoEmail == null) {
-        return Error(ClientException('Missing email or codigoEmail'));
+        return Error(
+          ApiGatewayException('Missing email or codigoEmail', statusCode: 422),
+        );
       }
 
       // Verify email code (skip actual verification in fake, just check it exists)
       final storedCode = fakeServerCacheEngine.get('email_code_$email');
       if (storedCode == null) {
         return Error(
-          ClientException('No verification code found for this email'),
+          ApiGatewayException(
+            'No verification code found for this email',
+            statusCode: 404,
+          ),
         );
       }
 
       if (storedCode != codigoEmail) {
-        return Error(ClientException('Invalid verification code'));
+        return Error(
+          ApiGatewayException('Invalid verification code', statusCode: 401),
+        );
       }
 
       // Check if user already exists with this email
@@ -113,7 +124,9 @@ class _AuthController {
         'registerToken': registerToken,
       });
     } catch (e) {
-      return Error(ClientException('Login with email failed: $e'));
+      return Error(
+        ApiGatewayException('Login with email failed: $e', statusCode: 500),
+      );
     }
   }
 
@@ -130,7 +143,9 @@ class _AuthController {
       final registerToken = data['registerToken'] as String?;
 
       if (user == null || registerToken == null) {
-        return Error(ClientException('Missing user or registerToken'));
+        return Error(
+          ApiGatewayException('Missing user or registerToken', statusCode: 422),
+        );
       }
 
       // Validate required user fields
@@ -140,8 +155,9 @@ class _AuthController {
 
       if (nome == null || cpf == null || dataNascimento == null) {
         return Error(
-          ClientException(
+          ApiGatewayException(
             'Missing required user fields: nome, cpf, dataNascimento',
+            statusCode: 422,
           ),
         );
       }
@@ -149,7 +165,12 @@ class _AuthController {
       // Get cached auth data
       final authData = fakeServerCacheEngine.get(registerToken);
       if (authData == null) {
-        return Error(ClientException('Invalid or expired registerToken'));
+        return Error(
+          ApiGatewayException(
+            'Invalid or expired registerToken',
+            statusCode: 401,
+          ),
+        );
       }
 
       final email = authData['email'] as String;
@@ -159,13 +180,17 @@ class _AuthController {
       // Check for duplicate CPF
       final existingByCpf = await fakeServerDatabase.users.findByCpf(cpf);
       if (existingByCpf != null) {
-        return Error(ClientException('CPF already registered'));
+        return Error(
+          ApiGatewayException('CPF already registered', statusCode: 409),
+        );
       }
 
       // Check for duplicate email
       final existingByEmail = await fakeServerDatabase.users.findByEmail(email);
       if (existingByEmail != null) {
-        return Error(ClientException('Email already registered'));
+        return Error(
+          ApiGatewayException('Email already registered', statusCode: 409),
+        );
       }
 
       // Create user in database
@@ -188,7 +213,9 @@ class _AuthController {
 
       return Success({'sessionToken': sessionToken});
     } catch (e) {
-      return Error(ClientException('Registration failed: $e'));
+      return Error(
+        ApiGatewayException('Registration failed: $e', statusCode: 500),
+      );
     }
   }
 
@@ -214,7 +241,7 @@ class _AuthController {
     try {
       final email = data['email'] as String?;
       if (email == null) {
-        return Error(ClientException('Missing email'));
+        return Error(ApiGatewayException('Missing email', statusCode: 422));
       }
 
       // Store fixed verification code in cache
@@ -222,7 +249,9 @@ class _AuthController {
 
       return Success({'status': 'success'});
     } catch (e) {
-      return Error(ClientException('Failed to send email: $e'));
+      return Error(
+        ApiGatewayException('Failed to send email: $e', statusCode: 500),
+      );
     }
   }
 

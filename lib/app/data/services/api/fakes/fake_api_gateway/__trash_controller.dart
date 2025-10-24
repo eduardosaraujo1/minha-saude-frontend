@@ -23,7 +23,7 @@ class _TrashController {
     try {
       final user = await _getCurrentUser();
       if (user == null) {
-        return Error(ClientException('User not found'));
+        return Error(ApiGatewayException('User not found', statusCode: 404));
       }
 
       final userId = user['id'] as int;
@@ -48,7 +48,9 @@ class _TrashController {
         'pagination': {'total': data.length, 'page': 1, 'perPage': data.length},
       });
     } catch (e) {
-      return Error(ServerException('Failed to list trash: $e'));
+      return Error(
+        ApiGatewayException('Failed to list trash: $e', statusCode: 500),
+      );
     }
   }
 
@@ -61,11 +63,15 @@ class _TrashController {
     try {
       final doc = await fakeServerDatabase.documents.findByUuid(id);
       if (doc == null) {
-        return Error(ClientException('Document not found'));
+        return Error(
+          ApiGatewayException('Document not found', statusCode: 404),
+        );
       }
 
       if (doc['deleted_at'] == null) {
-        return Error(ClientException('Document is not in trash'));
+        return Error(
+          ApiGatewayException('Document is not in trash', statusCode: 400),
+        );
       }
 
       return Success({
@@ -80,7 +86,12 @@ class _TrashController {
         'deletedAt': doc['deleted_at'],
       });
     } catch (e) {
-      return Error(ServerException('Failed to view trash document: $e'));
+      return Error(
+        ApiGatewayException(
+          'Failed to view trash document: $e',
+          statusCode: 500,
+        ),
+      );
     }
   }
 
@@ -92,11 +103,15 @@ class _TrashController {
     try {
       final doc = await fakeServerDatabase.documents.findByUuid(id);
       if (doc == null) {
-        return Error(ClientException('Document not found'));
+        return Error(
+          ApiGatewayException('Document not found', statusCode: 404),
+        );
       }
 
       if (doc['deleted_at'] == null) {
-        return Error(ClientException('Document is not in trash'));
+        return Error(
+          ApiGatewayException('Document is not in trash', statusCode: 400),
+        );
       }
 
       final docId = doc['id'] as int;
@@ -104,7 +119,9 @@ class _TrashController {
 
       return Success({'status': 'success', 'message': null});
     } catch (e) {
-      return Error(ServerException('Failed to restore document: $e'));
+      return Error(
+        ApiGatewayException('Failed to restore document: $e', statusCode: 500),
+      );
     }
   }
 
@@ -116,13 +133,16 @@ class _TrashController {
     try {
       final doc = await fakeServerDatabase.documents.findByUuid(id);
       if (doc == null) {
-        return Error(ClientException('Document not found'));
+        return Error(
+          ApiGatewayException('Document not found', statusCode: 404),
+        );
       }
 
       if (doc['deleted_at'] == null) {
         return Error(
-          ClientException(
+          ApiGatewayException(
             'Document must be in trash before permanent deletion',
+            statusCode: 400,
           ),
         );
       }
@@ -131,7 +151,9 @@ class _TrashController {
 
       return Success({'status': 'success', 'message': null});
     } catch (e) {
-      return Error(ServerException('Failed to destroy document: $e'));
+      return Error(
+        ApiGatewayException('Failed to destroy document: $e', statusCode: 500),
+      );
     }
   }
 }

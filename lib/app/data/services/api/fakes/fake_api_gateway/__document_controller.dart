@@ -27,7 +27,7 @@ class _DocumentController {
     try {
       final user = await _getCurrentUser();
       if (user == null) {
-        return Error(ClientException('User not found'));
+        return Error(ApiGatewayException('User not found', statusCode: 404));
       }
 
       // In fake implementation, we don't handle actual file uploads
@@ -55,7 +55,9 @@ class _DocumentController {
 
       return Success({'status': 'success', 'message': null});
     } catch (e) {
-      return Error(ServerException('Failed to upload document: $e'));
+      return Error(
+        ApiGatewayException('Failed to upload document: $e', statusCode: 500),
+      );
     }
   }
 
@@ -67,7 +69,7 @@ class _DocumentController {
     try {
       final user = await _getCurrentUser();
       if (user == null) {
-        return Error(ClientException('User not found'));
+        return Error(ApiGatewayException('User not found', statusCode: 404));
       }
 
       final userId = user['id'] as int;
@@ -92,7 +94,9 @@ class _DocumentController {
         'pagination': {'total': data.length, 'page': 1, 'perPage': data.length},
       });
     } catch (e) {
-      return Error(ServerException('Failed to list documents: $e'));
+      return Error(
+        ApiGatewayException('Failed to list documents: $e', statusCode: 500),
+      );
     }
   }
 
@@ -104,7 +108,7 @@ class _DocumentController {
     try {
       final user = await _getCurrentUser();
       if (user == null) {
-        return Error(ClientException('User not found'));
+        return Error(ApiGatewayException('User not found', statusCode: 404));
       }
 
       final userId = user['id'] as int;
@@ -140,7 +144,9 @@ class _DocumentController {
         },
       });
     } catch (e) {
-      return Error(ServerException('Failed to list categories: $e'));
+      return Error(
+        ApiGatewayException('Failed to list categories: $e', statusCode: 500),
+      );
     }
   }
 
@@ -153,11 +159,15 @@ class _DocumentController {
     try {
       final doc = await fakeServerDatabase.documents.findByUuid(id);
       if (doc == null) {
-        return Error(ClientException('Document not found'));
+        return Error(
+          ApiGatewayException('Document not found', statusCode: 404),
+        );
       }
 
       if (doc['deleted_at'] != null) {
-        return Error(ClientException('Document has been deleted'));
+        return Error(
+          ApiGatewayException('Document has been deleted', statusCode: 410),
+        );
       }
 
       return Success({
@@ -171,7 +181,9 @@ class _DocumentController {
         'deletedAt': doc['deleted_at'],
       });
     } catch (e) {
-      return Error(ServerException('Failed to get document: $e'));
+      return Error(
+        ApiGatewayException('Failed to get document: $e', statusCode: 500),
+      );
     }
   }
 
@@ -187,11 +199,15 @@ class _DocumentController {
     try {
       final doc = await fakeServerDatabase.documents.findByUuid(id);
       if (doc == null) {
-        return Error(ClientException('Document not found'));
+        return Error(
+          ApiGatewayException('Document not found', statusCode: 404),
+        );
       }
 
       if (doc['deleted_at'] != null) {
-        return Error(ClientException('Cannot edit deleted document'));
+        return Error(
+          ApiGatewayException('Cannot edit deleted document', statusCode: 410),
+        );
       }
 
       final updates = <String, dynamic>{};
@@ -226,7 +242,12 @@ class _DocumentController {
         'createdAt': updatedDoc['created_at'],
       });
     } catch (e) {
-      return Error(ServerException('Failed to edit document metadata: $e'));
+      return Error(
+        ApiGatewayException(
+          'Failed to edit document metadata: $e',
+          statusCode: 500,
+        ),
+      );
     }
   }
 
@@ -239,11 +260,15 @@ class _DocumentController {
     try {
       final doc = await fakeServerDatabase.documents.findByUuid(id);
       if (doc == null) {
-        return Error(ClientException('Document not found'));
+        return Error(
+          ApiGatewayException('Document not found', statusCode: 404),
+        );
       }
 
       if (doc['deleted_at'] != null) {
-        return Error(ClientException('Document already deleted'));
+        return Error(
+          ApiGatewayException('Document already deleted', statusCode: 410),
+        );
       }
 
       final now = DateTime.now();
@@ -256,7 +281,9 @@ class _DocumentController {
         'dataExclusao': _formatDate(now),
       });
     } catch (e) {
-      return Error(ServerException('Failed to delete document: $e'));
+      return Error(
+        ApiGatewayException('Failed to delete document: $e', statusCode: 500),
+      );
     }
   }
 
@@ -269,11 +296,18 @@ class _DocumentController {
     try {
       final doc = await fakeServerDatabase.documents.findByUuid(id);
       if (doc == null) {
-        return Error(ClientException('Document not found'));
+        return Error(
+          ApiGatewayException('Document not found', statusCode: 404),
+        );
       }
 
       if (doc['deleted_at'] != null) {
-        return Error(ClientException('Cannot download deleted document'));
+        return Error(
+          ApiGatewayException(
+            'Cannot download deleted document',
+            statusCode: 410,
+          ),
+        );
       }
 
       // In fake implementation, return a fake base64 encoded string
@@ -282,7 +316,9 @@ class _DocumentController {
         'linkDownload': null,
       });
     } catch (e) {
-      return Error(ServerException('Failed to download document: $e'));
+      return Error(
+        ApiGatewayException('Failed to download document: $e', statusCode: 500),
+      );
     }
   }
 

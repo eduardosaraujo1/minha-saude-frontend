@@ -32,7 +32,7 @@ class ApiGatewayImpl implements ApiGateway {
 
       return _handleResponse(response);
     } catch (e) {
-      return Error(ClientException('POST request failed: $e'));
+      return Error(ApiGatewayException('POST request failed: $e'));
     }
   }
 
@@ -49,7 +49,7 @@ class ApiGatewayImpl implements ApiGateway {
 
       return _handleResponse(response);
     } catch (e) {
-      return Error(ClientException('GET request failed: $e'));
+      return Error(ApiGatewayException('GET request failed: $e'));
     }
   }
 
@@ -68,7 +68,7 @@ class ApiGatewayImpl implements ApiGateway {
 
       return _handleResponse(response);
     } catch (e) {
-      return Error(ClientException('PUT request failed: $e'));
+      return Error(ApiGatewayException('PUT request failed: $e'));
     }
   }
 
@@ -87,7 +87,7 @@ class ApiGatewayImpl implements ApiGateway {
 
       return _handleResponse(response);
     } catch (e) {
-      return Error(ClientException('PATCH request failed: $e'));
+      return Error(ApiGatewayException('PATCH request failed: $e'));
     }
   }
 
@@ -110,7 +110,7 @@ class ApiGatewayImpl implements ApiGateway {
 
       return _handleResponse(response);
     } catch (e) {
-      return Error(ClientException('DELETE request failed: $e'));
+      return Error(ApiGatewayException('DELETE request failed: $e'));
     }
   }
 
@@ -125,7 +125,9 @@ class ApiGatewayImpl implements ApiGateway {
     final (:success, :error) = _parseJsonResponse(response.body).getBoth();
 
     if (error != null) {
-      return Error(ClientException('Failed to parse response JSON: $error'));
+      return Error(
+        ApiGatewayException('Failed to parse response JSON: $error'),
+      );
     }
 
     return Success(success!);
@@ -169,21 +171,24 @@ class ApiGatewayImpl implements ApiGateway {
   }
 
   Future<ApiGatewayException?> _processResponseErrors(Response response) async {
-    // Handle client exceptions
-    if (response.statusCode >= 400 && response.statusCode < 500) {
-      // Trigger unauthorized handler if 401
-      if (response.statusCode == 401 && _onUnauthorizedResponse != null) {
-        await _onUnauthorizedResponse!();
-      }
-
-      return ClientException(
-        'Client error: ${response.statusCode} - ${response.reasonPhrase}',
-      );
+    // Trigger unauthorized handler if 401
+    if (response.statusCode == 401 && _onUnauthorizedResponse != null) {
+      await _onUnauthorizedResponse!();
     }
 
-    if (response.statusCode >= 500) {
-      return ServerException(
-        'Server error: ${response.statusCode} - ${response.reasonPhrase}',
+    // Handle exceptions
+    try {
+      if (response.statusCode >= 300 && response.statusCode <= 599) {
+        final message = jsonDecode(response.body)['message'] as String?;
+        return ApiGatewayException(
+          message ?? ExceptionDictionary.unexpectedError,
+          statusCode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      return ApiGatewayException(
+        ExceptionDictionary.unexpectedError,
+        statusCode: response.statusCode,
       );
     }
 

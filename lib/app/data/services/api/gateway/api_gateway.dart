@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../../../../config/environment.dart';
+import '../clients/exception_dictionary.dart';
 
 part 'api_gateway_impl.dart';
 
@@ -95,19 +96,12 @@ abstract class ApiGateway {
   set onUnauthorizedResponse(Future<String?> Function()? provider);
 }
 
-abstract class ApiGatewayException implements Exception {
+class ApiGatewayException implements Exception {
   final String message;
+  final int statusCode;
 
-  ApiGatewayException(this.message);
+  ApiGatewayException(this.message, {this.statusCode = 0});
 
   @override
-  String toString() => 'ApiGatewayException: $message';
-}
-
-class ClientException extends ApiGatewayException {
-  ClientException(super.message);
-}
-
-class ServerException extends ApiGatewayException {
-  ServerException(super.message);
+  String toString() => '[$statusCode] ApiGatewayException: $message';
 }

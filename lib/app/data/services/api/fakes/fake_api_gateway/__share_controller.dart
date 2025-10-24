@@ -27,12 +27,14 @@ class _ShareController {
     try {
       final idsDocumentos = data['idsDocumentos'] as List<dynamic>?;
       if (idsDocumentos == null || idsDocumentos.isEmpty) {
-        return Error(ClientException('Missing idsDocumentos'));
+        return Error(
+          ApiGatewayException('Missing idsDocumentos', statusCode: 422),
+        );
       }
 
       final user = await _getCurrentUser();
       if (user == null) {
-        return Error(ClientException('User not found'));
+        return Error(ApiGatewayException('User not found', statusCode: 404));
       }
 
       final userId = user['id'] as int;
@@ -54,7 +56,9 @@ class _ShareController {
 
       return Success({'codigo': codigo});
     } catch (e) {
-      return Error(ServerException('Failed to create share: $e'));
+      return Error(
+        ApiGatewayException('Failed to create share: $e', statusCode: 500),
+      );
     }
   }
 
@@ -65,7 +69,7 @@ class _ShareController {
     try {
       final user = await _getCurrentUser();
       if (user == null) {
-        return Error(ClientException('User not found'));
+        return Error(ApiGatewayException('User not found', statusCode: 404));
       }
 
       final userId = user['id'] as int;
@@ -86,7 +90,9 @@ class _ShareController {
         'pagination': {'total': data.length, 'page': 1, 'perPage': data.length},
       });
     } catch (e) {
-      return Error(ServerException('Failed to list shares: $e'));
+      return Error(
+        ApiGatewayException('Failed to list shares: $e', statusCode: 500),
+      );
     }
   }
 
@@ -99,7 +105,9 @@ class _ShareController {
     try {
       final share = await fakeServerDatabase.shares.findByCode(code);
       if (share == null) {
-        return Error(ClientException('Share code not found'));
+        return Error(
+          ApiGatewayException('Share code not found', statusCode: 404),
+        );
       }
 
       final shareId = share['id'] as int;
@@ -115,7 +123,9 @@ class _ShareController {
         'documentos': documentos,
       });
     } catch (e) {
-      return Error(ServerException('Failed to get share details: $e'));
+      return Error(
+        ApiGatewayException('Failed to get share details: $e', statusCode: 500),
+      );
     }
   }
 
@@ -128,14 +138,18 @@ class _ShareController {
     try {
       final share = await fakeServerDatabase.shares.findByCode(code);
       if (share == null) {
-        return Error(ClientException('Share code not found'));
+        return Error(
+          ApiGatewayException('Share code not found', statusCode: 404),
+        );
       }
 
       await fakeServerDatabase.shares.deleteByCode(code);
 
       return Success({'status': 'success', 'message': null});
     } catch (e) {
-      return Error(ServerException('Failed to delete share: $e'));
+      return Error(
+        ApiGatewayException('Failed to delete share: $e', statusCode: 500),
+      );
     }
   }
 

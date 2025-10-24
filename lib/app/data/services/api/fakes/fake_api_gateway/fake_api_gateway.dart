@@ -84,7 +84,9 @@ class FakeApiGateway implements ApiGateway {
           final id = path.replaceFirst('/documents/', '');
           return await _documentController.deleteDocument(id: id);
         }
-        return Error(ClientException('DELETE $path not implemented'));
+        return Error(
+          ApiGatewayException('DELETE $path not implemented', statusCode: 404),
+        );
     }
   }
 
@@ -130,7 +132,9 @@ class FakeApiGateway implements ApiGateway {
             return await _documentController.getDocument(id: id);
           }
         }
-        return Error(ClientException('GET $path not implemented'));
+        return Error(
+          ApiGatewayException('GET $path not implemented', statusCode: 404),
+        );
     }
   }
 
@@ -142,7 +146,9 @@ class FakeApiGateway implements ApiGateway {
   }) async {
     // Route to appropriate controller
     // TODO: Implement patch routes in future phases
-    return Error(ClientException('PATCH $path not implemented'));
+    return Error(
+      ApiGatewayException('PATCH $path not implemented', statusCode: 404),
+    );
   }
 
   @override
@@ -194,7 +200,9 @@ class FakeApiGateway implements ApiGateway {
             return await _trashController.destroyTrashDocument(id: id);
           }
         }
-        return Error(ClientException('POST $path not implemented'));
+        return Error(
+          ApiGatewayException('POST $path not implemented', statusCode: 404),
+        );
     }
   }
 
@@ -221,7 +229,9 @@ class FakeApiGateway implements ApiGateway {
             data: data ?? {},
           );
         }
-        return Error(ClientException('PUT $path not implemented'));
+        return Error(
+          ApiGatewayException('PUT $path not implemented', statusCode: 404),
+        );
     }
   }
 }

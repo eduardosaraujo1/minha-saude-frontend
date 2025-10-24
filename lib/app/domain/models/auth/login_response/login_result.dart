@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../../data/services/api/deprecating/auth/models/login_response/login_api_response.dart';
+import '../../../../data/services/api/clients/auth/models/login_response/login_api_response.dart';
 
 part 'login_result.freezed.dart';
 part 'login_result.g.dart';

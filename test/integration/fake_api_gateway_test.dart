@@ -13,7 +13,7 @@ import 'package:minha_saude_frontend/app/data/services/api/fakes/fake_api_gatewa
 import 'package:minha_saude_frontend/app/data/services/api/fakes/fake_server_cache_engine.dart';
 import 'package:minha_saude_frontend/app/data/services/api/fakes/fake_server_database.dart';
 import 'package:minha_saude_frontend/app/data/services/api/fakes/fake_server_file_storage.dart';
-import 'package:minha_saude_frontend/app/data/services/api/gateway/routes.dart';
+import 'package:minha_saude_frontend/app/data/services/api/gateway/gateway_routes.dart';
 import 'package:minha_saude_frontend/app/data/services/sqlite/sqlite_database.dart';
 
 void main() {

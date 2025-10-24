@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:minha_saude_frontend/app/data/services/api/deprecating/document/models/document_api_model.dart';
+import 'package:minha_saude_frontend/app/data/services/api/clients/document/models/document_api_model/document_api_model.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 // Function names are based on endpoint path, and payload parameters are function parameters

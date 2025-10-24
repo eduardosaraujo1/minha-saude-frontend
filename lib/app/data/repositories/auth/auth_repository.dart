@@ -1,12 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:minha_saude_frontend/app/data/services/api/clients/auth/auth_api_client.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../../domain/models/auth/login_response/login_result.dart';
-import '../../services/api/gateway/api_gateway.dart';
-import '../../services/api/deprecating/auth/models/login_response/login_api_response.dart';
-import '../../services/api/deprecating/auth/models/register_response/register_response.dart';
-import '../../services/api/gateway/routes.dart';
+import '../../services/api/clients/auth/models/login_response/login_api_response.dart';
 import '../../services/google/google_service.dart';
 
 part 'auth_repository_impl.dart';

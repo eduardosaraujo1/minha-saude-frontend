@@ -1,7 +1,7 @@
 import 'package:minha_saude_frontend/app/data/repositories/profile/profile_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/profile/profile_repository_impl.dart';
-import 'package:minha_saude_frontend/app/data/services/api/deprecating/profile/models/profile_api_model.dart';
-import 'package:minha_saude_frontend/app/data/services/api/deprecating/profile/profile_api_client.dart';
+import 'package:minha_saude_frontend/app/data/services/api/clients/profile/models/profile_api_model.dart';
+import 'package:minha_saude_frontend/app/data/services/api/clients/profile/profile_api_client.dart';
 import 'package:minha_saude_frontend/app/domain/models/profile/profile.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:multiple_result/multiple_result.dart';

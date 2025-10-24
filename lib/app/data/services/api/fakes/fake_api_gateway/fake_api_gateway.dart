@@ -1,7 +1,7 @@
 import 'package:multiple_result/multiple_result.dart';
 
 import '../../gateway/api_gateway.dart';
-import '../../gateway/routes.dart';
+import '../../gateway/gateway_routes.dart';
 import '../fake_server_cache_engine.dart';
 import '../fake_server_database.dart';
 import '../fake_server_file_storage.dart';

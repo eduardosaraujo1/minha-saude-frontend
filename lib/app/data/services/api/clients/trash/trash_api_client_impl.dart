@@ -1,15 +1,9 @@
 import 'package:multiple_result/multiple_result.dart';
 
-import '../document/models/document_api_model.dart';
-import '../http_client/http_client.dart';
-
+import '../document/models/document_api_model/document_api_model.dart';
 import 'trash_api_client.dart';
 
-class TrashApiClientImpl extends TrashApiClient {
-  TrashApiClientImpl({required this.httpClient});
-
-  final LegacyHttpClient httpClient;
-
+class TrashApiClientImpl implements TrashApiClient {
   @override
   Future<Result<void, Exception>> destroyTrashDocument(String id) {
     // TODO: implement destroyTrashDocument
@@ -29,7 +23,7 @@ class TrashApiClientImpl extends TrashApiClient {
   }
 
   @override
-  Future<Result<DocumentApiModel, Exception>> restoreTrashDocument(String id) {
+  Future<Result<void, Exception>> restoreTrashDocument(String id) {
     // TODO: implement restoreTrashDocument
     throw UnimplementedError();
   }

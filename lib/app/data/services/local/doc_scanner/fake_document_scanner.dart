@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../../../config/asset.dart';
+import '../../../../../config/asset.dart';
 import 'document_scanner.dart';
 
 class FakeDocumentScanner implements DocumentScanner {

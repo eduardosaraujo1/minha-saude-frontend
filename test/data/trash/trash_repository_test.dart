@@ -1,7 +1,7 @@
 import 'package:minha_saude_frontend/app/data/repositories/trash/trash_repository.dart';
 import 'package:minha_saude_frontend/app/data/repositories/trash/trash_repository_impl.dart';
-import 'package:minha_saude_frontend/app/data/services/api/deprecating/document/models/document_api_model.dart';
-import 'package:minha_saude_frontend/app/data/services/api/deprecating/trash/trash_api_client.dart';
+import 'package:minha_saude_frontend/app/data/services/api/clients/document/models/document_api_model/document_api_model.dart';
+import 'package:minha_saude_frontend/app/data/services/api/clients/trash/trash_api_client.dart';
 import 'package:minha_saude_frontend/app/data/services/local/cache_database/cache_database.dart';
 import 'package:minha_saude_frontend/app/data/services/local/cache_database/models/document_db_model.dart';
 import 'package:minha_saude_frontend/app/data/services/local/file_system_service/file_system_service.dart';

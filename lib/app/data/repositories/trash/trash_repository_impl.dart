@@ -2,7 +2,7 @@ import 'package:logging/logging.dart';
 import 'package:minha_saude_frontend/app/domain/models/document/document.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-import '../../services/api/deprecating/trash/trash_api_client.dart';
+import '../../services/api/clients/trash/trash_api_client.dart';
 import '../../services/local/cache_database/cache_database.dart';
 import '../../services/local/file_system_service/file_system_service.dart';
 import 'trash_repository.dart';

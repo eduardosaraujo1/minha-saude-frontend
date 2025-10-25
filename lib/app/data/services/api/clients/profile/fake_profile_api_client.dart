@@ -1,8 +1,8 @@
 import 'package:intl/intl.dart';
 import 'package:multiple_result/multiple_result.dart';
 
-import '../../fakes/fake_server_cache_engine.dart';
-import '../../fakes/fake_server_database.dart';
+import '../../fake/fake_server_cache_engine.dart';
+import '../../fake/fake_server_database.dart';
 import 'models/profile_api_model.dart';
 import 'profile_api_client.dart';
 

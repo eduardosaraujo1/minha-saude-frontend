@@ -4,8 +4,8 @@ import 'dart:typed_data';
 import 'package:multiple_result/multiple_result.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../fakes/fake_server_database.dart';
-import '../../fakes/fake_server_file_storage.dart';
+import '../../fake/fake_server_database.dart';
+import '../../fake/fake_server_file_storage.dart';
 import 'document_api_client.dart';
 import 'models/document_api_model/document_api_model.dart';
 

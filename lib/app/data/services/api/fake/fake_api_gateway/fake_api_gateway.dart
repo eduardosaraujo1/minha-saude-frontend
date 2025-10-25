@@ -12,6 +12,9 @@ part '__document_controller.dart';
 part '__trash_controller.dart';
 part '__share_controller.dart';
 
+/// A fake implementation of the ApiGateway for testing purposes.
+///
+/// It routes requests to various fake controllers that simulate server behavior locally.
 class FakeApiGateway implements ApiGateway {
   FakeApiGateway({
     required this.fakeServerCacheEngine,

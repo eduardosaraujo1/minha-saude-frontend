@@ -1,7 +1,7 @@
 import 'package:logging/logging.dart';
 import 'package:minha_saude_frontend/app/data/services/api/clients/document/models/document_api_model/document_api_model.dart';
-import 'package:minha_saude_frontend/app/data/services/api/fakes/fake_server_database.dart';
-import 'package:minha_saude_frontend/app/data/services/api/fakes/fake_server_file_storage.dart';
+import 'package:minha_saude_frontend/app/data/services/api/fake/fake_server_database.dart';
+import 'package:minha_saude_frontend/app/data/services/api/fake/fake_server_file_storage.dart';
 import 'package:multiple_result/multiple_result.dart';
 
 import 'trash_api_client.dart';

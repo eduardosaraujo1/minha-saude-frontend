@@ -1,7 +1,7 @@
 import 'package:multiple_result/multiple_result.dart';
 
-import '../../fakes/fake_server_cache_engine.dart';
-import '../../fakes/fake_server_database.dart';
+import '../../fake/fake_server_cache_engine.dart';
+import '../../fake/fake_server_database.dart';
 import 'models/login_response/login_api_response.dart';
 import 'models/register_response/register_response.dart';
 import 'auth_api_client.dart';
